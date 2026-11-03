@@ -17,6 +17,9 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - run: bun run lint
+      - name: License check
+        if: runner.os == 'Linux'
+        run: bun run license:check
       - run: bun run typecheck
       - run: bun run test
       - run: bun run build
