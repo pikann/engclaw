@@ -21,10 +21,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: mac-arm64, os: macos-latest, builder: '--mac dmg --arm64', expectOrt: true }
-          # onnxruntime-node 1.31.x ships no darwin/x64 binary: this leg is expected to fail the ORT check.
-          - { name: mac-x64, os: macos-15-intel, builder: '--mac dmg --x64', expectOrt: false }
-          - { name: win-x64, os: windows-latest, builder: '--win nsis --x64', expectOrt: true }
+          # Intel macOS is intentionally unsupported: onnxruntime-node ships no darwin/x64 binary (ENGC-60).
+          - { name: mac-arm64, os: macos-latest, builder: '--mac dmg --arm64' }
+          - { name: win-x64, os: windows-latest, builder: '--win nsis --x64' }
           - {
               name: linux-x64,
               os: ubuntu-latest,
@@ -48,8 +47,6 @@ jobs:
         run: find release -maxdepth 1 -type f \( -name '*.dmg' -o -name '*.exe' -o -name '*.AppImage' -o -name '*.deb' \) -exec ls -l {} +
       - name: Smoke test (macOS)
         if: runner.os == 'macOS'
-        # mac-x64 is expected to fail the ORT check (no darwin/x64 binary); the result stays in the log.
-        continue-on-error: ${{ !matrix.expectOrt }}
         run: ENGCLAW_SMOKE=1 release/mac*/Engclaw.app/Contents/MacOS/Engclaw
       - name: Smoke test (Windows)
         if: runner.os == 'Windows'
