@@ -57,6 +57,10 @@
       "name": "@engclaw/pronounce",
       "version": "0.0.0",
     },
+    "packages/prosody": {
+      "name": "@engclaw/prosody",
+      "version": "0.0.0",
+    },
   },
   "trustedDependencies": [
     "electron",
@@ -124,6 +128,8 @@
     "@engclaw/ipc-contract": ["@engclaw/ipc-contract@workspace:packages/ipc-contract"],
 
     "@engclaw/pronounce": ["@engclaw/pronounce@workspace:packages/pronounce"],
+
+    "@engclaw/prosody": ["@engclaw/prosody@workspace:packages/prosody"],
 
     "@esbuild/aix-ppc64": ["@esbuild/aix-ppc64@0.25.12", "", { "os": "aix", "cpu": "ppc64" }, "sha512-Hhmwd6CInZ3dwpuGTF8fJG6yoWmsToE+vYgD4nytZVxcu1ulHpUQRAB1UJ8+N1Am3Mz4+xOByoQoSZf4D+CpkA=="],
 
