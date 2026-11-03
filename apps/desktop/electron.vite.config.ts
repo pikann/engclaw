@@ -7,7 +7,7 @@ const alias = { '@': resolve(__dirname, 'src/renderer/src') }
 
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin({ exclude: ['@engclaw/ipc-contract', '@engclaw/pronounce'] })],
+    plugins: [externalizeDepsPlugin({ exclude: ['@engclaw/ipc-contract', '@engclaw/pronounce', '@engclaw/youtube'] })],
     build: {
       rollupOptions: {
         input: {

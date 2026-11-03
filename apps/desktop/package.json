@@ -15,6 +15,7 @@
   "dependencies": {
     "@engclaw/ipc-contract": "workspace:*",
     "@engclaw/pronounce": "workspace:*",
+    "@engclaw/youtube": "workspace:*",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "cn": "^0.5.2",
@@ -23,7 +24,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router": "^7.0.0",
-    "tailwind-merge": "^2.5.0"
+    "tailwind-merge": "^2.5.0",
+    "youtubei.js": "^16.0.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0",

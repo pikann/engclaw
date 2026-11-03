@@ -10,7 +10,16 @@ import {
 } from 'electron'
 import { join, normalize } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { IPC, PingRequest, type PingResponse } from '@engclaw/ipc-contract'
+import {
+  AudioRangeRequest,
+  IPC,
+  PingRequest,
+  TranscriptRequest,
+  VideoRef,
+  type PingResponse,
+  type YouTubeResult,
+} from '@engclaw/ipc-contract'
+import { InnertubeAdapter, YouTubeError, parseVideoId } from '@engclaw/youtube'
 
 const APP_ORIGIN = 'app://engclaw'
 const rendererDir = join(__dirname, '../renderer')
@@ -66,6 +75,17 @@ function startUtility(): void {
   child.postMessage({ type: 'hello' })
 }
 
+const youtube = new InnertubeAdapter()
+
+async function yt<T>(fn: () => Promise<T>): Promise<YouTubeResult<T>> {
+  try {
+    return { ok: true, value: await fn() }
+  } catch (e) {
+    if (e instanceof YouTubeError) return { ok: false, code: e.code, message: e.message }
+    return { ok: false, code: 'EXTRACTOR_BROKEN', message: String(e) }
+  }
+}
+
 void app.whenReady().then(() => {
   registerAppProtocol()
   session.defaultSession.setPermissionRequestHandler((_wc, permission, cb, details) =>
@@ -74,6 +94,18 @@ void app.whenReady().then(() => {
   ipcMain.handle(IPC.ping, (_e, raw): PingResponse => {
     const req = PingRequest.parse(raw)
     return { echo: req.message, platform: process.platform }
+  })
+  ipcMain.handle(IPC.youtubeMeta, (_e, raw) => {
+    const { videoId } = VideoRef.parse(raw)
+    return yt(() => youtube.meta(parseVideoId(videoId)))
+  })
+  ipcMain.handle(IPC.youtubeTranscript, (_e, raw) => {
+    const { videoId, lang } = TranscriptRequest.parse(raw)
+    return yt(() => youtube.transcript(parseVideoId(videoId), lang))
+  })
+  ipcMain.handle(IPC.youtubeAudioRange, (_e, raw) => {
+    const { videoId, start, end } = AudioRangeRequest.parse(raw)
+    return yt(() => youtube.audioRange(parseVideoId(videoId), start, end))
   })
   createWindow()
   startUtility()
