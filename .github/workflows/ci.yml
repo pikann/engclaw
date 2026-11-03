@@ -30,7 +30,7 @@ jobs:
       - name: E2E
         if: runner.os != 'Linux'
         run: bun run test:e2e
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: app-${{ matrix.os }}
           path: apps/desktop/release
