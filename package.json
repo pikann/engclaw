@@ -8,6 +8,7 @@
     "packages/*"
   ],
   "trustedDependencies": [
+    "better-sqlite3",
     "electron",
     "esbuild"
   ],

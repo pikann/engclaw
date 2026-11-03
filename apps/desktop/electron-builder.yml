@@ -4,11 +4,44 @@ directories:
   output: release
 files:
   - out/**
+  - '!**/*.map'
+extraResources:
+  - from: resources/add.onnx
+    to: add.onnx
+npmRebuild: false # better-sqlite3 ships N-API prebuilds; node-gyp rebuild is unnecessary and fails on CI runners
+artifactName: Engclaw-${version}-${arch}.${ext}
 asar: true
+# Native binaries cannot be dlopen'ed from inside the asar; keep them on disk (ENGC-54).
+asarUnpack:
+  - '**/node_modules/onnxruntime-node/bin/**'
+  - '**/node_modules/better-sqlite3/prebuilds/**'
+# onnxruntime-node ships binaries for every OS/arch (~300 MB); drop the ones for other targets.
 mac:
-  target: dir
+  files:
+    - '!**/node_modules/onnxruntime-node/bin/napi-v6/{linux,win32}/**'
+    - '!**/node_modules/better-sqlite3/prebuilds/{linux*,win32*}'
+  target: dmg
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  hardenedRuntime: true
+  extendInfo:
+    NSMicrophoneUsageDescription: Engclaw records your voice to check your pronunciation.
 win:
-  target: dir
+  files:
+    - '!**/node_modules/onnxruntime-node/bin/napi-v6/{linux,darwin}/**'
+    - '!**/node_modules/better-sqlite3/prebuilds/{linux*,darwin*,win32-arm64*}'
+    - '!**/node_modules/onnxruntime-node/bin/napi-v6/win32/arm64/**'
+  target: nsis
 linux:
-  target: dir
+  files:
+    - '!**/node_modules/onnxruntime-node/bin/napi-v6/{win32,darwin}/**'
+    - '!**/node_modules/better-sqlite3/prebuilds/{win32*,darwin*,linux-arm64*,linuxmusl*}'
+    - '!**/node_modules/onnxruntime-node/bin/napi-v6/linux/arm64/**'
+  target:
+    - AppImage
+    - deb
+  category: Education
+  maintainer: Engclaw
+deb:
+  packageName: engclaw
 afterPack: build/after-pack.cjs
