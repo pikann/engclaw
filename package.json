@@ -2,6 +2,7 @@
   "name": "engclaw",
   "private": true,
   "version": "0.0.0",
+  "license": "GPL-3.0-or-later",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -18,13 +19,16 @@
     "format": "prettier --write .",
     "typecheck": "bun run --filter '*' typecheck",
     "test": "vitest run",
-    "test:e2e": "bun run --cwd apps/desktop test:e2e"
+    "test:e2e": "bun run --cwd apps/desktop test:e2e",
+    "license:check": "license-checker-rseidelsohn --start apps/desktop --production --excludePrivatePackages --onlyAllow \"MIT;ISC;BSD-2-Clause;BSD-3-Clause;Apache-2.0;0BSD;BlueOak-1.0.0;CC0-1.0;Python-2.0;Unlicense;GPL-3.0-or-later;MPL-2.0;OFL-1.1\"",
+    "license:generate": "license-checker-rseidelsohn --start apps/desktop --production --excludePrivatePackages --markdown --out THIRD_PARTY_LICENSES.md"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
     "eslint": "^9.0.0",
     "eslint-plugin-react-hooks": "^5.0.0",
     "globals": "^16.0.0",
+    "license-checker-rseidelsohn": "^5.0.1",
     "prettier": "^3.3.0",
     "typescript": "^5.6.0",
     "typescript-eslint": "^8.0.0",
