@@ -1,0 +1,18 @@
+{
+  "menu": {
+    "file": "Tệp",
+    "edit": "Chỉnh sửa",
+    "view": "Xem",
+    "window": "Cửa sổ",
+    "help": "Trợ giúp",
+    "language": "Ngôn ngữ",
+    "about": "Giới thiệu {{name}}",
+    "quit": "Thoát {{name}}"
+  },
+  "dialog": {
+    "updateReadyTitle": "Đã có bản cập nhật",
+    "updateReadyMessage": "Phiên bản {{version}} đã được tải xuống. Khởi động lại để cài đặt?",
+    "restart": "Khởi động lại",
+    "later": "Để sau"
+  }
+}

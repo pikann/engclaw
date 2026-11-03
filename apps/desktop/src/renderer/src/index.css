@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+@import '@fontsource-variable/inter/wght.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -21,6 +22,10 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
   --radius-md: calc(var(--radius) - 2px);
+}
+
+@theme inline {
+  --font-sans: 'Inter Variable', system-ui, sans-serif;
 }
 
 body {
