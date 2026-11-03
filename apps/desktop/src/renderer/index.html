@@ -2,10 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'self' app:; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: app:; connect-src 'self' app: ws://localhost:* http://localhost:*"
-    />
+    <!-- CSP is sent as a response header from the main process (src/main/security.ts). -->
     <title>Engclaw</title>
   </head>
   <body>

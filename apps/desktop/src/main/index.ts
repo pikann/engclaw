@@ -1,32 +1,16 @@
-import {
-  app,
-  BrowserWindow,
-  ipcMain,
-  net,
-  protocol,
-  session,
-  shell,
-  utilityProcess,
-} from 'electron'
+import { app, BrowserWindow, net, protocol, utilityProcess } from 'electron'
 import { join, normalize } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import {
-  AudioRangeRequest,
-  IPC,
-  LanguageRequest,
-  PingRequest,
-  TranscriptRequest,
-  VideoRef,
-  type PingResponse,
-  type YouTubeResult,
-} from '@engclaw/ipc-contract'
+import { IPC, type YouTubeResult } from '@engclaw/ipc-contract'
 import { isLocale, type Locale } from '@engclaw/i18n'
 import { changeMainLanguage, initMainI18n } from './i18n'
+import { handle } from './ipc'
 import { buildMenu } from './menu'
+import { APP_ORIGIN } from './security-policy'
+import { hardenWindow, installSessionSecurity, secureWebPreferences } from './security'
 import { loadLanguage, saveLanguage } from './settings'
 import { InnertubeAdapter, YouTubeError, parseVideoId } from '@engclaw/youtube'
 
-const APP_ORIGIN = 'app://engclaw'
 const rendererDir = join(__dirname, '../renderer')
 
 protocol.registerSchemesAsPrivileged([
@@ -50,25 +34,11 @@ function createWindow(): BrowserWindow {
     show: false,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      contextIsolation: true,
-      sandbox: true,
-      nodeIntegration: false,
-      webSecurity: true,
+      ...secureWebPreferences,
     },
   })
   win.once('ready-to-show', () => win.show())
-  win.webContents.setWindowOpenHandler(({ url }) => {
-    if (url.startsWith('https://')) void shell.openExternal(url)
-    return { action: 'deny' }
-  })
-  win.webContents.on('will-navigate', (e, url) => {
-    if (
-      !url.startsWith(APP_ORIGIN) &&
-      url !== process.env['ELECTRON_RENDERER_URL'] &&
-      !url.startsWith(process.env['ELECTRON_RENDERER_URL'] ?? '\0')
-    )
-      e.preventDefault()
-  })
+  hardenWindow(win)
   if (process.env['ELECTRON_RENDERER_URL']) void win.loadURL(process.env['ELECTRON_RENDERER_URL'])
   else void win.loadURL(`${APP_ORIGIN}/`)
   return win
@@ -107,31 +77,20 @@ void app.whenReady().then(async () => {
   await initMainI18n(language)
   buildMenu(language, (l) => void setLanguage(l))
   registerAppProtocol()
-  session.defaultSession.setPermissionRequestHandler((_wc, permission, cb, details) =>
-    cb(permission === 'media' && details.requestingUrl.startsWith(APP_ORIGIN)),
-  )
-  ipcMain.handle(IPC.ping, (_e, raw): PingResponse => {
-    const req = PingRequest.parse(raw)
-    return { echo: req.message, platform: process.platform }
-  })
-  ipcMain.handle(IPC.settingsGetLanguage, () => language)
-  ipcMain.handle(IPC.settingsSetLanguage, async (_e, raw) => {
-    const { language: next } = LanguageRequest.parse(raw)
+  installSessionSecurity()
+  handle(IPC.ping, (req) => ({ echo: req.message, platform: process.platform }))
+  handle(IPC.settingsGetLanguage, () => language)
+  handle(IPC.settingsSetLanguage, async ({ language: next }) => {
     if (isLocale(next)) await setLanguage(next)
     return language
   })
-  ipcMain.handle(IPC.youtubeMeta, (_e, raw) => {
-    const { videoId } = VideoRef.parse(raw)
-    return yt(() => youtube.meta(parseVideoId(videoId)))
-  })
-  ipcMain.handle(IPC.youtubeTranscript, (_e, raw) => {
-    const { videoId, lang } = TranscriptRequest.parse(raw)
-    return yt(() => youtube.transcript(parseVideoId(videoId), lang))
-  })
-  ipcMain.handle(IPC.youtubeAudioRange, (_e, raw) => {
-    const { videoId, start, end } = AudioRangeRequest.parse(raw)
-    return yt(() => youtube.audioRange(parseVideoId(videoId), start, end))
-  })
+  handle(IPC.youtubeMeta, ({ videoId }) => yt(() => youtube.meta(parseVideoId(videoId))))
+  handle(IPC.youtubeTranscript, ({ videoId, lang }) =>
+    yt(() => youtube.transcript(parseVideoId(videoId), lang)),
+  )
+  handle(IPC.youtubeAudioRange, ({ videoId, start, end }) =>
+    yt(() => youtube.audioRange(parseVideoId(videoId), start, end)),
+  )
   createWindow()
   startUtility()
 })

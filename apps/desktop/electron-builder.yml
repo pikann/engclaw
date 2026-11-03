@@ -11,3 +11,4 @@ win:
   target: dir
 linux:
   target: dir
+afterPack: build/after-pack.cjs

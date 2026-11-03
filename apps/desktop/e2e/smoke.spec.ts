@@ -37,3 +37,47 @@ test('language switches live and persists across restarts', async () => {
   await expect(page.getByTestId('title')).toHaveText('Xin chào từ Engclaw')
   await second.close()
 })
+
+test('renderer is isolated: no node, no raw ipc, only the typed bridge', async () => {
+  const app = await electron.launch({
+    args: [join(__dirname, '..'), ...(process.env['CI'] ? ['--no-sandbox'] : [])],
+  })
+  const page = await app.firstWindow()
+  const probe = await page.evaluate(() => {
+    const w = window as unknown as Record<string, unknown>
+    const api = w['engclaw'] as Record<string, unknown>
+    return {
+      require: typeof w['require'],
+      process: typeof w['process'],
+      ipcRenderer: typeof w['ipcRenderer'],
+      keys: Object.keys(api).sort(),
+    }
+  })
+  expect(probe.require).toBe('undefined')
+  expect(probe.process).toBe('undefined')
+  expect(probe.ipcRenderer).toBe('undefined')
+  expect(probe.keys).toEqual(['ping', 'settings', 'youtube'])
+
+  // Unknown payload shapes are rejected on the renderer side of the bridge.
+  const err = await page.evaluate(async () => {
+    try {
+      await (window as unknown as { engclaw: { ping(r: unknown): Promise<unknown> } }).engclaw.ping(
+        {
+          message: 1,
+        },
+      )
+      return null
+    } catch (e) {
+      return String(e)
+    }
+  })
+  expect(err).not.toBeNull()
+
+  // Navigation away from the app origin is blocked.
+  await page.evaluate(() => {
+    window.location.href = 'https://example.com/'
+  })
+  await page.waitForTimeout(500)
+  expect(page.url().startsWith('app://engclaw')).toBe(true)
+  await app.close()
+})
