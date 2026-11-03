@@ -1,0 +1,5 @@
+{
+  "app": { "title": "Engclaw", "hello": "Hello from Engclaw" },
+  "language": { "label": "Language", "en": "English", "vi": "Tiếng Việt" },
+  "ping": { "button": "Ping main" }
+}

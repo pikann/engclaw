@@ -13,16 +13,20 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@engclaw/i18n": "workspace:*",
     "@engclaw/ipc-contract": "workspace:*",
     "@engclaw/pronounce": "workspace:*",
     "@engclaw/youtube": "workspace:*",
+    "@fontsource-variable/inter": "^5.3.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "cn": "^0.5.2",
+    "i18next": "^26.7.1",
     "lucide-react": "^0.460.0",
     "radix-ui": "^1.8.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-i18next": "^17.1.11",
     "react-router": "^7.0.0",
     "tailwind-merge": "^2.5.0",
     "youtubei.js": "^16.0.0"
