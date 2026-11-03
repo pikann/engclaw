@@ -24,12 +24,7 @@ jobs:
           # Intel macOS is intentionally unsupported: onnxruntime-node ships no darwin/x64 binary (ENGC-60).
           - { name: mac-arm64, os: macos-latest, builder: '--mac dmg --arm64' }
           - { name: win-x64, os: windows-latest, builder: '--win nsis --x64' }
-          - {
-              name: linux-x64,
-              os: ubuntu-latest,
-              builder: '--linux AppImage deb --x64',
-              expectOrt: true,
-            }
+          - { name: linux-x64, os: ubuntu-latest, builder: '--linux AppImage deb --x64' }
     name: package (${{ matrix.name }})
     runs-on: ${{ matrix.os }}
     defaults:
