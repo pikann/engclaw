@@ -8,6 +8,7 @@ files:
 extraResources:
   - from: resources/add.onnx
     to: add.onnx
+npmRebuild: false # better-sqlite3 ships N-API prebuilds; node-gyp rebuild is unnecessary and fails on CI runners
 asar: true
 # Native binaries cannot be dlopen'ed from inside the asar; keep them on disk (ENGC-54).
 asarUnpack:
