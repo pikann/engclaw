@@ -13,12 +13,17 @@ import { pathToFileURL } from 'node:url'
 import {
   AudioRangeRequest,
   IPC,
+  LanguageRequest,
   PingRequest,
   TranscriptRequest,
   VideoRef,
   type PingResponse,
   type YouTubeResult,
 } from '@engclaw/ipc-contract'
+import { isLocale, type Locale } from '@engclaw/i18n'
+import { changeMainLanguage, initMainI18n } from './i18n'
+import { buildMenu } from './menu'
+import { loadLanguage, saveLanguage } from './settings'
 import { InnertubeAdapter, YouTubeError, parseVideoId } from '@engclaw/youtube'
 
 const APP_ORIGIN = 'app://engclaw'
@@ -86,7 +91,21 @@ async function yt<T>(fn: () => Promise<T>): Promise<YouTubeResult<T>> {
   }
 }
 
-void app.whenReady().then(() => {
+let language: Locale = 'en'
+
+async function setLanguage(next: Locale): Promise<void> {
+  language = next
+  saveLanguage(next)
+  await changeMainLanguage(next)
+  buildMenu(next, (l) => void setLanguage(l))
+  for (const w of BrowserWindow.getAllWindows())
+    w.webContents.send(IPC.settingsLanguageChanged, next)
+}
+
+void app.whenReady().then(async () => {
+  language = loadLanguage()
+  await initMainI18n(language)
+  buildMenu(language, (l) => void setLanguage(l))
   registerAppProtocol()
   session.defaultSession.setPermissionRequestHandler((_wc, permission, cb, details) =>
     cb(permission === 'media' && details.requestingUrl.startsWith(APP_ORIGIN)),
@@ -94,6 +113,12 @@ void app.whenReady().then(() => {
   ipcMain.handle(IPC.ping, (_e, raw): PingResponse => {
     const req = PingRequest.parse(raw)
     return { echo: req.message, platform: process.platform }
+  })
+  ipcMain.handle(IPC.settingsGetLanguage, () => language)
+  ipcMain.handle(IPC.settingsSetLanguage, async (_e, raw) => {
+    const { language: next } = LanguageRequest.parse(raw)
+    if (isLocale(next)) await setLanguage(next)
+    return language
   })
   ipcMain.handle(IPC.youtubeMeta, (_e, raw) => {
     const { videoId } = VideoRef.parse(raw)

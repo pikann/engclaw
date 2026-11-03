@@ -1,0 +1,18 @@
+{
+  "menu": {
+    "file": "File",
+    "edit": "Edit",
+    "view": "View",
+    "window": "Window",
+    "help": "Help",
+    "language": "Language",
+    "about": "About {{name}}",
+    "quit": "Quit {{name}}"
+  },
+  "dialog": {
+    "updateReadyTitle": "Update ready",
+    "updateReadyMessage": "Version {{version}} has been downloaded. Restart to install it?",
+    "restart": "Restart",
+    "later": "Later"
+  }
+}

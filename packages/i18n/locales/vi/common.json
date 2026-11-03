@@ -1,0 +1,5 @@
+{
+  "app": { "title": "Engclaw", "hello": "Xin chào từ Engclaw" },
+  "language": { "label": "Ngôn ngữ", "en": "English", "vi": "Tiếng Việt" },
+  "ping": { "button": "Ping tiến trình chính" }
+}
