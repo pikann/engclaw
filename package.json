@@ -1,0 +1,33 @@
+{
+  "name": "engclaw",
+  "private": true,
+  "version": "0.0.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "trustedDependencies": [
+    "electron",
+    "esbuild"
+  ],
+  "scripts": {
+    "dev": "bun run --cwd apps/desktop dev",
+    "build": "bun run --cwd apps/desktop build",
+    "package": "bun run --cwd apps/desktop package",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "typecheck": "bun run --filter '*' typecheck",
+    "test": "vitest run",
+    "test:e2e": "bun run --cwd apps/desktop test:e2e"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "globals": "^16.0.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.6.0",
+    "typescript-eslint": "^8.0.0",
+    "vitest": "^3.0.0"
+  }
+}

@@ -1,0 +1,13 @@
+appId: dev.engclaw.app
+productName: Engclaw
+directories:
+  output: release
+files:
+  - out/**
+asar: true
+mac:
+  target: dir
+win:
+  target: dir
+linux:
+  target: dir
