@@ -1,0 +1,253 @@
+{
+  "sentences": [
+    {
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "line": "ð_ə k_w_ˈɪ_k b_ɹ_ˈaʊ_n f_ˈɑː_k_s dʒ_ˈʌ_m_p_s ˌoʊ_v_ɚ ð_ə l_ˈeɪ_z_i d_ˈɑː_ɡ"
+    },
+    {
+      "text": "Hello, world!",
+      "line": "h_ə_l_ˈoʊ w_ˈɜː_l_d"
+    },
+    {
+      "text": "I would like a cup of tea, please.",
+      "line": "ˈaɪ w_ʊ_d l_ˈaɪ_k ɐ k_ˈʌ_p ʌ_v t_ˈiː p_l_ˈiː_z"
+    },
+    {
+      "text": "Where did you put the keys?",
+      "line": "w_ˌɛɹ d_ˈɪ_d j_uː p_ˌʊ_t ð_ə k_ˈiː_z"
+    },
+    {
+      "text": "She sells sea shells by the sea shore.",
+      "line": "ʃ_iː s_ˈɛ_l_z s_ˈiː ʃ_ˈɛ_l_z b_aɪ ð_ə s_ˈiː ʃ_ˈɔːɹ"
+    },
+    {
+      "text": "It's a beautiful day, isn't it?",
+      "line": "ɪ_t_s ɐ b_j_ˈuː_ɾ_i_f_əl d_ˈeɪ ˈɪ_z_ə_n_t ɪ_t"
+    },
+    {
+      "text": "Thank you very much for your help.",
+      "line": "θ_ˈæ_ŋ_k j_uː v_ˈɛ_ɹ_i m_ˈʌ_tʃ f_ɔːɹ j_ʊɹ h_ˈɛ_l_p"
+    },
+    {
+      "text": "He is a well-known author.",
+      "line": "h_iː_ ɪ_z ɐ w_ˈɛ_l n_ˈoʊ_n ˈɔː_θ_ɚ"
+    },
+    {
+      "text": "They're going to the market tomorrow.",
+      "line": "ð_eɪ_ɚ ɡ_ˌoʊ_ɪ_ŋ t_ə ð_ə m_ˈɑːɹ_k_ɪ_t t_ə_m_ˈɑː_ɹ_oʊ"
+    },
+    {
+      "text": "What time does the train leave?",
+      "line": "w_ˌʌ_t t_ˈaɪ_m d_ˈʌ_z ð_ə t_ɹ_ˈeɪ_n l_ˈiː_v"
+    },
+    {
+      "text": "Can you help me with this problem?",
+      "line": "k_æ_n j_uː h_ˈɛ_l_p m_ˌiː w_ɪ_ð ð_ɪ_s p_ɹ_ˈɑː_b_l_ə_m"
+    },
+    {
+      "text": "I have been living here for three years.",
+      "line": "ˈaɪ h_ɐ_v_b_ɪ_n l_ˈɪ_v_ɪ_ŋ h_ˈɪɹ f_ɔːɹ θ_ɹ_ˈiː j_ˈɪɹ_z"
+    },
+    {
+      "text": "The weather is nice today.",
+      "line": "ð_ə w_ˈɛ_ð_ɚ_ɹ ɪ_z n_ˈaɪ_s t_ə_d_ˈeɪ"
+    },
+    {
+      "text": "Please turn off the lights.",
+      "line": "p_l_ˈiː_z t_ˈɜː_n ˈɔ_f ð_ə l_ˈaɪ_t_s"
+    },
+    {
+      "text": "How much does this cost?",
+      "line": "h_ˌaʊ m_ˈʌ_tʃ d_ˈʌ_z ð_ɪ_s k_ˈɔ_s_t"
+    },
+    {
+      "text": "My favorite color is blue.",
+      "line": "m_aɪ f_ˈeɪ_v_ɚ_ɹ_ᵻ_t k_ˈʌ_l_ɚ_ɹ ɪ_z b_l_ˈuː"
+    },
+    {
+      "text": "We are learning English together.",
+      "line": "w_iː_ ɑːɹ l_ˈɜː_n_ɪ_ŋ ˈɪ_ŋ_ɡ_l_ɪ_ʃ t_ə_ɡ_ˈɛ_ð_ɚ"
+    },
+    {
+      "text": "Could you repeat that, please?",
+      "line": "k_ʊ_d j_uː ɹ_ᵻ_p_ˈiː_t ð_æ_t p_l_ˈiː_z"
+    },
+    {
+      "text": "This is the best pizza I have ever eaten.",
+      "line": "ð_ɪ_s ɪ_z ð_ə b_ˈɛ_s_t p_ˈiː_t_s_ə ˈaɪ h_æ_v ˈɛ_v_ɚ_ɹ ˈiː_ʔ_n̩"
+    },
+    {
+      "text": "Nobody knows the answer.",
+      "line": "n_ˈoʊ_b_ɑː_d_i n_ˈoʊ_z ð_ɪ_ ˈæ_n_s_ɚ"
+    },
+    {
+      "text": "The children are playing in the park.",
+      "line": "ð_ə tʃ_ˈɪ_l_d_ɹ_ə_n ɑːɹ p_l_ˈeɪ_ɪ_ŋ ɪ_n_ð_ə p_ˈɑːɹ_k"
+    },
+    {
+      "text": "I think that you are right.",
+      "line": "ˈaɪ θ_ˈɪ_ŋ_k ð_æ_t j_uː ɑːɹ ɹ_ˈaɪ_t"
+    },
+    {
+      "text": "Write a letter to your mother.",
+      "line": "ɹ_ˈaɪ_t ɐ l_ˈɛ_ɾ_ɚ t_ə j_ʊɹ m_ˈʌ_ð_ɚ"
+    },
+    {
+      "text": "Rice and beans are very cheap.",
+      "line": "ɹ_ˈaɪ_s æ_n_d b_ˈiː_n_z ɑːɹ v_ˈɛ_ɹ_i tʃ_ˈiː_p"
+    },
+    {
+      "text": "Why is the sky blue?",
+      "line": "w_ˌaɪ ɪ_z ð_ə s_k_ˈaɪ b_l_ˈuː"
+    },
+    {
+      "text": "A man, a plan, a canal: Panama!",
+      "line": "ɐ m_ˈæ_n ɐ p_l_ˈæ_n ɐ k_ə_n_ˈæ_l p_ˈæ_n_ə_m_ˌɑː"
+    },
+    {
+      "text": "Three thin thieves thought through thick fog.",
+      "line": "θ_ɹ_ˈiː θ_ˈɪ_n θ_ˈiː_v_z θ_ˈɔː_t θ_ɹ_uː θ_ˈɪ_k f_ˈɑː_ɡ"
+    },
+    {
+      "text": "Are you ready to start?",
+      "line": "ɑːɹ j_uː ɹ_ˈɛ_d_i t_ə s_t_ˈɑːɹ_t"
+    },
+    {
+      "text": "He didn't want to go to school.",
+      "line": "h_iː d_ˈɪ_d_n_t w_ˈɔ_n_t t_ə ɡ_ˌoʊ t_ə s_k_ˈuː_l"
+    },
+    {
+      "text": "The world is full of wonderful things.",
+      "line": "ð_ə w_ˈɜː_l_d ɪ_z f_ˈʊ_l ʌ_v w_ˈʌ_n_d_ɚ_f_əl θ_ˈɪ_ŋ_z"
+    }
+  ],
+  "words": {
+    "a": "ˈeɪ",
+    "and": "ˈæ_n_d",
+    "answer": "ˈæ_n_s_ɚ",
+    "are": "ˈɑːɹ",
+    "author": "ˈɔː_θ_ɚ",
+    "beans": "b_ˈiː_n_z",
+    "beautiful": "b_j_ˈuː_ɾ_i_f_əl",
+    "been": "b_ˈɪ_n",
+    "best": "b_ˈɛ_s_t",
+    "blue": "b_l_ˈuː",
+    "brown": "b_ɹ_ˈaʊ_n",
+    "by": "b_ˈaɪ",
+    "can": "k_ˈæ_n",
+    "canal": "k_ə_n_ˈæ_l",
+    "cheap": "tʃ_ˈiː_p",
+    "children": "tʃ_ˈɪ_l_d_ɹ_ə_n",
+    "color": "k_ˈʌ_l_ɚ",
+    "cost": "k_ˈɔ_s_t",
+    "could": "k_ˈʊ_d",
+    "cup": "k_ˈʌ_p",
+    "day": "d_ˈeɪ",
+    "did": "d_ˈɪ_d",
+    "didn't": "d_ˈɪ_d_n_t",
+    "does": "d_ˈʌ_z",
+    "dog": "d_ˈɑː_ɡ",
+    "eaten": "ˈiː_ʔ_n̩",
+    "english": "ˈɪ_ŋ_ɡ_l_ɪ_ʃ",
+    "ever": "ˈɛ_v_ɚ",
+    "favorite": "f_ˈeɪ_v_ɚ_ɹ_ᵻ_t",
+    "fog": "f_ˈɑː_ɡ",
+    "for": "f_ˈɔːɹ",
+    "fox": "f_ˈɑː_k_s",
+    "full": "f_ˈʊ_l",
+    "go": "ɡ_ˈoʊ",
+    "going": "ɡ_ˈoʊ_ɪ_ŋ",
+    "have": "h_ˈæ_v",
+    "he": "h_ˈiː",
+    "hello": "h_ə_l_ˈoʊ",
+    "help": "h_ˈɛ_l_p",
+    "here": "h_ˈɪɹ",
+    "how": "h_ˈaʊ",
+    "i": "ˈaɪ",
+    "in": "ˈɪ_n",
+    "is": "ˈɪ_z",
+    "isn't": "ˈɪ_z_ə_n_t",
+    "it": "ˈɪ_t",
+    "it's": "ˈɪ_t_s",
+    "jumps": "dʒ_ˈʌ_m_p_s",
+    "keys": "k_ˈiː_z",
+    "known": "n_ˈoʊ_n",
+    "knows": "n_ˈoʊ_z",
+    "lazy": "l_ˈeɪ_z_i",
+    "learning": "l_ˈɜː_n_ɪ_ŋ",
+    "leave": "l_ˈiː_v",
+    "letter": "l_ˈɛ_ɾ_ɚ",
+    "lights": "l_ˈaɪ_t_s",
+    "like": "l_ˈaɪ_k",
+    "living": "l_ˈɪ_v_ɪ_ŋ",
+    "man": "m_ˈæ_n",
+    "market": "m_ˈɑːɹ_k_ɪ_t",
+    "me": "m_ˈiː",
+    "mother": "m_ˈʌ_ð_ɚ",
+    "much": "m_ˈʌ_tʃ",
+    "my": "m_ˈaɪ",
+    "nice": "n_ˈaɪ_s",
+    "nobody": "n_ˈoʊ_b_ɑː_d_i",
+    "of": "ˈʌ_v",
+    "off": "ˈɔ_f",
+    "over": "ˈoʊ_v_ɚ",
+    "panama": "p_ˈæ_n_ə_m_ˌɑː",
+    "park": "p_ˈɑːɹ_k",
+    "pizza": "p_ˈiː_t_s_ə",
+    "plan": "p_l_ˈæ_n",
+    "playing": "p_l_ˈeɪ_ɪ_ŋ",
+    "please": "p_l_ˈiː_z",
+    "problem": "p_ɹ_ˈɑː_b_l_ə_m",
+    "put": "p_ˈʊ_t",
+    "quick": "k_w_ˈɪ_k",
+    "ready": "ɹ_ˈɛ_d_i",
+    "repeat": "ɹ_ᵻ_p_ˈiː_t",
+    "rice": "ɹ_ˈaɪ_s",
+    "right": "ɹ_ˈaɪ_t",
+    "school": "s_k_ˈuː_l",
+    "sea": "s_ˈiː",
+    "sells": "s_ˈɛ_l_z",
+    "she": "ʃ_ˈiː",
+    "shells": "ʃ_ˈɛ_l_z",
+    "shore": "ʃ_ˈɔːɹ",
+    "sky": "s_k_ˈaɪ",
+    "start": "s_t_ˈɑːɹ_t",
+    "tea": "t_ˈiː",
+    "thank": "θ_ˈæ_ŋ_k",
+    "that": "ð_ˈæ_t",
+    "the": "ð_ˈə",
+    "they're": "ð_eɪ_ˈɚ",
+    "thick": "θ_ˈɪ_k",
+    "thieves": "θ_ˈiː_v_z",
+    "thin": "θ_ˈɪ_n",
+    "things": "θ_ˈɪ_ŋ_z",
+    "think": "θ_ˈɪ_ŋ_k",
+    "this": "ð_ˈɪ_s",
+    "thought": "θ_ˈɔː_t",
+    "three": "θ_ɹ_ˈiː",
+    "through": "θ_ɹ_ˈuː",
+    "time": "t_ˈaɪ_m",
+    "to": "t_ˈuː",
+    "today": "t_ə_d_ˈeɪ",
+    "together": "t_ə_ɡ_ˈɛ_ð_ɚ",
+    "tomorrow": "t_ə_m_ˈɑː_ɹ_oʊ",
+    "train": "t_ɹ_ˈeɪ_n",
+    "turn": "t_ˈɜː_n",
+    "very": "v_ˈɛ_ɹ_i",
+    "want": "w_ˈɔ_n_t",
+    "we": "w_ˈiː",
+    "weather": "w_ˈɛ_ð_ɚ",
+    "well": "w_ˈɛ_l",
+    "what": "w_ˈʌ_t",
+    "where": "w_ˈɛɹ",
+    "why": "w_ˈaɪ",
+    "with": "w_ˈɪ_ð",
+    "wonderful": "w_ˈʌ_n_d_ɚ_f_əl",
+    "world": "w_ˈɜː_l_d",
+    "would": "w_ˈʊ_d",
+    "write": "ɹ_ˈaɪ_t",
+    "years": "j_ˈɪɹ_z",
+    "you": "j_ˈuː",
+    "your": "j_ˈʊɹ"
+  }
+}
