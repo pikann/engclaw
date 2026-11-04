@@ -1,5 +1,46 @@
 {
-  "app": { "title": "Engclaw", "hello": "Hello from Engclaw" },
-  "language": { "label": "Language", "en": "English", "vi": "Tiếng Việt" },
-  "ping": { "button": "Ping main" }
+  "app": {
+    "title": "Engclaw",
+    "hello": "Hello from Engclaw"
+  },
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "vi": "Tiếng Việt"
+  },
+  "ping": {
+    "button": "Ping main"
+  },
+  "models": {
+    "title": "AI models",
+    "empty": "No downloadable models are available in this build.",
+    "size": "Size: {{size}}",
+    "license": "License: {{license}}",
+    "ready": "Ready (works offline)",
+    "notInstalled": "Not downloaded",
+    "downloading": "Downloading…",
+    "verifying": "Verifying…",
+    "updateAvailable": "Update available",
+    "download": "Download",
+    "update": "Update",
+    "cancel": "Cancel",
+    "remove": "Delete",
+    "redownload": "Re-download",
+    "folder": "Models folder: {{dir}}",
+    "changeFolder": "Change folder",
+    "openFolder": "Open folder",
+    "consentTitle": "Download {{name}}?",
+    "consentBody": "This model runs fully on your device. It is {{size}} and is downloaded once from Hugging Face; after that it works offline.",
+    "consentLicense": "By downloading you accept the model license: {{license}}.",
+    "consentConfirm": "Download",
+    "progress": "{{received}} of {{total}}",
+    "error": {
+      "DISK_SPACE": "Not enough free disk space for this model.",
+      "NETWORK": "The download failed. Check your connection and try again; it will resume where it stopped.",
+      "CHECKSUM": "The downloaded file is corrupted. Try downloading again.",
+      "BUSY": "This model is already downloading.",
+      "UNKNOWN_MODEL": "Unknown model.",
+      "CANCELLED": "Download cancelled."
+    }
+  }
 }

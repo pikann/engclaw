@@ -33,7 +33,7 @@ describe('preload bridge', () => {
 
   it('exposes exactly the typed api and no raw ipc primitives', async () => {
     const api = await load()
-    expect(Object.keys(api).sort()).toEqual(['ping', 'settings', 'youtube'])
+    expect(Object.keys(api).sort()).toEqual(['models', 'ping', 'settings', 'youtube'])
     const json = JSON.stringify(Object.keys(api.settings).concat(Object.keys(api.youtube)))
     for (const forbidden of ['ipcRenderer', 'invoke', 'send', 'on', 'require', 'fs', 'shell'])
       expect(json).not.toContain(`"${forbidden}"`)

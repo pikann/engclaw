@@ -13,6 +13,7 @@
     "updateReadyTitle": "Đã có bản cập nhật",
     "updateReadyMessage": "Phiên bản {{version}} đã được tải xuống. Khởi động lại để cài đặt?",
     "restart": "Khởi động lại",
-    "later": "Để sau"
+    "later": "Để sau",
+    "chooseModelsDir": "Chọn thư mục mô hình"
   }
 }

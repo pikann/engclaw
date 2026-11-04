@@ -12,6 +12,7 @@ export default defineConfig({
         exclude: [
           '@engclaw/i18n',
           '@engclaw/ipc-contract',
+          '@engclaw/models',
           '@engclaw/pronounce',
           '@engclaw/youtube',
         ],

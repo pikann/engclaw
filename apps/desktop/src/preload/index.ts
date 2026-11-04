@@ -5,6 +5,7 @@ import {
   invokeChannels,
   type EngclawApi,
   type EventChannel,
+  type EventPayload,
   type InvokeChannel,
   type InvokeRequest,
   type InvokeResponse,
@@ -20,7 +21,10 @@ async function invoke<C extends InvokeChannel>(
   return invokeChannels[channel].response.parse(res) as InvokeResponse<C>
 }
 
-function subscribe<C extends EventChannel>(channel: C, cb: (payload: string) => void): () => void {
+function subscribe<C extends EventChannel>(
+  channel: C,
+  cb: (payload: EventPayload<C>) => void,
+): () => void {
   const listener = (_e: IpcRendererEvent, raw: unknown): void =>
     cb(eventChannels[channel].parse(raw))
   ipcRenderer.on(channel, listener)
@@ -34,6 +38,16 @@ const api: EngclawApi = {
     getLanguage: () => invoke(IPC.settingsGetLanguage),
     setLanguage: (req) => invoke(IPC.settingsSetLanguage, req),
     onLanguageChanged: (cb) => subscribe(IPC.settingsLanguageChanged, cb),
+  },
+  models: {
+    list: () => invoke(IPC.modelsList),
+    download: (req) => invoke(IPC.modelsDownload, req),
+    cancel: (req) => invoke(IPC.modelsCancel, req),
+    remove: (req) => invoke(IPC.modelsRemove, req),
+    getDir: () => invoke(IPC.modelsGetDir),
+    chooseDir: () => invoke(IPC.modelsChooseDir),
+    openFolder: () => invoke(IPC.modelsOpenFolder),
+    onProgress: (cb) => subscribe(IPC.modelsProgress, cb),
   },
   youtube: {
     meta: (req) => invoke(IPC.youtubeMeta, req),
