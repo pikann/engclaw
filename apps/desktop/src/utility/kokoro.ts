@@ -1,4 +1,3 @@
-import { createRequire } from 'node:module'
 import { readFileSync } from 'node:fs'
 import { basename, dirname, join } from 'node:path'
 import {
@@ -15,6 +14,7 @@ import {
   withPad,
 } from '@engclaw/pronounce'
 import { readNpz } from './npz'
+import { createSession, DEFAULT_PROVIDERS } from './sessions'
 import type { Synthesizer } from './speech'
 
 /** One model call: padded token ids + style row -> 24 kHz audio. */
@@ -87,7 +87,7 @@ export const DEFAULT_KOKORO_FILES = {
 export async function loadKokoro(
   files: KokoroFiles,
   ipa: KokoroOptions['ipa'],
-  providers: string[] = ['webgpu', 'cpu'],
+  providers: string[] = DEFAULT_PROVIDERS,
 ): Promise<KokoroSynthesizer> {
   const cfg = JSON.parse(readFileSync(join(files.dir, files.config), 'utf8')) as {
     vocab?: Record<string, number>
@@ -96,12 +96,7 @@ export async function loadKokoro(
   const voice = readNpz(readFileSync(join(files.dir, files.voices))).get(files.voice)
   if (!voice) throw new Error(`kokoro: voice ${files.voice} not found in ${files.voices}`)
 
-  const ort = createRequire(join(__dirname, 'utility.js'))(
-    'onnxruntime-node',
-  ) as typeof import('onnxruntime-node')
-  const session = await ort.InferenceSession.create(join(files.dir, files.model), {
-    executionProviders: providers,
-  })
+  const { ort, session } = await createSession(join(files.dir, files.model), providers)
   const run: KokoroRun = async (tokens, style, speed) => {
     const out = await session.run({
       tokens: new ort.Tensor('int64', BigInt64Array.from(tokens.map(BigInt)), [1, tokens.length]),

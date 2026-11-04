@@ -57,6 +57,14 @@ const api: EngclawApi = {
   tts: {
     speak: (req) => invoke(IPC.ttsSpeak, req),
   },
+  inference: {
+    analyze: (req) => invoke(IPC.inferenceAnalyze, req),
+    transcribe: (req) => invoke(IPC.inferenceTranscribe, req),
+    phonemize: (req) => invoke(IPC.inferencePhonemize, req),
+    languages: () => invoke(IPC.inferenceLanguages),
+    cancel: (req) => invoke(IPC.inferenceCancel, req),
+    onProgress: (cb) => subscribe(IPC.inferenceProgress, cb),
+  },
 }
 
 contextBridge.exposeInMainWorld('engclaw', api)

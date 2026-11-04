@@ -9,7 +9,9 @@ import { buildMenu } from './menu'
 import { APP_ORIGIN } from './security-policy'
 import { hardenWindow, installSessionSecurity, secureWebPreferences } from './security'
 import { registerModelHandlers } from './models'
+import { registerInferenceHandlers } from './inference'
 import { registerTtsHandlers } from './tts'
+import { UtilityClient } from './utility-client'
 import { loadLanguage, saveLanguage } from './settings'
 import { InnertubeAdapter, YouTubeError, parseVideoId } from '@engclaw/youtube'
 
@@ -50,7 +52,6 @@ function startUtility(): Electron.UtilityProcess {
   const child = utilityProcess.fork(join(__dirname, 'utility.js'))
   child.on('message', (m) => console.log('[utility]', m))
   child.postMessage({ type: 'hello' })
-  if (process.env['ENGCLAW_SMOKE']) runSmoke(child)
   return child
 }
 
@@ -120,7 +121,10 @@ void app.whenReady().then(async () => {
     yt(() => youtube.audioRange(parseVideoId(videoId), start, end)),
   )
   createWindow()
-  registerTtsHandlers(startUtility(), models)
+  if (process.env['ENGCLAW_SMOKE']) runSmoke(startUtility())
+  const inference = new UtilityClient(startUtility)
+  registerTtsHandlers(inference, models)
+  registerInferenceHandlers(inference, models)
 })
 
 app.on('window-all-closed', () => app.quit())

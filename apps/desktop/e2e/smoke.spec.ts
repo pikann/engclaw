@@ -56,7 +56,7 @@ test('renderer is isolated: no node, no raw ipc, only the typed bridge', async (
   expect(probe.require).toBe('undefined')
   expect(probe.process).toBe('undefined')
   expect(probe.ipcRenderer).toBe('undefined')
-  expect(probe.keys).toEqual(['models', 'ping', 'settings', 'tts', 'youtube'])
+  expect(probe.keys).toEqual(['inference', 'models', 'ping', 'settings', 'tts', 'youtube'])
 
   // Unknown payload shapes are rejected on the renderer side of the bridge.
   const err = await page.evaluate(async () => {
