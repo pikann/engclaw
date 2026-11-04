@@ -39,6 +39,19 @@ const api: EngclawApi = {
     setLanguage: (req) => invoke(IPC.settingsSetLanguage, req),
     onLanguageChanged: (cb) => subscribe(IPC.settingsLanguageChanged, cb),
   },
+  history: {
+    save: (req) => invoke(IPC.historySave, req),
+    list: (req) => invoke(IPC.historyList, req),
+    audio: (req) => invoke(IPC.historyAudio, req),
+    delete: (req) => invoke(IPC.historyDelete, req),
+    export: () => invoke(IPC.historyExport),
+    import: () => invoke(IPC.historyImport),
+  },
+  app: {
+    getSettings: () => invoke(IPC.appGetSettings),
+    updateSettings: (req) => invoke(IPC.appUpdateSettings, req),
+    deleteAllData: () => invoke(IPC.appDeleteAllData),
+  },
   models: {
     list: () => invoke(IPC.modelsList),
     download: (req) => invoke(IPC.modelsDownload, req),

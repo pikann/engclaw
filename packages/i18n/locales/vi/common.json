@@ -123,5 +123,40 @@
     "mouthAlt": "Khẩu hình {{shape}}",
     "playMouth": "Xem khẩu hình",
     "soundPick": "Âm {{phone}}"
+  },
+  "nav": {
+    "practice": "Luyện tập",
+    "history": "Lịch sử",
+    "settings": "Cài đặt"
+  },
+  "history": {
+    "title": "Lịch sử luyện tập",
+    "empty": "Chưa có lần luyện tập nào. Kết quả của bạn sẽ hiện ở đây.",
+    "score": "Điểm {{score}}",
+    "mode_sentence": "Câu",
+    "mode_free": "Nói tự do",
+    "errors": "{{count}} từ cần luyện thêm",
+    "clean": "Không có từ nào sai",
+    "play": "Nghe lại",
+    "noAudio": "Không có bản ghi",
+    "delete": "Xóa",
+    "export": "Xuất",
+    "import": "Nhập",
+    "exported": "Đã xuất {{count}} lần luyện tập.",
+    "imported": "Đã nhập {{imported}} lần luyện tập ({{skipped}} đã có sẵn).",
+    "fileError": "Không thể dùng tệp này: {{message}}",
+    "loadMore": "Xem thêm"
+  },
+  "settings": {
+    "title": "Cài đặt",
+    "silenceAutoStop": "Tự động dừng ghi âm khi im lặng",
+    "checkForUpdates": "Kiểm tra bản cập nhật khi mở ứng dụng",
+    "data": "Dữ liệu của bạn",
+    "dataHint": "Lịch sử luyện tập, bản ghi và tùy chọn chỉ được lưu trên máy tính này.",
+    "deleteAll": "Xóa toàn bộ dữ liệu",
+    "deleteTitle": "Xóa toàn bộ dữ liệu?",
+    "deleteBody": "Thao tác này xóa vĩnh viễn lịch sử luyện tập, bản ghi và tùy chọn. Các mô hình đã tải được giữ lại.",
+    "deleteConfirm": "Xóa tất cả",
+    "deleted": "Đã xóa toàn bộ dữ liệu."
   }
 }

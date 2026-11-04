@@ -34,6 +34,8 @@ describe('preload bridge', () => {
   it('exposes exactly the typed api and no raw ipc primitives', async () => {
     const api = await load()
     expect(Object.keys(api).sort()).toEqual([
+      'app',
+      'history',
       'inference',
       'models',
       'ping',

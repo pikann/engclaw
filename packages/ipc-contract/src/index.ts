@@ -206,11 +206,75 @@ export type ModelStatus = z.infer<typeof ModelStatus>
 export type ModelProgress = z.infer<typeof ModelProgress>
 export type ModelOpResult = z.infer<typeof ModelOpResult>
 
+export const HistoryError = z.object({
+  word: z.string(),
+  expected: z.string(),
+  actual: z.string(),
+  confidence: z.number(),
+})
+export const HistoryAttempt = z.object({
+  id: z.string().min(1).max(64),
+  createdAt: z.number().int().nonnegative(),
+  mode: z.enum(['sentence', 'free']),
+  text: z.string().max(1000),
+  language: z.string().min(2).max(16),
+  score: z.number(),
+  errors: z.array(HistoryError).max(500),
+  hasAudio: z.boolean(),
+})
+export type HistoryAttempt = z.infer<typeof HistoryAttempt>
+export const HistorySaveRequest = HistoryAttempt.omit({ id: true, createdAt: true, hasAudio: true })
+  .extend({ audio: Pcm16k.optional() })
+  .strict()
+export type HistorySaveRequest = z.infer<typeof HistorySaveRequest>
+export const HistoryListRequest = z
+  .object({
+    limit: z.number().int().min(1).max(500).optional(),
+    offset: z.number().int().min(0).optional(),
+  })
+  .strict()
+export const HistoryIdRequest = z.object({ id: z.string().min(1).max(64) }).strict()
+/** The on-disk export format. `audio` is a base64 16 kHz mono WAV, or null. */
+export const HistoryExport = z.object({
+  format: z.literal('engclaw-history'),
+  version: z.literal(1),
+  exportedAt: z.number(),
+  attempts: z.array(
+    HistoryAttempt.omit({ hasAudio: true }).extend({ audio: z.string().nullable() }),
+  ),
+})
+export type HistoryExportFile = z.infer<typeof HistoryExport>
+export const HistoryFileResult = z.discriminatedUnion('status', [
+  z.object({ status: z.literal('cancelled') }),
+  z.object({ status: z.literal('error'), message: z.string() }),
+  z.object({ status: z.literal('exported'), count: z.number(), path: z.string() }),
+  z.object({ status: z.literal('imported'), imported: z.number(), skipped: z.number() }),
+])
+export type HistoryFileResult = z.infer<typeof HistoryFileResult>
+
+export const AppSettings = z.object({
+  /** Stop recording after ~2 s of silence once speech was heard. */
+  silenceAutoStop: z.boolean().default(true),
+  /** Check GitHub releases for a newer version on launch. */
+  checkForUpdates: z.boolean().default(true),
+})
+export type AppSettings = z.infer<typeof AppSettings>
+export const AppSettingsPatch = AppSettings.partial().strict()
+
 export const IPC = {
   ping: 'app:ping',
   settingsGetLanguage: 'settings:getLanguage',
   settingsSetLanguage: 'settings:setLanguage',
   settingsLanguageChanged: 'settings:languageChanged',
+  historySave: 'history:save',
+  historyList: 'history:list',
+  historyAudio: 'history:audio',
+  historyDelete: 'history:delete',
+  historyExport: 'history:export',
+  historyImport: 'history:import',
+  appGetSettings: 'app:getSettings',
+  appUpdateSettings: 'app:updateSettings',
+  appDeleteAllData: 'app:deleteAllData',
   modelsList: 'models:list',
   modelsDownload: 'models:download',
   modelsCancel: 'models:cancel',
@@ -242,6 +306,24 @@ export const invokeChannels = {
   [IPC.ping]: { request: PingRequest, response: PingResponse },
   [IPC.settingsGetLanguage]: { request: noArgs, response: z.string() },
   [IPC.settingsSetLanguage]: { request: LanguageRequest, response: z.string() },
+  [IPC.historySave]: { request: HistorySaveRequest, response: HistoryAttempt },
+  [IPC.historyList]: {
+    request: HistoryListRequest.optional(),
+    response: z.object({ attempts: z.array(HistoryAttempt), total: z.number() }),
+  },
+  [IPC.historyAudio]: {
+    request: HistoryIdRequest,
+    response: z.custom<Float32Array>((v) => v instanceof Float32Array).nullable(),
+  },
+  [IPC.historyDelete]: { request: HistoryIdRequest, response: z.boolean() },
+  /** Opens a save dialog and writes every attempt (with recordings) as JSON. */
+  [IPC.historyExport]: { request: noArgs, response: HistoryFileResult },
+  /** Opens a file picker and merges attempts from an export (existing ids are skipped). */
+  [IPC.historyImport]: { request: noArgs, response: HistoryFileResult },
+  [IPC.appGetSettings]: { request: noArgs, response: AppSettings },
+  [IPC.appUpdateSettings]: { request: AppSettingsPatch, response: AppSettings },
+  /** Deletes history, recordings and preferences (not downloaded models). */
+  [IPC.appDeleteAllData]: { request: noArgs, response: z.null() },
   [IPC.modelsList]: { request: noArgs, response: z.array(ModelStatus) },
   [IPC.modelsDownload]: { request: ModelRef, response: ModelOpResult },
   [IPC.modelsCancel]: { request: ModelRef, response: z.null() },
@@ -304,6 +386,22 @@ export interface EngclawApi {
     setLanguage(req: z.infer<typeof LanguageRequest>): Promise<string>
     /** Subscribes to language changes made anywhere (e.g. the app menu); returns an unsubscribe fn. */
     onLanguageChanged(cb: (language: string) => void): () => void
+  }
+  history: {
+    save(req: HistorySaveRequest): Promise<HistoryAttempt>
+    list(
+      req?: z.infer<typeof HistoryListRequest>,
+    ): Promise<{ attempts: HistoryAttempt[]; total: number }>
+    /** 16 kHz mono PCM of a stored recording, or null if the attempt has none. */
+    audio(req: z.infer<typeof HistoryIdRequest>): Promise<Float32Array | null>
+    delete(req: z.infer<typeof HistoryIdRequest>): Promise<boolean>
+    export(): Promise<HistoryFileResult>
+    import(): Promise<HistoryFileResult>
+  }
+  app: {
+    getSettings(): Promise<AppSettings>
+    updateSettings(req: z.infer<typeof AppSettingsPatch>): Promise<AppSettings>
+    deleteAllData(): Promise<null>
   }
   models: {
     list(): Promise<ModelStatus[]>

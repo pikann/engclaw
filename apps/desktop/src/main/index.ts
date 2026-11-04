@@ -9,6 +9,7 @@ import { buildMenu } from './menu'
 import { APP_ORIGIN } from './security-policy'
 import { hardenWindow, installSessionSecurity, secureWebPreferences } from './security'
 import { registerModelHandlers } from './models'
+import { registerStoreHandlers } from './history'
 import { registerInferenceHandlers } from './inference'
 import { registerTtsHandlers } from './tts'
 import { UtilityClient } from './utility-client'
@@ -112,6 +113,7 @@ void app.whenReady().then(async () => {
     if (isLocale(next)) await setLanguage(next)
     return language
   })
+  registerStoreHandlers()
   const models = registerModelHandlers()
   handle(IPC.youtubeMeta, ({ videoId }) => yt(() => youtube.meta(parseVideoId(videoId))))
   handle(IPC.youtubeTranscript, ({ videoId, lang }) =>

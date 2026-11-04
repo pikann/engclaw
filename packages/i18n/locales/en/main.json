@@ -14,6 +14,8 @@
     "updateReadyMessage": "Version {{version}} has been downloaded. Restart to install it?",
     "restart": "Restart",
     "later": "Later",
-    "chooseModelsDir": "Choose models folder"
+    "chooseModelsDir": "Choose models folder",
+    "exportHistory": "Export practice history",
+    "importHistory": "Import practice history"
   }
 }
