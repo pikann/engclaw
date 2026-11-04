@@ -1,8 +1,12 @@
-// Inference worker entry (utility process). ML services land here in later tasks.
+// Inference worker entry (utility process): serves the main process over `rpc` messages.
 import { join } from 'node:path'
 import { CachedPhonemizer } from '@engclaw/pronounce'
 import { EspeakProcess } from './espeak'
 import { DEFAULT_KOKORO_FILES, loadKokoro } from './kokoro'
+import { InferenceError, toInferenceError } from './errors'
+import { InferenceService, type ModelDirs } from './inference'
+import { loadModelAdapter } from './model-adapter'
+import type { RpcCancel, RpcRequest, RpcResult } from './rpc'
 import { runSmoke } from './smoke'
 import { SpeechService } from './speech'
 
@@ -28,32 +32,76 @@ function speechFor(modelDir: string, cacheDir: string): Promise<SpeechService> {
 }
 process.on('exit', () => phonemizer.dispose())
 
-process.parentPort.on('message', (e) => {
-  const data = e.data as {
-    type?: string
-    modelPath?: string
-    id?: number
+// Set by each request that carries it: where the reference-voice model and its audio cache live.
+let kokoroDirs: { modelDir: string; cacheDir: string } | null = null
+
+const inference = new InferenceService({
+  loadAdapter: loadModelAdapter,
+  phonemizer,
+  speak: async (text) => {
+    if (!kokoroDirs)
+      throw new InferenceError('MODEL_MISSING', 'reference voice not installed', 'kokoro-82m')
+    return (await (await speechFor(kokoroDirs.modelDir, kokoroDirs.cacheDir)).speak(text)).samples
+  },
+})
+const running = new Map<number, AbortController>()
+const post = (m: object) => process.parentPort.postMessage(m)
+
+async function dispatch(req: RpcRequest, signal: AbortSignal): Promise<unknown> {
+  const p = req.params as {
+    audio?: Float32Array
     text?: string
-    modelDir?: string
-    cacheDir?: string
+    language?: string
+    models?: ModelDirs
+    kokoro?: { modelDir: string; cacheDir: string }
   }
-  if (data.type === 'hello') process.parentPort.postMessage({ type: 'ready', pid: process.pid })
+  const opts = {
+    signal,
+    onStage: (stage: string) => post({ type: 'rpc-progress', id: req.id, stage }),
+  }
+  if (p.kokoro) kokoroDirs = p.kokoro
+  switch (req.method) {
+    case 'analyze':
+      return inference.analyze(p.audio!, p.text!, p.language, p.models ?? {}, opts)
+    case 'transcribe':
+      return inference.transcribe(p.audio!, p.language, p.models ?? {}, opts)
+    case 'phonemize':
+      return inference.phonemize(p.text!, p.language)
+    case 'speak': {
+      if (!p.kokoro)
+        throw new InferenceError('MODEL_MISSING', 'reference voice not installed', 'kokoro-82m')
+      return (await speechFor(p.kokoro.modelDir, p.kokoro.cacheDir)).speak(p.text!)
+    }
+  }
+}
+
+async function handleRpc(req: RpcRequest): Promise<void> {
+  const ctl = new AbortController()
+  running.set(req.id, ctl)
+  let reply: RpcResult
+  try {
+    reply = { type: 'rpc-result', id: req.id, ok: true, value: await dispatch(req, ctl.signal) }
+  } catch (e) {
+    const err = toInferenceError(e)
+    reply = {
+      type: 'rpc-result',
+      id: req.id,
+      ok: false,
+      code: err.code,
+      message: err.message,
+      ...(err.modelId ? { modelId: err.modelId } : {}),
+    }
+  } finally {
+    running.delete(req.id)
+  }
+  post(reply)
+}
+
+process.parentPort.on('message', (e) => {
+  const data = e.data as { type?: string; modelPath?: string }
+  if (data.type === 'hello') post({ type: 'ready', pid: process.pid })
   if (data.type === 'smoke' && data.modelPath)
-    void runSmoke(data.modelPath).then((report) =>
-      process.parentPort.postMessage({ type: 'smoke', report }),
-    )
-  if (data.type === 'phonemize' && typeof data.text === 'string')
-    phonemizer.getPhonemesWithWordMapping(data.text).then(
-      (words) => process.parentPort.postMessage({ type: 'phonemized', id: data.id, words }),
-      (err: Error) =>
-        process.parentPort.postMessage({ type: 'phonemized', id: data.id, error: err.message }),
-    )
-  if (data.type === 'speak' && typeof data.text === 'string' && data.modelDir && data.cacheDir)
-    speechFor(data.modelDir, data.cacheDir)
-      .then((svc) => svc.speak(data.text!))
-      .then(
-        (r) => process.parentPort.postMessage({ type: 'spoke', id: data.id, ...r }),
-        (err: Error) =>
-          process.parentPort.postMessage({ type: 'spoke', id: data.id, error: err.message }),
-      )
+    void runSmoke(data.modelPath).then((report) => post({ type: 'smoke', report }))
+  if (data.type === 'rpc') void handleRpc(e.data as RpcRequest)
+  if (data.type === 'rpc-cancel') running.get((e.data as RpcCancel).id)?.abort()
 })

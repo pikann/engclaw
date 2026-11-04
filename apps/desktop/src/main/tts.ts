@@ -3,53 +3,41 @@ import { join } from 'node:path'
 import { IPC, type SpeakResponse } from '@engclaw/ipc-contract'
 import type { ModelManager } from '@engclaw/models'
 import { handle } from './ipc'
+import type { UtilityClient } from './utility-client'
 
 /** Catalog id of the Kokoro reference-voice model. */
 export const KOKORO_MODEL_ID = 'kokoro-82m'
 
+/** Where the reference-voice model and its audio cache live, or null if the model is not installed. */
+export async function kokoroLocation(
+  models: ModelManager,
+): Promise<{ modelDir: string; cacheDir: string } | null> {
+  const model = (await models.list()).find((m) => m.id === KOKORO_MODEL_ID)
+  if (!model || model.state !== 'ready' || !model.path) return null
+  return { modelDir: model.path, cacheDir: join(app.getPath('userData'), 'tts-cache') }
+}
+
 interface Spoke {
-  type: 'spoke'
-  id: number
-  error?: string
-  samples?: Float32Array
-  sampleRate?: number
-  cached?: boolean
+  samples: Float32Array
+  sampleRate: number
+  cached: boolean
 }
 
 /** `tts:speak` -> utility process (Kokoro + disk cache under userData/tts-cache). */
-export function registerTtsHandlers(child: Electron.UtilityProcess, models: ModelManager): void {
-  let nextId = 1
-  const waiting = new Map<number, (m: Spoke) => void>()
-  child.on('message', (m: Spoke) => {
-    if (m?.type === 'spoke') waiting.get(m.id)?.(m)
-  })
-  child.on('exit', () => {
-    for (const done of waiting.values())
-      done({ type: 'spoke', id: 0, error: 'inference process exited' })
-    waiting.clear()
-  })
-
+export function registerTtsHandlers(client: UtilityClient, models: ModelManager): void {
   handle(IPC.ttsSpeak, async ({ text }): Promise<SpeakResponse> => {
-    const model = (await models.list()).find((m) => m.id === KOKORO_MODEL_ID)
-    if (!model || model.state !== 'ready' || !model.path)
+    const kokoro = await kokoroLocation(models)
+    if (!kokoro)
       return {
         ok: false,
         code: 'MODEL_MISSING',
         message: 'The reference voice model is not downloaded.',
       }
-    const id = nextId++
-    const reply = new Promise<Spoke>((resolve) => waiting.set(id, resolve))
-    child.postMessage({
-      type: 'speak',
-      id,
-      text,
-      modelDir: model.path,
-      cacheDir: join(app.getPath('userData'), 'tts-cache'),
-    })
-    const m = await reply
-    waiting.delete(id)
-    if (m.error || !m.samples)
-      return { ok: false, code: 'FAILED', message: m.error ?? 'no audio returned' }
-    return { ok: true, samples: m.samples, sampleRate: m.sampleRate ?? 16000, cached: !!m.cached }
+    try {
+      const r = await client.call<Spoke>('speak', { text, kokoro }).result
+      return { ok: true, samples: r.samples, sampleRate: r.sampleRate, cached: r.cached }
+    } catch (e) {
+      return { ok: false, code: 'FAILED', message: e instanceof Error ? e.message : String(e) }
+    }
   })
 }

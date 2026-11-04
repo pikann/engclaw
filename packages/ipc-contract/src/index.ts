@@ -54,6 +54,121 @@ export const SpeakResponse = z.discriminatedUnion('ok', [
 ])
 export type SpeakResponse = z.infer<typeof SpeakResponse>
 
+export const LanguageInfo = z.object({
+  code: z.string(),
+  name: z.string(),
+  /** Experimental languages are not calibrated; only English is in the PoC. */
+  experimental: z.boolean(),
+})
+export type LanguageInfo = z.infer<typeof LanguageInfo>
+
+/** 16 kHz mono float32 PCM, at most 60 s. */
+const Pcm16k = z.custom<Float32Array>((v) => v instanceof Float32Array && v.length <= 16000 * 60)
+const RequestId = z.string().min(1).max(64)
+const LanguageCode = z.string().min(2).max(16)
+
+export const AnalyzeRequest = z
+  .object({
+    requestId: RequestId,
+    audio: Pcm16k,
+    text: z.string().min(1).max(1000),
+    language: LanguageCode.optional(),
+  })
+  .strict()
+export const TranscribeRequest = z
+  .object({ requestId: RequestId, audio: Pcm16k, language: LanguageCode.optional() })
+  .strict()
+export const PhonemizeRequest = z
+  .object({ text: z.string().min(1).max(1000), language: LanguageCode.optional() })
+  .strict()
+export const CancelRequest = z.object({ requestId: RequestId }).strict()
+
+/** Staged loading messages the UI maps to `pronounce.stage.<stage>`. */
+export const InferenceStage = z.enum([
+  'loading-phone-model',
+  'loading-asr-model',
+  'loading-voice',
+  'synthesizing',
+  'recognizing-phones',
+  'transcribing',
+  'scoring',
+])
+export const InferenceProgress = z.object({ requestId: z.string(), stage: InferenceStage })
+export type InferenceProgress = z.infer<typeof InferenceProgress>
+
+export const InferenceErrorCode = z.enum([
+  'MODEL_MISSING',
+  'INVALID_INPUT',
+  'UNSUPPORTED_LANGUAGE',
+  'CANCELLED',
+  'PROCESS_CRASHED',
+  'FAILED',
+])
+export type InferenceErrorCode = z.infer<typeof InferenceErrorCode>
+
+const inferenceResult = <T extends z.ZodTypeAny>(value: T) =>
+  z.discriminatedUnion('ok', [
+    z.object({ ok: z.literal(true), value }),
+    z.object({
+      ok: z.literal(false),
+      code: InferenceErrorCode,
+      message: z.string(),
+      /** Catalog id of the model to download, for MODEL_MISSING. */
+      modelId: z.string().optional(),
+    }),
+  ])
+export type InferenceResult<T> =
+  | { ok: true; value: T }
+  | { ok: false; code: InferenceErrorCode; message: string; modelId?: string }
+
+const PhoneReport = z.object({ expected: z.string(), heard: z.string(), confidence: z.number() })
+/** OpenPronounce `/pronunciation` body (snake_case, as the Python reference emits it). */
+export const PronunciationResult = z.object({
+  score: z.number(),
+  distance: z.number(),
+  acoustic_distance: z.number(),
+  differences: z.object({
+    word_distance: z.number(),
+    phoneme_distance: z.number(),
+    word_error_rate: z.number(),
+    phoneme_error_rate: z.number(),
+    errors: z.array(
+      z.object({
+        position: z.number(),
+        word: z.string(),
+        expected: z.string(),
+        actual: z.string(),
+        actual_word: z.string(),
+        phone_distance: z.number(),
+        confidence: z.number(),
+        phones: z.array(PhoneReport),
+      }),
+    ),
+    /** Locale-neutral (the UI renders `pronounce.feedback.<code>`); upstream sends English prose. */
+    feedback: z.object({ code: z.enum(['EXCELLENT', 'NEEDS_WORK']), words: z.array(z.string()) }),
+    transcribe: z.string(),
+    expected_vector: z.array(z.number()),
+    transcribed_vector: z.array(z.number()),
+    expected_phonemes: z.array(z.string()),
+    transcribed_phonemes: z.array(z.string()),
+    words_with_errors: z.array(z.string()),
+    expected_phones: z.array(z.array(z.string())),
+    heard_phones: z.array(z.string()),
+    heard_phones_confidence: z.array(z.number()),
+  }),
+  feedback: z.object({ code: z.enum(['EXCELLENT', 'NEEDS_WORK']), words: z.array(z.string()) }),
+  transcribe: z.string(),
+  language: z.string(),
+  prosody: z.object({ f0: z.array(z.number()), energy: z.array(z.number()) }),
+})
+export type PronunciationResult = z.infer<typeof PronunciationResult>
+export const TranscribeResult = z.object({ text: z.string(), language: z.string() })
+export const PhonemizeResult = z.object({
+  words: z.array(z.object({ word: z.string(), phones: z.array(z.string()) })),
+  language: z.string(),
+})
+export type PhonemizeResult = z.infer<typeof PhonemizeResult>
+
 export const LanguageRequest = z.object({ language: z.string().min(2).max(16) }).strict()
 
 export const ModelErrorCode = z.enum([
@@ -108,6 +223,12 @@ export const IPC = {
   youtubeTranscript: 'youtube:transcript',
   youtubeAudioRange: 'youtube:audioRange',
   ttsSpeak: 'tts:speak',
+  inferenceAnalyze: 'inference:analyze',
+  inferenceTranscribe: 'inference:transcribe',
+  inferencePhonemize: 'inference:phonemize',
+  inferenceLanguages: 'inference:languages',
+  inferenceCancel: 'inference:cancel',
+  inferenceProgress: 'inference:progress',
 } as const
 
 const noArgs = z.undefined()
@@ -139,12 +260,27 @@ export const invokeChannels = {
     response: youtubeResult(AudioRangeResponse),
   },
   [IPC.ttsSpeak]: { request: SpeakRequest, response: SpeakResponse },
+  [IPC.inferenceAnalyze]: {
+    request: AnalyzeRequest,
+    response: inferenceResult(PronunciationResult),
+  },
+  [IPC.inferenceTranscribe]: {
+    request: TranscribeRequest,
+    response: inferenceResult(TranscribeResult),
+  },
+  [IPC.inferencePhonemize]: {
+    request: PhonemizeRequest,
+    response: inferenceResult(PhonemizeResult),
+  },
+  [IPC.inferenceLanguages]: { request: noArgs, response: z.array(LanguageInfo) },
+  [IPC.inferenceCancel]: { request: CancelRequest, response: z.null() },
 } as const
 
 /** Main -> renderer push channels and their payload schemas. */
 export const eventChannels = {
   [IPC.settingsLanguageChanged]: z.string(),
   [IPC.modelsProgress]: ModelProgress,
+  [IPC.inferenceProgress]: InferenceProgress,
 } as const
 
 export type InvokeChannel = keyof typeof invokeChannels
@@ -191,5 +327,22 @@ export interface EngclawApi {
   tts: {
     /** Reference-voice audio (16 kHz mono) for a sentence; repeats are served from a disk cache. */
     speak(req: z.infer<typeof SpeakRequest>): Promise<SpeakResponse>
+  }
+  inference: {
+    /** OpenPronounce `/pronunciation`: score a recording against the sentence it should say. */
+    analyze(req: z.infer<typeof AnalyzeRequest>): Promise<InferenceResult<PronunciationResult>>
+    /** `/speech2text`. */
+    transcribe(
+      req: z.infer<typeof TranscribeRequest>,
+    ): Promise<InferenceResult<z.infer<typeof TranscribeResult>>>
+    /** `/phonemes`. */
+    phonemize(
+      req: z.infer<typeof PhonemizeRequest>,
+    ): Promise<InferenceResult<z.infer<typeof PhonemizeResult>>>
+    /** `/languages`. */
+    languages(): Promise<LanguageInfo[]>
+    /** Aborts a running analyze/transcribe; that call resolves with code CANCELLED. */
+    cancel(req: z.infer<typeof CancelRequest>): Promise<null>
+    onProgress(cb: (e: InferenceProgress) => void): () => void
   }
 }

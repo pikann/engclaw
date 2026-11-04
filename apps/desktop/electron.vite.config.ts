@@ -14,6 +14,7 @@ export default defineConfig({
           '@engclaw/ipc-contract',
           '@engclaw/models',
           '@engclaw/pronounce',
+          '@engclaw/prosody',
           '@engclaw/youtube',
         ],
       }),

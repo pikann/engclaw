@@ -38,6 +38,7 @@
     "@engclaw/ipc-contract": "workspace:*",
     "@engclaw/models": "workspace:*",
     "@engclaw/pronounce": "workspace:*",
+    "@engclaw/prosody": "workspace:*",
     "@engclaw/youtube": "workspace:*",
     "@playwright/test": "^1.49.0",
     "@tailwindcss/vite": "^4.0.0",
