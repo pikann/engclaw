@@ -41,6 +41,26 @@
       "BUSY": "This model is already downloading.",
       "UNKNOWN_MODEL": "Unknown model.",
       "CANCELLED": "Download cancelled."
+    },
+    "dl": {
+      "title": "Download the AI models",
+      "body": "To analyze your speech, Engclaw needs these models. They run fully on your device and are downloaded once from Hugging Face; after that everything works offline. By downloading you accept each model's license.",
+      "allReady": "All models are installed. You can close this and try again.",
+      "total": "Total download: {{size}}",
+      "free": "{{size}} free on disk",
+      "start": "Download ({{size}})",
+      "notNow": "Not now",
+      "close": "Close",
+      "pause": "Pause",
+      "resume": "Resume",
+      "paused": "Paused — resume to continue where it stopped.",
+      "progressLabel": "Download progress",
+      "announce": "Downloading, {{percent}} percent",
+      "advanced": "Advanced: download location",
+      "location": "Models are saved in this folder:",
+      "folderNotWritable": "Engclaw cannot write to {{dir}}. Choose another folder.",
+      "folderNoSpace": "This folder has {{free}} free but {{needed}} (plus some headroom) is needed. Choose another folder.",
+      "notMoved": "Models already downloaded stay in the previous folder; they are not moved. Download them again here, or copy the folders over yourself."
     }
   },
   "audio": {
@@ -100,7 +120,8 @@
     "transcribe": "Transcribe",
     "transcribing": "Transcribing your recording…",
     "confirmAnalyze": "Confirm and analyze",
-    "transcriptNote": "Fix any words the recognizer got wrong, then confirm. The analysis uses this text."
+    "transcriptNote": "Fix any words the recognizer got wrong, then confirm. The analysis uses this text.",
+    "downloadModels": "Download models"
   },
   "result": {
     "verdict": "{{flagged}} of {{total}} words need work",

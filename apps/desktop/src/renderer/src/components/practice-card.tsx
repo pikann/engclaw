@@ -4,6 +4,7 @@ import { Loader2, Mic, Play, Square, Upload } from 'lucide-react'
 import type { PronunciationResult } from '@engclaw/ipc-contract'
 import { Alert } from '@/components/ui/alert'
 import { Button, buttonVariants } from '@/components/ui/button'
+import { ModelDownloadDialog } from '@/components/model-download-dialog'
 import { HearReference } from '@/components/hear-reference'
 import { ResultCard } from '@/components/result-card'
 import {
@@ -63,6 +64,7 @@ export function PracticeCard() {
   const [micError, setMicError] = useState<string | null>(null)
   const [fileError, setFileError] = useState<string | null>(null)
   const [dragging, setDragging] = useState(false)
+  const [downloadOpen, setDownloadOpen] = useState(false)
   const recorder = useRef<Recorder | null>(null)
   const requestId = useRef<string | null>(null)
   const playing = useRef<{ stop: () => void } | null>(null)
@@ -129,6 +131,12 @@ export function PracticeCard() {
   }
 
   const onRetry = (): void => (s.step === 'transcribe' ? onTranscribe() : onAnalyze())
+
+  // A missing model opens the download prompt; once it is installed the same step runs again.
+  const missingModel = s.phase === 'error' && s.error?.code === 'MODEL_MISSING'
+  useEffect(() => {
+    if (missingModel) setDownloadOpen(true)
+  }, [missingModel, s.error])
 
   const onAnalyze = (): void => {
     if (!s.audio || !hasText(s.text)) return dispatch({ type: 'analyze-requested' })
@@ -391,9 +399,20 @@ export function PracticeCard() {
               ? t('practice.error.modelMissing')
               : t('practice.error.failed')}
           </p>
-          <Button className="mt-2" size="sm" data-testid="practice-retry" onClick={onRetry}>
-            {t('practice.retry')}
-          </Button>
+          {missingModel ? (
+            <Button
+              className="mt-2"
+              size="sm"
+              data-testid="practice-download-models"
+              onClick={() => setDownloadOpen(true)}
+            >
+              {t('practice.downloadModels')}
+            </Button>
+          ) : (
+            <Button className="mt-2" size="sm" data-testid="practice-retry" onClick={onRetry}>
+              {t('practice.retry')}
+            </Button>
+          )}
         </Alert>
       )}
 
@@ -405,6 +424,14 @@ export function PracticeCard() {
           onReplay={togglePlay}
         />
       )}
+      <ModelDownloadDialog
+        open={downloadOpen}
+        onOpenChange={setDownloadOpen}
+        onReady={() => {
+          setDownloadOpen(false)
+          onRetry()
+        }}
+      />
     </section>
   )
 }

@@ -24,6 +24,7 @@ export function ModelsPanel() {
   const [dir, setDir] = useState('')
   const [progress, setProgress] = useState<Record<string, ModelProgress>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [folderError, setFolderError] = useState<string | null>(null)
   const [consent, setConsent] = useState<ModelStatus | null>(null)
 
   const refresh = useCallback(async () => {
@@ -142,7 +143,18 @@ export function ModelsPanel() {
           variant="outline"
           size="sm"
           onClick={async () => {
-            if (await window.engclaw.models.chooseDir()) void refresh()
+            const res = await window.engclaw.models.chooseDir()
+            if (res.status === 'rejected')
+              setFolderError(
+                res.reason === 'NOT_WRITABLE'
+                  ? t('models.dl.folderNotWritable', { dir: res.info.dir })
+                  : t('models.dl.folderNoSpace', {
+                      needed: formatBytes(res.neededBytes),
+                      free: formatBytes(res.info.freeBytes),
+                    }),
+              )
+            else setFolderError(res.status === 'chosen' ? t('models.dl.notMoved') : null)
+            if (res.status === 'chosen') void refresh()
           }}
         >
           {t('models.changeFolder')}
@@ -151,6 +163,12 @@ export function ModelsPanel() {
           {t('models.openFolder')}
         </Button>
       </div>
+
+      {folderError && (
+        <Alert data-testid="models-folder-message" role="status">
+          {folderError}
+        </Alert>
+      )}
 
       <Dialog open={consent !== null} onOpenChange={(open) => !open && setConsent(null)}>
         <DialogContent data-testid="model-consent">

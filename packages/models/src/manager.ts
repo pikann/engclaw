@@ -1,17 +1,8 @@
 import { createHash } from 'node:crypto'
 import { createReadStream } from 'node:fs'
-import {
-  mkdir,
-  open,
-  readdir,
-  readFile,
-  rename,
-  rm,
-  stat,
-  statfs,
-  writeFile,
-} from 'node:fs/promises'
+import { mkdir, open, readdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
+import { freeSpaceOf } from './dir'
 import { fileUrl, totalSize, type Catalog, type CatalogFile, type CatalogModel } from './catalog'
 
 export type ModelErrorCode =
@@ -72,22 +63,10 @@ export interface ModelManagerDeps {
   progressIntervalMs?: number
 }
 
+/** Headroom required beyond the download size. */
+export const SPACE_MARGIN_BYTES = 256 * 1024 * 1024
 const MANIFEST = '.engclaw-model.json'
 const PARTIAL_SUFFIX = '.partial'
-
-const defaultFreeSpace = async (dir: string): Promise<number> => {
-  let probe = dir
-  for (;;) {
-    try {
-      const s = await statfs(probe)
-      return s.bavail * s.bsize
-    } catch {
-      const up = dirname(probe)
-      if (up === probe) return Number.MAX_SAFE_INTEGER
-      probe = up
-    }
-  }
-}
 
 const defaultSleep = (attempt: number): Promise<void> =>
   new Promise((r) => setTimeout(r, Math.min(30_000, 1000 * 2 ** (attempt - 1))))
@@ -122,7 +101,7 @@ export class ModelManager {
   constructor(private readonly deps: ModelManagerDeps) {
     this.maxAttempts = deps.maxAttempts ?? 4
     this.sleep = deps.sleep ?? defaultSleep
-    this.freeSpace = deps.freeSpace ?? defaultFreeSpace
+    this.freeSpace = deps.freeSpace ?? freeSpaceOf
   }
 
   private model(id: string): CatalogModel {
@@ -254,7 +233,7 @@ export class ModelManager {
 
     const need = total - sum()
     const free = await this.freeSpace(stage)
-    if (free < need + (this.deps.spaceMarginBytes ?? 256 * 1024 * 1024))
+    if (free < need + (this.deps.spaceMarginBytes ?? SPACE_MARGIN_BYTES))
       throw new ModelError('DISK_SPACE', `need ${need} bytes, ${free} free`)
 
     let last = 0
