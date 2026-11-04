@@ -1,5 +1,46 @@
 {
-  "app": { "title": "Engclaw", "hello": "Xin chào từ Engclaw" },
-  "language": { "label": "Ngôn ngữ", "en": "English", "vi": "Tiếng Việt" },
-  "ping": { "button": "Ping tiến trình chính" }
+  "app": {
+    "title": "Engclaw",
+    "hello": "Xin chào từ Engclaw"
+  },
+  "language": {
+    "label": "Ngôn ngữ",
+    "en": "English",
+    "vi": "Tiếng Việt"
+  },
+  "ping": {
+    "button": "Ping tiến trình chính"
+  },
+  "models": {
+    "title": "Mô hình AI",
+    "empty": "Bản dựng này chưa có mô hình nào để tải.",
+    "size": "Dung lượng: {{size}}",
+    "license": "Giấy phép: {{license}}",
+    "ready": "Sẵn sàng (dùng được ngoại tuyến)",
+    "notInstalled": "Chưa tải",
+    "downloading": "Đang tải…",
+    "verifying": "Đang kiểm tra…",
+    "updateAvailable": "Có bản cập nhật",
+    "download": "Tải xuống",
+    "update": "Cập nhật",
+    "cancel": "Hủy",
+    "remove": "Xóa",
+    "redownload": "Tải lại",
+    "folder": "Thư mục mô hình: {{dir}}",
+    "changeFolder": "Đổi thư mục",
+    "openFolder": "Mở thư mục",
+    "consentTitle": "Tải {{name}}?",
+    "consentBody": "Mô hình này chạy hoàn toàn trên máy của bạn. Dung lượng {{size}}, chỉ tải một lần từ Hugging Face; sau đó dùng được ngoại tuyến.",
+    "consentLicense": "Khi tải xuống, bạn chấp nhận giấy phép của mô hình: {{license}}.",
+    "consentConfirm": "Tải xuống",
+    "progress": "{{received}} / {{total}}",
+    "error": {
+      "DISK_SPACE": "Không đủ dung lượng ổ đĩa trống cho mô hình này.",
+      "NETWORK": "Tải xuống thất bại. Hãy kiểm tra kết nối và thử lại; quá trình sẽ tiếp tục từ chỗ đã dừng.",
+      "CHECKSUM": "Tệp đã tải bị hỏng. Hãy tải lại.",
+      "BUSY": "Mô hình này đang được tải.",
+      "UNKNOWN_MODEL": "Mô hình không xác định.",
+      "CANCELLED": "Đã hủy tải xuống."
+    }
+  }
 }

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ModelsPanel } from '@/components/models-panel'
 import { LanguageSwitcher } from '@/components/language-switcher'
 import { Button } from '@/components/ui/button'
 
@@ -26,6 +27,7 @@ export function Home() {
       <p data-testid="reply" className="text-muted-foreground">
         {reply}
       </p>
+      <ModelsPanel />
     </main>
   )
 }

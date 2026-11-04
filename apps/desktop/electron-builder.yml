@@ -8,6 +8,8 @@ files:
 extraResources:
   - from: resources/add.onnx
     to: add.onnx
+  - from: resources/models.json
+    to: models.json
 npmRebuild: false # better-sqlite3 ships N-API prebuilds; node-gyp rebuild is unnecessary and fails on CI runners
 artifactName: Engclaw-${version}-${arch}.${ext}
 asar: true

@@ -5,6 +5,8 @@ import { isLocale, resolveLocale, type Locale } from '@engclaw/i18n'
 
 interface Settings {
   language?: Locale
+  /** Custom models directory (air-gapped / big disk); default is `userData/models`. */
+  modelsDir?: string
 }
 
 const file = (): string => join(app.getPath('userData'), 'settings.json')
@@ -12,8 +14,11 @@ const file = (): string => join(app.getPath('userData'), 'settings.json')
 function read(): Settings {
   try {
     const raw: unknown = JSON.parse(readFileSync(file(), 'utf8'))
-    const language = (raw as Settings).language
-    return isLocale(language) ? { language } : {}
+    const { language, modelsDir } = raw as Settings
+    return {
+      ...(isLocale(language) ? { language } : {}),
+      ...(typeof modelsDir === 'string' && modelsDir !== '' ? { modelsDir } : {}),
+    }
   } catch {
     return {}
   }
@@ -26,4 +31,12 @@ export function loadLanguage(): Locale {
 
 export function saveLanguage(language: Locale): void {
   writeFileSync(file(), JSON.stringify({ ...read(), language }, null, 2))
+}
+
+export function loadModelsDir(): string {
+  return read().modelsDir ?? join(app.getPath('userData'), 'models')
+}
+
+export function saveModelsDir(modelsDir: string): void {
+  writeFileSync(file(), JSON.stringify({ ...read(), modelsDir }, null, 2))
 }

@@ -13,6 +13,7 @@
     "updateReadyTitle": "Update ready",
     "updateReadyMessage": "Version {{version}} has been downloaded. Restart to install it?",
     "restart": "Restart",
-    "later": "Later"
+    "later": "Later",
+    "chooseModelsDir": "Choose models folder"
   }
 }

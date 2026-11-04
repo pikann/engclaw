@@ -8,6 +8,7 @@ import { handle } from './ipc'
 import { buildMenu } from './menu'
 import { APP_ORIGIN } from './security-policy'
 import { hardenWindow, installSessionSecurity, secureWebPreferences } from './security'
+import { registerModelHandlers } from './models'
 import { loadLanguage, saveLanguage } from './settings'
 import { InnertubeAdapter, YouTubeError, parseVideoId } from '@engclaw/youtube'
 
@@ -108,6 +109,7 @@ void app.whenReady().then(async () => {
     if (isLocale(next)) await setLanguage(next)
     return language
   })
+  registerModelHandlers()
   handle(IPC.youtubeMeta, ({ videoId }) => yt(() => youtube.meta(parseVideoId(videoId))))
   handle(IPC.youtubeTranscript, ({ videoId, lang }) =>
     yt(() => youtube.transcript(parseVideoId(videoId), lang)),
