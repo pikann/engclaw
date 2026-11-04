@@ -113,6 +113,15 @@
     "understood": "The recognizer understood “{{word}}”.",
     "weHeard": "We heard",
     "yourSounds": "Your sounds",
-    "replay": "Replay my recording"
+    "replay": "Replay my recording",
+    "details": "Details",
+    "chartPhoneme": "Phoneme trace",
+    "chartReference": "Reference",
+    "chartYou": "You",
+    "chartF0": "Pitch (F0, Hz)",
+    "chartEnergy": "Energy",
+    "mouthAlt": "Mouth shape {{shape}}",
+    "playMouth": "Show mouth",
+    "soundPick": "Sound {{phone}}"
   }
 }

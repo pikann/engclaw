@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Play, RotateCcw, Volume2 } from 'lucide-react'
+import { Play, RotateCcw, Smile, Volume2 } from 'lucide-react'
 import type { PronunciationResult } from '@engclaw/ipc-contract'
+import { DetailCharts } from '@/components/detail-charts'
+import { Mouth } from '@/components/mouth'
 import { Button } from '@/components/ui/button'
 import { playChime } from '@/lib/audio'
 import {
@@ -71,7 +73,12 @@ function speak(word: string): void {
 function WordDetail({ chip }: { chip: WordChip }) {
   const { t } = useTranslation()
   const e = chip.error
+  const [phone, setPhone] = useState<number | null>(null)
+  const [playId, setPlayId] = useState(0)
+  useEffect(() => setPhone(null), [chip.position])
   if (!e) return null
+  const sounds = e.phones.map((p) => p.expected)
+  const mouthPhones = phone === null ? sounds : sounds.slice(phone, phone + 1)
   return (
     <div className="space-y-2 rounded-md border p-3" data-testid="word-detail">
       <div className="flex items-center gap-2">
@@ -92,15 +99,23 @@ function WordDetail({ chip }: { chip: WordChip }) {
         <dd className="font-mono" data-testid="word-expected">
           {e.phones.length
             ? e.phones.map((p, i) => (
-                <span
+                <button
                   key={i}
+                  type="button"
+                  data-testid="word-phone"
                   data-wrong={isWrongPhone(p.confidence)}
-                  className={
+                  aria-pressed={phone === i}
+                  aria-label={t('result.soundPick', { phone: p.expected })}
+                  onClick={() => {
+                    setPhone(i)
+                    setPlayId((n) => n + 1)
+                  }}
+                  className={`rounded px-0.5 ${phone === i ? 'bg-muted' : ''} ${
                     isWrongPhone(p.confidence) ? 'underline decoration-red-500 decoration-2' : ''
-                  }
+                  }`}
                 >
                   {p.expected}
-                </span>
+                </button>
               ))
             : e.expected}
         </dd>
@@ -124,6 +139,20 @@ function WordDetail({ chip }: { chip: WordChip }) {
         <p className="text-muted-foreground text-sm" data-testid="word-actual">
           {t('result.understood', { word: e.actual_word })}
         </p>
+      )}
+      {sounds.length > 0 && (
+        <div className="flex items-center gap-3">
+          <Mouth phones={mouthPhones} playId={playId} />
+          <Button
+            variant="outline"
+            size="sm"
+            data-testid="mouth-play"
+            onClick={() => setPlayId((n) => n + 1)}
+          >
+            <Smile />
+            {t('result.playMouth')}
+          </Button>
+        </div>
       )}
     </div>
   )
@@ -227,6 +256,8 @@ export function ResultCard({
           </p>
         </section>
       )}
+
+      <DetailCharts result={result} />
 
       <div className="flex flex-wrap gap-2">
         <Button size="sm" data-testid="result-try-again" onClick={onTryAgain}>
