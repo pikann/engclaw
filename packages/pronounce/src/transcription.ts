@@ -38,19 +38,24 @@ export interface TranscriptionComparison {
   wordErrorRate: number
   phonemeErrorRate: number
   errors: TranscriptionError[]
-  feedback: string
+  feedback: Feedback
   transcribe: string
   expectedPhonemes: string[]
   transcribedPhonemes: string[]
   wordsWithErrors: string[]
 }
 
-export function feedbackText(wordsWithErrors: readonly string[]): string {
-  let feedback = '🔊 Feedback on your pronunciation:\n'
-  feedback += wordsWithErrors.length
-    ? '❌ You need to better pronounce these words: ' + wordsWithErrors.join(', ') + '\n'
-    : '✅ Your pronunciation is excellent! 🎉\n'
-  return feedback
+/** Locale-neutral feedback: the UI renders `pronounce.feedback.<code>` with `words` via i18n. */
+export type FeedbackCode = 'EXCELLENT' | 'NEEDS_WORK'
+export interface Feedback {
+  code: FeedbackCode
+  words: string[]
+}
+
+export function feedbackFor(wordsWithErrors: readonly string[]): Feedback {
+  return wordsWithErrors.length
+    ? { code: 'NEEDS_WORK', words: [...wordsWithErrors] }
+    : { code: 'EXCELLENT', words: [] }
 }
 
 /**
@@ -123,7 +128,7 @@ export function compareTranscriptions(
       4,
     ),
     errors,
-    feedback: feedbackText(wordsWithErrors),
+    feedback: feedbackFor(wordsWithErrors),
     transcribe: transcription,
     expectedPhonemes,
     transcribedPhonemes,

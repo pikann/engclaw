@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { cleanTranscription, compareTranscriptions, feedbackText } from './transcription'
+import { cleanTranscription, compareTranscriptions, feedbackFor } from './transcription'
 import type { WordPhones } from './phonemizer'
 
 const lexicon: Record<string, string[]> = {
@@ -25,16 +25,12 @@ describe('cleanTranscription', () => {
   })
 })
 
-describe('feedbackText', () => {
-  it('lists flagged words', () => {
-    expect(feedbackText(['a', 'b'])).toBe(
-      '🔊 Feedback on your pronunciation:\n❌ You need to better pronounce these words: a, b\n',
-    )
+describe('feedbackFor', () => {
+  it('returns a code and the flagged words', () => {
+    expect(feedbackFor(['a', 'b'])).toEqual({ code: 'NEEDS_WORK', words: ['a', 'b'] })
   })
-  it('praises a clean reading', () => {
-    expect(feedbackText([])).toBe(
-      '🔊 Feedback on your pronunciation:\n✅ Your pronunciation is excellent! 🎉\n',
-    )
+  it('returns the excellent code for a clean reading', () => {
+    expect(feedbackFor([])).toEqual({ code: 'EXCELLENT', words: [] })
   })
 })
 
@@ -48,7 +44,7 @@ describe('compareTranscriptions', () => {
       errors: [],
       wordsWithErrors: [],
     })
-    expect(r.feedback).toContain('excellent')
+    expect(r.feedback).toEqual({ code: 'EXCELLENT', words: [] })
   })
 
   it('one dropped phone stays under the word threshold but counts in WER/PER', () => {
@@ -67,7 +63,7 @@ describe('compareTranscriptions', () => {
       { position: 4, expected: 'wɚld', actual: '', word: 'world', actualWord: '' },
     ])
     expect(r.wordsWithErrors).toEqual(['world'])
-    expect(r.feedback).toContain('world')
+    expect(r.feedback).toEqual({ code: 'NEEDS_WORK', words: ['world'] })
   })
 
   it('substituted word reports what was heard', () => {

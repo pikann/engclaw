@@ -61,5 +61,11 @@
     "drop": "Thả tệp âm thanh vào đây",
     "decodeError": "Không thể đọc tệp này như âm thanh.",
     "truncated": "Đã cắt đoạn âm thanh còn {{seconds}} giây đầu."
+  },
+  "pronounce": {
+    "feedback": {
+      "EXCELLENT": "Phát âm của bạn rất tốt!",
+      "NEEDS_WORK": "Bạn cần phát âm tốt hơn các từ sau: {{words}}"
+    }
   }
 }
