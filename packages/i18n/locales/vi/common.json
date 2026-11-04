@@ -113,6 +113,15 @@
     "understood": "Bộ nhận dạng hiểu là “{{word}}”.",
     "weHeard": "Chúng tôi nghe được",
     "yourSounds": "Âm của bạn",
-    "replay": "Nghe lại bản ghi"
+    "replay": "Nghe lại bản ghi",
+    "details": "Chi tiết",
+    "chartPhoneme": "Đường âm vị",
+    "chartReference": "Chuẩn",
+    "chartYou": "Bạn",
+    "chartF0": "Cao độ (F0, Hz)",
+    "chartEnergy": "Năng lượng",
+    "mouthAlt": "Khẩu hình {{shape}}",
+    "playMouth": "Xem khẩu hình",
+    "soundPick": "Âm {{phone}}"
   }
 }
