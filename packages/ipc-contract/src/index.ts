@@ -40,6 +40,20 @@ const youtubeResult = <T extends z.ZodTypeAny>(value: T) =>
     z.object({ ok: z.literal(false), code: YouTubeErrorCode, message: z.string() }),
   ])
 
+export const SpeakRequest = z.object({ text: z.string().min(1).max(1000) }).strict()
+export const SpeakErrorCode = z.enum(['MODEL_MISSING', 'FAILED'])
+export const SpeakResponse = z.discriminatedUnion('ok', [
+  z.object({
+    ok: z.literal(true),
+    /** Mono float32 PCM. */
+    samples: z.custom<Float32Array>((v) => v instanceof Float32Array),
+    sampleRate: z.number(),
+    cached: z.boolean(),
+  }),
+  z.object({ ok: z.literal(false), code: SpeakErrorCode, message: z.string() }),
+])
+export type SpeakResponse = z.infer<typeof SpeakResponse>
+
 export const LanguageRequest = z.object({ language: z.string().min(2).max(16) }).strict()
 
 export const ModelErrorCode = z.enum([
@@ -93,6 +107,7 @@ export const IPC = {
   youtubeMeta: 'youtube:meta',
   youtubeTranscript: 'youtube:transcript',
   youtubeAudioRange: 'youtube:audioRange',
+  ttsSpeak: 'tts:speak',
 } as const
 
 const noArgs = z.undefined()
@@ -123,6 +138,7 @@ export const invokeChannels = {
     request: AudioRangeRequest,
     response: youtubeResult(AudioRangeResponse),
   },
+  [IPC.ttsSpeak]: { request: SpeakRequest, response: SpeakResponse },
 } as const
 
 /** Main -> renderer push channels and their payload schemas. */
@@ -171,5 +187,9 @@ export interface EngclawApi {
     audioRange(
       req: z.infer<typeof AudioRangeRequest>,
     ): Promise<YouTubeResult<z.infer<typeof AudioRangeResponse>>>
+  }
+  tts: {
+    /** Reference-voice audio (16 kHz mono) for a sentence; repeats are served from a disk cache. */
+    speak(req: z.infer<typeof SpeakRequest>): Promise<SpeakResponse>
   }
 }

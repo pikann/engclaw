@@ -54,6 +54,9 @@ const api: EngclawApi = {
     transcript: (req) => invoke(IPC.youtubeTranscript, req),
     audioRange: (req) => invoke(IPC.youtubeAudioRange, req),
   },
+  tts: {
+    speak: (req) => invoke(IPC.ttsSpeak, req),
+  },
 }
 
 contextBridge.exposeInMainWorld('engclaw', api)

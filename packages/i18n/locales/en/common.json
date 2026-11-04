@@ -67,5 +67,12 @@
       "EXCELLENT": "Your pronunciation is excellent!",
       "NEEDS_WORK": "You need to better pronounce these words: {{words}}"
     }
+  },
+  "reference": {
+    "hear": "Hear the reference",
+    "playing": "Playing…",
+    "loading": "Preparing…",
+    "modelMissing": "Download the reference voice model in AI models first.",
+    "failed": "Could not play the reference. Try again."
   }
 }
