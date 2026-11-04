@@ -41,6 +41,26 @@
       "BUSY": "Mô hình này đang được tải.",
       "UNKNOWN_MODEL": "Mô hình không xác định.",
       "CANCELLED": "Đã hủy tải xuống."
+    },
+    "dl": {
+      "title": "Tải các mô hình AI",
+      "body": "Để phân tích giọng nói của bạn, Engclaw cần các mô hình này. Chúng chạy hoàn toàn trên máy của bạn và chỉ tải một lần từ Hugging Face; sau đó mọi thứ hoạt động ngoại tuyến. Khi tải xuống, bạn chấp nhận giấy phép của từng mô hình.",
+      "allReady": "Tất cả mô hình đã được cài. Bạn có thể đóng hộp thoại này và thử lại.",
+      "total": "Tổng dung lượng tải: {{size}}",
+      "free": "Còn trống {{size}} trên ổ đĩa",
+      "start": "Tải xuống ({{size}})",
+      "notNow": "Để sau",
+      "close": "Đóng",
+      "pause": "Tạm dừng",
+      "resume": "Tiếp tục",
+      "paused": "Đã tạm dừng — nhấn tiếp tục để tải tiếp từ chỗ đã dừng.",
+      "progressLabel": "Tiến độ tải xuống",
+      "announce": "Đang tải, {{percent}} phần trăm",
+      "advanced": "Nâng cao: vị trí tải xuống",
+      "location": "Các mô hình được lưu trong thư mục này:",
+      "folderNotWritable": "Engclaw không thể ghi vào {{dir}}. Hãy chọn thư mục khác.",
+      "folderNoSpace": "Thư mục này còn trống {{free}} nhưng cần {{needed}} (cộng thêm một ít dư). Hãy chọn thư mục khác.",
+      "notMoved": "Các mô hình đã tải vẫn nằm ở thư mục cũ và không được chuyển đi. Hãy tải lại tại đây, hoặc tự sao chép các thư mục sang."
     }
   },
   "audio": {
@@ -100,7 +120,8 @@
     "transcribe": "Chép lời",
     "transcribing": "Đang chép lời bản ghi…",
     "confirmAnalyze": "Xác nhận và phân tích",
-    "transcriptNote": "Sửa những từ nhận dạng sai rồi xác nhận. Phân tích sẽ dùng đúng văn bản này."
+    "transcriptNote": "Sửa những từ nhận dạng sai rồi xác nhận. Phân tích sẽ dùng đúng văn bản này.",
+    "downloadModels": "Tải mô hình"
   },
   "result": {
     "verdict": "{{flagged}} / {{total}} từ cần luyện thêm",

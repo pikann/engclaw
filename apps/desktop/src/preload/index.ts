@@ -59,6 +59,7 @@ const api: EngclawApi = {
     remove: (req) => invoke(IPC.modelsRemove, req),
     getDir: () => invoke(IPC.modelsGetDir),
     chooseDir: () => invoke(IPC.modelsChooseDir),
+    diskInfo: () => invoke(IPC.modelsDiskInfo),
     openFolder: () => invoke(IPC.modelsOpenFolder),
     onProgress: (cb) => subscribe(IPC.modelsProgress, cb),
   },

@@ -202,7 +202,27 @@ export const ModelOpResult = z.discriminatedUnion('ok', [
   z.object({ ok: z.literal(true) }),
   z.object({ ok: z.literal(false), code: ModelErrorCode, message: z.string() }),
 ])
+/** Where models are stored and whether that folder is usable. */
+export const ModelsDiskInfo = z.object({
+  dir: z.string(),
+  writable: z.boolean(),
+  freeBytes: z.number(),
+})
+/** Outcome of the "choose models folder" dialog; a rejected folder is not saved. */
+export const ModelsDirChoice = z.discriminatedUnion('status', [
+  z.object({ status: z.literal('cancelled') }),
+  z.object({ status: z.literal('chosen'), info: ModelsDiskInfo }),
+  z.object({
+    status: z.literal('rejected'),
+    reason: z.enum(['NOT_WRITABLE', 'DISK_SPACE']),
+    info: ModelsDiskInfo,
+    /** Bytes still to download; the folder has less than this free. */
+    neededBytes: z.number(),
+  }),
+])
 export type ModelStatus = z.infer<typeof ModelStatus>
+export type ModelsDiskInfo = z.infer<typeof ModelsDiskInfo>
+export type ModelsDirChoice = z.infer<typeof ModelsDirChoice>
 export type ModelProgress = z.infer<typeof ModelProgress>
 export type ModelOpResult = z.infer<typeof ModelOpResult>
 
@@ -281,6 +301,7 @@ export const IPC = {
   modelsRemove: 'models:remove',
   modelsGetDir: 'models:getDir',
   modelsChooseDir: 'models:chooseDir',
+  modelsDiskInfo: 'models:diskInfo',
   modelsOpenFolder: 'models:openFolder',
   modelsProgress: 'models:progress',
   youtubeMeta: 'youtube:meta',
@@ -329,8 +350,10 @@ export const invokeChannels = {
   [IPC.modelsCancel]: { request: ModelRef, response: z.null() },
   [IPC.modelsRemove]: { request: ModelRef, response: ModelOpResult },
   [IPC.modelsGetDir]: { request: noArgs, response: z.string() },
-  /** Opens a folder picker; resolves to the chosen dir, or null if dismissed. */
-  [IPC.modelsChooseDir]: { request: noArgs, response: z.string().nullable() },
+  /** Opens a folder picker and saves the folder if it is writable with enough room. */
+  [IPC.modelsChooseDir]: { request: noArgs, response: ModelsDirChoice },
+  /** Writability and free space of the current models folder. */
+  [IPC.modelsDiskInfo]: { request: noArgs, response: ModelsDiskInfo },
   [IPC.modelsOpenFolder]: { request: noArgs, response: z.null() },
   [IPC.youtubeMeta]: { request: VideoRef, response: youtubeResult(VideoMeta) },
   [IPC.youtubeTranscript]: {
@@ -409,7 +432,8 @@ export interface EngclawApi {
     cancel(req: z.infer<typeof ModelRef>): Promise<null>
     remove(req: z.infer<typeof ModelRef>): Promise<ModelOpResult>
     getDir(): Promise<string>
-    chooseDir(): Promise<string | null>
+    chooseDir(): Promise<ModelsDirChoice>
+    diskInfo(): Promise<ModelsDiskInfo>
     openFolder(): Promise<null>
     onProgress(cb: (e: ModelProgress) => void): () => void
   }
