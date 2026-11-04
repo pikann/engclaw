@@ -14,6 +14,8 @@
     "updateReadyMessage": "Phiên bản {{version}} đã được tải xuống. Khởi động lại để cài đặt?",
     "restart": "Khởi động lại",
     "later": "Để sau",
-    "chooseModelsDir": "Chọn thư mục mô hình"
+    "chooseModelsDir": "Chọn thư mục mô hình",
+    "exportHistory": "Xuất lịch sử luyện tập",
+    "importHistory": "Nhập lịch sử luyện tập"
   }
 }

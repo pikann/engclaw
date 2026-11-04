@@ -56,7 +56,16 @@ test('renderer is isolated: no node, no raw ipc, only the typed bridge', async (
   expect(probe.require).toBe('undefined')
   expect(probe.process).toBe('undefined')
   expect(probe.ipcRenderer).toBe('undefined')
-  expect(probe.keys).toEqual(['inference', 'models', 'ping', 'settings', 'tts', 'youtube'])
+  expect(probe.keys).toEqual([
+    'app',
+    'history',
+    'inference',
+    'models',
+    'ping',
+    'settings',
+    'tts',
+    'youtube',
+  ])
 
   // Unknown payload shapes are rejected on the renderer side of the bridge.
   const err = await page.evaluate(async () => {
@@ -95,4 +104,51 @@ test('practice card: empty text shows an inline hint instead of recording', asyn
   await expect(page.getByTestId('practice-hint')).toHaveCount(0)
   await expect(page.getByTestId('practice-text')).not.toHaveValue('')
   await app.close()
+})
+
+test('history and settings persist across restarts (SQLite in userData)', async () => {
+  const userData = mkdtempSync(join(tmpdir(), 'engclaw-e2e-'))
+  const launch = () =>
+    electron.launch({
+      args: [
+        join(__dirname, '..'),
+        `--user-data-dir=${userData}`,
+        ...(process.env['CI'] ? ['--no-sandbox'] : []),
+      ],
+    })
+
+  const first = await launch()
+  let page = await first.firstWindow()
+  await page.evaluate(async () => {
+    await window.engclaw.history.save({
+      mode: 'sentence',
+      text: 'Persist me.',
+      language: 'en',
+      score: 77,
+      errors: [],
+      audio: new Float32Array(1600),
+    })
+    await window.engclaw.app.updateSettings({ silenceAutoStop: false })
+  })
+  await first.close()
+
+  const second = await launch()
+  page = await second.firstWindow()
+  const { list, settings, audio } = await page.evaluate(async () => {
+    const list = await window.engclaw.history.list()
+    const id = list.attempts[0]?.id ?? ''
+    return {
+      list,
+      settings: await window.engclaw.app.getSettings(),
+      audio: (await window.engclaw.history.audio({ id }))?.length ?? 0,
+    }
+  })
+  expect(list.total).toBe(1)
+  expect(list.attempts[0]).toMatchObject({ text: 'Persist me.', score: 77, hasAudio: true })
+  expect(settings.silenceAutoStop).toBe(false)
+  expect(audio).toBe(1600)
+
+  await page.getByTestId('tab-history').click()
+  await expect(page.getByTestId('history-item')).toHaveCount(1)
+  await second.close()
 })

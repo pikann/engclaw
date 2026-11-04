@@ -123,5 +123,40 @@
     "mouthAlt": "Mouth shape {{shape}}",
     "playMouth": "Show mouth",
     "soundPick": "Sound {{phone}}"
+  },
+  "nav": {
+    "practice": "Practice",
+    "history": "History",
+    "settings": "Settings"
+  },
+  "history": {
+    "title": "Practice history",
+    "empty": "No attempts yet. Your practice results will appear here.",
+    "score": "Score {{score}}",
+    "mode_sentence": "Sentence",
+    "mode_free": "Free speech",
+    "errors": "{{count}} words to work on",
+    "clean": "No problem words",
+    "play": "Replay",
+    "noAudio": "No recording",
+    "delete": "Delete",
+    "export": "Export",
+    "import": "Import",
+    "exported": "Exported {{count}} attempts.",
+    "imported": "Imported {{imported}} attempts ({{skipped}} already present).",
+    "fileError": "That file could not be used: {{message}}",
+    "loadMore": "Show more"
+  },
+  "settings": {
+    "title": "Settings",
+    "silenceAutoStop": "Stop recording automatically after silence",
+    "checkForUpdates": "Check for updates on launch",
+    "data": "Your data",
+    "dataHint": "Practice history, recordings and preferences are stored only on this computer.",
+    "deleteAll": "Delete all data",
+    "deleteTitle": "Delete all data?",
+    "deleteBody": "This permanently removes your practice history, recordings and preferences. Downloaded models are kept.",
+    "deleteConfirm": "Delete everything",
+    "deleted": "All data deleted."
   }
 }

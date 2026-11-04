@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Loader2, Mic, Play, Square, Upload } from 'lucide-react'
+import type { PronunciationResult } from '@engclaw/ipc-contract'
 import { Alert } from '@/components/ui/alert'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { HearReference } from '@/components/hear-reference'
@@ -23,6 +24,30 @@ import {
   practiceReducer,
   type PracticeAudio,
 } from '@/lib/practice'
+
+/** Records a finished analysis in the local history; a storage failure never blocks the result. */
+function saveAttempt(
+  mode: 'sentence' | 'free',
+  text: string,
+  audio: PracticeAudio,
+  r: PronunciationResult,
+): void {
+  void window.engclaw.history
+    .save({
+      mode,
+      text,
+      language: r.language,
+      score: r.score,
+      errors: r.differences.errors.map((e) => ({
+        word: e.word,
+        expected: e.expected,
+        actual: e.actual,
+        confidence: e.confidence,
+      })),
+      audio: audio.samples,
+    })
+    .catch((e: unknown) => console.error('[history] save failed', e))
+}
 
 const platformOf = (p: string): string =>
   /mac/i.test(p) ? 'darwin' : /win/i.test(p) ? 'win32' : 'linux'
@@ -56,6 +81,7 @@ export function PracticeCard() {
         text: textRef.current.trim(),
       })
       if (requestId.current !== id) return
+      if (res.ok) saveAttempt(modeRef.current, textRef.current.trim(), audio, res.value)
       dispatch(
         res.ok
           ? { type: 'analyzed', result: res.value }
@@ -115,7 +141,9 @@ export function PracticeCard() {
     setMicError(null)
     setFileError(null)
     setSeconds(0)
+    const { silenceAutoStop } = await window.engclaw.app.getSettings()
     const rec = new Recorder({
+      silenceAutoStop,
       onTick: setSeconds,
       onAutoStop: () => void stopRecording(),
     })
