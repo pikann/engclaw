@@ -61,5 +61,11 @@
     "drop": "Drop an audio file here",
     "decodeError": "This file could not be read as audio.",
     "truncated": "Clip trimmed to the first {{seconds}} seconds."
+  },
+  "pronounce": {
+    "feedback": {
+      "EXCELLENT": "Your pronunciation is excellent!",
+      "NEEDS_WORK": "You need to better pronounce these words: {{words}}"
+    }
   }
 }
