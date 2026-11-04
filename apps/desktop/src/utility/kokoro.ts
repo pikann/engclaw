@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { basename, dirname, join } from 'node:path'
 import {
   KOKORO_MAX_TOKENS,
@@ -13,7 +13,6 @@ import {
   trimSilence,
   withPad,
 } from '@engclaw/pronounce'
-import { readNpz } from './npz'
 import { createSession, DEFAULT_PROVIDERS } from './sessions'
 import type { Synthesizer } from './speech'
 
@@ -70,18 +69,40 @@ export interface KokoroFiles {
   /** Folder holding the installed Kokoro model (see the models catalog). */
   dir: string
   model: string
-  /** JSON with the token vocabulary: `{ vocab: {char: id} }` (config.json) or a flat map. */
-  config: string
+  /** HF `tokenizer.json`; the token vocabulary is `model.vocab` (`{char: id}`). */
+  tokenizer: string
+  /** Folder of raw float32 voice packs, one `<voice>.bin` each (`[510, 1, 256]`). */
   voices: string
   voice: string
 }
 
+/** Layout of `onnx-community/Kokoro-82M-v1.0-ONNX` (the pinned upstream repo, ENGC-50). */
 export const DEFAULT_KOKORO_FILES = {
-  model: 'kokoro-v1.0.onnx',
-  config: 'config.json',
-  voices: 'voices-v1.0.bin',
+  model: 'onnx/model.onnx',
+  tokenizer: 'tokenizer.json',
+  voices: 'voices',
   voice: 'af_heart',
 } as const
+
+export interface KokoroAssets {
+  modelPath: string
+  vocab: Record<string, number>
+  voice: Float32Array
+}
+
+export function readKokoroAssets(files: KokoroFiles): KokoroAssets {
+  const tok = JSON.parse(readFileSync(join(files.dir, files.tokenizer), 'utf8')) as {
+    model?: { vocab?: Record<string, number> }
+  }
+  const vocab = tok.model?.vocab
+  if (!vocab) throw new Error(`kokoro: no vocab in ${files.tokenizer}`)
+  const voicePath = join(files.dir, files.voices, `${files.voice}.bin`)
+  if (!existsSync(voicePath))
+    throw new Error(`kokoro: voice ${files.voice} not found in ${files.voices}`)
+  const b = readFileSync(voicePath)
+  const voice = new Float32Array(b.buffer.slice(b.byteOffset, b.byteOffset + b.length))
+  return { modelPath: join(files.dir, files.model), vocab, voice }
+}
 
 /** Loads vocab + voice pack and an onnxruntime-node session (WebGPU first, CPU fallback). */
 export async function loadKokoro(
@@ -89,22 +110,19 @@ export async function loadKokoro(
   ipa: KokoroOptions['ipa'],
   providers: string[] = DEFAULT_PROVIDERS,
 ): Promise<KokoroSynthesizer> {
-  const cfg = JSON.parse(readFileSync(join(files.dir, files.config), 'utf8')) as {
-    vocab?: Record<string, number>
-  }
-  const vocab = cfg.vocab ?? (cfg as Record<string, number>)
-  const voice = readNpz(readFileSync(join(files.dir, files.voices))).get(files.voice)
-  if (!voice) throw new Error(`kokoro: voice ${files.voice} not found in ${files.voices}`)
-
-  const { ort, session } = await createSession(join(files.dir, files.model), providers)
+  const { modelPath, vocab, voice } = readKokoroAssets(files)
+  const { ort, session } = await createSession(modelPath, providers)
   const run: KokoroRun = async (tokens, style, speed) => {
     const out = await session.run({
-      tokens: new ort.Tensor('int64', BigInt64Array.from(tokens.map(BigInt)), [1, tokens.length]),
+      input_ids: new ort.Tensor('int64', BigInt64Array.from(tokens.map(BigInt)), [
+        1,
+        tokens.length,
+      ]),
       style: new ort.Tensor('float32', style, [1, style.length]),
       speed: new ort.Tensor('float32', Float32Array.of(speed), [1]),
     })
     return new Float32Array(
-      (out['audio'] as import('onnxruntime-node').Tensor).data as Float32Array,
+      (out['waveform'] as import('onnxruntime-node').Tensor).data as Float32Array,
     )
   }
   return new KokoroSynthesizer({

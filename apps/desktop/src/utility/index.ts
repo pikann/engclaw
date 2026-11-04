@@ -1,6 +1,6 @@
 // Inference worker entry (utility process): serves the main process over `rpc` messages.
 import { join } from 'node:path'
-import { CachedPhonemizer } from '@engclaw/pronounce'
+import { CachedPhonemizer, TTS_MODEL_ID } from '@engclaw/pronounce'
 import { EspeakProcess } from './espeak'
 import { DEFAULT_KOKORO_FILES, loadKokoro } from './kokoro'
 import { InferenceError, toInferenceError } from './errors'
@@ -40,7 +40,7 @@ const inference = new InferenceService({
   phonemizer,
   speak: async (text) => {
     if (!kokoroDirs)
-      throw new InferenceError('MODEL_MISSING', 'reference voice not installed', 'kokoro-82m')
+      throw new InferenceError('MODEL_MISSING', 'reference voice not installed', TTS_MODEL_ID)
     return (await (await speechFor(kokoroDirs.modelDir, kokoroDirs.cacheDir)).speak(text)).samples
   },
 })
@@ -69,7 +69,7 @@ async function dispatch(req: RpcRequest, signal: AbortSignal): Promise<unknown> 
       return inference.phonemize(p.text!, p.language)
     case 'speak': {
       if (!p.kokoro)
-        throw new InferenceError('MODEL_MISSING', 'reference voice not installed', 'kokoro-82m')
+        throw new InferenceError('MODEL_MISSING', 'reference voice not installed', TTS_MODEL_ID)
       return (await speechFor(p.kokoro.modelDir, p.kokoro.cacheDir)).speak(p.text!)
     }
   }
