@@ -26,7 +26,10 @@ import {
 const platformOf = (p: string): string =>
   /mac/i.test(p) ? 'darwin' : /win/i.test(p) ? 'win32' : 'linux'
 
-/** Mode 2: type the sentence, record or import audio, analyze. */
+/**
+ * Mode 2 ('sentence'): type the sentence, record or import audio, analyze.
+ * Mode 1 ('free'): record or import audio, correct the ASR transcript, analyze the corrected text.
+ */
 export function PracticeCard() {
   const { t } = useTranslation()
   const [s, dispatch] = useReducer(practiceReducer, initialPractice)
@@ -39,6 +42,8 @@ export function PracticeCard() {
   const playing = useRef<{ stop: () => void } | null>(null)
   const textRef = useRef(s.text)
   textRef.current = s.text
+  const modeRef = useRef(s.mode)
+  modeRef.current = s.mode
 
   const analyze = useCallback(async (audio: PracticeAudio) => {
     const id = crypto.randomUUID()
@@ -67,6 +72,37 @@ export function PracticeCard() {
     }
   }, [])
 
+  const transcribe = useCallback(async (audio: PracticeAudio) => {
+    const id = crypto.randomUUID()
+    requestId.current = id
+    try {
+      const res = await window.engclaw.inference.transcribe({ requestId: id, audio: audio.samples })
+      if (requestId.current !== id) return
+      dispatch(
+        res.ok
+          ? { type: 'transcribed', text: res.value.text }
+          : {
+              type: 'failed',
+              error: { code: res.code, message: res.message, modelId: res.modelId },
+            },
+      )
+    } catch (err) {
+      if (requestId.current === id)
+        dispatch({
+          type: 'failed',
+          error: { code: 'FAILED', message: err instanceof Error ? err.message : '' },
+        })
+    }
+  }, [])
+
+  const onTranscribe = (): void => {
+    if (!s.audio) return
+    dispatch({ type: 'transcribe-requested' })
+    void transcribe(s.audio)
+  }
+
+  const onRetry = (): void => (s.step === 'transcribe' ? onTranscribe() : onAnalyze())
+
   const onAnalyze = (): void => {
     if (!s.audio || !hasText(s.text)) return dispatch({ type: 'analyze-requested' })
     dispatch({ type: 'analyze-requested' })
@@ -74,7 +110,7 @@ export function PracticeCard() {
   }
 
   const startRecording = async (): Promise<void> => {
-    if (!hasText(s.text)) return dispatch({ type: 'record-requested' })
+    if (s.mode === 'sentence' && !hasText(s.text)) return dispatch({ type: 'record-requested' })
     setMicError(null)
     setFileError(null)
     setSeconds(0)
@@ -100,8 +136,15 @@ export function PracticeCard() {
     const take = await rec.stop()
     const audio: PracticeAudio = { ...take, source: 'mic', truncated: false }
     dispatch({ type: 'recorded', audio })
-    // Auto-analyze straight after a recording; the text was validated before it started.
-    if (hasText(textRef.current)) {
+    startAuto(audio)
+  }
+
+  /** Mode 1 transcribes new audio straight away; Mode 2 analyzes a recording (text is checked). */
+  const startAuto = (audio: PracticeAudio, fromFile = false): void => {
+    if (modeRef.current === 'free') {
+      dispatch({ type: 'transcribe-requested' })
+      void transcribe(audio)
+    } else if (!fromFile && hasText(textRef.current)) {
       dispatch({ type: 'analyze-requested' })
       void analyze(audio)
     }
@@ -113,10 +156,14 @@ export function PracticeCard() {
     if (!isAudioFile(file)) return setFileError(t('audio.decodeError'))
     try {
       const d = await decodeFile(file)
-      dispatch({
-        type: 'loaded',
-        audio: { samples: d.samples, seconds: d.seconds, source: 'file', truncated: d.truncated },
-      })
+      const audio: PracticeAudio = {
+        samples: d.samples,
+        seconds: d.seconds,
+        source: 'file',
+        truncated: d.truncated,
+      }
+      dispatch({ type: 'loaded', audio })
+      startAuto(audio, true)
     } catch {
       setFileError(t('audio.decodeError'))
     }
@@ -145,7 +192,10 @@ export function PracticeCard() {
     [],
   )
 
-  const busy = s.phase === 'recording' || s.phase === 'analyzing'
+  const busy = s.phase === 'recording' || s.phase === 'transcribing' || s.phase === 'analyzing'
+  const free = s.mode === 'free'
+  // In free speech the text is the ASR transcript, so it opens up only once there is one.
+  const textLocked = busy || (free && !s.transcribed)
 
   return (
     <section
@@ -165,13 +215,29 @@ export function PracticeCard() {
     >
       <h2 className="text-lg font-semibold">{t('practice.title')}</h2>
 
+      <div className="flex gap-2" role="group" aria-label={t('practice.mode.label')}>
+        {(['sentence', 'free'] as const).map((m) => (
+          <Button
+            key={m}
+            size="sm"
+            variant={s.mode === m ? 'default' : 'outline'}
+            aria-pressed={s.mode === m}
+            data-testid={`practice-mode-${m}`}
+            disabled={busy}
+            onClick={() => dispatch({ type: 'mode', mode: m })}
+          >
+            {t(`practice.mode.${m}`)}
+          </Button>
+        ))}
+      </div>
+
       <div className="space-y-2">
         <textarea
           data-testid="practice-text"
           className="border-input bg-background min-h-24 w-full rounded-md border p-2 text-sm"
-          placeholder={t('practice.placeholder')}
+          placeholder={t(free ? 'practice.freePlaceholder' : 'practice.placeholder')}
           value={s.text}
-          disabled={busy}
+          disabled={textLocked}
           maxLength={1000}
           aria-invalid={s.hint}
           onChange={(e) => dispatch({ type: 'text', text: e.target.value })}
@@ -181,19 +247,25 @@ export function PracticeCard() {
             {t('practice.emptyHint')}
           </p>
         )}
+        {free && s.transcribed && (
+          <p className="text-muted-foreground text-xs" data-testid="practice-transcript-note">
+            {t('practice.transcriptNote')}
+          </p>
+        )}
         <div className="flex flex-wrap gap-2">
-          {EXAMPLES.map((ex) => (
-            <Button
-              key={ex}
-              variant="outline"
-              size="sm"
-              data-testid="practice-example"
-              disabled={busy}
-              onClick={() => dispatch({ type: 'text', text: ex })}
-            >
-              {ex}
-            </Button>
-          ))}
+          {!free &&
+            EXAMPLES.map((ex) => (
+              <Button
+                key={ex}
+                variant="outline"
+                size="sm"
+                data-testid="practice-example"
+                disabled={busy}
+                onClick={() => dispatch({ type: 'text', text: ex })}
+              >
+                {ex}
+              </Button>
+            ))}
         </div>
       </div>
 
@@ -261,13 +333,15 @@ export function PracticeCard() {
             <Play />
             {t('practice.review', { time: formatTimer(s.audio.seconds) })}
           </Button>
-          <Button
-            data-testid="practice-analyze"
-            disabled={s.phase === 'analyzing'}
-            onClick={onAnalyze}
-          >
-            {t('practice.analyze')}
-          </Button>
+          {free && !s.transcribed ? (
+            <Button data-testid="practice-transcribe" disabled={busy} onClick={onTranscribe}>
+              {t('practice.transcribe')}
+            </Button>
+          ) : (
+            <Button data-testid="practice-analyze" disabled={busy} onClick={onAnalyze}>
+              {t(free ? 'practice.confirmAnalyze' : 'practice.analyze')}
+            </Button>
+          )}
           {s.audio.truncated && (
             <span className="text-muted-foreground text-xs">
               {t('audio.truncated', { seconds: MAX_CLIP_SECONDS })}
@@ -276,6 +350,9 @@ export function PracticeCard() {
         </div>
       )}
 
+      {s.phase === 'transcribing' && (
+        <LoadingCard onCancel={cancel} messageKey="practice.transcribing" />
+      )}
       {s.phase === 'analyzing' && <LoadingCard onCancel={cancel} />}
 
       {s.phase === 'error' && s.error && (
@@ -285,7 +362,7 @@ export function PracticeCard() {
               ? t('practice.error.modelMissing')
               : t('practice.error.failed')}
           </p>
-          <Button className="mt-2" size="sm" data-testid="practice-retry" onClick={onAnalyze}>
+          <Button className="mt-2" size="sm" data-testid="practice-retry" onClick={onRetry}>
             {t('practice.retry')}
           </Button>
         </Alert>
@@ -307,7 +384,7 @@ export function PracticeCard() {
   )
 }
 
-function LoadingCard({ onCancel }: { onCancel: () => void }) {
+function LoadingCard({ onCancel, messageKey }: { onCancel: () => void; messageKey?: string }) {
   const { t } = useTranslation()
   const [elapsed, setElapsed] = useState(0)
   useEffect(() => {
@@ -322,7 +399,7 @@ function LoadingCard({ onCancel }: { onCancel: () => void }) {
       data-testid="practice-loading"
     >
       <Loader2 className="animate-spin" />
-      <span className="flex-1 text-sm">{t(loadingMessageKey(elapsed))}</span>
+      <span className="flex-1 text-sm">{t(messageKey ?? loadingMessageKey(elapsed))}</span>
       <Button variant="outline" size="sm" onClick={onCancel}>
         {t('models.cancel')}
       </Button>

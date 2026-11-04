@@ -90,6 +90,16 @@
     "error": {
       "modelMissing": "Chưa tải các mô hình phát âm. Hãy tải trong mục Mô hình AI rồi thử lại.",
       "failed": "Phân tích thất bại. Hãy thử lại."
-    }
+    },
+    "mode": {
+      "label": "Chế độ luyện tập",
+      "sentence": "Đọc một câu",
+      "free": "Nói tự do"
+    },
+    "freePlaceholder": "Ghi âm hoặc nhập âm thanh, bản chép lời sẽ hiện ở đây để bạn sửa…",
+    "transcribe": "Chép lời",
+    "transcribing": "Đang chép lời bản ghi…",
+    "confirmAnalyze": "Xác nhận và phân tích",
+    "transcriptNote": "Sửa những từ nhận dạng sai rồi xác nhận. Phân tích sẽ dùng đúng văn bản này."
   }
 }
