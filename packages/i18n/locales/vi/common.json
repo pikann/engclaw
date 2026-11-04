@@ -67,5 +67,12 @@
       "EXCELLENT": "Phát âm của bạn rất tốt!",
       "NEEDS_WORK": "Bạn cần phát âm tốt hơn các từ sau: {{words}}"
     }
+  },
+  "reference": {
+    "hear": "Nghe giọng mẫu",
+    "playing": "Đang phát…",
+    "loading": "Đang chuẩn bị…",
+    "modelMissing": "Hãy tải mô hình giọng mẫu trong mục Mô hình AI trước.",
+    "failed": "Không thể phát giọng mẫu. Hãy thử lại."
   }
 }

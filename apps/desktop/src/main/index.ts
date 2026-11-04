@@ -9,6 +9,7 @@ import { buildMenu } from './menu'
 import { APP_ORIGIN } from './security-policy'
 import { hardenWindow, installSessionSecurity, secureWebPreferences } from './security'
 import { registerModelHandlers } from './models'
+import { registerTtsHandlers } from './tts'
 import { loadLanguage, saveLanguage } from './settings'
 import { InnertubeAdapter, YouTubeError, parseVideoId } from '@engclaw/youtube'
 
@@ -45,11 +46,12 @@ function createWindow(): BrowserWindow {
   return win
 }
 
-function startUtility(): void {
+function startUtility(): Electron.UtilityProcess {
   const child = utilityProcess.fork(join(__dirname, 'utility.js'))
   child.on('message', (m) => console.log('[utility]', m))
   child.postMessage({ type: 'hello' })
   if (process.env['ENGCLAW_SMOKE']) runSmoke(child)
+  return child
 }
 
 /** Packaging smoke test (ENGC-54): run the native-module checks in the utility process, print, exit. */
@@ -109,7 +111,7 @@ void app.whenReady().then(async () => {
     if (isLocale(next)) await setLanguage(next)
     return language
   })
-  registerModelHandlers()
+  const models = registerModelHandlers()
   handle(IPC.youtubeMeta, ({ videoId }) => yt(() => youtube.meta(parseVideoId(videoId))))
   handle(IPC.youtubeTranscript, ({ videoId, lang }) =>
     yt(() => youtube.transcript(parseVideoId(videoId), lang)),
@@ -118,7 +120,7 @@ void app.whenReady().then(async () => {
     yt(() => youtube.audioRange(parseVideoId(videoId), start, end)),
   )
   createWindow()
-  startUtility()
+  registerTtsHandlers(startUtility(), models)
 })
 
 app.on('window-all-closed', () => app.quit())
