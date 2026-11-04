@@ -90,6 +90,16 @@
     "error": {
       "modelMissing": "The pronunciation models are not downloaded yet. Download them in AI models, then try again.",
       "failed": "The analysis failed. Try again."
-    }
+    },
+    "mode": {
+      "label": "Practice mode",
+      "sentence": "Read a sentence",
+      "free": "Free speech"
+    },
+    "freePlaceholder": "Record or import audio and the transcript appears here to correct…",
+    "transcribe": "Transcribe",
+    "transcribing": "Transcribing your recording…",
+    "confirmAnalyze": "Confirm and analyze",
+    "transcriptNote": "Fix any words the recognizer got wrong, then confirm. The analysis uses this text."
   }
 }

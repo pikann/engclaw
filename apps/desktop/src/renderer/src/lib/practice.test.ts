@@ -6,6 +6,7 @@ import {
   loadingMessageKey,
   practiceReducer,
   shouldAutoAnalyze,
+  shouldAutoTranscribe,
   type PracticeAudio,
   type PracticeEvent,
   type PracticeState,
@@ -80,6 +81,119 @@ describe('practice flow', () => {
       { type: 'record-requested' },
       { type: 'record-failed' },
     ])
+    expect(s.phase).toBe('idle')
+  })
+})
+
+describe('free speech flow (Mode 1)', () => {
+  const free = (events: PracticeEvent[] = []) => run([{ type: 'mode', mode: 'free' }, ...events])
+
+  it('records without a typed sentence and asks for transcription instead of analysis', () => {
+    let s = free([{ type: 'record-requested' }])
+    expect(s.phase).toBe('recording')
+    s = practiceReducer(s, { type: 'recorded', audio })
+    expect(shouldAutoTranscribe(s)).toBe(true)
+    expect(shouldAutoAnalyze(s)).toBe(false)
+    s = practiceReducer(s, { type: 'transcribe-requested' })
+    expect(s.phase).toBe('transcribing')
+  })
+
+  it('shows the transcript as editable text once ASR finishes', () => {
+    const s = free([
+      { type: 'loaded', audio },
+      { type: 'transcribe-requested' },
+      { type: 'transcribed', text: 'helo world' },
+    ])
+    expect(s.phase).toBe('ready')
+    expect(s.text).toBe('helo world')
+    expect(s.transcribed).toBe(true)
+  })
+
+  it('analyzes the edited text, not the raw transcript', () => {
+    const s = free([
+      { type: 'loaded', audio },
+      { type: 'transcribe-requested' },
+      { type: 'transcribed', text: 'helo world' },
+      { type: 'text', text: 'hello world' },
+      { type: 'analyze-requested' },
+    ])
+    expect(s.phase).toBe('analyzing')
+    expect(s.text).toBe('hello world')
+  })
+
+  it('hints instead of analyzing when the transcript was cleared', () => {
+    const s = free([
+      { type: 'loaded', audio },
+      { type: 'transcribed', text: 'hi' },
+      { type: 'text', text: '' },
+      { type: 'analyze-requested' },
+    ])
+    expect(s.phase).toBe('ready')
+    expect(s.hint).toBe(true)
+  })
+
+  it('keeps audio on a transcription failure and retries the same step', () => {
+    const base = free([{ type: 'loaded', audio }, { type: 'transcribe-requested' }])
+    const failed = practiceReducer(base, {
+      type: 'failed',
+      error: { code: 'FAILED', message: 'boom' },
+    })
+    expect(failed.phase).toBe('error')
+    expect(failed.step).toBe('transcribe')
+    expect(failed.audio).toBe(audio)
+    expect(practiceReducer(failed, { type: 'transcribe-requested' }).phase).toBe('transcribing')
+  })
+
+  it('returns to review when transcription is cancelled', () => {
+    const s = free([
+      { type: 'loaded', audio },
+      { type: 'transcribe-requested' },
+      { type: 'failed', error: { code: 'CANCELLED', message: '' } },
+    ])
+    expect(s.phase).toBe('ready')
+    expect(s.transcribed).toBe(false)
+  })
+
+  it('a new take clears the old transcript flag so it is transcribed again', () => {
+    const s = free([
+      { type: 'loaded', audio },
+      { type: 'transcribed', text: 'one' },
+      { type: 'recorded', audio },
+    ])
+    expect(s.transcribed).toBe(false)
+    expect(shouldAutoTranscribe(s)).toBe(true)
+  })
+
+  it('switching mode keeps the audio and text', () => {
+    const s = run([
+      { type: 'text', text: 'hello' },
+      { type: 'loaded', audio },
+      { type: 'mode', mode: 'free' },
+      { type: 'mode', mode: 'sentence' },
+    ])
+    expect(s.audio).toBe(audio)
+    expect(s.text).toBe('hello')
+    expect(s.phase).toBe('ready')
+  })
+
+  it('ignores a mode switch while busy', () => {
+    const s = run([
+      { type: 'text', text: 'hi' },
+      { type: 'record-requested' },
+      { type: 'mode', mode: 'free' },
+    ])
+    expect(s.mode).toBe('sentence')
+    expect(s.phase).toBe('recording')
+  })
+
+  it('discard allows a re-record and keeps the text', () => {
+    const s = free([
+      { type: 'loaded', audio },
+      { type: 'transcribed', text: 'hi' },
+      { type: 'discard' },
+    ])
+    expect(s.audio).toBeNull()
+    expect(s.transcribed).toBe(false)
     expect(s.phase).toBe('idle')
   })
 })
