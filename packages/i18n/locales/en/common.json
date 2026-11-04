@@ -42,5 +42,24 @@
       "UNKNOWN_MODEL": "Unknown model.",
       "CANCELLED": "Download cancelled."
     }
+  },
+  "audio": {
+    "mic": {
+      "denied": {
+        "title": "Microphone access was denied.",
+        "macos": "Open System Settings → Privacy & Security → Microphone and enable Engclaw, then restart the app.",
+        "windows": "Open Settings → Privacy & security → Microphone and allow desktop apps to use the microphone.",
+        "generic": "Allow microphone access for Engclaw in your system settings, then try again."
+      },
+      "notfound": "No microphone was found. Connect one and try again.",
+      "unknown": "Could not start recording. Close other apps that use the microphone and try again."
+    },
+    "device": "Microphone",
+    "record": "Record",
+    "stop": "Stop",
+    "import": "Import audio file",
+    "drop": "Drop an audio file here",
+    "decodeError": "This file could not be read as audio.",
+    "truncated": "Clip trimmed to the first {{seconds}} seconds."
   }
 }

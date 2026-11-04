@@ -42,5 +42,24 @@
       "UNKNOWN_MODEL": "Mô hình không xác định.",
       "CANCELLED": "Đã hủy tải xuống."
     }
+  },
+  "audio": {
+    "mic": {
+      "denied": {
+        "title": "Quyền truy cập micro đã bị từ chối.",
+        "macos": "Mở Cài đặt hệ thống → Quyền riêng tư & Bảo mật → Micro, bật Engclaw rồi khởi động lại ứng dụng.",
+        "windows": "Mở Cài đặt → Quyền riêng tư & bảo mật → Micro và cho phép ứng dụng máy tính dùng micro.",
+        "generic": "Hãy cho phép Engclaw dùng micro trong cài đặt hệ thống rồi thử lại."
+      },
+      "notfound": "Không tìm thấy micro. Hãy kết nối micro rồi thử lại.",
+      "unknown": "Không thể bắt đầu ghi âm. Hãy đóng các ứng dụng khác đang dùng micro rồi thử lại."
+    },
+    "device": "Micro",
+    "record": "Ghi âm",
+    "stop": "Dừng",
+    "import": "Nhập tệp âm thanh",
+    "drop": "Thả tệp âm thanh vào đây",
+    "decodeError": "Không thể đọc tệp này như âm thanh.",
+    "truncated": "Đã cắt đoạn âm thanh còn {{seconds}} giây đầu."
   }
 }
