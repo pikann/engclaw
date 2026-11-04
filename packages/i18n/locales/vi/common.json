@@ -66,6 +66,11 @@
     "feedback": {
       "EXCELLENT": "Phát âm của bạn rất tốt!",
       "NEEDS_WORK": "Bạn cần phát âm tốt hơn các từ sau: {{words}}"
+    },
+    "loading": {
+      "stage1": "Đang phân tích phát âm của bạn…",
+      "stage2": "Vẫn đang xử lý — lần đầu cần tải mô hình…",
+      "stage3": "Sắp xong, lần này lâu hơn bình thường…"
     }
   },
   "reference": {
@@ -74,5 +79,17 @@
     "loading": "Đang chuẩn bị…",
     "modelMissing": "Hãy tải mô hình giọng mẫu trong mục Mô hình AI trước.",
     "failed": "Không thể phát giọng mẫu. Hãy thử lại."
+  },
+  "practice": {
+    "title": "Luyện một câu",
+    "placeholder": "Nhập hoặc dán câu bạn muốn nói…",
+    "emptyHint": "Hãy nhập một câu trước.",
+    "review": "Nghe lại bản ghi ({{time}})",
+    "analyze": "Phân tích",
+    "retry": "Thử lại",
+    "error": {
+      "modelMissing": "Chưa tải các mô hình phát âm. Hãy tải trong mục Mô hình AI rồi thử lại.",
+      "failed": "Phân tích thất bại. Hãy thử lại."
+    }
   }
 }
