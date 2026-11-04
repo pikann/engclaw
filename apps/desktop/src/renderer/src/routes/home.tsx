@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { HearReference } from '@/components/hear-reference'
+import { PracticeCard } from '@/components/practice-card'
 import { ModelsPanel } from '@/components/models-panel'
 import { LanguageSwitcher } from '@/components/language-switcher'
 import { Button } from '@/components/ui/button'
@@ -9,7 +9,7 @@ export function Home() {
   const { t } = useTranslation()
   const [reply, setReply] = useState('')
   return (
-    <main className="mx-auto max-w-xl space-y-4 p-8">
+    <main className="mx-auto max-w-2xl space-y-4 p-8">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold" data-testid="title">
           {t('app.hello')}
@@ -28,7 +28,7 @@ export function Home() {
       <p data-testid="reply" className="text-muted-foreground">
         {reply}
       </p>
-      <HearReference text="The quick brown fox jumps over the lazy dog." />
+      <PracticeCard />
       <ModelsPanel />
     </main>
   )

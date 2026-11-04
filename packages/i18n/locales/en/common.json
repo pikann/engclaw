@@ -66,6 +66,11 @@
     "feedback": {
       "EXCELLENT": "Your pronunciation is excellent!",
       "NEEDS_WORK": "You need to better pronounce these words: {{words}}"
+    },
+    "loading": {
+      "stage1": "Analyzing your pronunciation…",
+      "stage2": "Still working — the first run loads the models…",
+      "stage3": "Almost there, this is taking longer than usual…"
     }
   },
   "reference": {
@@ -74,5 +79,17 @@
     "loading": "Preparing…",
     "modelMissing": "Download the reference voice model in AI models first.",
     "failed": "Could not play the reference. Try again."
+  },
+  "practice": {
+    "title": "Practice a sentence",
+    "placeholder": "Type or paste the sentence you want to say…",
+    "emptyHint": "Enter a sentence first.",
+    "review": "Play your recording ({{time}})",
+    "analyze": "Analyze",
+    "retry": "Try again",
+    "error": {
+      "modelMissing": "The pronunciation models are not downloaded yet. Download them in AI models, then try again.",
+      "failed": "The analysis failed. Try again."
+    }
   }
 }

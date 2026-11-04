@@ -81,3 +81,18 @@ test('renderer is isolated: no node, no raw ipc, only the typed bridge', async (
   expect(page.url().startsWith('app://engclaw')).toBe(true)
   await app.close()
 })
+
+test('practice card: empty text shows an inline hint instead of recording', async () => {
+  const app = await electron.launch({
+    args: [join(__dirname, '..'), ...(process.env['CI'] ? ['--no-sandbox'] : [])],
+  })
+  const page = await app.firstWindow()
+  await expect(page.getByTestId('practice-hint')).toHaveCount(0)
+  await page.getByTestId('practice-record').click()
+  await expect(page.getByTestId('practice-hint')).toBeVisible()
+  await expect(page.getByTestId('practice-stop')).toHaveCount(0)
+  await page.getByTestId('practice-example').first().click()
+  await expect(page.getByTestId('practice-hint')).toHaveCount(0)
+  await expect(page.getByTestId('practice-text')).not.toHaveValue('')
+  await app.close()
+})
