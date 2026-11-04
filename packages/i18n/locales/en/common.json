@@ -101,5 +101,18 @@
     "transcribing": "Transcribing your recording…",
     "confirmAnalyze": "Confirm and analyze",
     "transcriptNote": "Fix any words the recognizer got wrong, then confirm. The analysis uses this text."
+  },
+  "result": {
+    "verdict": "{{flagged}} of {{total}} words need work",
+    "verdictAll": "All {{total}} words sound good",
+    "chipTip": "Needs work ({{confidence}}% confidence): expected {{expected}}, heard {{actual}}",
+    "chipOk": "Sounds good",
+    "hearIt": "Hear it",
+    "expected": "Expected",
+    "heard": "You said",
+    "understood": "The recognizer understood “{{word}}”.",
+    "weHeard": "We heard",
+    "yourSounds": "Your sounds",
+    "replay": "Replay my recording"
   }
 }

@@ -4,6 +4,7 @@ import { Loader2, Mic, Play, Square, Upload } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { HearReference } from '@/components/hear-reference'
+import { ResultCard } from '@/components/result-card'
 import {
   classifyMicError,
   decodeFile,
@@ -369,16 +370,12 @@ export function PracticeCard() {
       )}
 
       {s.phase === 'result' && s.result && (
-        <div className="space-y-1 rounded-md border p-3" data-testid="result-card">
-          <p className="text-2xl font-semibold" data-testid="result-score">
-            {Math.round(s.result.score)}
-          </p>
-          <p className="text-sm">
-            {t(`pronounce.feedback.${s.result.feedback.code}`, {
-              words: s.result.feedback.words.join(', '),
-            })}
-          </p>
-        </div>
+        <ResultCard
+          result={s.result}
+          text={s.text}
+          onTryAgain={() => dispatch({ type: 'discard' })}
+          onReplay={togglePlay}
+        />
       )}
     </section>
   )
