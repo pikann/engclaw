@@ -1,5 +1,8 @@
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { KokoroSynthesizer, type KokoroRun } from './kokoro'
+import { DEFAULT_KOKORO_FILES, KokoroSynthesizer, readKokoroAssets, type KokoroRun } from './kokoro'
 
 const vocab = { a: 1, b: 2, ' ': 3, ˈ: 4 }
 
@@ -51,5 +54,36 @@ describe('KokoroSynthesizer', () => {
 
   it('rejects text with nothing to say', async () => {
     await expect(setup().synth.synthesize('...')).rejects.toThrow('nothing to say')
+  })
+})
+
+describe('readKokoroAssets', () => {
+  it('reads the vocab from tokenizer.json and the voice pack from voices/<voice>.bin', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'kokoro-'))
+    try {
+      mkdirSync(join(dir, 'voices'))
+      writeFileSync(
+        join(dir, 'tokenizer.json'),
+        JSON.stringify({ model: { vocab: { a: 1, ' ': 2 } } }),
+      )
+      const pack = Float32Array.from([1, 2, 3, 4])
+      writeFileSync(join(dir, 'voices', 'af_heart.bin'), Buffer.from(pack.buffer))
+      const a = readKokoroAssets({ dir, ...DEFAULT_KOKORO_FILES })
+      expect(a.vocab).toEqual({ a: 1, ' ': 2 })
+      expect([...a.voice]).toEqual([1, 2, 3, 4])
+      expect(a.modelPath).toBe(join(dir, 'onnx', 'model.onnx'))
+    } finally {
+      rmSync(dir, { recursive: true })
+    }
+  })
+
+  it('names the missing voice', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'kokoro-'))
+    try {
+      writeFileSync(join(dir, 'tokenizer.json'), JSON.stringify({ model: { vocab: {} } }))
+      expect(() => readKokoroAssets({ dir, ...DEFAULT_KOKORO_FILES })).toThrow(/af_heart/)
+    } finally {
+      rmSync(dir, { recursive: true })
+    }
   })
 })

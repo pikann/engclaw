@@ -2,11 +2,12 @@ import { app } from 'electron'
 import { join } from 'node:path'
 import { IPC, type SpeakResponse } from '@engclaw/ipc-contract'
 import type { ModelManager } from '@engclaw/models'
+import { TTS_MODEL_ID } from '@engclaw/pronounce'
 import { handle } from './ipc'
 import type { UtilityClient } from './utility-client'
 
 /** Catalog id of the Kokoro reference-voice model. */
-export const KOKORO_MODEL_ID = 'kokoro-82m'
+export const KOKORO_MODEL_ID = TTS_MODEL_ID
 
 /** Where the reference-voice model and its audio cache live, or null if the model is not installed. */
 export async function kokoroLocation(

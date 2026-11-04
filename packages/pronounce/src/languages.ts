@@ -22,6 +22,9 @@ export const LANGUAGES: Readonly<Record<string, LanguageConfig>> = {
   },
 }
 
+/** Catalog id of the Kokoro reference-voice model (language independent). */
+export const TTS_MODEL_ID = 'tts-ref'
+
 export const DEFAULT_LANGUAGE = 'en'
 
 export const getLanguage = (code: string | undefined): LanguageConfig | undefined =>
