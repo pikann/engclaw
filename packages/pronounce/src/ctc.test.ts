@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { decodeCtc, logSoftmax, parseVocab } from './ctc'
+import { decodeCtc, decodeCtcText, logSoftmax, parseVocab } from './ctc'
 
 const vocab = parseVocab({
   '<pad>': 0,
@@ -66,5 +66,28 @@ describe('decodeCtc', () => {
     const [hit] = decodeCtc(logSoftmax(logits, 2, 9), 2, vocab)
     const strong = Math.exp(5) / (Math.exp(5) + 8)
     expect(hit!.confidence).toBeCloseTo(strong, 5)
+  })
+})
+
+describe('decodeCtcText', () => {
+  const chars = parseVocab({
+    '<pad>': 0,
+    '<s>': 1,
+    '</s>': 2,
+    '<unk>': 3,
+    '|': 4,
+    H: 5,
+    I: 6,
+    "'": 7,
+  })
+  const decode = (ids: number[]) =>
+    decodeCtcText(logSoftmax(peaks(ids, 8), ids.length, 8), ids.length, chars)
+
+  it('collapses repeats, honours blanks between doubled letters, maps | to space', () => {
+    expect(decode([5, 5, 0, 6, 6, 4, 4, 5, 0, 5, 3, 1])).toBe('HI HH')
+  })
+  it('trims leading/trailing delimiters and returns empty for all blanks', () => {
+    expect(decode([4, 5, 4, 4])).toBe('H')
+    expect(decode([0, 0, 2])).toBe('')
   })
 })

@@ -53,3 +53,29 @@ export function decodeCtc(logProbs: Float32Array, frames: number, vocab: Vocab):
   }
   return hits
 }
+
+/**
+ * Greedy CTC text decode for character vocabularies (wav2vec2-base/large-960h): argmax per frame,
+ * collapse repeats, drop blank and `<special>` tokens, `|` becomes a space. Output keeps the model's case (upper).
+ */
+export function decodeCtcText(
+  logProbs: Float32Array,
+  frames: number,
+  vocab: Vocab,
+  wordDelimiter = '|',
+): string {
+  const size = vocab.tokens.length
+  let out = ''
+  let previous = -1
+  for (let f = 0; f < frames; f++) {
+    let best = 0
+    for (let v = 1; v < size; v++)
+      if (logProbs[f * size + v]! > logProbs[f * size + best]!) best = v
+    if (best === previous) continue
+    previous = best
+    const tok = vocab.tokens[best]
+    if (best === vocab.blankId || tok === undefined || SPECIAL.test(tok)) continue
+    out += tok === wordDelimiter ? ' ' : tok
+  }
+  return out.replace(/\s+/g, ' ').trim()
+}
