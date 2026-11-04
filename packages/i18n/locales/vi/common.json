@@ -101,5 +101,18 @@
     "transcribing": "Đang chép lời bản ghi…",
     "confirmAnalyze": "Xác nhận và phân tích",
     "transcriptNote": "Sửa những từ nhận dạng sai rồi xác nhận. Phân tích sẽ dùng đúng văn bản này."
+  },
+  "result": {
+    "verdict": "{{flagged}} / {{total}} từ cần luyện thêm",
+    "verdictAll": "Cả {{total}} từ đều ổn",
+    "chipTip": "Cần luyện ({{confidence}}% độ tin cậy): chuẩn {{expected}}, nghe được {{actual}}",
+    "chipOk": "Phát âm tốt",
+    "hearIt": "Nghe thử",
+    "expected": "Chuẩn",
+    "heard": "Bạn nói",
+    "understood": "Bộ nhận dạng hiểu là “{{word}}”.",
+    "weHeard": "Chúng tôi nghe được",
+    "yourSounds": "Âm của bạn",
+    "replay": "Nghe lại bản ghi"
   }
 }
