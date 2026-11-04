@@ -1,5 +1,6 @@
 import { _electron as electron, expect, test } from '@playwright/test'
 import { join } from 'node:path'
+import type { EngclawApi } from '@engclaw/ipc-contract'
 import { mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 
@@ -120,7 +121,8 @@ test('history and settings persist across restarts (SQLite in userData)', async 
   const first = await launch()
   let page = await first.firstWindow()
   await page.evaluate(async () => {
-    await window.engclaw.history.save({
+    const api = () => (window as unknown as { engclaw: EngclawApi }).engclaw
+    await api().history.save({
       mode: 'sentence',
       text: 'Persist me.',
       language: 'en',
@@ -128,19 +130,20 @@ test('history and settings persist across restarts (SQLite in userData)', async 
       errors: [],
       audio: new Float32Array(1600),
     })
-    await window.engclaw.app.updateSettings({ silenceAutoStop: false })
+    await api().app.updateSettings({ silenceAutoStop: false })
   })
   await first.close()
 
   const second = await launch()
   page = await second.firstWindow()
   const { list, settings, audio } = await page.evaluate(async () => {
-    const list = await window.engclaw.history.list()
+    const api = () => (window as unknown as { engclaw: EngclawApi }).engclaw
+    const list = await api().history.list()
     const id = list.attempts[0]?.id ?? ''
     return {
       list,
-      settings: await window.engclaw.app.getSettings(),
-      audio: (await window.engclaw.history.audio({ id }))?.length ?? 0,
+      settings: await api().app.getSettings(),
+      audio: (await api().history.audio({ id }))?.length ?? 0,
     }
   })
   expect(list.total).toBe(1)
