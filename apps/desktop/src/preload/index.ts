@@ -51,6 +51,7 @@ const api: EngclawApi = {
     getSettings: () => invoke(IPC.appGetSettings),
     updateSettings: (req) => invoke(IPC.appUpdateSettings, req),
     deleteAllData: () => invoke(IPC.appDeleteAllData),
+    openMicSettings: () => invoke(IPC.appOpenMicSettings),
   },
   models: {
     list: () => invoke(IPC.modelsList),

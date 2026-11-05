@@ -6,6 +6,7 @@ import {
   heardSounds,
   isWrongPhone,
   scoreTone,
+  subScores,
   verdictOf,
   wordChips,
 } from './result'
@@ -70,5 +71,23 @@ describe('result view model', () => {
 
   it('picks a tone by score', () => {
     expect([90, 70, 30].map(scoreTone)).toEqual(['good', 'ok', 'poor'])
+  })
+})
+
+describe('subScores', () => {
+  it('maps error rates and acoustic distance to 0-100 tiles', () => {
+    const r = {
+      acoustic_distance: 7,
+      differences: { phoneme_error_rate: 0.12, word_error_rate: 0.4 },
+    } as unknown as PronunciationResult
+    expect(subScores(r)).toEqual({ accuracy: 88, fluency: 60, prosody: 100 })
+  })
+
+  it('clamps to the 0-100 range', () => {
+    const r = {
+      acoustic_distance: 30,
+      differences: { phoneme_error_rate: 1.5, word_error_rate: 0 },
+    } as unknown as PronunciationResult
+    expect(subScores(r)).toEqual({ accuracy: 0, fluency: 100, prosody: 0 })
   })
 })

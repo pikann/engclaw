@@ -362,6 +362,15 @@
       "readLabel": "Text to read",
       "speakLabel": "We heard",
       "check": "Check my pronunciation",
+      "reviewTitle": "Is this what you said?",
+      "reviewHint": "Fix any mistakes in the text, then press “Check my pronunciation”.",
+      "reviewHintRead": "Happy with your recording? Press “Check my pronunciation”.",
+      "reRecord": "Re-record",
+      "playTake": "Play my recording",
+      "examples": "Try an example",
+      "startOver": "Start over",
+      "speakFreely": "Speak freely",
+      "checkAgain": "Check again",
       "analyzing": "Analyzing your pronunciation…",
       "emptyResult": "Record something to see your score",
       "emptyDetail": "Phonemes, pitch and words appear here after you record.",
@@ -370,7 +379,6 @@
       "prosody": "Prosody",
       "needsWork": "Needs work",
       "tip": "Tip: for “th”, put your tongue between your teeth and blow air gently.",
-      "editText": "Edit text",
       "hearBoth": "Hear both",
       "tabResult": "Result",
       "tabPhonemes": "Phonemes",
@@ -401,7 +409,8 @@
       "pitchEmptyTitle": "No pitch to show",
       "pitchEmptyBody": "The recording is too short or too quiet to track your pitch. Record a longer sentence to see the contour.",
       "pitchLowTitle": "Low confidence",
-      "pitchLowBody": "Background noise made the pitch unreliable. Treat this chart as a rough guide and try again somewhere quieter."
+      "pitchLowBody": "Background noise made the pitch unreliable. Treat this chart as a rough guide and try again somewhere quieter.",
+      "pickWord": "Select a word that needs work to see its sounds."
     },
     "shadowing": {
       "heading": "Practice with any YouTube video",

@@ -61,6 +61,11 @@ export type PracticeEvent =
   | { type: 'analyzed'; result: PronunciationResult }
   | { type: 'failed'; error: PracticeError }
   | { type: 'discard' }
+  | { type: 'edit' }
+  /** Record again: drops the take and result but keeps the text (and that it was transcribed). */
+  | { type: 'rerecord' }
+  /** Start over: forget text, take and result. */
+  | { type: 'reset' }
 
 export const initialPractice: PracticeState = {
   phase: 'idle',
@@ -96,7 +101,8 @@ export function practiceReducer(s: PracticeState, e: PracticeEvent): PracticeSta
         ...s,
         phase: 'ready',
         audio: e.audio,
-        transcribed: false,
+        // A new mic take keeps the text the user already has; an imported file is transcribed afresh.
+        transcribed: e.type === 'recorded' && s.transcribed && hasText(s.text),
         step: null,
         result: null,
         error: null,
@@ -119,6 +125,21 @@ export function practiceReducer(s: PracticeState, e: PracticeEvent): PracticeSta
       return e.error.code === 'CANCELLED'
         ? { ...s, phase: 'ready' }
         : { ...s, phase: 'error', error: e.error }
+    case 'edit':
+      // Back to the review step with the same audio and text, so the text can be corrected.
+      return s.audio ? { ...s, phase: 'ready', result: null, error: null } : s
+    case 'rerecord':
+      return {
+        ...s,
+        phase: 'idle',
+        audio: null,
+        step: null,
+        result: null,
+        error: null,
+        hint: false,
+      }
+    case 'reset':
+      return { ...initialPractice, mode: s.mode }
     case 'discard':
       return {
         ...s,
@@ -153,3 +174,29 @@ export function formatTimer(seconds: number): string {
   const s = Math.floor(seconds)
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
 }
+
+/** Each tab keeps its own text, audio and result; switching never discards them. */
+export interface PracticeTabs {
+  active: PracticeMode
+  tabs: Record<PracticeMode, PracticeState>
+}
+
+export type TabsEvent =
+  { type: 'switch'; mode: PracticeMode } | { type: 'tab'; mode: PracticeMode; event: PracticeEvent }
+
+export const initialTabs: PracticeTabs = {
+  active: 'sentence',
+  tabs: {
+    sentence: { ...initialPractice, mode: 'sentence' },
+    free: { ...initialPractice, mode: 'free' },
+  },
+}
+
+export function tabsReducer(s: PracticeTabs, e: TabsEvent): PracticeTabs {
+  if (e.type === 'switch') return { ...s, active: e.mode }
+  return { ...s, tabs: { ...s.tabs, [e.mode]: practiceReducer(s.tabs[e.mode], e.event) } }
+}
+
+/** Work a tab would lose if it were thrown away: text, a take or a result. */
+export const hasDraft = (s: PracticeState): boolean =>
+  hasText(s.text) || s.audio !== null || s.result !== null

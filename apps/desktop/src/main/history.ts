@@ -1,10 +1,15 @@
-import { app, BrowserWindow, dialog } from 'electron'
+import { app, BrowserWindow, dialog, shell } from 'electron'
 import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { IPC, type HistoryFileResult } from '@engclaw/ipc-contract'
 import { t } from './i18n'
 import { handle } from './ipc'
 import { openStore, type Store } from './store'
+
+const MIC_SETTINGS_URL: Partial<Record<NodeJS.Platform, string>> = {
+  darwin: 'x-apple.systempreferences:com.apple.preference.security?Privacy_Microphone',
+  win32: 'ms-settings:privacy-microphone',
+}
 
 const filters = (): Electron.FileFilter[] => [{ name: 'JSON', extensions: ['json'] }]
 
@@ -66,6 +71,12 @@ export function registerStoreHandlers(): Store {
   handle(IPC.appDeleteAllData, () => {
     store.deleteAll()
     return null
+  })
+  handle(IPC.appOpenMicSettings, async () => {
+    const url = MIC_SETTINGS_URL[process.platform]
+    if (!url) return false
+    await shell.openExternal(url)
+    return true
   })
   return store
 }

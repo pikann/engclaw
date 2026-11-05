@@ -362,6 +362,15 @@
       "readLabel": "Văn bản cần đọc",
       "speakLabel": "Chúng tôi nghe được",
       "check": "Kiểm tra phát âm của tôi",
+      "reviewTitle": "Đây có phải điều bạn đã nói?",
+      "reviewHint": "Sửa lỗi trong văn bản nếu có, rồi nhấn “Kiểm tra phát âm của tôi”.",
+      "reviewHintRead": "Hài lòng với bản ghi âm? Nhấn “Kiểm tra phát âm của tôi”.",
+      "reRecord": "Ghi âm lại",
+      "playTake": "Nghe bản ghi âm của tôi",
+      "examples": "Thử một câu mẫu",
+      "startOver": "Bắt đầu lại",
+      "speakFreely": "Nói tự do",
+      "checkAgain": "Kiểm tra lại",
       "analyzing": "Đang phân tích phát âm của bạn…",
       "emptyResult": "Hãy ghi âm để xem điểm của bạn",
       "emptyDetail": "Âm vị, cao độ và từng từ sẽ hiện ở đây sau khi bạn ghi âm.",
@@ -370,7 +379,6 @@
       "prosody": "Ngữ điệu",
       "needsWork": "Cần cải thiện",
       "tip": "Mẹo: với âm “th”, đặt lưỡi giữa hai hàm răng và thổi nhẹ hơi ra.",
-      "editText": "Sửa văn bản",
       "hearBoth": "Nghe cả hai",
       "tabResult": "Kết quả",
       "tabPhonemes": "Âm vị",
@@ -401,7 +409,8 @@
       "pitchEmptyTitle": "Không có cao độ để hiển thị",
       "pitchEmptyBody": "Bản ghi quá ngắn hoặc quá nhỏ để theo dõi cao độ. Hãy ghi một câu dài hơn để xem đường nét.",
       "pitchLowTitle": "Độ tin cậy thấp",
-      "pitchLowBody": "Tiếng ồn nền làm cao độ không đáng tin. Hãy xem biểu đồ này như tham khảo và thử lại ở nơi yên tĩnh hơn."
+      "pitchLowBody": "Tiếng ồn nền làm cao độ không đáng tin. Hãy xem biểu đồ này như tham khảo và thử lại ở nơi yên tĩnh hơn.",
+      "pickWord": "Chọn một từ cần luyện để xem các âm của nó."
     },
     "shadowing": {
       "heading": "Luyện tập với bất kỳ video YouTube nào",

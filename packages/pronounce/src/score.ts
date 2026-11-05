@@ -32,11 +32,27 @@ export interface ScoreInputs {
   wordErrorRate: number
 }
 
+export interface ScoreParts {
+  /** How close the voice is to the reference (the spoken-rhythm and sound component), 0–100. */
+  acoustic: number
+  /** Share of sounds produced as expected, 0–100. */
+  phoneme: number
+  /** Share of words recognised as expected, 0–100. */
+  word: number
+}
+
+/** The three 0–100 components that `computePronunciationScore` blends. */
+export function scoreParts(inputs: ScoreInputs): ScoreParts {
+  return {
+    acoustic: clip(100 * (1 - (inputs.acousticDistance - ACOUSTIC_GOOD) / ACOUSTIC_SPAN)),
+    phoneme: clip(100 * (1 - inputs.phonemeErrorRate)),
+    word: clip(100 * (1 - inputs.wordErrorRate)),
+  }
+}
+
 /** Weighted blend of acoustic, phoneme and word scores (0–100, 2 dp). */
 export function computePronunciationScore(inputs: ScoreInputs): number {
-  const acoustic = clip(100 * (1 - (inputs.acousticDistance - ACOUSTIC_GOOD) / ACOUSTIC_SPAN))
-  const phoneme = clip(100 * (1 - inputs.phonemeErrorRate))
-  const word = clip(100 * (1 - inputs.wordErrorRate))
+  const { acoustic, phoneme, word } = scoreParts(inputs)
   const score = ACOUSTIC_WEIGHT * acoustic + PHONEME_WEIGHT * phoneme + WORD_WEIGHT * word
   return Math.round(score * 100) / 100
 }

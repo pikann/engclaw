@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Outlet, useLocation } from 'react-router'
-import { PracticeCard } from '@/components/practice-card'
+import { PracticeScreen } from '@/components/practice-screen'
 import { AppShell, useLayout, type NavKey } from '@/components/screens/shell'
 import { modelCard } from '@/lib/model-download'
 import { useModels } from '@/lib/use-models'
@@ -62,11 +62,15 @@ export function AppLayout() {
         modelsPercent={modelsPercent}
         title={known ? t(`screens.shell.${active}`) : t('screens.shell.comingSoon')}
       >
-        <main className="h-full overflow-auto p-6">
-          <div hidden={!onPractice} className="mx-auto max-w-2xl">
-            <PracticeCard />
+        <main className="h-full">
+          <div hidden={!onPractice} className="h-full">
+            <PracticeScreen />
           </div>
-          {!onPractice && <Outlet />}
+          {!onPractice && (
+            <div className="h-full overflow-auto p-6">
+              <Outlet />
+            </div>
+          )}
         </main>
       </AppShell>
     </div>

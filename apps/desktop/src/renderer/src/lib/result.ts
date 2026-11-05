@@ -1,4 +1,5 @@
 import type { PronunciationResult } from '@engclaw/ipc-contract'
+import { scoreParts } from '@engclaw/pronounce/src/score'
 
 /** Pure view-model helpers for the result card (OpenPronounce result UI parity). */
 
@@ -68,3 +69,23 @@ export const scoreTone = (score: number): ScoreTone =>
 
 /** Sentence shown under "We heard": the recognizer's text, if any. */
 export const heardText = (result: PronunciationResult): string => result.transcribe.trim()
+
+export interface SubScores {
+  accuracy: number
+  fluency: number
+  prosody: number
+}
+
+/** The tiles beside the ring: the same three components the overall score blends. */
+export function subScores(result: PronunciationResult): SubScores {
+  const p = scoreParts({
+    acousticDistance: result.acoustic_distance,
+    phonemeErrorRate: result.differences.phoneme_error_rate,
+    wordErrorRate: result.differences.word_error_rate,
+  })
+  return {
+    accuracy: Math.round(p.phoneme),
+    fluency: Math.round(p.word),
+    prosody: Math.round(p.acoustic),
+  }
+}

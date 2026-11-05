@@ -16,6 +16,10 @@ export function Recorder({
   onStop,
   disabled,
   className,
+  startTestId = 'recorder-start',
+  stopTestId = 'recorder-stop',
+  processingLabel,
+  timer,
 }: {
   state: RecorderState
   /** Input level 0..1. */
@@ -24,6 +28,12 @@ export function Recorder({
   onStop: () => void
   disabled?: boolean
   className?: string
+  startTestId?: string
+  stopTestId?: string
+  /** Replaces the default "Analysing…" while the state is `processing`. */
+  processingLabel?: string
+  /** Elapsed time shown beside the meter while recording. */
+  timer?: string
 }) {
   const { t } = useTranslation()
   const recording = state === 'recording'
@@ -35,11 +45,11 @@ export function Recorder({
         variant={recording ? 'live' : 'default'}
         disabled={disabled || processing}
         onClick={recording ? onStop : onStart}
-        data-testid={recording ? 'recorder-stop' : 'recorder-start'}
+        data-testid={recording ? stopTestId : startTestId}
       >
         {processing ? <Loader2 className="animate-spin" /> : recording ? <Square /> : <Mic />}
         {processing
-          ? t('ds.recorder.processing')
+          ? (processingLabel ?? t('ds.recorder.processing'))
           : recording
             ? t('ds.recorder.stop')
             : t('ds.recorder.start')}
@@ -54,6 +64,11 @@ export function Recorder({
           style={{ transform: `scaleX(${recording ? Math.min(1, Math.max(0, level)) : 0})` }}
         />
       </div>
+      {recording && timer && (
+        <span className="text-muted-foreground text-sm tabular-nums" data-testid="recorder-timer">
+          {timer}
+        </span>
+      )}
     </div>
   )
 }

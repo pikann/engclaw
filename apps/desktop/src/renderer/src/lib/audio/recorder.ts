@@ -8,6 +8,8 @@ export interface RecorderOptions {
   /** Stop on ~2 s of silence after speech (default true). */
   silenceAutoStop?: boolean
   onTick?: (seconds: number) => void
+  /** RMS of the latest frame (0..1). */
+  onLevel?: (rms: number) => void
   /** Fired when recording ends on its own (silence or max length); call stop() to collect. */
   onAutoStop?: (reason: 'silence' | 'max') => void
 }
@@ -56,6 +58,11 @@ export class Recorder {
     this.chunks.push(frame)
     this.total += frame.length
     this.opts.onTick?.(this.total / rate)
+    if (this.opts.onLevel) {
+      let sum = 0
+      for (const x of frame) sum += x * x
+      this.opts.onLevel(Math.sqrt(sum / (frame.length || 1)))
+    }
     if (this.total / rate >= MAX_CLIP_SECONDS) this.opts.onAutoStop?.('max')
     else if (this.opts.silenceAutoStop !== false && this.vad?.push(frame))
       this.opts.onAutoStop?.('silence')

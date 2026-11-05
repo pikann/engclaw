@@ -297,6 +297,7 @@ export const IPC = {
   appGetSettings: 'app:getSettings',
   appUpdateSettings: 'app:updateSettings',
   appDeleteAllData: 'app:deleteAllData',
+  appOpenMicSettings: 'app:openMicSettings',
   modelsList: 'models:list',
   modelsDownload: 'models:download',
   modelsCancel: 'models:cancel',
@@ -347,6 +348,8 @@ export const invokeChannels = {
   [IPC.appUpdateSettings]: { request: AppSettingsPatch, response: AppSettings },
   /** Deletes history, recordings and preferences (not downloaded models). */
   [IPC.appDeleteAllData]: { request: noArgs, response: z.null() },
+  /** Opens the OS microphone privacy settings; false where the OS has no such page. */
+  [IPC.appOpenMicSettings]: { request: noArgs, response: z.boolean() },
   [IPC.modelsList]: { request: noArgs, response: z.array(ModelStatus) },
   [IPC.modelsDownload]: { request: ModelRef, response: ModelOpResult },
   [IPC.modelsCancel]: { request: ModelRef, response: z.null() },
@@ -427,6 +430,7 @@ export interface EngclawApi {
     getSettings(): Promise<AppSettings>
     updateSettings(req: z.infer<typeof AppSettingsPatch>): Promise<AppSettings>
     deleteAllData(): Promise<null>
+    openMicSettings(): Promise<boolean>
   }
   models: {
     list(): Promise<ModelStatus[]>
