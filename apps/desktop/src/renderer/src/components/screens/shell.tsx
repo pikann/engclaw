@@ -15,9 +15,9 @@ import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
 
 export type NavKey =
-  'home' | 'practice' | 'shadowing' | 'converse' | 'game' | 'dictionary' | 'history'
+  'home' | 'practice' | 'shadowing' | 'converse' | 'game' | 'dictionary' | 'history' | 'settings'
 
-const NAV: { key: NavKey; icon: LucideIcon }[] = [
+const NAV: { key: Exclude<NavKey, 'settings'>; icon: LucideIcon }[] = [
   { key: 'home', icon: Home },
   { key: 'practice', icon: Mic },
   { key: 'shadowing', icon: Play },
@@ -136,7 +136,12 @@ export function AppShell({
               className="mx-3 w-auto"
             />
           )}
-          <SidebarItem icon={Settings} iconOnly={iconOnly} label={t('screens.shell.settings')} />
+          <SidebarItem
+            icon={Settings}
+            iconOnly={iconOnly}
+            active={active === 'settings'}
+            label={t('screens.shell.settings')}
+          />
         </div>
       </nav>
       <div className="flex min-w-0 flex-1 flex-col">
