@@ -259,5 +259,158 @@
       },
       "newBest": "New best"
     }
+  },
+  "screens": {
+    "shell": {
+      "nav": "Main",
+      "home": "Home",
+      "practice": "Practice",
+      "shadowing": "Shadowing",
+      "converse": "Converse",
+      "game": "Game",
+      "dictionary": "Dictionary",
+      "history": "History",
+      "models": "Models",
+      "settings": "Settings",
+      "micReady": "Microphone ready",
+      "modelsReady": "Models ready",
+      "modelsDownloading": "Downloading models…"
+    },
+    "home": {
+      "welcome": "Welcome to Engclaw",
+      "welcomeBody": "Practice speaking English with feedback that stays on your device. Pick where to start.",
+      "card": {
+        "practice": {
+          "title": "Practice pronunciation",
+          "body": "Read a sentence or speak freely and see which sounds to fix.",
+          "cta": "Start practising"
+        },
+        "shadowing": {
+          "title": "Shadow a video",
+          "body": "Repeat YouTube sentences with a transcript, or test yourself with dictation.",
+          "cta": "Open Shadowing"
+        },
+        "game": {
+          "title": "Pronunciation game",
+          "body": "Pass chapters one word at a time and collect stars.",
+          "cta": "Play"
+        }
+      },
+      "modelsNotice": "Speech models are not downloaded yet. They are needed the first time you record.",
+      "noRecent": "Your recent attempts will appear here."
+    },
+    "models": {
+      "intro": "Pronunciation needs about {{size}} of models, stored on this device. Your audio never leaves your computer.",
+      "tableCaption": "Models to download",
+      "colModel": "Model",
+      "colSize": "Size",
+      "colFor": "Needed for",
+      "name": {
+        "phone": "Phone model",
+        "asr": "Speech recognition",
+        "voice": "Voice (Kokoro)"
+      },
+      "for": {
+        "phone": "Pronunciation, Game",
+        "asr": "Speak freely, Converse",
+        "voice": "Hear it, examples"
+      },
+      "offline": "You are offline. Connect to the internet and retry; the download resumes where it stopped.",
+      "lockedTitle": "Speech models are needed"
+    },
+    "practice": {
+      "mode": {
+        "free": "Speak freely",
+        "read": "Read aloud"
+      },
+      "helper": {
+        "free": "Say anything you like. We transcribe it, you fix the text, then we check your pronunciation.",
+        "read": "Type or paste a text, then read it aloud."
+      },
+      "input": "Input",
+      "result": "Result",
+      "detail": "Detail",
+      "readLabel": "Text to read",
+      "speakLabel": "We heard",
+      "check": "Check my pronunciation",
+      "analyzing": "Analyzing your pronunciation…",
+      "emptyResult": "Record something to see your score",
+      "emptyDetail": "Phonemes, pitch and words appear here after you record.",
+      "accuracy": "Accuracy",
+      "fluency": "Fluency",
+      "prosody": "Prosody",
+      "needsWork": "Needs work",
+      "tip": "Tip: for “th”, put your tongue between your teeth and blow air gently.",
+      "editText": "Edit text",
+      "hearBoth": "Hear both",
+      "tabResult": "Result",
+      "tabPhonemes": "Phonemes",
+      "tabPitch": "Pitch",
+      "tabWords": "Words",
+      "pitchSummary": "Pitch contour: your voice follows the reference closely, with a lower rise on the last word.",
+      "openSettings": "Open system settings",
+      "keptAudio": "Your recording and text are kept, so you do not need to record again."
+    },
+    "shadowing": {
+      "heading": "Practice with any YouTube video",
+      "urlLabel": "YouTube link",
+      "load": "Load video",
+      "loading": "Loading video and transcript…",
+      "error": {
+        "invalid": "That doesn't look like a YouTube link.",
+        "noTranscript": "This video has no transcript, so it can't be used for shadowing. Please try another video — pick one that shows captions (CC) on YouTube.",
+        "unavailable": "This video can't be played here. Please try another video.",
+        "network": "Couldn't reach YouTube. Check your connection and try again."
+      },
+      "recent": "Recent videos",
+      "noRecents": "Videos you practise with will appear here.",
+      "sampleVideo": "Everyday English {{n}}",
+      "progress": "{{done}} of {{total}} sentences",
+      "videoTitle": "Everyday English 2",
+      "videoAlt": "Video player",
+      "modeLabel": "Mode",
+      "mode": {
+        "shadowing": "Shadowing",
+        "dictation": "Dictation"
+      },
+      "toggleRail": "Show transcript",
+      "focus": "Focus mode",
+      "segment": "Sentence {{n}} / {{total}}",
+      "fluency": "Fluency {{n}}",
+      "accuracy": "Accuracy {{n}}%",
+      "toFix": "{{count}} words to fix",
+      "sentenceHidden": "Sentence hidden. Hover or press H to reveal.",
+      "stopped": "Playback stopped.",
+      "transcript": "Transcript",
+      "sampleLine": "Sample sentence number {{n}} of the video."
+    },
+    "dictation": {
+      "listen": "Listen",
+      "playCount": "Play {{n}} of {{total}}",
+      "segment": "Sentence {{n}} / {{total}}",
+      "hide": "Hide {{n}}%",
+      "blank": "Blank {{n}}",
+      "check": "Check",
+      "newBlanks": "New blanks",
+      "retrySegment": "Retry sentence",
+      "status": {
+        "ok": "Correct",
+        "near": "Almost — correct spelling:",
+        "wrong": "Wrong — answer:"
+      },
+      "answersKept": "Your answers are kept.",
+      "segments": "Sentences",
+      "score": "Score {{n}}%",
+      "seg": {
+        "done": "Correct",
+        "current": "Current",
+        "todo": "Not started",
+        "review": "Needs review"
+      },
+      "reviewList": "Words to review",
+      "summary": "Summary",
+      "summaryBody": "You got {{right}} of {{total}} sentences right.",
+      "practiseWords": "Practise these words"
+    }
   }
 }
