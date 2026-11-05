@@ -502,6 +502,49 @@
       "typePlaceholder": "Type a message…",
       "send": "Send",
       "signedInToast": "Signed in to {{provider}}. You can start talking."
+    },
+    "dictionary": {
+      "imageAlt": "Illustration for {{word}}",
+      "imageLoading": "Loading image…",
+      "noImage": "No image available",
+      "imageOffline": "Image unavailable offline",
+      "attribution": "© Jane Doe · CC BY-SA 4.0 · Wikimedia Commons",
+      "verb": "verb",
+      "def1": "Look at something closely to check it.",
+      "def2": "Officially examine a person or place.",
+      "root": "Latin “look”",
+      "example": "She inspected the engine before the trip.",
+      "open": "Open in Dictionary",
+      "setupProvider": "Set up an AI provider",
+      "prompt": {
+        "explain": "Explain “{{word}}” simply",
+        "examples": "Give me 3 examples",
+        "differ": "How is it different from “look at”?",
+        "inContext": "What does it mean here?",
+        "pronounce": "Help me pronounce it"
+      },
+      "search": "Search words",
+      "results": "Search results",
+      "recent": "Recent words",
+      "recentHint": "Type to search, or pick a recent word.",
+      "noResults": "No words match “{{query}}”.",
+      "pickWord": "Pick a word to see its page.",
+      "tryAnother": "Try another spelling, or search by a root such as “spect”.",
+      "sections": "Dictionary sections",
+      "section": {
+        "search": "Search",
+        "roots": "Roots",
+        "flashcards": "Flashcards"
+      },
+      "tabWord": "Word",
+      "tabRoots": "Roots & family",
+      "rootsTitle": "Roots & family",
+      "rootMeaning": "“look” · Latin",
+      "family": "Family",
+      "quiz": "Quiz this root",
+      "pronounce": "Pronounce",
+      "sendPractice": "Send to Practice",
+      "liveHint": "Click a word to open the dictionary. Press Esc to close; focus returns to the word."
     }
   }
 }

@@ -502,6 +502,49 @@
       "typePlaceholder": "Nhập tin nhắn…",
       "send": "Gửi",
       "signedInToast": "Đã đăng nhập {{provider}}. Bạn có thể bắt đầu nói."
+    },
+    "dictionary": {
+      "imageAlt": "Hình minh họa cho {{word}}",
+      "imageLoading": "Đang tải hình ảnh…",
+      "noImage": "Không có hình ảnh",
+      "imageOffline": "Không có hình ảnh khi ngoại tuyến",
+      "attribution": "© Jane Doe · CC BY-SA 4.0 · Wikimedia Commons",
+      "verb": "động từ",
+      "def1": "Nhìn kỹ một thứ gì đó để kiểm tra.",
+      "def2": "Kiểm tra chính thức một người hoặc một nơi.",
+      "root": "Gốc Latin “nhìn”",
+      "example": "Cô ấy kiểm tra động cơ trước chuyến đi.",
+      "open": "Mở trong Từ điển",
+      "setupProvider": "Thiết lập nhà cung cấp AI",
+      "prompt": {
+        "explain": "Giải thích “{{word}}” đơn giản",
+        "examples": "Cho tôi 3 ví dụ",
+        "differ": "Khác “look at” thế nào?",
+        "inContext": "Từ này nghĩa là gì ở đây?",
+        "pronounce": "Giúp tôi phát âm từ này"
+      },
+      "search": "Tìm từ",
+      "results": "Kết quả tìm kiếm",
+      "recent": "Từ gần đây",
+      "recentHint": "Nhập để tìm, hoặc chọn một từ gần đây.",
+      "noResults": "Không có từ nào khớp “{{query}}”.",
+      "pickWord": "Chọn một từ để xem trang của từ đó.",
+      "tryAnother": "Thử cách viết khác, hoặc tìm theo gốc từ như “spect”.",
+      "sections": "Các mục từ điển",
+      "section": {
+        "search": "Tìm kiếm",
+        "roots": "Gốc từ",
+        "flashcards": "Thẻ ghi nhớ"
+      },
+      "tabWord": "Từ",
+      "tabRoots": "Gốc từ & họ từ",
+      "rootsTitle": "Gốc từ & họ từ",
+      "rootMeaning": "“nhìn” · Latin",
+      "family": "Họ từ",
+      "quiz": "Làm bài kiểm tra gốc từ này",
+      "pronounce": "Phát âm",
+      "sendPractice": "Gửi sang Luyện tập",
+      "liveHint": "Nhấp vào một từ để mở từ điển. Nhấn Esc để đóng; tiêu điểm quay lại từ đó."
     }
   }
 }
