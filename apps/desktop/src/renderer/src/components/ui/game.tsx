@@ -64,12 +64,14 @@ export function ChapterNode({
   state,
   stars,
   onSelect,
+  className,
 }: {
   index: number
   title: string
   state: NodeState
   stars: number
   onSelect?: () => void
+  className?: string
 }) {
   const { t } = useTranslation()
   const Icon = NODE_ICON[state]
@@ -90,6 +92,7 @@ export function ChapterNode({
         state === 'passed' && 'border-success bg-success-soft text-success-soft-foreground',
         state === 'current' && 'border-primary bg-card text-card-foreground',
         state === 'locked' && 'border-node-locked bg-muted text-muted-foreground border-dashed',
+        className,
       )}
     >
       <span className="flex size-10 items-center justify-center rounded-full border-2 border-current">
