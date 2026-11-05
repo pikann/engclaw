@@ -169,7 +169,7 @@ export function AppShell({
         className="absolute h-full"
       >
         <SidebarHeader>
-          <div className="text-primary flex h-9 items-center gap-2.5 px-2 text-base font-semibold group-data-[collapsible=icon]:px-0">
+          <div className="text-primary flex h-9 items-center gap-2.5 px-2 text-base font-semibold group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
             <Logo label="Engclaw" className="h-5 shrink-0" />
             <span className="truncate group-data-[collapsible=icon]:hidden">Engclaw</span>
           </div>
