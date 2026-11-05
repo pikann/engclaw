@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Outlet, useLocation } from 'react-router'
-import type { ModelProgress, ModelStatus } from '@engclaw/ipc-contract'
 import { PracticeCard } from '@/components/practice-card'
 import { AppShell, useLayout, type NavKey } from '@/components/screens/shell'
-import { aggregateProgress } from '@/lib/model-download'
+import { modelCard } from '@/lib/model-download'
+import { useModels } from '@/lib/use-models'
 
 const TITLES: Record<string, NavKey> = {
   '/': 'home',
@@ -19,19 +19,9 @@ const TITLES: Record<string, NavKey> = {
 
 /** Download percent while any model is downloading, otherwise null. */
 function useModelsPercent(): number | null {
-  const [models, setModels] = useState<ModelStatus[]>([])
-  const [progress, setProgress] = useState<Record<string, ModelProgress>>({})
-  useEffect(() => {
-    const refresh = () => void window.engclaw.models.list().then(setModels)
-    refresh()
-    return window.engclaw.models.onProgress((e) => {
-      setProgress((p) => ({ ...p, [e.id]: e }))
-      if (e.phase === 'ready' || e.phase === 'cancelled' || e.phase === 'error') refresh()
-      else setModels((m) => m.map((x) => (x.id === e.id ? { ...x, state: 'downloading' } : x)))
-    })
-  }, [])
-  const active = models.filter((m) => m.state === 'downloading')
-  return active.length > 0 ? aggregateProgress(active, progress).percent : null
+  const { models, progress } = useModels()
+  const card = modelCard(models ?? [], progress)
+  return card.status === 'downloading' ? card.aggregate.percent : null
 }
 
 function useMic(): 'ready' | 'missing' {

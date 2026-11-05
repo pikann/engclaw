@@ -1,19 +1,82 @@
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router'
-import { buttonVariants } from '@/components/ui/button'
-import { Logo } from '@/components/ui/logo'
+import type { HistoryAttempt } from '@engclaw/ipc-contract'
+import { ModelDownloadDialog } from '@/components/model-download-dialog'
+import {
+  HomeDashboard,
+  type ModelCardData,
+  type RecentRow,
+} from '@/components/screens/home-screens'
+import { formatBytes } from '@/lib/format'
+import { modelCard } from '@/lib/model-download'
+import { useModels } from '@/lib/use-models'
+
+const RECENT_COUNT = 5
+
+const toRow = (a: HistoryAttempt): RecentRow => ({
+  id: a.id,
+  text: a.text,
+  mode: a.mode === 'sentence' ? 'read' : 'free',
+  score: Math.round(a.score),
+  at: a.createdAt,
+})
+
+function useOnline(): boolean {
+  const [online, setOnline] = useState(navigator.onLine)
+  useEffect(() => {
+    const up = () => setOnline(true)
+    const down = () => setOnline(false)
+    window.addEventListener('online', up)
+    window.addEventListener('offline', down)
+    return () => {
+      window.removeEventListener('online', up)
+      window.removeEventListener('offline', down)
+    }
+  }, [])
+  return online
+}
 
 export function Home() {
-  const { t } = useTranslation()
+  const { models, progress, refresh } = useModels()
+  const [recent, setRecent] = useState<RecentRow[] | null>(null)
+  const [downloadOpen, setDownloadOpen] = useState(false)
+  const online = useOnline()
+
+  useEffect(() => {
+    void window.engclaw.history
+      .list({ limit: RECENT_COUNT })
+      .then((r) => setRecent(r.attempts.map(toRow)))
+  }, [])
+
+  const card = modelCard(models ?? [], progress)
+  const model: ModelCardData = {
+    status: card.status,
+    percent: card.aggregate.percent,
+    received: formatBytes(card.aggregate.receivedBytes),
+    total: formatBytes(card.aggregate.totalBytes),
+  }
   return (
-    <section className="mx-auto max-w-2xl space-y-4" data-testid="home">
-      <Logo className="text-primary h-8" />
-      <h2 className="text-2xl font-semibold">{t('screens.home.welcome')}</h2>
-      <p className="text-muted-foreground">{t('screens.home.welcomeBody')}</p>
-      <Link to="/practice" data-testid="home-start" className={buttonVariants()}>
-        {t('screens.home.card.practice.cta')}
-      </Link>
-    </section>
+    <>
+      <HomeDashboard
+        data={{
+          loading: models === null || recent === null,
+          offline: !online,
+          noProvider: true,
+          recent: recent ?? [],
+          items: [],
+          model,
+          onDownload: () => setDownloadOpen(true),
+        }}
+      />
+      <ModelDownloadDialog
+        open={downloadOpen}
+        onOpenChange={setDownloadOpen}
+        onReady={() => {
+          setDownloadOpen(false)
+          void refresh()
+        }}
+      />
+    </>
   )
 }
 

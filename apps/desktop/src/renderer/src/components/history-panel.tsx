@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Download, Play, Trash2, Upload } from 'lucide-react'
+import { useSearchParams } from 'react-router'
 import type { HistoryAttempt, HistoryFileResult } from '@engclaw/ipc-contract'
 import { Button } from '@/components/ui/button'
 import { playPcm } from '@/lib/audio'
@@ -14,6 +15,8 @@ export function HistoryPanel() {
   const [total, setTotal] = useState(0)
   const [notice, setNotice] = useState<string | null>(null)
   const playing = useRef<{ stop: () => void } | null>(null)
+  const [params] = useSearchParams()
+  const focusId = params.get('attempt')
 
   const load = useCallback(async (limit: number) => {
     const r = await window.engclaw.history.list({ limit })
@@ -88,7 +91,13 @@ export function HistoryPanel() {
       ) : (
         <ul className="divide-y">
           {items.map((a) => (
-            <li key={a.id} className="flex items-center gap-3 py-2" data-testid="history-item">
+            <li
+              key={a.id}
+              ref={a.id === focusId ? (el) => el?.scrollIntoView({ block: 'nearest' }) : undefined}
+              aria-current={a.id === focusId ? 'true' : undefined}
+              className="aria-[current=true]:bg-muted flex items-center gap-3 py-2"
+              data-testid="history-item"
+            >
               <span className="w-16 text-lg font-semibold tabular-nums">{Math.round(a.score)}</span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm">{a.text}</p>
