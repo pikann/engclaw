@@ -51,6 +51,7 @@ export function AppLayout() {
   const mic = useMic()
   const active = TITLES[pathname] ?? 'home'
   const onPractice = pathname === '/practice'
+  const fullBleed = pathname === '/shadowing'
   const known = pathname in TITLES
   return (
     <div className="h-screen">
@@ -67,7 +68,7 @@ export function AppLayout() {
             <PracticeScreen />
           </div>
           {!onPractice && (
-            <div className="h-full overflow-auto p-6">
+            <div className={fullBleed ? 'h-full' : 'h-full overflow-auto p-6'}>
               <Outlet />
             </div>
           )}

@@ -18,6 +18,7 @@ type Api = Record<string, unknown> & {
     onLanguageChanged(cb: (l: string) => void): () => void
   }
   youtube: { meta(r: unknown): Promise<unknown> }
+  player: { setBounds(r: unknown): Promise<unknown>; command(r: unknown): Promise<unknown> }
 }
 
 async function load(): Promise<Api> {
@@ -39,6 +40,7 @@ describe('preload bridge', () => {
       'inference',
       'models',
       'ping',
+      'player',
       'settings',
       'tts',
       'youtube',
@@ -54,6 +56,9 @@ describe('preload bridge', () => {
     await expect(api.ping({ message: 123 })).rejects.toThrow()
     await expect(api.ping({ message: 'x', admin: true })).rejects.toThrow()
     await expect(api.youtube.meta({})).rejects.toThrow()
+    await expect(api.player.setBounds({ x: -1, y: 0, width: 10, height: 10 })).rejects.toThrow()
+    await expect(api.player.command({ type: 'seek', seconds: -5 })).rejects.toThrow()
+    await expect(api.player.command({ type: 'eval', code: '1' })).rejects.toThrow()
     expect(invoke).not.toHaveBeenCalled()
   })
 

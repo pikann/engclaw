@@ -20,6 +20,22 @@ export const MIGRATIONS: readonly string[] = [
      key   TEXT PRIMARY KEY,
      value TEXT NOT NULL
    );`,
+  `CREATE TABLE videos (
+     video_id        TEXT PRIMARY KEY,
+     title           TEXT NOT NULL,
+     duration_sec    REAL NOT NULL,
+     caption_tracks  TEXT NOT NULL,
+     fetched_at      INTEGER NOT NULL,
+     last_opened_at  INTEGER
+   );
+   CREATE INDEX videos_last_opened ON videos (last_opened_at DESC);
+   CREATE TABLE transcripts (
+     video_id    TEXT NOT NULL,
+     lang        TEXT NOT NULL,
+     cues        TEXT NOT NULL,
+     fetched_at  INTEGER NOT NULL,
+     PRIMARY KEY (video_id, lang)
+   );`,
 ]
 
 export class FutureSchemaError extends Error {

@@ -30,7 +30,15 @@ export default defineConfig({
   },
   preload: {
     plugins: [externalizeDepsPlugin({ exclude: ['@engclaw/ipc-contract'] })],
-    build: { rollupOptions: { output: { format: 'cjs', entryFileNames: '[name].js' } } },
+    build: {
+      rollupOptions: {
+        input: {
+          index: resolve(__dirname, 'src/preload/index.ts'),
+          player: resolve(__dirname, 'src/preload/player.ts'),
+        },
+        output: { format: 'cjs', entryFileNames: '[name].js' },
+      },
+    },
   },
   renderer: {
     resolve: { alias },

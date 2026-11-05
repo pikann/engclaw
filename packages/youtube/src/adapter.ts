@@ -8,6 +8,7 @@ import {
 } from './types'
 import { parseVideoId } from './videoId'
 
+type Info = Awaited<ReturnType<Innertube['getBasicInfo']>>
 type Client = 'WEB' | 'MWEB' | 'IOS' | 'ANDROID' | 'TV'
 export interface InnertubeAdapterOptions {
   /** Tried in order. Which clients YouTube accepts varies by network; see docs. */
@@ -32,7 +33,7 @@ export class InnertubeAdapter implements YouTubeAdapter {
   private readonly fetchFn: typeof fetch
 
   constructor(opts: InnertubeAdapterOptions = {}) {
-    this.clients = opts.clients ?? ['WEB']
+    this.clients = opts.clients ?? ['MWEB', 'IOS', 'WEB']
     this.fetchFn = opts.fetch ?? fetch
   }
 
@@ -41,7 +42,7 @@ export class InnertubeAdapter implements YouTubeAdapter {
     return this.yt
   }
 
-  private async info(videoId: string) {
+  private async info(videoId: string, usable: (info: Info) => boolean = () => true) {
     const id = parseVideoId(videoId)
     let last: unknown
     for (const client of this.clients) {
@@ -49,8 +50,9 @@ export class InnertubeAdapter implements YouTubeAdapter {
         const info = await (await this.innertube()).getBasicInfo(id, { client })
         const status = info.playability_status?.status
         if (status === 'ERROR') throw new YouTubeError('NOT_FOUND', info.playability_status?.reason ?? 'unavailable')
-        if (status === 'OK') return info
-        last = new Error(`playability ${status}`)
+        if (status !== 'OK') last = new Error(`playability ${status}`)
+        else if (usable(info)) return info
+        else last = new Error('no usable format')
       } catch (e) {
         last = e
       }
@@ -76,7 +78,7 @@ export class InnertubeAdapter implements YouTubeAdapter {
     const track = info.captions?.caption_tracks?.find((t) => t.language_code === lang)
     if (!track) throw new YouTubeError('NO_CAPTIONS', `No ${lang} captions`)
     try {
-      const res = await this.fetchFn(`${track.base_url}&fmt=json3`)
+      const res = await this.fetchFn(`${new URL(track.base_url, 'https://www.youtube.com').href}&fmt=json3`)
       if (!res.ok) throw new Error(`timedtext status code ${res.status}`)
       const json = (await res.json()) as { events?: { tStartMs: number; dDurationMs?: number; segs?: { utf8: string }[] }[] }
       const cues = (json.events ?? [])
@@ -96,10 +98,12 @@ export class InnertubeAdapter implements YouTubeAdapter {
 
   async audioRange(videoId: string, startSec: number, endSec: number): Promise<AudioRange> {
     if (!(endSec > startSec) || endSec - startSec > 120) throw new YouTubeError('NOT_FOUND', 'Invalid range')
-    const info = await this.info(videoId)
-    const fmt = info.streaming_data?.adaptive_formats
-      .filter((f) => f.has_audio && !f.has_video && f.url && f.content_length)
-      .sort((a, b) => a.bitrate - b.bitrate)[0]
+    const pickAudio = (i: Info) =>
+      i.streaming_data?.adaptive_formats
+        .filter((f) => f.has_audio && !f.has_video && f.url && f.content_length)
+        .sort((a, b) => a.bitrate - b.bitrate)[0]
+    const info = await this.info(videoId, (i) => !!pickAudio(i))
+    const fmt = pickAudio(info)
     if (!fmt?.url || !fmt.content_length) throw new YouTubeError('EXTRACTOR_BROKEN', 'No usable audio format')
     // Coarse byte window by average bitrate with padding; decoder trims to exact times downstream.
     const total = fmt.content_length

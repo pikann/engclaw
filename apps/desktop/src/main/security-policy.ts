@@ -53,3 +53,16 @@ export function buildCsp(dev: boolean): string {
     .map(([k, v]) => `${k} ${v.join(' ')}`)
     .join('; ')
 }
+
+const PLAYER_FRAME_HOSTS = new Set(['www.youtube.com', 'www.youtube-nocookie.com'])
+
+/** What the sandboxed player view may navigate to: its own loopback origin and YouTube's embed hosts. */
+export function isPlayerFrameUrlAllowed(raw: string, playerOrigin: string): boolean {
+  try {
+    const u = new URL(raw)
+    if (u.origin === playerOrigin) return true
+    return u.protocol === 'https:' && PLAYER_FRAME_HOSTS.has(u.hostname)
+  } catch {
+    return false
+  }
+}

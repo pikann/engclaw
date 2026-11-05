@@ -65,6 +65,7 @@ test('renderer is isolated: no node, no raw ipc, only the typed bridge', async (
     'inference',
     'models',
     'ping',
+    'player',
     'settings',
     'tts',
     'youtube',

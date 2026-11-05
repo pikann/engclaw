@@ -31,6 +31,49 @@ export const AudioRangeResponse = z.object({
   mime: z.string(),
   offsetSec: z.number(),
 })
+export const RecentVideo = z.object({
+  videoId: z.string(),
+  title: z.string(),
+  durationSec: z.number(),
+  lastOpenedAt: z.number(),
+})
+export type RecentVideo = z.infer<typeof RecentVideo>
+
+/** Where the player view sits, in the main window's content coordinates (CSS pixels). */
+export const PlayerBounds = z
+  .object({
+    x: z.number().int().min(0).max(20000),
+    y: z.number().int().min(0).max(20000),
+    width: z.number().int().min(0).max(20000),
+    height: z.number().int().min(0).max(20000),
+  })
+  .strict()
+export type PlayerBounds = z.infer<typeof PlayerBounds>
+
+export const PlayerCommand = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('play') }).strict(),
+  z.object({ type: z.literal('pause') }).strict(),
+  z.object({ type: z.literal('seek'), seconds: z.number().min(0).max(86_400) }).strict(),
+])
+export type PlayerCommand = z.infer<typeof PlayerCommand>
+
+export const PlayerState = z.enum(['playing', 'paused', 'ended', 'buffering', 'cued'])
+export type PlayerState = z.infer<typeof PlayerState>
+
+/** Pushed by the main process from the sandboxed player view. */
+export const PlayerEvent = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('ready'), duration: z.number() }),
+  z.object({ type: z.literal('state'), state: PlayerState }),
+  z.object({ type: z.literal('time'), seconds: z.number(), duration: z.number() }),
+  z.object({
+    type: z.literal('error'),
+    /** UNAVAILABLE: private, removed, embed-blocked or any player error. NETWORK: YouTube unreachable. */
+    code: z.enum(['UNAVAILABLE', 'NETWORK']),
+    detail: z.number().optional(),
+  }),
+])
+export type PlayerEvent = z.infer<typeof PlayerEvent>
+
 export type YouTubeResult<T> =
   { ok: true; value: T } | { ok: false; code: z.infer<typeof YouTubeErrorCode>; message: string }
 
@@ -310,6 +353,12 @@ export const IPC = {
   youtubeMeta: 'youtube:meta',
   youtubeTranscript: 'youtube:transcript',
   youtubeAudioRange: 'youtube:audioRange',
+  youtubeRecent: 'youtube:recent',
+  playerLoad: 'player:load',
+  playerBounds: 'player:bounds',
+  playerCommand: 'player:command',
+  playerClose: 'player:close',
+  playerEvent: 'player:event',
   ttsSpeak: 'tts:speak',
   inferenceAnalyze: 'inference:analyze',
   inferenceTranscribe: 'inference:transcribe',
@@ -369,6 +418,14 @@ export const invokeChannels = {
     request: AudioRangeRequest,
     response: youtubeResult(AudioRangeResponse),
   },
+  /** Videos opened before (with a cached transcript), newest first. */
+  [IPC.youtubeRecent]: { request: noArgs, response: z.array(RecentVideo) },
+  /** Creates (or replaces) the sandboxed player view for a video, hidden until bounds are set. */
+  [IPC.playerLoad]: { request: VideoRef, response: z.null() },
+  [IPC.playerBounds]: { request: PlayerBounds, response: z.null() },
+  [IPC.playerCommand]: { request: PlayerCommand, response: z.null() },
+  /** Destroys the player view. */
+  [IPC.playerClose]: { request: noArgs, response: z.null() },
   [IPC.ttsSpeak]: { request: SpeakRequest, response: SpeakResponse },
   [IPC.inferenceAnalyze]: {
     request: AnalyzeRequest,
@@ -391,6 +448,7 @@ export const eventChannels = {
   [IPC.settingsLanguageChanged]: z.string(),
   [IPC.modelsProgress]: ModelProgress,
   [IPC.inferenceProgress]: InferenceProgress,
+  [IPC.playerEvent]: PlayerEvent,
 } as const
 
 export type InvokeChannel = keyof typeof invokeChannels
@@ -451,6 +509,14 @@ export interface EngclawApi {
     audioRange(
       req: z.infer<typeof AudioRangeRequest>,
     ): Promise<YouTubeResult<z.infer<typeof AudioRangeResponse>>>
+    recent(): Promise<RecentVideo[]>
+  }
+  player: {
+    load(req: z.infer<typeof VideoRef>): Promise<null>
+    setBounds(req: PlayerBounds): Promise<null>
+    command(req: PlayerCommand): Promise<null>
+    close(): Promise<null>
+    onEvent(cb: (e: PlayerEvent) => void): () => void
   }
   tts: {
     /** Reference-voice audio (16 kHz mono) for a sentence; repeats are served from a disk cache. */

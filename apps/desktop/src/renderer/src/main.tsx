@@ -4,6 +4,7 @@ import { createHashRouter, RouterProvider } from 'react-router'
 import { AppLayout } from '@/components/app-shell'
 import { ComingSoon, Home } from '@/routes/home'
 import { HistoryPage } from '@/routes/history'
+import { ShadowingPage } from '@/routes/shadowing'
 import { SettingsPage } from '@/routes/settings'
 import { initI18n } from '@/lib/i18n'
 import { setThemePreference, useTheme, useThemePreference } from '@/lib/theme'
@@ -20,6 +21,7 @@ const router = createHashRouter([
     children: [
       { index: true, element: <Home /> },
       { path: 'practice', element: null },
+      { path: 'shadowing', element: <ShadowingPage /> },
       { path: 'history', element: <HistoryPage /> },
       { path: 'settings', element: <SettingsPage /> },
       { path: '*', element: <ComingSoon /> },
