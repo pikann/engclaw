@@ -11,6 +11,7 @@ import {
   Settings,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { Logo } from '@/components/ui/logo'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
 
@@ -100,12 +101,12 @@ export function AppShell({
       >
         <div
           className={cn(
-            'text-primary mb-2 flex h-9 items-center gap-2 px-3 text-base font-semibold',
+            'text-primary mb-2 flex h-9 items-center gap-2.5 px-3 text-base font-semibold',
             iconOnly && 'justify-center px-0',
           )}
         >
-          <span aria-hidden="true" className="bg-primary size-3 rounded-full" />
-          {iconOnly ? <span className="sr-only">Engclaw</span> : 'Engclaw'}
+          <Logo label={iconOnly ? 'Engclaw' : undefined} className="h-5" />
+          {!iconOnly && 'Engclaw'}
         </div>
         {NAV.map(({ key, icon }) => (
           <SidebarItem
