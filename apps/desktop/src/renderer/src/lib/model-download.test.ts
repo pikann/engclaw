@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { aggregateProgress, spaceProblem } from './model-download'
+import { aggregateProgress, modelCard, spaceProblem } from './model-download'
 
 const models = [
   { id: 'a', sizeBytes: 600 },
@@ -33,5 +33,30 @@ describe('spaceProblem', () => {
     expect(spaceProblem(100, { writable: true, freeBytes: 100 }, 50)).toBe('DISK_SPACE')
     expect(spaceProblem(100, { writable: true, freeBytes: 150 }, 50)).toBeNull()
     expect(spaceProblem(100, null)).toBeNull()
+  })
+})
+
+describe('modelCard', () => {
+  const m = (a: string, b: string) => [
+    { id: 'a', sizeBytes: 600, state: a as 'ready' },
+    { id: 'b', sizeBytes: 400, state: b as 'ready' },
+  ]
+
+  it('is ready when every model is installed', () => {
+    expect(modelCard(m('ready', 'ready'), {}).status).toBe('ready')
+  })
+
+  it('is missing when a model is not installed, with the size still to fetch', () => {
+    const c = modelCard(m('ready', 'not-installed'), {})
+    expect(c.status).toBe('missing')
+    expect(c.aggregate.totalBytes).toBe(400)
+  })
+
+  it('is downloading with live percent over the downloading models', () => {
+    const c = modelCard(m('downloading', 'not-installed'), {
+      a: { id: 'a', phase: 'downloading', receivedBytes: 300, totalBytes: 600 },
+    })
+    expect(c.status).toBe('downloading')
+    expect(c.aggregate.percent).toBe(50)
   })
 })

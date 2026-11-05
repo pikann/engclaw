@@ -35,3 +35,21 @@ export function spaceProblem(
   if (!disk.writable) return 'NOT_WRITABLE'
   return disk.freeBytes < needBytes + marginBytes ? 'DISK_SPACE' : null
 }
+
+export interface ModelCard {
+  status: 'ready' | 'downloading' | 'missing'
+  aggregate: Aggregate
+}
+
+/** What the Home model card shows: downloading wins over missing, which wins over ready. */
+export function modelCard(
+  models: Pick<ModelStatus, 'id' | 'sizeBytes' | 'state'>[],
+  progress: Record<string, ModelProgress | undefined>,
+): ModelCard {
+  const downloading = models.filter((m) => m.state === 'downloading')
+  if (downloading.length > 0)
+    return { status: 'downloading', aggregate: aggregateProgress(downloading, progress) }
+  const missing = models.filter((m) => m.state === 'not-installed')
+  if (missing.length > 0) return { status: 'missing', aggregate: aggregateProgress(missing, {}) }
+  return { status: 'ready', aggregate: aggregateProgress(models, {}) }
+}

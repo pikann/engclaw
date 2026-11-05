@@ -9,10 +9,12 @@ async function open(reducedMotion = false) {
   })
   const page = await app.firstWindow()
   if (reducedMotion) await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.evaluate(() => {
-    window.location.hash = '#/screens/game'
-  })
-  await expect(page.getByTestId('screens-game')).toBeVisible()
+  await expect(async () => {
+    await page.evaluate(() => {
+      window.location.hash = '#/screens/game'
+    })
+    await expect(page.getByTestId('screens-game')).toBeVisible({ timeout: 1500 })
+  }).toPass({ timeout: 15_000 })
   return { app, page }
 }
 
