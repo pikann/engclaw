@@ -63,6 +63,8 @@ test('map: zig-zag keeps chapter order in the DOM, current chapter is marked, pr
   const map = page.getByTestId('frame-map-mid')
   await expect(map.getByTestId('you-are-here')).toHaveCount(1)
   await expect(map.getByTestId('chapter-preview')).toBeVisible()
+  await expect(map.getByTestId('road-svg')).toBeVisible()
+  await expect(map.getByTestId('road-walked')).toHaveCount(1)
   const order = await map
     .locator('[data-testid="road-map"] button[data-state]')
     .evaluateAll((els) => els.map((e) => e.getAttribute('aria-label')?.match(/Chapter (\d+)/)?.[1]))
@@ -76,7 +78,15 @@ test('locked chapters are disabled and passed ones show 1-3 stars', async () => 
   const { app, page } = await open()
   const map = page.getByTestId('frame-map-mid')
   await expect(map.locator('button[data-state="locked"]').first()).toBeDisabled()
-  expect(await map.locator('button[data-state="passed"] [data-stars]').count()).toBeGreaterThan(0)
+  const stars = await map
+    .locator('[data-testid="road-map"] button[data-state="passed"]')
+    .evaluateAll((els) =>
+      els.map((e) =>
+        Number(e.parentElement?.querySelector('[data-stars]')?.getAttribute('data-stars')),
+      ),
+    )
+  expect(stars.length).toBeGreaterThan(0)
+  for (const n of stars) expect([1, 2, 3]).toContain(n)
   await app.close()
 })
 
