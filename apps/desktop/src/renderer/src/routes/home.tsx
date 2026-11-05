@@ -1,59 +1,28 @@
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { PracticeCard } from '@/components/practice-card'
-import { HistoryPanel } from '@/components/history-panel'
-import { SettingsPanel } from '@/components/settings-panel'
-import { LanguageSwitcher } from '@/components/language-switcher'
-import { Button } from '@/components/ui/button'
+import { Link } from 'react-router'
+import { buttonVariants } from '@/components/ui/button'
 import { Logo } from '@/components/ui/logo'
 
 export function Home() {
   const { t } = useTranslation()
-  const [reply, setReply] = useState('')
-  const [tab, setTab] = useState<'practice' | 'history' | 'settings'>('practice')
   return (
-    <main className="mx-auto max-w-2xl space-y-4 p-8">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Logo className="text-primary h-7" />
-          <h1 className="text-2xl font-semibold" data-testid="title">
-            {t('app.hello')}
-          </h1>
-        </div>
-        <LanguageSwitcher />
-      </div>
-      <Button
-        data-testid="ping"
-        onClick={async () => {
-          const res = await window.engclaw.ping({ message: 'hello' })
-          setReply(`${res.echo}@${res.platform}`)
-        }}
-      >
-        {t('ping.button')}
-      </Button>
-      <p data-testid="reply" className="text-muted-foreground">
-        {reply}
-      </p>
-      <nav className="flex gap-2" aria-label="main">
-        {(['practice', 'history', 'settings'] as const).map((k) => (
-          <Button
-            key={k}
-            size="sm"
-            variant={tab === k ? 'default' : 'outline'}
-            aria-pressed={tab === k}
-            data-testid={`tab-${k}`}
-            onClick={() => setTab(k)}
-          >
-            {t(`nav.${k}`)}
-          </Button>
-        ))}
-      </nav>
-      {/* Practice stays mounted so an in-flight analysis survives a tab switch. */}
-      <div hidden={tab !== 'practice'}>
-        <PracticeCard />
-      </div>
-      {tab === 'history' && <HistoryPanel />}
-      {tab === 'settings' && <SettingsPanel />}
-    </main>
+    <section className="mx-auto max-w-2xl space-y-4" data-testid="home">
+      <Logo className="text-primary h-8" />
+      <h2 className="text-2xl font-semibold">{t('screens.home.welcome')}</h2>
+      <p className="text-muted-foreground">{t('screens.home.welcomeBody')}</p>
+      <Link to="/practice" data-testid="home-start" className={buttonVariants()}>
+        {t('screens.home.card.practice.cta')}
+      </Link>
+    </section>
+  )
+}
+
+export function ComingSoon() {
+  const { t } = useTranslation()
+  return (
+    <section className="mx-auto max-w-2xl space-y-2" data-testid="coming-soon">
+      <h2 className="text-xl font-semibold">{t('screens.shell.comingSoon')}</h2>
+      <p className="text-muted-foreground">{t('screens.shell.comingSoonBody')}</p>
+    </section>
   )
 }

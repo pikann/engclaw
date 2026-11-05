@@ -91,7 +91,7 @@ test('theme choice persists across restarts', async () => {
     })
   const first = await launch()
   let page = await first.firstWindow()
-  await page.getByTestId('tab-settings').click()
+  await page.getByTestId('nav-settings').click()
   await page.getByTestId('theme-dark').click()
   await expect(page.locator('html')).toHaveClass(/dark/)
   await first.close()

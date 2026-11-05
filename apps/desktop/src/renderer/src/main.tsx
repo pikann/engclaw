@@ -1,7 +1,10 @@
 import { StrictMode, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createHashRouter, RouterProvider } from 'react-router'
-import { Home } from '@/routes/home'
+import { AppLayout } from '@/components/app-shell'
+import { ComingSoon, Home } from '@/routes/home'
+import { HistoryPage } from '@/routes/history'
+import { SettingsPage } from '@/routes/settings'
 import { initI18n } from '@/lib/i18n'
 import { setThemePreference, useTheme, useThemePreference } from '@/lib/theme'
 import './index.css'
@@ -11,9 +14,23 @@ import './index.css'
 const showDesignSystem = import.meta.env.DEV || import.meta.env.VITE_DESIGN_SYSTEM === '1'
 
 const router = createHashRouter([
-  { path: '/', element: <Home /> },
+  {
+    path: '/',
+    element: <AppLayout />,
+    children: [
+      { index: true, element: <Home /> },
+      { path: 'practice', element: null },
+      { path: 'history', element: <HistoryPage /> },
+      { path: 'settings', element: <SettingsPage /> },
+      { path: '*', element: <ComingSoon /> },
+    ],
+  },
   ...(showDesignSystem
     ? [
+        {
+          path: '/dev/ping',
+          lazy: async () => ({ Component: (await import('@/routes/dev-ping')).DevPing }),
+        },
         {
           path: '/design-system',
           lazy: async () => ({ Component: (await import('@/routes/design-system')).DesignSystem }),

@@ -36,6 +36,9 @@ function createWindow(): BrowserWindow {
   const win = new BrowserWindow({
     width: 1100,
     height: 760,
+    minWidth: 960,
+    minHeight: 600,
+    useContentSize: true,
     show: false,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),

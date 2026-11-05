@@ -9,6 +9,7 @@ test('app launches and IPC round-trips', async () => {
     args: [join(__dirname, '..'), ...(process.env['CI'] ? ['--no-sandbox'] : [])],
   })
   const page = await app.firstWindow()
+  await page.evaluate(() => (window.location.hash = '#/dev/ping'))
   await page.getByTestId('ping').click()
   await expect(page.getByTestId('reply')).toHaveText(`hello@${process.platform}`)
   await app.close()
@@ -27,15 +28,16 @@ test('language switches live and persists across restarts', async () => {
 
   const first = await launch()
   let page = await first.firstWindow()
-  await expect(page.getByTestId('title')).toHaveText('Hello from Engclaw')
+  await page.getByTestId('nav-settings').click()
+  await expect(page.getByTestId('page-title')).toHaveText('Settings')
   await page.getByTestId('language-switcher').click()
   await page.getByTestId('language-vi').click()
-  await expect(page.getByTestId('title')).toHaveText('Xin chào từ Engclaw')
+  await expect(page.getByTestId('page-title')).toHaveText('Cài đặt')
   await first.close()
 
   const second = await launch()
   page = await second.firstWindow()
-  await expect(page.getByTestId('title')).toHaveText('Xin chào từ Engclaw')
+  await expect(page.getByTestId('nav-home')).toContainText('Trang chủ')
   await second.close()
 })
 
@@ -97,6 +99,7 @@ test('practice card: empty text shows an inline hint instead of recording', asyn
     args: [join(__dirname, '..'), ...(process.env['CI'] ? ['--no-sandbox'] : [])],
   })
   const page = await app.firstWindow()
+  await page.getByTestId('nav-practice').click()
   await expect(page.getByTestId('practice-hint')).toHaveCount(0)
   await page.getByTestId('practice-record').click()
   await expect(page.getByTestId('practice-hint')).toBeVisible()
@@ -151,7 +154,7 @@ test('history and settings persist across restarts (SQLite in userData)', async 
   expect(settings.silenceAutoStop).toBe(false)
   expect(audio).toBe(1600)
 
-  await page.getByTestId('tab-history').click()
+  await page.getByTestId('nav-history').click()
   await expect(page.getByTestId('history-item')).toHaveCount(1)
   await second.close()
 })

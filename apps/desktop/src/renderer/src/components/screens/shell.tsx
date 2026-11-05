@@ -10,7 +10,9 @@ import {
   Play,
   Settings,
 } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link, NavLink } from 'react-router'
 import { Logo } from '@/components/ui/logo'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
@@ -28,6 +30,16 @@ const NAV: { key: Exclude<NavKey, 'settings'>; icon: LucideIcon }[] = [
   { key: 'history', icon: History },
 ]
 
+const ROUTES: Record<Exclude<NavKey, 'settings'>, string> = {
+  home: '/',
+  practice: '/practice',
+  shadowing: '/shadowing',
+  converse: '/converse',
+  game: '/game',
+  dictionary: '/dictionary',
+  history: '/history',
+}
+
 /** Windows narrower than this collapse the sidebar to icons (IA doc §0.2). */
 export const COMPACT_BELOW = 1100
 /** Windows at least this wide get three panes (IA doc §0.2). */
@@ -37,29 +49,47 @@ export type Layout = 'compact' | 'standard' | 'wide'
 export const layoutOf = (width: number): Layout =>
   width < COMPACT_BELOW ? 'compact' : width < WIDE_FROM ? 'standard' : 'wide'
 
+/** The layout class for the live window width. */
+export function useLayout(): Layout {
+  const [layout, setLayout] = useState(() => layoutOf(window.innerWidth))
+  useEffect(() => {
+    const onResize = () => setLayout(layoutOf(window.innerWidth))
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+  return layout
+}
+
 function SidebarItem({
   icon: Icon,
   label,
   active,
   iconOnly,
   trailing,
+  to,
+  testId,
+  secondary,
 }: {
   icon: LucideIcon
   label: string
   active?: boolean
   iconOnly: boolean
   trailing?: React.ReactNode
+  /** When set, the item is a real route link and the router decides which one is active. */
+  to?: string
+  testId?: string
+  /** A shortcut into another item's page: a plain link that is never marked current. */
+  secondary?: boolean
 }) {
-  return (
-    <div
-      aria-current={active ? 'page' : undefined}
-      title={iconOnly ? label : undefined}
-      className={cn(
-        'flex h-9 items-center gap-3 rounded-md px-3 text-sm',
-        active ? 'bg-primary-soft text-foreground font-medium' : 'text-muted-foreground',
-        iconOnly && 'justify-center px-0',
-      )}
-    >
+  const className = (isActive: boolean) =>
+    cn(
+      'flex h-9 items-center gap-3 rounded-md px-3 text-sm',
+      isActive ? 'bg-primary-soft text-foreground font-medium' : 'text-muted-foreground',
+      iconOnly && 'justify-center px-0',
+      to && 'hover:text-foreground focus-visible:ring-ring outline-none focus-visible:ring-2',
+    )
+  const content = (
+    <>
       <Icon className="size-4 shrink-0" aria-hidden="true" />
       {iconOnly ? (
         <span className="sr-only">{label}</span>
@@ -67,6 +97,38 @@ function SidebarItem({
         <span className="truncate">{label}</span>
       )}
       {!iconOnly && trailing}
+    </>
+  )
+  if (to && secondary)
+    return (
+      <Link
+        to={to}
+        title={iconOnly ? label : undefined}
+        data-testid={testId}
+        className={className(false)}
+      >
+        {content}
+      </Link>
+    )
+  if (to)
+    return (
+      <NavLink
+        to={to}
+        end
+        title={iconOnly ? label : undefined}
+        data-testid={testId ?? `nav-${to === '/' ? 'home' : to.slice(1)}`}
+        className={({ isActive }) => className(isActive)}
+      >
+        {content}
+      </NavLink>
+    )
+  return (
+    <div
+      aria-current={active ? 'page' : undefined}
+      title={iconOnly ? label : undefined}
+      className={className(!!active)}
+    >
+      {content}
     </div>
   )
 }
@@ -78,9 +140,14 @@ export function AppShell({
   title,
   actions,
   modelsPercent,
+  linked,
+  mic = 'ready',
   children,
 }: {
   layout: Layout
+  /** Real routing: items become links and the router marks the active one. */
+  linked?: boolean
+  mic?: 'ready' | 'missing'
   active: NavKey
   title: React.ReactNode
   actions?: React.ReactNode
@@ -114,6 +181,7 @@ export function AppShell({
             icon={icon}
             iconOnly={iconOnly}
             active={key === active}
+            to={linked ? ROUTES[key] : undefined}
             label={t(`screens.shell.${key}`)}
           />
         ))}
@@ -122,6 +190,9 @@ export function AppShell({
             icon={Download}
             iconOnly={iconOnly}
             label={t('screens.shell.models')}
+            to={linked ? '/settings' : undefined}
+            secondary
+            testId="nav-models"
             trailing={
               modelsPercent != null && (
                 <span className="text-muted-foreground ml-auto text-xs tabular-nums">
@@ -141,20 +212,26 @@ export function AppShell({
             icon={Settings}
             iconOnly={iconOnly}
             active={active === 'settings'}
+            to={linked ? '/settings' : undefined}
             label={t('screens.shell.settings')}
           />
         </div>
       </nav>
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex h-12 shrink-0 items-center gap-3 border-b px-4">
-          <h2 className="min-w-0 flex-1 truncate text-lg font-semibold">{title}</h2>
+          <h1 data-testid="page-title" className="min-w-0 flex-1 truncate text-lg font-semibold">
+            {title}
+          </h1>
           {actions}
         </header>
         <div className="min-h-0 flex-1">{children}</div>
         <footer className="text-muted-foreground flex h-7 shrink-0 items-center gap-4 border-t px-4 text-xs">
           <span className="flex items-center gap-1.5">
-            <span aria-hidden="true" className="bg-success size-2 rounded-full" />
-            {t('screens.shell.micReady')}
+            <span
+              aria-hidden="true"
+              className={cn('size-2 rounded-full', mic === 'ready' ? 'bg-success' : 'bg-warning')}
+            />
+            {t(mic === 'ready' ? 'screens.shell.micReady' : 'screens.shell.micMissing')}
           </span>
           <span>
             {t(
@@ -163,6 +240,7 @@ export function AppShell({
                 : 'screens.shell.modelsReady',
             )}
           </span>
+          <span>{t('screens.shell.providerNone')}</span>
         </footer>
       </div>
     </div>

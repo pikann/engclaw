@@ -274,7 +274,12 @@
       "settings": "Settings",
       "micReady": "Microphone ready",
       "modelsReady": "Models ready",
-      "modelsDownloading": "Downloading models…"
+      "modelsDownloading": "Downloading models…",
+      "micMissing": "No microphone found",
+      "providerNone": "No AI provider",
+      "comingSoon": "Coming soon",
+      "comingSoonBody": "This part of Engclaw is not available yet.",
+      "dev": "Developer tools"
     },
     "home": {
       "welcome": "Welcome to Engclaw",
