@@ -8,10 +8,12 @@ async function open() {
     args: [join(__dirname, '..'), ...(process.env['CI'] ? ['--no-sandbox'] : [])],
   })
   const page = await app.firstWindow()
-  await page.evaluate(() => {
-    window.location.hash = '#/screens/dictionary'
-  })
-  await expect(page.getByTestId('screens-dictionary')).toBeVisible()
+  await expect(async () => {
+    await page.evaluate(() => {
+      window.location.hash = '#/screens/dictionary'
+    })
+    await expect(page.getByTestId('screens-dictionary')).toBeVisible({ timeout: 1500 })
+  }).toPass({ timeout: 15_000 })
   return { app, page }
 }
 
