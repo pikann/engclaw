@@ -47,7 +47,9 @@ function createWindow(): BrowserWindow {
       ...secureWebPreferences,
     },
   })
-  win.once('ready-to-show', () => win.show())
+  // E2E headless mode: the window is still created and rendered (offscreen), just never shown.
+  const headless = !app.isPackaged && process.env['ENGCLAW_E2E_HEADLESS'] === '1'
+  if (!headless) win.once('ready-to-show', () => win.show())
   hardenWindow(win)
   if (process.env['ELECTRON_RENDERER_URL']) void win.loadURL(process.env['ELECTRON_RENDERER_URL'])
   else void win.loadURL(`${APP_ORIGIN}/`)
