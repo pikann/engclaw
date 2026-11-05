@@ -85,6 +85,7 @@ function setup(): { userData: string; catalogFile: string } {
 }
 
 async function recordAndAnalyze(page: import('@playwright/test').Page): Promise<void> {
+  await page.getByTestId('nav-practice').click()
   await page.getByTestId('practice-text').fill('Hello, I am a developer')
   await page.getByTestId('practice-record').click()
   await expect(page.getByTestId('practice-stop')).toBeVisible()
@@ -141,7 +142,7 @@ test('a custom folder is saved, receives the models and is found on the next lau
   // Next launch: the saved folder is used and the model is already there (no network needed).
   const again = await launch(userData, catalogFile)
   const p2 = await again.firstWindow()
-  await p2.getByTestId('tab-settings').click()
+  await p2.getByTestId('nav-settings').click()
   for (const id of ids)
     await expect(p2.getByTestId(`model-state-${id}`)).toContainText(/Ready|Sẵn sàng/)
   await again.close()

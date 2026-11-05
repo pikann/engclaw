@@ -10,9 +10,26 @@ import {
   Play,
   Settings,
 } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router'
 import { Logo } from '@/components/ui/logo'
 import { Progress } from '@/components/ui/progress'
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuBadge,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarRail,
+  SidebarTrigger,
+} from '@/components/ui/sidebar'
 import { cn } from '@/lib/utils'
 
 export type NavKey =
@@ -28,6 +45,16 @@ const NAV: { key: Exclude<NavKey, 'settings'>; icon: LucideIcon }[] = [
   { key: 'history', icon: History },
 ]
 
+const ROUTES: Record<Exclude<NavKey, 'settings'>, string> = {
+  home: '/',
+  practice: '/practice',
+  shadowing: '/shadowing',
+  converse: '/converse',
+  game: '/game',
+  dictionary: '/dictionary',
+  history: '/history',
+}
+
 /** Windows narrower than this collapse the sidebar to icons (IA doc §0.2). */
 export const COMPACT_BELOW = 1100
 /** Windows at least this wide get three panes (IA doc §0.2). */
@@ -37,37 +64,71 @@ export type Layout = 'compact' | 'standard' | 'wide'
 export const layoutOf = (width: number): Layout =>
   width < COMPACT_BELOW ? 'compact' : width < WIDE_FROM ? 'standard' : 'wide'
 
-function SidebarItem({
+/** The layout class for the live window width. */
+export function useLayout(): Layout {
+  const [layout, setLayout] = useState(() => layoutOf(window.innerWidth))
+  useEffect(() => {
+    const onResize = () => setLayout(layoutOf(window.innerWidth))
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+  return layout
+}
+
+const SIDEBAR_KEY = 'engclaw.sidebarCollapsed'
+
+/** Sidebar open state: the saved choice if there is one, otherwise it follows the window width. */
+function useSidebarOpen(layout: Layout): [boolean, (open: boolean) => void] {
+  const [saved, setSaved] = useState<boolean | null>(() => {
+    const v = localStorage.getItem(SIDEBAR_KEY)
+    return v === null ? null : v === '0'
+  })
+  const setOpen = useCallback((open: boolean) => {
+    localStorage.setItem(SIDEBAR_KEY, open ? '0' : '1')
+    setSaved(open)
+  }, [])
+  return [saved ?? layout !== 'compact', setOpen]
+}
+
+function NavItem({
   icon: Icon,
   label,
+  to,
   active,
-  iconOnly,
+  testId,
   trailing,
 }: {
   icon: LucideIcon
   label: string
+  /** Without a route the item is static (design-system gallery). */
+  to?: string
   active?: boolean
-  iconOnly: boolean
+  testId?: string
   trailing?: React.ReactNode
 }) {
+  const content = (
+    <>
+      <Icon aria-hidden="true" />
+      <span className="group-data-[collapsible=icon]:sr-only">{label}</span>
+    </>
+  )
   return (
-    <div
-      aria-current={active ? 'page' : undefined}
-      title={iconOnly ? label : undefined}
-      className={cn(
-        'flex h-9 items-center gap-3 rounded-md px-3 text-sm',
-        active ? 'bg-primary-soft text-foreground font-medium' : 'text-muted-foreground',
-        iconOnly && 'justify-center px-0',
-      )}
-    >
-      <Icon className="size-4 shrink-0" aria-hidden="true" />
-      {iconOnly ? (
-        <span className="sr-only">{label}</span>
-      ) : (
-        <span className="truncate">{label}</span>
-      )}
-      {!iconOnly && trailing}
-    </div>
+    <SidebarMenuItem>
+      <SidebarMenuButton asChild isActive={active} tooltip={label}>
+        {to ? (
+          <Link
+            to={to}
+            data-testid={testId ?? `nav-${to === '/' ? 'home' : to.slice(1)}`}
+            aria-current={active ? 'page' : undefined}
+          >
+            {content}
+          </Link>
+        ) : (
+          <div aria-current={active ? 'page' : undefined}>{content}</div>
+        )}
+      </SidebarMenuButton>
+      {trailing}
+    </SidebarMenuItem>
   )
 }
 
@@ -78,9 +139,14 @@ export function AppShell({
   title,
   actions,
   modelsPercent,
+  linked,
+  mic = 'ready',
   children,
 }: {
   layout: Layout
+  /** Real routing: items become links and the router marks the active one. */
+  linked?: boolean
+  mic?: 'ready' | 'missing'
   active: NavKey
   title: React.ReactNode
   actions?: React.ReactNode
@@ -89,72 +155,91 @@ export function AppShell({
   children: React.ReactNode
 }) {
   const { t } = useTranslation()
-  const iconOnly = layout === 'compact'
+  const [open, setOpen] = useSidebarOpen(layout)
   return (
-    <div className="bg-background text-foreground flex h-full w-full overflow-hidden">
-      <nav
+    <SidebarProvider
+      open={open}
+      onOpenChange={setOpen}
+      className="bg-background text-foreground relative h-full min-h-0 w-full overflow-hidden"
+    >
+      <Sidebar
+        collapsible="icon"
+        role="navigation"
         aria-label={t('screens.shell.nav')}
-        className={cn(
-          'bg-card flex shrink-0 flex-col gap-1 border-r p-2',
-          iconOnly ? 'w-16' : 'w-60',
-        )}
+        className="absolute h-full"
       >
-        <div
-          className={cn(
-            'text-primary mb-2 flex h-9 items-center gap-2.5 px-3 text-base font-semibold',
-            iconOnly && 'justify-center px-0',
-          )}
-        >
-          <Logo label={iconOnly ? 'Engclaw' : undefined} className="h-5" />
-          {!iconOnly && 'Engclaw'}
-        </div>
-        {NAV.map(({ key, icon }) => (
-          <SidebarItem
-            key={key}
-            icon={icon}
-            iconOnly={iconOnly}
-            active={key === active}
-            label={t(`screens.shell.${key}`)}
-          />
-        ))}
-        <div className="mt-auto space-y-1">
-          <SidebarItem
-            icon={Download}
-            iconOnly={iconOnly}
-            label={t('screens.shell.models')}
-            trailing={
-              modelsPercent != null && (
-                <span className="text-muted-foreground ml-auto text-xs tabular-nums">
-                  {modelsPercent}%
-                </span>
-              )
-            }
-          />
-          {modelsPercent != null && !iconOnly && (
-            <Progress
-              value={modelsPercent}
-              aria-label={t('models.dl.progressLabel')}
-              className="mx-3 w-auto"
+        <SidebarHeader>
+          <div className="text-primary flex h-10 items-center gap-3 p-2.5 text-lg font-semibold group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0">
+            <Logo label="Engclaw" className="h-6 shrink-0" />
+            <span className="truncate group-data-[collapsible=icon]:hidden">Engclaw</span>
+          </div>
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarMenu>
+              {NAV.map(({ key, icon }) => (
+                <NavItem
+                  key={key}
+                  icon={icon}
+                  active={key === active}
+                  to={linked ? ROUTES[key] : undefined}
+                  label={t(`screens.shell.${key}`)}
+                />
+              ))}
+            </SidebarMenu>
+          </SidebarGroup>
+        </SidebarContent>
+        <SidebarFooter>
+          <SidebarMenu>
+            <NavItem
+              icon={Download}
+              label={t('screens.shell.models')}
+              to={linked ? '/settings' : undefined}
+              testId="nav-models"
+              trailing={
+                modelsPercent != null && (
+                  <SidebarMenuBadge className="tabular-nums">{modelsPercent}%</SidebarMenuBadge>
+                )
+              }
             />
-          )}
-          <SidebarItem
-            icon={Settings}
-            iconOnly={iconOnly}
-            active={active === 'settings'}
-            label={t('screens.shell.settings')}
-          />
-        </div>
-      </nav>
-      <div className="flex min-w-0 flex-1 flex-col">
+            {modelsPercent != null && (
+              <Progress
+                value={modelsPercent}
+                aria-label={t('models.dl.progressLabel')}
+                className="mx-2 w-auto group-data-[collapsible=icon]:hidden"
+              />
+            )}
+            <NavItem
+              icon={Settings}
+              active={active === 'settings'}
+              to={linked ? '/settings' : undefined}
+              label={t('screens.shell.settings')}
+            />
+          </SidebarMenu>
+        </SidebarFooter>
+        <SidebarRail />
+      </Sidebar>
+      <SidebarInset className="min-h-0 min-w-0">
         <header className="flex h-12 shrink-0 items-center gap-3 border-b px-4">
-          <h2 className="min-w-0 flex-1 truncate text-lg font-semibold">{title}</h2>
+          <SidebarTrigger
+            data-testid="sidebar-toggle"
+            aria-label={t('screens.shell.toggleSidebar')}
+            title={`${t('screens.shell.toggleSidebar')} (Ctrl/⌘ B)`}
+            className="-ml-2"
+          />
+          <h1 data-testid="page-title" className="min-w-0 flex-1 truncate text-lg font-semibold">
+            {title}
+          </h1>
           {actions}
         </header>
         <div className="min-h-0 flex-1">{children}</div>
         <footer className="text-muted-foreground flex h-7 shrink-0 items-center gap-4 border-t px-4 text-xs">
           <span className="flex items-center gap-1.5">
-            <span aria-hidden="true" className="bg-success size-2 rounded-full" />
-            {t('screens.shell.micReady')}
+            <span
+              aria-hidden="true"
+              className={cn('size-2 rounded-full', mic === 'ready' ? 'bg-success' : 'bg-warning')}
+            />
+            {t(mic === 'ready' ? 'screens.shell.micReady' : 'screens.shell.micMissing')}
           </span>
           <span>
             {t(
@@ -163,9 +248,10 @@ export function AppShell({
                 : 'screens.shell.modelsReady',
             )}
           </span>
+          <span>{t('screens.shell.providerNone')}</span>
         </footer>
-      </div>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   )
 }
 

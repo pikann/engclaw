@@ -36,6 +36,7 @@ test.describe('Mode 2: practice a sentence', () => {
   test('records from the fake mic, then analyzes (or hits the model gate)', async () => {
     const app = await launch(freshUserData())
     const page = await app.firstWindow()
+    await page.getByTestId('nav-practice').click()
     await page.getByTestId('practice-text').fill(sentence)
     await page.getByTestId('practice-record').click()
     await expect(page.getByTestId('practice-stop')).toBeVisible()
@@ -60,6 +61,7 @@ test.describe('Mode 1: free speech', () => {
   test('records from the fake mic, then transcribes (or hits the model gate)', async () => {
     const app = await launch(freshUserData())
     const page = await app.firstWindow()
+    await page.getByTestId('nav-practice').click()
     await page.getByTestId('practice-mode-free').click()
     await page.getByTestId('practice-record').click()
     await expect(page.getByTestId('practice-stop')).toBeVisible()

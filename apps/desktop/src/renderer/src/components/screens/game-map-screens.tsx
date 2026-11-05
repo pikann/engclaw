@@ -470,7 +470,7 @@ export function ChapterPreview({
             type: t(`screens.game.type.${chapter.type}`),
           })}
         </p>
-        <p className="text-2xl font-semibold break-words">{chapter.target}</p>
+        <p className="text-2xl font-semibold wrap-break-word">{chapter.target}</p>
         <p className="text-muted-foreground" lang="en-fonipa">
           /{chapter.ipa}/
         </p>

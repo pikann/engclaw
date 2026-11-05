@@ -262,6 +262,7 @@
   },
   "screens": {
     "shell": {
+      "toggleSidebar": "Bật/tắt thanh bên",
       "nav": "Chính",
       "home": "Trang chủ",
       "practice": "Luyện tập",
@@ -274,7 +275,12 @@
       "settings": "Cài đặt",
       "micReady": "Micro sẵn sàng",
       "modelsReady": "Mô hình sẵn sàng",
-      "modelsDownloading": "Đang tải mô hình…"
+      "modelsDownloading": "Đang tải mô hình…",
+      "micMissing": "Không tìm thấy micro",
+      "providerNone": "Chưa có nhà cung cấp AI",
+      "comingSoon": "Sắp ra mắt",
+      "comingSoonBody": "Phần này của Engclaw chưa sẵn sàng.",
+      "dev": "Công cụ phát triển"
     },
     "home": {
       "welcome": "Chào mừng đến với Engclaw",

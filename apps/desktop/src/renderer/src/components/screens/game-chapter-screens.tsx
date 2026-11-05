@@ -91,7 +91,7 @@ function TargetText({ target, onWord }: { target: Target; onWord?: boolean }) {
   const long = target.text.length > 24
   const size = long ? 'text-2xl' : target.type === 'word' ? 'text-4xl' : 'text-3xl'
   return (
-    <p className={cn(size, 'leading-snug font-semibold break-words')} data-testid="target-text">
+    <p className={cn(size, 'leading-snug font-semibold wrap-break-word')} data-testid="target-text">
       {target.text.split(' ').map((w, i) => (
         <span key={i} className="mr-2 inline-block">
           <ClickableWord aria-expanded={onWord ? true : undefined}>{w}</ClickableWord>
@@ -256,7 +256,7 @@ function AskPanelBody({ target }: { target: Target }) {
   return (
     <div className="flex h-full min-h-0 flex-col gap-3" data-testid="ask-panel">
       <div className="flex items-center gap-2">
-        <h3 className="min-w-0 flex-1 text-sm font-semibold break-words">
+        <h3 className="min-w-0 flex-1 text-sm font-semibold wrap-break-word">
           {t('screens.game.askAbout', { target: target.text })}
         </h3>
         <Button size="icon-sm" variant="ghost" aria-label={t('screens.game.closeAsk')}>
@@ -339,7 +339,7 @@ function LeaveDialog() {
   return (
     <section
       aria-labelledby="leave-title"
-      className="bg-card w-[480px] max-w-full space-y-4 rounded-xl border p-6 shadow-lg"
+      className="bg-card w-120 max-w-full space-y-4 rounded-xl border p-6 shadow-lg"
       data-testid="leave-dialog"
     >
       <h3 id="leave-title" className="text-lg font-semibold">
