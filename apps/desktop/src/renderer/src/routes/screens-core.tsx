@@ -2,12 +2,13 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   DownloadOverlayScreen,
-  FirstRunHomeScreen,
   LockedFeatureScreen,
   type DownloadState,
 } from '@/components/screens/model-screens'
+import { HomeScreen } from '@/components/screens/home-screens'
 import {
   PracticeScreen,
+  type PracticeExtras,
   type PracticeMode,
   type PracticePhase,
 } from '@/components/screens/practice-screens'
@@ -83,6 +84,44 @@ const PRACTICE: [PracticeMode, PracticePhase][] = [
   ['free', 'check'],
   ['free', 'analyzing'],
   ['free', 'result'],
+]
+const PRACTICE_DETAILS: [string, string, PracticeMode, PracticePhase, PracticeExtras][] = [
+  ['history-list', 'History: last 5, open (Read aloud)', 'read', 'idle', { history: 'list' }],
+  [
+    'history-closed',
+    'History: last 5, collapsed (Speak freely)',
+    'free',
+    'idle',
+    { history: 'closed' },
+  ],
+  ['history-empty', 'History: empty', 'read', 'idle', { history: 'empty' }],
+  ['save', 'Result with Save', 'read', 'result', { history: 'list' }],
+  ['saved', 'Result saved with its audio', 'read', 'result', { saved: true, history: 'list' }],
+  ['tabs-draft', 'Tab switch: other tab keeps its work', 'read', 'idle', { tabs: 'draft' }],
+  ['tabs-confirm', 'Tab switch while recording: confirm', 'free', 'recording', { tabs: 'confirm' }],
+  [
+    'detail-text',
+    'Detail: phonemes as text',
+    'read',
+    'result',
+    { view: 'text', detailTab: 'phonemes' },
+  ],
+  [
+    'detail-hearing',
+    'Detail: Hear both playing',
+    'read',
+    'result',
+    { hearing: true, detailTab: 'phonemes' },
+  ],
+  ['pitch-ok', 'Detail: pitch', 'free', 'result', { detailTab: 'pitch' }],
+  ['pitch-empty', 'Detail: pitch empty', 'read', 'result', { pitch: 'empty', detailTab: 'pitch' }],
+  [
+    'pitch-low',
+    'Detail: pitch low confidence',
+    'read',
+    'result',
+    { pitch: 'low', detailTab: 'pitch' },
+  ],
 ]
 const ENTRY: EntryState[] = [
   'empty',
@@ -177,7 +216,7 @@ export function ScreensCore() {
 
         <Group id="first-run" title="First run and model download">
           <Frame id="home" title="First-run Home" size={size}>
-            <FirstRunHomeScreen width={w} />
+            <HomeScreen width={w} state="first-run" />
           </Frame>
           {DOWNLOAD.map((s) => (
             <Frame key={s} id={`dl-${s}`} title={`Download prompt: ${s}`} size={size}>
@@ -193,6 +232,14 @@ export function ScreensCore() {
           {PRACTICE.map(([m, p]) => (
             <Frame key={`${m}-${p}`} id={`practice-${m}-${p}`} title={`${m}: ${p}`} size={size}>
               <PracticeScreen width={w} mode={m} phase={p} />
+            </Frame>
+          ))}
+        </Group>
+
+        <Group id="practice-details" title="Practice details (ENGC-87)">
+          {PRACTICE_DETAILS.map(([id, title, m, p, x]) => (
+            <Frame key={id} id={`practice-${id}`} title={title} size={size}>
+              <PracticeScreen width={w} mode={m} phase={p} extras={x} />
             </Frame>
           ))}
         </Group>
