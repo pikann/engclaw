@@ -37,7 +37,7 @@ export function DictionaryDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-w-lg"
+        className="max-h-[70vh] max-w-[720px] overflow-auto"
         data-testid="dictionary-dialog"
         onCloseAutoFocus={(e) => {
           e.preventDefault()
