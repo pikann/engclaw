@@ -109,7 +109,7 @@ function NavItem({
   const content = (
     <>
       <Icon aria-hidden="true" />
-      <span>{label}</span>
+      <span className="group-data-[collapsible=icon]:sr-only">{label}</span>
     </>
   )
   return (
@@ -169,8 +169,8 @@ export function AppShell({
         className="absolute h-full"
       >
         <SidebarHeader>
-          <div className="text-primary flex h-9 items-center gap-2.5 pl-[3.5px] text-base font-semibold">
-            <Logo label="Engclaw" className="h-5 shrink-0" />
+          <div className="text-primary flex h-9 items-center gap-2.5 pl-[9px] text-lg font-semibold">
+            <Logo label="Engclaw" className="h-6 shrink-0" />
             <span className="truncate group-data-[collapsible=icon]:hidden">Engclaw</span>
           </div>
         </SidebarHeader>
