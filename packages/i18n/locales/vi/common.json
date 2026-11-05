@@ -262,6 +262,7 @@
   },
   "screens": {
     "shell": {
+      "toggleSidebar": "Bật/tắt thanh bên",
       "nav": "Chính",
       "home": "Trang chủ",
       "practice": "Luyện tập",

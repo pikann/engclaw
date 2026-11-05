@@ -7,12 +7,14 @@ import {
   type LucideIcon,
   MessageCircle,
   Mic,
+  PanelLeft,
   Play,
   Settings,
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, NavLink } from 'react-router'
+import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/ui/logo'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
@@ -134,6 +136,33 @@ function SidebarItem({
 }
 
 /** Static app chrome for the gallery: sidebar, page header and status bar (IA doc §1.1). */
+const SIDEBAR_KEY = 'engclaw.sidebarCollapsed'
+
+/** Collapsed state of the sidebar: the user's saved choice, else follows the window width. */
+function useSidebarCollapsed(layout: Layout): [boolean, () => void] {
+  const [saved, setSaved] = useState<boolean | null>(() => {
+    const v = localStorage.getItem(SIDEBAR_KEY)
+    return v === null ? null : v === '1'
+  })
+  const collapsed = saved ?? layout === 'compact'
+  const toggle = useCallback(() => {
+    const next = !collapsed
+    localStorage.setItem(SIDEBAR_KEY, next ? '1' : '0')
+    setSaved(next)
+  }, [collapsed])
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() === 'b' && (e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey) {
+        e.preventDefault()
+        toggle()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [toggle])
+  return [collapsed, toggle]
+}
+
 export function AppShell({
   layout,
   active,
@@ -156,13 +185,13 @@ export function AppShell({
   children: React.ReactNode
 }) {
   const { t } = useTranslation()
-  const iconOnly = layout === 'compact'
+  const [iconOnly, toggleSidebar] = useSidebarCollapsed(layout)
   return (
     <div className="bg-background text-foreground flex h-full w-full overflow-hidden">
       <nav
         aria-label={t('screens.shell.nav')}
         className={cn(
-          'bg-card flex shrink-0 flex-col gap-1 border-r p-2',
+          'bg-card flex shrink-0 flex-col gap-1 overflow-hidden border-r p-2 transition-[width] duration-200',
           iconOnly ? 'w-16' : 'w-60',
         )}
       >
@@ -219,6 +248,18 @@ export function AppShell({
       </nav>
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex h-12 shrink-0 items-center gap-3 border-b px-4">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            data-testid="sidebar-toggle"
+            aria-label={t('screens.shell.toggleSidebar')}
+            aria-expanded={!iconOnly}
+            title={`${t('screens.shell.toggleSidebar')} (Ctrl/⌘ B)`}
+            onClick={toggleSidebar}
+            className="-ml-2"
+          >
+            <PanelLeft aria-hidden="true" />
+          </Button>
           <h1 data-testid="page-title" className="min-w-0 flex-1 truncate text-lg font-semibold">
             {title}
           </h1>

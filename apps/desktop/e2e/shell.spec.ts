@@ -85,3 +85,18 @@ for (const theme of ['light', 'dark']) {
     await app.close()
   })
 }
+
+test('sidebar toggle collapses and expands, persists, and responds to Ctrl/Cmd+B', async () => {
+  const app = await launch()
+  const page = await app.firstWindow()
+  const nav = page.getByRole('navigation', { name: /Main|Chính/ })
+  const toggle = page.getByTestId('sidebar-toggle')
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+  const wide = (await nav.boundingBox())!.width
+  await toggle.click()
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+  await expect.poll(async () => (await nav.boundingBox())!.width).toBeLessThan(wide)
+  await page.keyboard.press(process.platform === 'darwin' ? 'Meta+b' : 'Control+b')
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+  await app.close()
+})

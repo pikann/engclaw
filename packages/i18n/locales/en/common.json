@@ -262,6 +262,7 @@
   },
   "screens": {
     "shell": {
+      "toggleSidebar": "Toggle sidebar",
       "nav": "Main",
       "home": "Home",
       "practice": "Practice",
