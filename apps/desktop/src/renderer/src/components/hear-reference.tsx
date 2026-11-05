@@ -7,7 +7,13 @@ import { playPcm } from '@/lib/audio'
 type State = 'idle' | 'loading' | 'playing'
 
 /** "Hear the reference": plays the Kokoro reference voice for `text` (cached after the first time). */
-export function HearReference({ text }: { text: string }) {
+export function HearReference({
+  text,
+  variant = 'outline',
+}: {
+  text: string
+  variant?: 'outline' | 'ghost'
+}) {
   const { t } = useTranslation()
   const [state, setState] = useState<State>('idle')
   const [error, setError] = useState<string | null>(null)
@@ -38,7 +44,7 @@ export function HearReference({ text }: { text: string }) {
   return (
     <div className="space-y-1">
       <Button
-        variant="outline"
+        variant={variant}
         size="sm"
         data-testid="hear-reference"
         disabled={state === 'loading' || !text.trim()}

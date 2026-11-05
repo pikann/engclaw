@@ -2,11 +2,15 @@ import { describe, expect, it } from 'vitest'
 import type { PronunciationResult } from '@engclaw/ipc-contract'
 import {
   formatTimer,
+  hasDraft,
   initialPractice,
+  initialTabs,
   loadingMessageKey,
   practiceReducer,
   shouldAutoAnalyze,
   shouldAutoTranscribe,
+  tabsReducer,
+  type TabsEvent,
   type PracticeAudio,
   type PracticeEvent,
   type PracticeState,
@@ -154,11 +158,11 @@ describe('free speech flow (Mode 1)', () => {
     expect(s.transcribed).toBe(false)
   })
 
-  it('a new take clears the old transcript flag so it is transcribed again', () => {
+  it('a newly imported file clears the old transcript flag so it is transcribed again', () => {
     const s = free([
       { type: 'loaded', audio },
       { type: 'transcribed', text: 'one' },
-      { type: 'recorded', audio },
+      { type: 'loaded', audio },
     ])
     expect(s.transcribed).toBe(false)
     expect(shouldAutoTranscribe(s)).toBe(true)
@@ -211,5 +215,97 @@ describe('formatTimer', () => {
   it('formats m:ss', () => {
     expect(formatTimer(0)).toBe('0:00')
     expect(formatTimer(65.9)).toBe('1:05')
+  })
+})
+
+describe('edit text', () => {
+  it('returns from the result to review, keeping audio and text', () => {
+    const s = run([
+      { type: 'text', text: 'hello' },
+      { type: 'recorded', audio },
+      { type: 'analyze-requested' },
+      { type: 'analyzed', result },
+      { type: 'edit' },
+    ])
+    expect(s.phase).toBe('ready')
+    expect(s.result).toBeNull()
+    expect(s.audio).toBe(audio)
+    expect(s.text).toBe('hello')
+  })
+})
+
+describe('practice tabs', () => {
+  const runTabs = (events: TabsEvent[]) => events.reduce(tabsReducer, initialTabs)
+
+  it("keeps each tab's text, audio and result when switching", () => {
+    const s = runTabs([
+      { type: 'tab', mode: 'sentence', event: { type: 'text', text: 'hello there' } },
+      { type: 'tab', mode: 'sentence', event: { type: 'recorded', audio } },
+      { type: 'switch', mode: 'free' },
+      { type: 'tab', mode: 'free', event: { type: 'loaded', audio } },
+      { type: 'switch', mode: 'sentence' },
+    ])
+    expect(s.active).toBe('sentence')
+    expect(s.tabs.sentence.text).toBe('hello there')
+    expect(s.tabs.sentence.audio).toBe(audio)
+    expect(s.tabs.free.audio).toBe(audio)
+    expect(s.tabs.free.text).toBe('')
+  })
+
+  it('lets a request that finishes on a hidden tab land on its own tab', () => {
+    const s = runTabs([
+      { type: 'tab', mode: 'sentence', event: { type: 'text', text: 'hello there' } },
+      { type: 'tab', mode: 'sentence', event: { type: 'recorded', audio } },
+      { type: 'tab', mode: 'sentence', event: { type: 'analyze-requested' } },
+      { type: 'switch', mode: 'free' },
+      { type: 'tab', mode: 'sentence', event: { type: 'analyzed', result } },
+    ])
+    expect(s.active).toBe('free')
+    expect(s.tabs.sentence.phase).toBe('result')
+    expect(s.tabs.free.phase).toBe('idle')
+  })
+
+  it('reports unfinished work', () => {
+    expect(hasDraft(initialPractice)).toBe(false)
+    expect(hasDraft({ ...initialPractice, text: ' x ' })).toBe(true)
+    expect(hasDraft({ ...initialPractice, audio })).toBe(true)
+  })
+})
+
+describe('record again and start over', () => {
+  const free = (events: PracticeEvent[]) => run([{ type: 'mode', mode: 'free' }, ...events])
+
+  it('record again keeps the text; the next mic take is not transcribed over it', () => {
+    const s = free([
+      { type: 'loaded', audio },
+      { type: 'transcribed', text: 'fixed text' },
+      { type: 'rerecord' },
+      { type: 'recorded', audio },
+    ])
+    expect(s.text).toBe('fixed text')
+    expect(s.transcribed).toBe(true)
+    expect(s.result).toBeNull()
+  })
+
+  it('an imported file is transcribed afresh even when text is kept', () => {
+    const s = free([
+      { type: 'loaded', audio },
+      { type: 'transcribed', text: 'fixed text' },
+      { type: 'rerecord' },
+      { type: 'loaded', audio },
+    ])
+    expect(s.transcribed).toBe(false)
+  })
+
+  it('reset forgets everything but the mode', () => {
+    const s = free([
+      { type: 'loaded', audio },
+      { type: 'transcribed', text: 'hi' },
+      { type: 'reset' },
+    ])
+    expect(s.text).toBe('')
+    expect(s.audio).toBeNull()
+    expect(s.transcribed).toBe(false)
+    expect(s.mode).toBe('free')
   })
 })
