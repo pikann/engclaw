@@ -5,6 +5,7 @@ import { HistoryPanel } from '@/components/history-panel'
 import { SettingsPanel } from '@/components/settings-panel'
 import { LanguageSwitcher } from '@/components/language-switcher'
 import { Button } from '@/components/ui/button'
+import { Logo } from '@/components/ui/logo'
 
 export function Home() {
   const { t } = useTranslation()
@@ -13,9 +14,12 @@ export function Home() {
   return (
     <main className="mx-auto max-w-2xl space-y-4 p-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold" data-testid="title">
-          {t('app.hello')}
-        </h1>
+        <div className="flex items-center gap-3">
+          <Logo className="text-primary h-7" />
+          <h1 className="text-2xl font-semibold" data-testid="title">
+            {t('app.hello')}
+          </h1>
+        </div>
         <LanguageSwitcher />
       </div>
       <Button

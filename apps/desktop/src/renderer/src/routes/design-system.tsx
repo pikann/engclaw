@@ -44,6 +44,7 @@ import { Button } from '@/components/ui/button'
 import { ChartFrame } from '@/components/ui/chart-frame'
 import { ClickableWord } from '@/components/ui/clickable-word'
 import { LiveRegion } from '@/components/ui/live-region'
+import { Logo, LogoLockup } from '@/components/ui/logo'
 import { PlayerControls } from '@/components/ui/player-controls'
 import { Recorder, type RecorderState } from '@/components/ui/recorder'
 import { ScoreRing } from '@/components/ui/score-ring'
@@ -108,6 +109,42 @@ export function DesignSystem() {
             ))}
           </div>
         </header>
+
+        <Section id="ds-logo" title="Logo">
+          <p className="text-muted-foreground max-w-prose text-sm">
+            The mark has no text. It is one colour and follows <code>currentColor</code>: teal on
+            surfaces, white on a primary surface. Minimum height 16 px; keep clear space of at least
+            a quarter of the mark's height around it. The wordmark is set in the UI font next to it
+            (lockup).
+          </p>
+          <div className="flex flex-wrap items-center gap-6">
+            <div
+              className="bg-card flex items-center gap-6 rounded-lg border p-6"
+              data-testid="logo-on-surface"
+            >
+              <Logo label="Engclaw" className="text-primary h-16" />
+              <Logo className="text-primary h-10" />
+              <Logo className="text-primary h-6" />
+              <Logo className="text-primary h-4" />
+            </div>
+            <div className="bg-primary text-primary-foreground flex items-center gap-6 rounded-lg p-6">
+              <Logo className="h-16" />
+              <Logo className="h-6" />
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-8">
+            <LogoLockup size="lg" />
+            <LogoLockup />
+            <LogoLockup size="sm" />
+            <span
+              className="bg-primary text-primary-foreground flex size-24 items-center justify-center rounded-[22%]"
+              role="img"
+              aria-label="App icon"
+            >
+              <Logo className="h-10" />
+            </span>
+          </div>
+        </Section>
 
         <Section id="ds-type" title="Typography (en / vi)">
           <p className="text-3xl">Pronounce clearly — Phát âm rõ ràng</p>
