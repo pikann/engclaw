@@ -7,16 +7,29 @@ import {
   type LucideIcon,
   MessageCircle,
   Mic,
-  PanelLeft,
   Play,
   Settings,
 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, NavLink } from 'react-router'
-import { Button } from '@/components/ui/button'
+import { Link } from 'react-router'
 import { Logo } from '@/components/ui/logo'
 import { Progress } from '@/components/ui/progress'
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuBadge,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarRail,
+  SidebarTrigger,
+} from '@/components/ui/sidebar'
 import { cn } from '@/lib/utils'
 
 export type NavKey =
@@ -62,107 +75,64 @@ export function useLayout(): Layout {
   return layout
 }
 
-function SidebarItem({
+const SIDEBAR_KEY = 'engclaw.sidebarCollapsed'
+
+/** Sidebar open state: the saved choice if there is one, otherwise it follows the window width. */
+function useSidebarOpen(layout: Layout): [boolean, (open: boolean) => void] {
+  const [saved, setSaved] = useState<boolean | null>(() => {
+    const v = localStorage.getItem(SIDEBAR_KEY)
+    return v === null ? null : v === '0'
+  })
+  const setOpen = useCallback((open: boolean) => {
+    localStorage.setItem(SIDEBAR_KEY, open ? '0' : '1')
+    setSaved(open)
+  }, [])
+  return [saved ?? layout !== 'compact', setOpen]
+}
+
+function NavItem({
   icon: Icon,
   label,
-  active,
-  iconOnly,
-  trailing,
   to,
+  active,
   testId,
-  secondary,
+  trailing,
 }: {
   icon: LucideIcon
   label: string
-  active?: boolean
-  iconOnly: boolean
-  trailing?: React.ReactNode
-  /** When set, the item is a real route link and the router decides which one is active. */
+  /** Without a route the item is static (design-system gallery). */
   to?: string
+  active?: boolean
   testId?: string
-  /** A shortcut into another item's page: a plain link that is never marked current. */
-  secondary?: boolean
+  trailing?: React.ReactNode
 }) {
-  const className = (isActive: boolean) =>
-    cn(
-      'flex h-9 items-center gap-3 rounded-md px-3 text-sm',
-      isActive ? 'bg-primary-soft text-foreground font-medium' : 'text-muted-foreground',
-      iconOnly && 'justify-center px-0',
-      to && 'hover:text-foreground focus-visible:ring-ring outline-none focus-visible:ring-2',
-    )
   const content = (
     <>
-      <Icon className="size-4 shrink-0" aria-hidden="true" />
-      {iconOnly ? (
-        <span className="sr-only">{label}</span>
-      ) : (
-        <span className="truncate">{label}</span>
-      )}
-      {!iconOnly && trailing}
+      <Icon aria-hidden="true" />
+      <span>{label}</span>
     </>
   )
-  if (to && secondary)
-    return (
-      <Link
-        to={to}
-        title={iconOnly ? label : undefined}
-        data-testid={testId}
-        className={className(false)}
-      >
-        {content}
-      </Link>
-    )
-  if (to)
-    return (
-      <NavLink
-        to={to}
-        end
-        title={iconOnly ? label : undefined}
-        data-testid={testId ?? `nav-${to === '/' ? 'home' : to.slice(1)}`}
-        className={({ isActive }) => className(isActive)}
-      >
-        {content}
-      </NavLink>
-    )
   return (
-    <div
-      aria-current={active ? 'page' : undefined}
-      title={iconOnly ? label : undefined}
-      className={className(!!active)}
-    >
-      {content}
-    </div>
+    <SidebarMenuItem>
+      <SidebarMenuButton asChild isActive={active} tooltip={label}>
+        {to ? (
+          <Link
+            to={to}
+            data-testid={testId ?? `nav-${to === '/' ? 'home' : to.slice(1)}`}
+            aria-current={active ? 'page' : undefined}
+          >
+            {content}
+          </Link>
+        ) : (
+          <div aria-current={active ? 'page' : undefined}>{content}</div>
+        )}
+      </SidebarMenuButton>
+      {trailing}
+    </SidebarMenuItem>
   )
 }
 
 /** Static app chrome for the gallery: sidebar, page header and status bar (IA doc §1.1). */
-const SIDEBAR_KEY = 'engclaw.sidebarCollapsed'
-
-/** Collapsed state of the sidebar: the user's saved choice, else follows the window width. */
-function useSidebarCollapsed(layout: Layout): [boolean, () => void] {
-  const [saved, setSaved] = useState<boolean | null>(() => {
-    const v = localStorage.getItem(SIDEBAR_KEY)
-    return v === null ? null : v === '1'
-  })
-  const collapsed = saved ?? layout === 'compact'
-  const toggle = useCallback(() => {
-    const next = !collapsed
-    localStorage.setItem(SIDEBAR_KEY, next ? '1' : '0')
-    setSaved(next)
-  }, [collapsed])
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() === 'b' && (e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey) {
-        e.preventDefault()
-        toggle()
-      }
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [toggle])
-  return [collapsed, toggle]
-}
-
 export function AppShell({
   layout,
   active,
@@ -185,81 +155,78 @@ export function AppShell({
   children: React.ReactNode
 }) {
   const { t } = useTranslation()
-  const [iconOnly, toggleSidebar] = useSidebarCollapsed(layout)
+  const [open, setOpen] = useSidebarOpen(layout)
   return (
-    <div className="bg-background text-foreground flex h-full w-full overflow-hidden">
-      <nav
+    <SidebarProvider
+      open={open}
+      onOpenChange={setOpen}
+      className="bg-background text-foreground relative h-full min-h-0 w-full overflow-hidden"
+    >
+      <Sidebar
+        collapsible="icon"
+        role="navigation"
         aria-label={t('screens.shell.nav')}
-        className={cn(
-          'bg-card flex shrink-0 flex-col gap-1 overflow-hidden border-r p-2 transition-[width] duration-200',
-          iconOnly ? 'w-16' : 'w-60',
-        )}
+        className="absolute h-full"
       >
-        <div
-          className={cn(
-            'text-primary mb-2 flex h-9 items-center gap-2.5 px-3 text-base font-semibold',
-            iconOnly && 'justify-center px-0',
-          )}
-        >
-          <Logo label={iconOnly ? 'Engclaw' : undefined} className="h-5" />
-          {!iconOnly && 'Engclaw'}
-        </div>
-        {NAV.map(({ key, icon }) => (
-          <SidebarItem
-            key={key}
-            icon={icon}
-            iconOnly={iconOnly}
-            active={key === active}
-            to={linked ? ROUTES[key] : undefined}
-            label={t(`screens.shell.${key}`)}
-          />
-        ))}
-        <div className="mt-auto space-y-1">
-          <SidebarItem
-            icon={Download}
-            iconOnly={iconOnly}
-            label={t('screens.shell.models')}
-            to={linked ? '/settings' : undefined}
-            secondary
-            testId="nav-models"
-            trailing={
-              modelsPercent != null && (
-                <span className="text-muted-foreground ml-auto text-xs tabular-nums">
-                  {modelsPercent}%
-                </span>
-              )
-            }
-          />
-          {modelsPercent != null && !iconOnly && (
-            <Progress
-              value={modelsPercent}
-              aria-label={t('models.dl.progressLabel')}
-              className="mx-3 w-auto"
+        <SidebarHeader>
+          <div className="text-primary flex h-9 items-center gap-2.5 px-2 text-base font-semibold group-data-[collapsible=icon]:px-0">
+            <Logo label="Engclaw" className="h-5 shrink-0" />
+            <span className="truncate group-data-[collapsible=icon]:hidden">Engclaw</span>
+          </div>
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarMenu>
+              {NAV.map(({ key, icon }) => (
+                <NavItem
+                  key={key}
+                  icon={icon}
+                  active={key === active}
+                  to={linked ? ROUTES[key] : undefined}
+                  label={t(`screens.shell.${key}`)}
+                />
+              ))}
+            </SidebarMenu>
+          </SidebarGroup>
+        </SidebarContent>
+        <SidebarFooter>
+          <SidebarMenu>
+            <NavItem
+              icon={Download}
+              label={t('screens.shell.models')}
+              to={linked ? '/settings' : undefined}
+              testId="nav-models"
+              trailing={
+                modelsPercent != null && (
+                  <SidebarMenuBadge className="tabular-nums">{modelsPercent}%</SidebarMenuBadge>
+                )
+              }
             />
-          )}
-          <SidebarItem
-            icon={Settings}
-            iconOnly={iconOnly}
-            active={active === 'settings'}
-            to={linked ? '/settings' : undefined}
-            label={t('screens.shell.settings')}
-          />
-        </div>
-      </nav>
-      <div className="flex min-w-0 flex-1 flex-col">
+            {modelsPercent != null && (
+              <Progress
+                value={modelsPercent}
+                aria-label={t('models.dl.progressLabel')}
+                className="mx-2 w-auto group-data-[collapsible=icon]:hidden"
+              />
+            )}
+            <NavItem
+              icon={Settings}
+              active={active === 'settings'}
+              to={linked ? '/settings' : undefined}
+              label={t('screens.shell.settings')}
+            />
+          </SidebarMenu>
+        </SidebarFooter>
+        <SidebarRail />
+      </Sidebar>
+      <SidebarInset className="min-h-0 min-w-0">
         <header className="flex h-12 shrink-0 items-center gap-3 border-b px-4">
-          <Button
-            variant="ghost"
-            size="icon-sm"
+          <SidebarTrigger
             data-testid="sidebar-toggle"
             aria-label={t('screens.shell.toggleSidebar')}
-            aria-expanded={!iconOnly}
             title={`${t('screens.shell.toggleSidebar')} (Ctrl/⌘ B)`}
-            onClick={toggleSidebar}
             className="-ml-2"
-          >
-            <PanelLeft aria-hidden="true" />
-          </Button>
+          />
           <h1 data-testid="page-title" className="min-w-0 flex-1 truncate text-lg font-semibold">
             {title}
           </h1>
@@ -283,8 +250,8 @@ export function AppShell({
           </span>
           <span>{t('screens.shell.providerNone')}</span>
         </footer>
-      </div>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   )
 }
 
