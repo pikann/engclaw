@@ -20,6 +20,13 @@ async function open(reducedMotion?: boolean) {
 // axe-core directly inside the renderer.
 async function serious(page: Page) {
   await page.waitForTimeout(400) // let colour transitions from a theme switch finish
+  // A hidden (headless) window produces no frames on Linux/Windows, which freezes theme colour
+  // transitions half-way; drop them so axe reads the final colours.
+  await page.evaluate(() => {
+    const style = document.createElement('style')
+    style.textContent = '*, *::before, *::after { transition: none !important }'
+    document.head.append(style)
+  })
   await page.evaluate(axe.source)
   const violations = await page.evaluate(async () => {
     const r = await (window as unknown as { axe: typeof axe }).axe.run(document, {
