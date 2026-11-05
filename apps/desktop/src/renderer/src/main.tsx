@@ -1,16 +1,43 @@
-import { StrictMode } from 'react'
+import { StrictMode, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createHashRouter, RouterProvider } from 'react-router'
 import { Home } from '@/routes/home'
 import { initI18n } from '@/lib/i18n'
+import { setThemePreference, useTheme, useThemePreference } from '@/lib/theme'
 import './index.css'
 
-const router = createHashRouter([{ path: '/', element: <Home /> }])
+// The kitchen-sink route is dev/test only: the flag is a build-time constant, so it is
+// tree-shaken out of release builds.
+const showDesignSystem = import.meta.env.DEV || import.meta.env.VITE_DESIGN_SYSTEM === '1'
+
+const router = createHashRouter([
+  { path: '/', element: <Home /> },
+  ...(showDesignSystem
+    ? [
+        {
+          path: '/design-system',
+          lazy: async () => ({ Component: (await import('@/routes/design-system')).DesignSystem }),
+        },
+      ]
+    : []),
+])
+
+/** Applies the persisted theme preference (system / light / dark) to <html>. */
+function ThemeRoot({ children }: { children: React.ReactNode }) {
+  const pref = useThemePreference()
+  useTheme(pref)
+  useEffect(() => {
+    void window.engclaw.app.getSettings().then((s) => setThemePreference(s.theme))
+  }, [])
+  return children
+}
 
 void initI18n().then(() =>
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
-      <RouterProvider router={router} />
+      <ThemeRoot>
+        <RouterProvider router={router} />
+      </ThemeRoot>
     </StrictMode>,
   ),
 )

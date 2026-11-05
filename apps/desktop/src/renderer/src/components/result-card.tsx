@@ -5,62 +5,17 @@ import type { PronunciationResult } from '@engclaw/ipc-contract'
 import { DetailCharts } from '@/components/detail-charts'
 import { Mouth } from '@/components/mouth'
 import { Button } from '@/components/ui/button'
+import { ScoreRing } from '@/components/ui/score-ring'
 import { playChime } from '@/lib/audio'
 import {
-  countUp,
   firstFlagged,
   heardSounds,
   heardText,
   isWrongPhone,
-  scoreTone,
   verdictOf,
   wordChips,
   type WordChip,
 } from '@/lib/result'
-
-const RADIUS = 52
-const CIRCUMFERENCE = 2 * Math.PI * RADIUS
-const TONE = { good: 'stroke-green-500', ok: 'stroke-amber-500', poor: 'stroke-red-500' } as const
-
-function ScoreRing({ score }: { score: number }) {
-  const [shown, setShown] = useState(0)
-  useEffect(() => {
-    const start = performance.now()
-    let raf = 0
-    const tick = (now: number): void => {
-      const v = countUp(score, now - start)
-      setShown(v)
-      if (v < Math.min(100, score)) raf = requestAnimationFrame(tick)
-    }
-    raf = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(raf)
-  }, [score])
-  return (
-    <div className="relative size-32 shrink-0" data-testid="result-ring">
-      <svg viewBox="0 0 120 120" className="size-full -rotate-90">
-        <circle cx="60" cy="60" r={RADIUS} fill="none" strokeWidth="10" className="stroke-muted" />
-        <circle
-          cx="60"
-          cy="60"
-          r={RADIUS}
-          fill="none"
-          strokeWidth="10"
-          strokeLinecap="round"
-          className={TONE[scoreTone(score)]}
-          strokeDasharray={CIRCUMFERENCE}
-          strokeDashoffset={CIRCUMFERENCE * (1 - shown / 100)}
-        />
-      </svg>
-      <span
-        className="absolute inset-0 flex items-center justify-center text-3xl font-semibold"
-        data-testid="result-score"
-        data-score={Math.round(score)}
-      >
-        {Math.round(shown)}
-      </span>
-    </div>
-  )
-}
 
 function speak(word: string): void {
   if (!('speechSynthesis' in window)) return
@@ -111,7 +66,7 @@ function WordDetail({ chip }: { chip: WordChip }) {
                     setPlayId((n) => n + 1)
                   }}
                   className={`rounded px-0.5 ${phone === i ? 'bg-muted' : ''} ${
-                    isWrongPhone(p.confidence) ? 'underline decoration-red-500 decoration-2' : ''
+                    isWrongPhone(p.confidence) ? 'underline decoration-score-low decoration-2' : ''
                   }`}
                 >
                   {p.expected}
@@ -126,7 +81,7 @@ function WordDetail({ chip }: { chip: WordChip }) {
                 <span
                   key={i}
                   className={
-                    isWrongPhone(p.confidence) ? 'underline decoration-red-500 decoration-2' : ''
+                    isWrongPhone(p.confidence) ? 'underline decoration-score-low decoration-2' : ''
                   }
                 >
                   {p.heard || '∅'}
@@ -218,9 +173,9 @@ export function ResultCard({
             onClick={() => setSelected(c.position)}
             className={`rounded-full border px-3 py-1 text-sm ${
               c.error
-                ? 'border-red-300 bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-200'
-                : 'border-green-300 bg-green-100 text-green-900 dark:bg-green-950 dark:text-green-200'
-            } ${c.position === selected ? 'ring-2 ring-offset-1' : ''}`}
+                ? 'border-destructive bg-destructive-soft text-destructive-soft-foreground'
+                : 'border-success bg-success-soft text-success-soft-foreground'
+            } ${c.position === selected ? 'ring-2 ring-ring ring-offset-1' : ''}`}
           >
             {c.word}
           </button>

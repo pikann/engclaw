@@ -277,6 +277,8 @@ export const AppSettings = z.object({
   silenceAutoStop: z.boolean().default(true),
   /** Check GitHub releases for a newer version on launch. */
   checkForUpdates: z.boolean().default(true),
+  /** Colour theme: follow the OS, or force light/dark. */
+  theme: z.enum(['system', 'light', 'dark']).default('system'),
 })
 export type AppSettings = z.infer<typeof AppSettings>
 export const AppSettingsPatch = AppSettings.partial().strict()

@@ -105,11 +105,19 @@ describe('store', () => {
   })
 
   it('settings default, persist and patch', () => {
-    expect(store.settings.get()).toEqual({ silenceAutoStop: true, checkForUpdates: true })
+    expect(store.settings.get()).toEqual({
+      silenceAutoStop: true,
+      checkForUpdates: true,
+      theme: 'system',
+    })
     store.settings.update({ silenceAutoStop: false })
     store.db.close()
     store = openStore(dbPath())
-    expect(store.settings.get()).toEqual({ silenceAutoStop: false, checkForUpdates: true })
+    expect(store.settings.get()).toEqual({
+      silenceAutoStop: false,
+      checkForUpdates: true,
+      theme: 'system',
+    })
   })
 
   it('deleteAll wipes history, recordings and settings', () => {

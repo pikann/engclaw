@@ -178,6 +178,86 @@
     "deleteTitle": "Delete all data?",
     "deleteBody": "This permanently removes your practice history, recordings and preferences. Downloaded models are kept.",
     "deleteConfirm": "Delete everything",
-    "deleted": "All data deleted."
+    "deleted": "All data deleted.",
+    "theme": "Theme",
+    "themeSystem": "Match system",
+    "themeLight": "Light",
+    "themeDark": "Dark"
+  },
+  "ds": {
+    "scoreRing": "Score {{score}} out of 100",
+    "resize": "Resize panes",
+    "recorder": {
+      "start": "Record",
+      "stop": "Stop",
+      "processing": "Analysing…"
+    },
+    "player": {
+      "label": "Player controls",
+      "prev": "Previous sentence",
+      "next": "Next sentence",
+      "play": "Play",
+      "pause": "Pause",
+      "loop": "Loop sentence",
+      "speed": "Playback speed"
+    },
+    "chat": {
+      "you": "You",
+      "agent": "Agent"
+    },
+    "turn": {
+      "listening": "Listening",
+      "thinking": "Thinking",
+      "speaking": "Speaking"
+    },
+    "captions": {
+      "toggle": "Captions",
+      "hidden": "Captions are hidden. The agent is still speaking.",
+      "show": "Show captions"
+    },
+    "card": {
+      "vocabulary": "Vocabulary",
+      "pronunciation": "Pronunciation",
+      "grammar": "Grammar tip",
+      "correction": "Correction",
+      "hearIt": "Hear it",
+      "said": "You said",
+      "better": "Better"
+    },
+    "tool": {
+      "running": "in progress",
+      "done": "done"
+    },
+    "dict": {
+      "description": "Dictionary entry for {{word}}",
+      "close": "Close",
+      "ask": "Ask the agent",
+      "quickPrompts": "Quick questions",
+      "noImage": "No image for this word"
+    },
+    "provider": {
+      "signIn": "Sign in with {{provider}}",
+      "advanced": "Advanced",
+      "testing": "Testing connection…",
+      "ok": "Connected",
+      "failed": "Connection failed"
+    },
+    "game": {
+      "stars": "{{count}} of {{max}} stars",
+      "node": {
+        "locked": "Chapter {{index}}, {{title}}: locked",
+        "current": "Chapter {{index}}, {{title}}: current, {{count}} of {{max}} stars",
+        "passed": "Chapter {{index}}, {{title}}: passed, {{count}} of {{max}} stars"
+      },
+      "progress": "{{passed}} of {{chapters}} chapters passed · {{earned}} of {{total}} stars",
+      "progressLabel": "Game progress",
+      "attempts": "{{correct}} of {{max}} attempts correct",
+      "slot": {
+        "empty": "Attempt {{index}}: not yet",
+        "correct": "Attempt {{index}}: correct",
+        "filled-pulse": "Attempt {{index}}: in progress"
+      },
+      "newBest": "New best"
+    }
   }
 }

@@ -72,18 +72,18 @@ export function DetailCharts({ result }: { result: PronunciationResult }) {
               values: s.phoneme.reference,
               className: 'stroke-muted-foreground',
             },
-            { label: t('result.chartYou'), values: s.phoneme.you, className: 'stroke-blue-500' },
+            { label: t('result.chartYou'), values: s.phoneme.you, className: 'stroke-primary' },
           ]}
         />
         <Chart
           testId="chart-f0"
           title={t('result.chartF0')}
-          lines={[{ label: 'F0', values: s.f0, className: 'stroke-blue-500' }]}
+          lines={[{ label: 'F0', values: s.f0, className: 'stroke-primary' }]}
         />
         <Chart
           testId="chart-energy"
           title={t('result.chartEnergy')}
-          lines={[{ label: 'Energy', values: s.energy, className: 'stroke-blue-500' }]}
+          lines={[{ label: 'Energy', values: s.energy, className: 'stroke-primary' }]}
         />
       </div>
     </details>
