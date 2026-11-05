@@ -23,6 +23,10 @@ const router = createHashRouter([
           lazy: async () => ({ Component: (await import('@/routes/screens-core')).ScreensCore }),
         },
         {
+          path: '/screens/home',
+          lazy: async () => ({ Component: (await import('@/routes/screens-home')).ScreensHome }),
+        },
+        {
           path: '/screens/agent',
           lazy: async () => ({ Component: (await import('@/routes/screens-agent')).ScreensAgent }),
         },

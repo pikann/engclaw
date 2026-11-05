@@ -3,7 +3,6 @@ import {
   CheckCircle2,
   Download,
   HardDrive,
-  Mic,
   Pause,
   Play,
   WifiOff,
@@ -12,9 +11,7 @@ import { useTranslation } from 'react-i18next'
 import { AppShell, layoutOf } from '@/components/screens/shell'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { cn } from '@/lib/utils'
 
 export type DownloadState =
   'prompt' | 'downloading' | 'paused' | 'offline' | 'error' | 'lowDisk' | 'unwritable' | 'done'
@@ -191,56 +188,6 @@ export function LockedFeatureScreen({ width }: { width: number }) {
           <Download />
           {t('practice.downloadModels')}
         </Button>
-      </div>
-    </AppShell>
-  )
-}
-
-/** First launch Home (IA doc §1.1): no wizard, a dashboard that points at what to try. */
-export function FirstRunHomeScreen({ width }: { width: number }) {
-  const { t } = useTranslation()
-  const cards = [
-    { key: 'practice', icon: Mic },
-    { key: 'shadowing', icon: Play },
-    { key: 'game', icon: Download },
-  ] as const
-  return (
-    <AppShell layout={layoutOf(width)} active="home" title={t('screens.shell.home')}>
-      <div className="h-full space-y-6 overflow-auto p-6">
-        <div className="space-y-1">
-          <h3 className="text-2xl font-semibold">{t('screens.home.welcome')}</h3>
-          <p className="text-muted-foreground text-sm">{t('screens.home.welcomeBody')}</p>
-        </div>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {cards.map(({ key, icon: Icon }) => (
-            <Card key={key}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Icon className="text-primary size-4" aria-hidden="true" />
-                  {t(`screens.home.card.${key}.title`)}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p className="text-muted-foreground text-sm">
-                  {t(`screens.home.card.${key}.body`)}
-                </p>
-                <Button size="sm" variant={key === 'practice' ? 'default' : 'outline'}>
-                  {t(`screens.home.card.${key}.cta`)}
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-        <Card className={cn('border-dashed')}>
-          <CardContent className="flex items-center gap-3 text-sm">
-            <Download className="text-muted-foreground size-4" aria-hidden="true" />
-            <span className="flex-1">{t('screens.home.modelsNotice')}</span>
-            <Button size="sm" variant="outline">
-              {t('practice.downloadModels')}
-            </Button>
-          </CardContent>
-        </Card>
-        <p className="text-muted-foreground text-sm">{t('screens.home.noRecent')}</p>
       </div>
     </AppShell>
   )
