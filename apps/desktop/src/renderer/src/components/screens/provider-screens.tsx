@@ -159,7 +159,7 @@ export function ProviderSetupPanel({
       <section
         role="status"
         aria-labelledby="prov-success-title"
-        className="bg-card flex w-[640px] max-w-full flex-col items-center gap-3 rounded-xl border p-10 text-center shadow-lg"
+        className="bg-card flex w-160 max-w-full flex-col items-center gap-3 rounded-xl border p-10 text-center shadow-lg"
         data-testid="screen-provider-success"
       >
         <span className="bg-success-soft text-success-soft-foreground flex size-14 items-center justify-center rounded-full">
@@ -177,7 +177,7 @@ export function ProviderSetupPanel({
   return (
     <section
       aria-labelledby={`prov-title-${status}-${test}`}
-      className="bg-card w-[640px] max-w-full space-y-4 rounded-xl border p-6 shadow-lg"
+      className="bg-card w-160 max-w-full space-y-4 rounded-xl border p-6 shadow-lg"
       data-testid="screen-provider"
     >
       <header className="space-y-1">

@@ -50,7 +50,7 @@ export function Recorder({
         data-testid="recorder-level"
       >
         <div
-          className="bg-accent h-full origin-left transition-transform duration-[var(--duration-fast)]"
+          className="bg-accent h-full origin-left transition-transform duration-(--duration-fast)"
           style={{ transform: `scaleX(${recording ? Math.min(1, Math.max(0, level)) : 0})` }}
         />
       </div>

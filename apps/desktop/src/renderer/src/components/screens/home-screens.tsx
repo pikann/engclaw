@@ -106,7 +106,7 @@ function ContinueCard({
           {kicker}
         </p>
         <div className="min-w-0 flex-1 space-y-1">
-          <p className="line-clamp-2 break-words font-medium">{title}</p>
+          <p className="line-clamp-2 wrap-break-word font-medium">{title}</p>
           <p className="text-muted-foreground text-sm">{meta}</p>
           {progress != null && (
             <Progress value={progress} aria-label={meta} className="mt-2 h-1.5" />

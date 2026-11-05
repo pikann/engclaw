@@ -584,7 +584,7 @@ function ConfirmSwitch({ to }: { to: PracticeMode }) {
     <div className="bg-background/70 absolute inset-0 flex items-center justify-center p-4 backdrop-blur-[1px]">
       <section
         aria-labelledby="switch-title"
-        className="bg-card w-[480px] max-w-full space-y-4 rounded-xl border p-6 shadow-lg"
+        className="bg-card w-120 max-w-full space-y-4 rounded-xl border p-6 shadow-lg"
         data-testid="screen-switch-confirm"
       >
         <h3 id="switch-title" className="text-lg font-semibold">

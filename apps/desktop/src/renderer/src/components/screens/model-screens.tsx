@@ -35,7 +35,7 @@ export function DownloadPrompt({ state }: { state: DownloadState }) {
   return (
     <section
       aria-labelledby={`dl-title-${state}`}
-      className="bg-card w-[560px] max-w-full space-y-4 rounded-xl border p-6 shadow-lg"
+      className="bg-card w-140 max-w-full space-y-4 rounded-xl border p-6 shadow-lg"
       data-testid="screen-download"
     >
       <header className="space-y-1">
