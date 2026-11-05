@@ -348,7 +348,7 @@ export function PracticeCard() {
         </label>
       </div>
       <p
-        className={`text-muted-foreground rounded-md border border-dashed p-2 text-center text-xs ${dragging ? 'bg-accent' : ''}`}
+        className={`text-muted-foreground rounded-md border border-dashed p-2 text-center text-xs ${dragging ? 'bg-primary-soft' : ''}`}
       >
         {t('audio.drop')}
       </p>

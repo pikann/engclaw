@@ -1,33 +1,252 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+/* Includes the latin, latin-ext and vietnamese subsets (bundled, works offline). */
 @import '@fontsource-variable/inter/wght.css';
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * Design tokens. Every colour is an oklch() literal so lib/color.ts can verify WCAG AA
+ * contrast for the pairs listed in tokens.test.ts. Add a new pair there when adding a token.
+ */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --border: oklch(0.922 0 0);
+  color-scheme: light;
+
+  --background: oklch(0.985 0.005 190);
+  --foreground: oklch(0.24 0.02 220);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.24 0.02 220);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.24 0.02 220);
+  --muted: oklch(0.96 0.008 190);
+  --muted-foreground: oklch(0.52 0.02 210);
+  --secondary: oklch(0.96 0.008 190);
+  --secondary-foreground: oklch(0.24 0.02 220);
+  --accent: oklch(0.68 0.17 50);
+  --accent-foreground: oklch(0.24 0.04 50);
+  --primary: oklch(0.525 0.0895 195.8);
+  --primary-foreground: oklch(1 0 0);
+  --primary-soft: oklch(0.95 0.025 190);
+  --border: oklch(0.92 0.01 190);
+  --input: oklch(0.62 0.02 200);
+  --ring: oklch(0.525 0.0895 195.8);
+
+  --destructive: oklch(0.58 0.2 25);
+  --destructive-foreground: oklch(0.985 0 0);
+  --destructive-soft: oklch(0.95 0.03 25);
+  --destructive-soft-foreground: oklch(0.45 0.18 27);
+  --success: oklch(0.5 0.14 150);
+  --success-foreground: oklch(0.985 0 0);
+  --success-soft: oklch(0.95 0.05 150);
+  --success-soft-foreground: oklch(0.38 0.1 150);
+  --warning: oklch(0.78 0.16 80);
+  --warning-foreground: oklch(0.2 0.04 80);
+  --warning-soft: oklch(0.96 0.07 90);
+  --warning-soft-foreground: oklch(0.4 0.09 70);
+  --info: oklch(0.5 0.15 235);
+  --info-foreground: oklch(0.985 0 0);
+  --info-soft: oklch(0.95 0.03 235);
+  --info-soft-foreground: oklch(0.4 0.12 240);
+
+  /* Score bands (ring, bars, chips): graphics need 3:1 against the surface. */
+  --score-high: oklch(0.62 0.15 150);
+  --score-mid: oklch(0.78 0.14 85);
+  --score-low: oklch(0.52 0.17 355);
+
+  /* Game: stars and node states. */
+  --star-filled: oklch(0.78 0.14 85);
+  --star-stroke: oklch(0.55 0.12 75);
+  --star-empty: oklch(0.6 0 0);
+  --node-locked: oklch(0.6 0 0);
+
   --radius: 0.625rem;
+  --shadow-color: oklch(0.2 0.02 220 / 0.08);
+}
+
+.dark {
+  color-scheme: dark;
+
+  --background: oklch(0.19 0.015 200);
+  --foreground: oklch(0.96 0.008 190);
+  --card: oklch(0.23 0.018 200);
+  --card-foreground: oklch(0.96 0.008 190);
+  --popover: oklch(0.23 0.018 200);
+  --popover-foreground: oklch(0.96 0.008 190);
+  --muted: oklch(0.27 0.015 200);
+  --muted-foreground: oklch(0.72 0.015 200);
+  --secondary: oklch(0.27 0.015 200);
+  --secondary-foreground: oklch(0.96 0.008 190);
+  --accent: oklch(0.76 0.15 52);
+  --accent-foreground: oklch(0.2 0.03 50);
+  --primary: oklch(0.74 0.1 190);
+  --primary-foreground: oklch(0.2 0.02 200);
+  --primary-soft: oklch(0.3 0.04 195);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(0.58 0.02 200);
+  --ring: oklch(0.74 0.1 190);
+
+  --destructive: oklch(0.7 0.17 25);
+  --destructive-foreground: oklch(0.15 0.02 22);
+  --destructive-soft: oklch(0.27 0.06 25);
+  --destructive-soft-foreground: oklch(0.85 0.1 25);
+  --success: oklch(0.72 0.17 150);
+  --success-foreground: oklch(0.15 0.03 150);
+  --success-soft: oklch(0.27 0.05 150);
+  --success-soft-foreground: oklch(0.85 0.12 150);
+  --warning: oklch(0.82 0.15 85);
+  --warning-foreground: oklch(0.2 0.04 80);
+  --warning-soft: oklch(0.28 0.05 85);
+  --warning-soft-foreground: oklch(0.87 0.12 85);
+  --info: oklch(0.72 0.13 235);
+  --info-foreground: oklch(0.15 0.03 235);
+  --info-soft: oklch(0.27 0.05 235);
+  --info-soft-foreground: oklch(0.86 0.08 235);
+
+  --score-high: oklch(0.75 0.14 150);
+  --score-mid: oklch(0.84 0.13 85);
+  --score-low: oklch(0.7 0.15 355);
+
+  --star-filled: oklch(0.84 0.13 85);
+  --star-stroke: oklch(0.84 0.13 85);
+  --star-empty: oklch(0.55 0 0);
+  --node-locked: oklch(0.55 0 0);
+
+  --shadow-color: oklch(0 0 0 / 0.5);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
-  --color-muted-foreground: var(--muted-foreground);
+  --color-primary-soft: var(--primary-soft);
   --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-destructive-soft-foreground: var(--destructive-soft-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-soft: var(--success-soft);
+  --color-success-soft-foreground: var(--success-soft-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-soft-foreground: var(--warning-soft-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-info-soft: var(--info-soft);
+  --color-info-soft-foreground: var(--info-soft-foreground);
+  --color-score-high: var(--score-high);
+  --color-score-mid: var(--score-mid);
+  --color-score-low: var(--score-low);
+  --color-star-filled: var(--star-filled);
+  --color-star-stroke: var(--star-stroke);
+  --color-star-empty: var(--star-empty);
+  --color-node-locked: var(--node-locked);
+
+  --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --font-sans: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Type scale. Line heights leave room for Vietnamese stacked diacritics. */
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.25rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.375rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.625rem;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.75rem;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.875rem;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 2.125rem;
+  --text-3xl: 1.875rem;
+  --text-3xl--line-height: 2.5rem;
+
+  --shadow-sm: 0 1px 2px var(--shadow-color);
+  --shadow-md: 0 4px 12px var(--shadow-color);
+  --shadow-lg: 0 12px 32px var(--shadow-color);
+
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --animate-pulse-soft: pulse-soft 1.4s var(--ease-standard) infinite;
+  --animate-star-pop: star-pop 0.5s var(--ease-standard) both;
+  --animate-caret: caret 1s steps(2, start) infinite;
+
+  @keyframes pulse-soft {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.7;
+      transform: scale(1.12);
+    }
+  }
+  @keyframes star-pop {
+    0% {
+      opacity: 0;
+      transform: scale(0.3) rotate(-25deg);
+    }
+    70% {
+      transform: scale(1.2) rotate(6deg);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) rotate(0);
+    }
+  }
+  @keyframes caret {
+    to {
+      visibility: hidden;
+    }
+  }
 }
 
-@theme inline {
-  --font-sans: 'Inter Variable', system-ui, sans-serif;
+/* Motion durations, shared by components. */
+:root {
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 500ms;
 }
 
 body {
-  @apply bg-background text-foreground;
+  @apply bg-background text-foreground font-sans antialiased;
+  min-width: 960px;
+  min-height: 600px;
+}
+
+/* One consistent keyboard focus ring (3:1 against surfaces, see tokens.test.ts). */
+:where(button, [href], input, select, textarea, [role='button'], [tabindex]):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Reduced motion: no decorative animation or smooth transitions anywhere. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

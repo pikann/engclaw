@@ -178,6 +178,86 @@
     "deleteTitle": "Xóa toàn bộ dữ liệu?",
     "deleteBody": "Thao tác này xóa vĩnh viễn lịch sử luyện tập, bản ghi và tùy chọn. Các mô hình đã tải được giữ lại.",
     "deleteConfirm": "Xóa tất cả",
-    "deleted": "Đã xóa toàn bộ dữ liệu."
+    "deleted": "Đã xóa toàn bộ dữ liệu.",
+    "theme": "Giao diện",
+    "themeSystem": "Theo hệ thống",
+    "themeLight": "Sáng",
+    "themeDark": "Tối"
+  },
+  "ds": {
+    "scoreRing": "Điểm {{score}} trên 100",
+    "resize": "Đổi kích thước khung",
+    "recorder": {
+      "start": "Ghi âm",
+      "stop": "Dừng",
+      "processing": "Đang phân tích…"
+    },
+    "player": {
+      "label": "Điều khiển phát",
+      "prev": "Câu trước",
+      "next": "Câu tiếp theo",
+      "play": "Phát",
+      "pause": "Tạm dừng",
+      "loop": "Lặp lại câu",
+      "speed": "Tốc độ phát"
+    },
+    "chat": {
+      "you": "Bạn",
+      "agent": "Trợ lý"
+    },
+    "turn": {
+      "listening": "Đang nghe",
+      "thinking": "Đang suy nghĩ",
+      "speaking": "Đang nói"
+    },
+    "captions": {
+      "toggle": "Phụ đề",
+      "hidden": "Phụ đề đang ẩn. Trợ lý vẫn đang nói.",
+      "show": "Hiện phụ đề"
+    },
+    "card": {
+      "vocabulary": "Từ vựng",
+      "pronunciation": "Phát âm",
+      "grammar": "Mẹo ngữ pháp",
+      "correction": "Sửa lỗi",
+      "hearIt": "Nghe thử",
+      "said": "Bạn nói",
+      "better": "Tốt hơn"
+    },
+    "tool": {
+      "running": "đang chạy",
+      "done": "xong"
+    },
+    "dict": {
+      "description": "Mục từ điển cho {{word}}",
+      "close": "Đóng",
+      "ask": "Hỏi trợ lý",
+      "quickPrompts": "Câu hỏi nhanh",
+      "noImage": "Chưa có hình cho từ này"
+    },
+    "provider": {
+      "signIn": "Đăng nhập với {{provider}}",
+      "advanced": "Nâng cao",
+      "testing": "Đang kiểm tra kết nối…",
+      "ok": "Đã kết nối",
+      "failed": "Kết nối thất bại"
+    },
+    "game": {
+      "stars": "{{count}}/{{max}} sao",
+      "node": {
+        "locked": "Chương {{index}}, {{title}}: đang khóa",
+        "current": "Chương {{index}}, {{title}}: hiện tại, {{count}}/{{max}} sao",
+        "passed": "Chương {{index}}, {{title}}: đã qua, {{count}}/{{max}} sao"
+      },
+      "progress": "Đã qua {{passed}}/{{chapters}} chương · {{earned}}/{{total}} sao",
+      "progressLabel": "Tiến độ trò chơi",
+      "attempts": "Đúng {{correct}}/{{max}} lượt",
+      "slot": {
+        "empty": "Lượt {{index}}: chưa làm",
+        "correct": "Lượt {{index}}: đúng",
+        "filled-pulse": "Lượt {{index}}: đang làm"
+      },
+      "newBest": "Kỷ lục mới"
+    }
   }
 }

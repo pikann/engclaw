@@ -22,8 +22,14 @@ jobs:
         run: bun run license:check
       - run: bun run typecheck
       - run: bun run test
-      - run: bun run build
-      - run: bun run package
+      - name: Build (with the dev-only design-system route for e2e)
+        run: bun run build
+        env:
+          VITE_DESIGN_SYSTEM: '1'
+      - name: Package (CI artifact only; releases are built in packaging.yml)
+        run: bun run package
+        env:
+          VITE_DESIGN_SYSTEM: '1'
       - name: E2E (Linux)
         if: runner.os == 'Linux'
         run: xvfb-run --auto-servernum bun run test:e2e
