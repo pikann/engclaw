@@ -91,12 +91,18 @@ test('sidebar toggle collapses and expands, persists, and responds to Ctrl/Cmd+B
   const page = await app.firstWindow()
   const nav = page.getByRole('navigation', { name: /Main|Chính/ })
   const toggle = page.getByTestId('sidebar-toggle')
-  await expect(toggle).toHaveAttribute('aria-expanded', 'true')
-  const wide = (await nav.boundingBox())!.width
+  // The first click saves the choice, after which the window width no longer decides the state
+  // (CI displays are small enough that the default can flip while the window settles).
   await toggle.click()
-  await expect(toggle).toHaveAttribute('aria-expanded', 'false')
-  await expect.poll(async () => (await nav.boundingBox())!.width).toBeLessThan(wide)
+  const first = await toggle.getAttribute('aria-expanded')
+  const flipped = first === 'true' ? 'false' : 'true'
   await page.keyboard.press(process.platform === 'darwin' ? 'Meta+b' : 'Control+b')
-  await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+  await expect(toggle).toHaveAttribute('aria-expanded', flipped)
+  await toggle.click()
+  await expect(toggle).toHaveAttribute('aria-expanded', first!)
+  const widthOf = async () => (await nav.boundingBox())!.width
+  await expect
+    .poll(async () => (first === 'true' ? (await widthOf()) > 100 : (await widthOf()) < 100))
+    .toBe(true)
   await app.close()
 })
