@@ -41,12 +41,14 @@ export function ModelsPanel() {
     return window.engclaw.models.onProgress((e) => {
       setProgress((p) => ({ ...p, [e.id]: e }))
       if (e.phase === 'ready' || e.phase === 'cancelled' || e.phase === 'error') void refresh()
+      else setModels((l) => l.map((x) => (x.id === e.id ? { ...x, state: 'downloading' } : x)))
     })
   }, [refresh])
 
   const start = async (m: ModelStatus) => {
     setConsent(null)
     setErrors((e) => Object.fromEntries(Object.entries(e).filter(([k]) => k !== m.id)))
+    setModels((l) => l.map((x) => (x.id === m.id ? { ...x, state: 'downloading' } : x)))
     const res = await window.engclaw.models.download({ id: m.id })
     if (!res.ok && res.code !== 'CANCELLED')
       setErrors((e) => ({ ...e, [m.id]: t(`models.error.${res.code}`) }))
@@ -55,14 +57,16 @@ export function ModelsPanel() {
 
   return (
     <section className="space-y-3" data-testid="models-panel">
-      <h2 className="text-lg font-semibold">{t('models.title')}</h2>
       {models.length === 0 && <p className="text-muted-foreground text-sm">{t('models.empty')}</p>}
       {models.map((m) => {
         const p = progress[m.id]
         const busy = m.state === 'downloading'
         const pct = p && p.totalBytes > 0 ? Math.round((p.receivedBytes / p.totalBytes) * 100) : 0
         return (
-          <div key={m.id} className="space-y-2 rounded-md border border-border p-3">
+          <div
+            key={m.id}
+            className="bg-card border-border space-y-3 rounded-xl border p-4 shadow-xs"
+          >
             <div className="flex items-center justify-between gap-2">
               <div>
                 <div className="font-medium">{m.name}</div>
@@ -105,29 +109,16 @@ export function ModelsPanel() {
                   {t('models.cancel')}
                 </Button>
               ) : m.state === 'ready' ? (
-                <>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={async () => {
-                      await window.engclaw.models.remove({ id: m.id })
-                      setConsent(m)
-                      void refresh()
-                    }}
-                  >
-                    {t('models.redownload')}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={async () => {
-                      await window.engclaw.models.remove({ id: m.id })
-                      void refresh()
-                    }}
-                  >
-                    {t('models.remove')}
-                  </Button>
-                </>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    await window.engclaw.models.remove({ id: m.id })
+                    void refresh()
+                  }}
+                >
+                  {t('models.remove')}
+                </Button>
               ) : (
                 <Button size="sm" onClick={() => setConsent(m)}>
                   {m.updateAvailable ? t('models.update') : t('models.download')}
@@ -138,7 +129,7 @@ export function ModelsPanel() {
         )
       })}
       <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-xs">
-        <span>{t('models.folder', { dir })}</span>
+        <span className="min-w-0 break-all">{t('models.folder', { dir })}</span>
         <Button
           variant="outline"
           size="sm"

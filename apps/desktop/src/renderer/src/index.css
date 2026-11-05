@@ -121,7 +121,6 @@
   --node-locked: oklch(0.55 0 0);
 
   --shadow-color: oklch(0 0 0 / 0.5);
-
 }
 
 @theme inline {
@@ -243,6 +242,15 @@
   --duration-fast: 120ms;
   --duration-base: 200ms;
   --duration-slow: 500ms;
+}
+
+/* Tailwind v4 defaults borders to currentColor; use the subtle border token instead. */
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--border);
+  }
 }
 
 body {

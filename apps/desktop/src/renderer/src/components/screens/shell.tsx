@@ -1,6 +1,5 @@
 import {
   BookOpen,
-  Download,
   Gamepad2,
   History,
   Home,
@@ -191,17 +190,6 @@ export function AppShell({
         </SidebarContent>
         <SidebarFooter>
           <SidebarMenu>
-            <NavItem
-              icon={Download}
-              label={t('screens.shell.models')}
-              to={linked ? '/settings' : undefined}
-              testId="nav-models"
-              trailing={
-                modelsPercent != null && (
-                  <SidebarMenuBadge className="tabular-nums">{modelsPercent}%</SidebarMenuBadge>
-                )
-              }
-            />
             {modelsPercent != null && (
               <Progress
                 value={modelsPercent}
@@ -214,6 +202,11 @@ export function AppShell({
               active={active === 'settings'}
               to={linked ? '/settings' : undefined}
               label={t('screens.shell.settings')}
+              trailing={
+                modelsPercent != null && (
+                  <SidebarMenuBadge className="tabular-nums">{modelsPercent}%</SidebarMenuBadge>
+                )
+              }
             />
           </SidebarMenu>
         </SidebarFooter>
