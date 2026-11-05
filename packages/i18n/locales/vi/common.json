@@ -259,5 +259,158 @@
       },
       "newBest": "Kỷ lục mới"
     }
+  },
+  "screens": {
+    "shell": {
+      "nav": "Chính",
+      "home": "Trang chủ",
+      "practice": "Luyện tập",
+      "shadowing": "Nhại giọng",
+      "converse": "Hội thoại",
+      "game": "Trò chơi",
+      "dictionary": "Từ điển",
+      "history": "Lịch sử",
+      "models": "Mô hình",
+      "settings": "Cài đặt",
+      "micReady": "Micro sẵn sàng",
+      "modelsReady": "Mô hình sẵn sàng",
+      "modelsDownloading": "Đang tải mô hình…"
+    },
+    "home": {
+      "welcome": "Chào mừng đến với Engclaw",
+      "welcomeBody": "Luyện nói tiếng Anh với phản hồi được xử lý ngay trên máy của bạn. Chọn nơi bắt đầu.",
+      "card": {
+        "practice": {
+          "title": "Luyện phát âm",
+          "body": "Đọc một câu hoặc nói tự do để biết âm nào cần sửa.",
+          "cta": "Bắt đầu luyện tập"
+        },
+        "shadowing": {
+          "title": "Nhại giọng theo video",
+          "body": "Lặp lại các câu trong video YouTube có phụ đề, hoặc tự kiểm tra bằng nghe chép.",
+          "cta": "Mở Nhại giọng"
+        },
+        "game": {
+          "title": "Trò chơi phát âm",
+          "body": "Vượt từng chương, từng từ và thu thập sao.",
+          "cta": "Chơi"
+        }
+      },
+      "modelsNotice": "Các mô hình giọng nói chưa được tải. Bạn cần chúng ở lần ghi âm đầu tiên.",
+      "noRecent": "Các lần luyện tập gần đây sẽ hiện ở đây."
+    },
+    "models": {
+      "intro": "Phần phát âm cần khoảng {{size}} mô hình, lưu trên thiết bị này. Âm thanh của bạn không rời khỏi máy.",
+      "tableCaption": "Các mô hình cần tải",
+      "colModel": "Mô hình",
+      "colSize": "Dung lượng",
+      "colFor": "Dùng cho",
+      "name": {
+        "phone": "Mô hình âm vị",
+        "asr": "Nhận dạng giọng nói",
+        "voice": "Giọng đọc (Kokoro)"
+      },
+      "for": {
+        "phone": "Phát âm, Trò chơi",
+        "asr": "Nói tự do, Hội thoại",
+        "voice": "Nghe mẫu, ví dụ"
+      },
+      "offline": "Bạn đang ngoại tuyến. Hãy kết nối mạng rồi thử lại; việc tải sẽ tiếp tục từ chỗ đã dừng.",
+      "lockedTitle": "Cần tải mô hình giọng nói"
+    },
+    "practice": {
+      "mode": {
+        "free": "Nói tự do",
+        "read": "Đọc to"
+      },
+      "helper": {
+        "free": "Nói bất cứ điều gì bạn muốn. Chúng tôi chép lại, bạn sửa văn bản, rồi kiểm tra phát âm.",
+        "read": "Nhập hoặc dán một đoạn văn, rồi đọc to lên."
+      },
+      "input": "Đầu vào",
+      "result": "Kết quả",
+      "detail": "Chi tiết",
+      "readLabel": "Văn bản cần đọc",
+      "speakLabel": "Chúng tôi nghe được",
+      "check": "Kiểm tra phát âm của tôi",
+      "analyzing": "Đang phân tích phát âm của bạn…",
+      "emptyResult": "Hãy ghi âm để xem điểm của bạn",
+      "emptyDetail": "Âm vị, cao độ và từng từ sẽ hiện ở đây sau khi bạn ghi âm.",
+      "accuracy": "Độ chính xác",
+      "fluency": "Độ trôi chảy",
+      "prosody": "Ngữ điệu",
+      "needsWork": "Cần cải thiện",
+      "tip": "Mẹo: với âm “th”, đặt lưỡi giữa hai hàm răng và thổi nhẹ hơi ra.",
+      "editText": "Sửa văn bản",
+      "hearBoth": "Nghe cả hai",
+      "tabResult": "Kết quả",
+      "tabPhonemes": "Âm vị",
+      "tabPitch": "Cao độ",
+      "tabWords": "Từ",
+      "pitchSummary": "Đường cao độ: giọng của bạn bám sát giọng mẫu, nhưng lên giọng thấp hơn ở từ cuối.",
+      "openSettings": "Mở cài đặt hệ thống",
+      "keptAudio": "Bản ghi và văn bản được giữ lại, bạn không cần ghi âm lại."
+    },
+    "shadowing": {
+      "heading": "Luyện tập với bất kỳ video YouTube nào",
+      "urlLabel": "Liên kết YouTube",
+      "load": "Tải video",
+      "loading": "Đang tải video và phụ đề…",
+      "error": {
+        "invalid": "Đây không giống một liên kết YouTube.",
+        "noTranscript": "Video này không có phụ đề nên không dùng để nhại giọng được. Hãy thử video khác — chọn video có hiển thị phụ đề (CC) trên YouTube.",
+        "unavailable": "Không phát được video này ở đây. Hãy thử video khác.",
+        "network": "Không kết nối được tới YouTube. Kiểm tra kết nối mạng rồi thử lại."
+      },
+      "recent": "Video gần đây",
+      "noRecents": "Các video bạn đã luyện sẽ hiện ở đây.",
+      "sampleVideo": "Tiếng Anh hằng ngày {{n}}",
+      "progress": "{{done}} / {{total}} câu",
+      "videoTitle": "Tiếng Anh hằng ngày 2",
+      "videoAlt": "Trình phát video",
+      "modeLabel": "Chế độ",
+      "mode": {
+        "shadowing": "Nhại giọng",
+        "dictation": "Nghe chép"
+      },
+      "toggleRail": "Hiện phụ đề",
+      "focus": "Chế độ tập trung",
+      "segment": "Câu {{n}} / {{total}}",
+      "fluency": "Trôi chảy {{n}}",
+      "accuracy": "Chính xác {{n}}%",
+      "toFix": "{{count}} từ cần sửa",
+      "sentenceHidden": "Câu đang ẩn. Di chuột hoặc nhấn H để hiện.",
+      "stopped": "Phát lại đã dừng.",
+      "transcript": "Phụ đề",
+      "sampleLine": "Câu mẫu số {{n}} của video."
+    },
+    "dictation": {
+      "listen": "Nghe",
+      "playCount": "Lần phát {{n}} / {{total}}",
+      "segment": "Câu {{n}} / {{total}}",
+      "hide": "Ẩn {{n}}%",
+      "blank": "Chỗ trống {{n}}",
+      "check": "Kiểm tra",
+      "newBlanks": "Chỗ trống mới",
+      "retrySegment": "Làm lại câu",
+      "status": {
+        "ok": "Đúng",
+        "near": "Gần đúng — viết đúng là:",
+        "wrong": "Sai — đáp án:"
+      },
+      "answersKept": "Câu trả lời của bạn được giữ lại.",
+      "segments": "Các câu",
+      "score": "Điểm {{n}}%",
+      "seg": {
+        "done": "Đúng",
+        "current": "Đang làm",
+        "todo": "Chưa làm",
+        "review": "Cần xem lại"
+      },
+      "reviewList": "Từ cần xem lại",
+      "summary": "Tổng kết",
+      "summaryBody": "Bạn làm đúng {{right}} trên {{total}} câu.",
+      "practiseWords": "Luyện các từ này"
+    }
   }
 }

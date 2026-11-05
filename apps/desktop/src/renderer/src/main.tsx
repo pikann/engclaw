@@ -18,6 +18,10 @@ const router = createHashRouter([
           path: '/design-system',
           lazy: async () => ({ Component: (await import('@/routes/design-system')).DesignSystem }),
         },
+        {
+          path: '/screens/core',
+          lazy: async () => ({ Component: (await import('@/routes/screens-core')).ScreensCore }),
+        },
       ]
     : []),
 ])
