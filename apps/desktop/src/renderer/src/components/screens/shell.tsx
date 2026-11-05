@@ -81,7 +81,7 @@ export function AppShell({
 }: {
   layout: Layout
   active: NavKey
-  title: string
+  title: React.ReactNode
   actions?: React.ReactNode
   /** Sidebar Models badge: download progress, or null when nothing is downloading. */
   modelsPercent?: number | null
