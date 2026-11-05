@@ -15,6 +15,8 @@ import { registerTtsHandlers } from './tts'
 import { UtilityClient } from './utility-client'
 import { loadLanguage, saveLanguage } from './settings'
 import { InnertubeAdapter, YouTubeError, parseVideoId } from '@engclaw/youtube'
+import { PlayerController } from './player'
+import { CachedYouTube } from './youtube-cache'
 
 const rendererDir = join(__dirname, '../renderer')
 
@@ -93,6 +95,34 @@ async function yt<T>(fn: () => Promise<T>): Promise<YouTubeResult<T>> {
   }
 }
 
+const players = new WeakMap<BrowserWindow, PlayerController>()
+
+function registerPlayerHandlers(): void {
+  const playerFor = (e: Electron.IpcMainInvokeEvent): PlayerController | null => {
+    const win = BrowserWindow.fromWebContents(e.sender)
+    if (!win) return null
+    let player = players.get(win)
+    if (!player) players.set(win, (player = new PlayerController(win)))
+    return player
+  }
+  handle(IPC.playerLoad, async ({ videoId }, e) => {
+    await playerFor(e)?.load(parseVideoId(videoId))
+    return null
+  })
+  handle(IPC.playerBounds, (bounds, e) => {
+    playerFor(e)?.setBounds(bounds)
+    return null
+  })
+  handle(IPC.playerCommand, (command, e) => {
+    playerFor(e)?.command(command)
+    return null
+  })
+  handle(IPC.playerClose, (_req, e) => {
+    playerFor(e)?.close()
+    return null
+  })
+}
+
 let language: Locale = 'en'
 
 async function setLanguage(next: Locale): Promise<void> {
@@ -116,15 +146,18 @@ void app.whenReady().then(async () => {
     if (isLocale(next)) await setLanguage(next)
     return language
   })
-  registerStoreHandlers()
+  const store = registerStoreHandlers()
   const models = registerModelHandlers()
-  handle(IPC.youtubeMeta, ({ videoId }) => yt(() => youtube.meta(parseVideoId(videoId))))
+  const cachedYoutube = new CachedYouTube(youtube, store.videos)
+  handle(IPC.youtubeMeta, ({ videoId }) => yt(() => cachedYoutube.meta(parseVideoId(videoId))))
   handle(IPC.youtubeTranscript, ({ videoId, lang }) =>
-    yt(() => youtube.transcript(parseVideoId(videoId), lang)),
+    yt(() => cachedYoutube.transcript(parseVideoId(videoId), lang)),
   )
   handle(IPC.youtubeAudioRange, ({ videoId, start, end }) =>
     yt(() => youtube.audioRange(parseVideoId(videoId), start, end)),
   )
+  handle(IPC.youtubeRecent, () => cachedYoutube.recent())
+  registerPlayerHandlers()
   createWindow()
   if (process.env['ENGCLAW_SMOKE']) runSmoke(startUtility())
   const inference = new UtilityClient(startUtility)

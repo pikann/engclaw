@@ -68,6 +68,14 @@ const api: EngclawApi = {
     meta: (req) => invoke(IPC.youtubeMeta, req),
     transcript: (req) => invoke(IPC.youtubeTranscript, req),
     audioRange: (req) => invoke(IPC.youtubeAudioRange, req),
+    recent: () => invoke(IPC.youtubeRecent),
+  },
+  player: {
+    load: (req) => invoke(IPC.playerLoad, req),
+    setBounds: (req) => invoke(IPC.playerBounds, req),
+    command: (req) => invoke(IPC.playerCommand, req),
+    close: () => invoke(IPC.playerClose),
+    onEvent: (cb) => subscribe(IPC.playerEvent, cb),
   },
   tts: {
     speak: (req) => invoke(IPC.ttsSpeak, req),

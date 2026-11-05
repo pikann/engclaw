@@ -3,6 +3,7 @@ import {
   buildCsp,
   isAllowedExternalUrl,
   isPermissionAllowed,
+  isPlayerFrameUrlAllowed,
   isTrustedUrl,
 } from './security-policy'
 
@@ -63,4 +64,24 @@ describe('buildCsp', () => {
   it('never allows unsafe-eval, even in dev', () => {
     expect(buildCsp(true)).not.toMatch(/unsafe-eval/)
   })
+})
+
+describe('isPlayerFrameUrlAllowed', () => {
+  const origin = 'http://127.0.0.1:4321'
+  it.each([
+    'http://127.0.0.1:4321/player.html?v=dQw4w9WgXcQ',
+    'https://www.youtube.com/embed/dQw4w9WgXcQ?enablejsapi=1',
+    'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ',
+  ])('allows %s', (u) => expect(isPlayerFrameUrlAllowed(u, origin)).toBe(true))
+  it.each([
+    'http://127.0.0.1:9999/player.html',
+    'http://localhost:4321/player.html',
+    'https://evil.example.com/',
+    'https://www.youtube.com.evil.example.com/embed/x',
+    'http://www.youtube.com/embed/x',
+    'file:///etc/passwd',
+    'app://engclaw/',
+    'javascript:alert(1)',
+    'not a url',
+  ])('rejects %s', (u) => expect(isPlayerFrameUrlAllowed(u, origin)).toBe(false))
 })

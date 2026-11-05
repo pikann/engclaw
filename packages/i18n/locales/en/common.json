@@ -432,6 +432,8 @@
         "unavailable": "This video can't be played here. Please try another video.",
         "network": "Couldn't reach YouTube. Check your connection and try again."
       },
+      "another": "Choose another video",
+      "openRecent": "Open {{title}}",
       "recent": "Recent videos",
       "noRecents": "Videos you practise with will appear here.",
       "sampleVideo": "Everyday English {{n}}",

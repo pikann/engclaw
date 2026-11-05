@@ -432,6 +432,8 @@
         "unavailable": "Không phát được video này ở đây. Hãy thử video khác.",
         "network": "Không kết nối được tới YouTube. Kiểm tra kết nối mạng rồi thử lại."
       },
+      "another": "Chọn video khác",
+      "openRecent": "Mở {{title}}",
       "recent": "Video gần đây",
       "noRecents": "Các video bạn đã luyện sẽ hiện ở đây.",
       "sampleVideo": "Tiếng Anh hằng ngày {{n}}",
