@@ -35,6 +35,9 @@ function registerAppProtocol(): void {
 }
 
 function createWindow(): BrowserWindow {
+  // E2E headless mode: the window is still created and rendered, just never shown. A hidden window
+  // is otherwise throttled, which stalls CSS transitions and makes axe read mid-transition colours.
+  const headless = !app.isPackaged && process.env['ENGCLAW_E2E_HEADLESS'] === '1'
   const win = new BrowserWindow({
     width: 1100,
     height: 760,
@@ -45,10 +48,9 @@ function createWindow(): BrowserWindow {
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       ...secureWebPreferences,
+      ...(headless && { backgroundThrottling: false }),
     },
   })
-  // E2E headless mode: the window is still created and rendered (offscreen), just never shown.
-  const headless = !app.isPackaged && process.env['ENGCLAW_E2E_HEADLESS'] === '1'
   if (!headless) win.once('ready-to-show', () => win.show())
   hardenWindow(win)
   if (process.env['ELECTRON_RENDERER_URL']) void win.loadURL(process.env['ELECTRON_RENDERER_URL'])

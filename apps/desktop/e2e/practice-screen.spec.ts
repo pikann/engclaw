@@ -123,7 +123,12 @@ test('focus order follows the pane order: input, then result', async () => {
   const app = await launch()
   const page = await app.firstWindow()
   await page.getByTestId('nav-practice').click()
-  await page.getByTestId('practice-text').focus()
+  const text = page.getByTestId('practice-text')
+  // The screen can re-render right after mounting and drop focus; retry until it sticks.
+  await expect(async () => {
+    await text.focus()
+    await expect(text).toBeFocused({ timeout: 500 })
+  }).toPass()
   const order: string[] = []
   for (let i = 0; i < 12; i++) {
     await page.keyboard.press('Tab')
