@@ -90,6 +90,7 @@ const CONVERSE: [string, ConverseView, ConverseTurn, ConverseVariant][] = [
   ['empty', 'transcript', 'idle', 'empty'],
   ['tool-failed', 'transcript', 'idle', 'toolFailed'],
   ['card-error', 'cards', 'idle', 'cardError'],
+  ['just-signed-in', 'transcript', 'idle', 'justSignedIn'],
   ['no-provider', 'transcript', 'idle', 'noProvider'],
   ['no-models', 'transcript', 'idle', 'noModels'],
   ['provider-expired', 'transcript', 'idle', 'providerExpired'],

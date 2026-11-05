@@ -70,3 +70,14 @@ test('cards-only hides captions; transcript view shows them', async () => {
   ).toBeVisible()
   await app.close()
 })
+
+test('successful sign-in shows a confirmation instead of the form, and the closed screen shows a toast', async () => {
+  const { app, page } = await open()
+  const done = page.getByTestId('frame-setup-signed-in-idle')
+  await expect(done.getByTestId('screen-provider-success')).toBeVisible()
+  await expect(done.getByTestId('screen-provider')).toHaveCount(0)
+  await expect(
+    page.getByTestId('frame-converse-just-signed-in').getByTestId('signed-in-toast'),
+  ).toBeVisible()
+  await app.close()
+})

@@ -439,7 +439,9 @@
         "expired": "Session expired",
         "error": "Error",
         "api": "API connected"
-      }
+      },
+      "successTitle": "You're signed in",
+      "closing": "Closing and starting your conversation…"
     },
     "settings": {
       "nav": "Settings sections",
@@ -498,7 +500,8 @@
       "typeInstead": "You can type instead.",
       "typeLabel": "Message",
       "typePlaceholder": "Type a message…",
-      "send": "Send"
+      "send": "Send",
+      "signedInToast": "Signed in to {{provider}}. You can start talking."
     }
   }
 }

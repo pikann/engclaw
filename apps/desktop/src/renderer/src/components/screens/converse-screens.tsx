@@ -1,5 +1,6 @@
 import {
   AlertTriangle,
+  CheckCircle2,
   ChevronDown,
   Eye,
   Ear,
@@ -48,6 +49,7 @@ export type ConverseVariant =
   | 'micError'
   | 'listOpen'
   | 'emptyList'
+  | 'justSignedIn'
 
 const SAID = 'I go to the market yesterday'
 const REPLY = 'Nice! You went to the market yesterday. What did you buy there?'
@@ -557,6 +559,16 @@ export function ConverseScreen({
           </h3>
           <ConversationList empty={variant === 'emptyList'} />
         </div>
+      )}
+      {variant === 'justSignedIn' && (
+        <p
+          role="status"
+          data-testid="signed-in-toast"
+          className="bg-card absolute right-4 bottom-10 z-10 flex items-center gap-2 rounded-lg border px-4 py-3 text-sm shadow-lg"
+        >
+          <CheckCircle2 aria-hidden="true" className="text-success size-4" />
+          {t('screens.converse.signedInToast', { provider: 'ChatGPT' })}
+        </p>
       )}
       {variant === 'noModels' && (
         <div className="bg-background/70 absolute inset-0 flex items-center justify-center p-4 backdrop-blur-[1px]">

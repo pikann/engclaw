@@ -72,18 +72,6 @@ function RecommendedColumn({ status }: { status: ProviderStatus }) {
           </Button>
         </div>
       )}
-      {status === 'signed-in' && (
-        <div className="space-y-3">
-          <ProviderStatusChip status="signed-in" />
-          <p className="text-sm">
-            {t('screens.provider.signedInAs', { account: 'hai@example.com' })}
-          </p>
-          <Button variant="outline" size="sm">
-            <LogOut />
-            {t('screens.provider.signOut')}
-          </Button>
-        </div>
-      )}
       {status === 'expired' && (
         <div className="space-y-3">
           <p className="bg-warning-soft text-warning-soft-foreground rounded-md p-3 text-sm">
@@ -104,7 +92,7 @@ function RecommendedColumn({ status }: { status: ProviderStatus }) {
           <Button>{t('practice.retry')}</Button>
         </div>
       )}
-      {status !== 'signed-in' && status !== 'error' && (
+      {status !== 'error' && (
         <p className="text-muted-foreground text-sm">{t('screens.provider.chatgptHint')}</p>
       )}
     </div>
@@ -165,6 +153,27 @@ export function ProviderSetupPanel({
   test?: ConnectionStatus
 }) {
   const { t } = useTranslation()
+  // A successful sign-in ends the setup: confirm it, then the dialog closes by itself.
+  if (status === 'signed-in')
+    return (
+      <section
+        role="status"
+        aria-labelledby="prov-success-title"
+        className="bg-card flex w-[640px] max-w-full flex-col items-center gap-3 rounded-xl border p-10 text-center shadow-lg"
+        data-testid="screen-provider-success"
+      >
+        <span className="bg-success-soft text-success-soft-foreground flex size-14 items-center justify-center rounded-full">
+          <CheckCircle2 aria-hidden="true" className="size-8" />
+        </span>
+        <h3 id="prov-success-title" className="text-lg font-semibold">
+          {t('screens.provider.successTitle')}
+        </h3>
+        <p className="text-muted-foreground text-sm">
+          {t('screens.provider.signedInAs', { account: 'hai@example.com' })}
+        </p>
+        <p className="text-muted-foreground text-xs">{t('screens.provider.closing')}</p>
+      </section>
+    )
   return (
     <section
       aria-labelledby={`prov-title-${status}-${test}`}
