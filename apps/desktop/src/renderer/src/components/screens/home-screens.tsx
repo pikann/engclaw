@@ -290,7 +290,7 @@ function ModelStatusCard({ data }: { data: HomeData }) {
   const { status, percent, received, total } = data.model
   const manage = (
     <Link
-      to="/settings"
+      to="/settings?tab=models"
       data-testid="home-models-manage"
       className={buttonVariants({ size: 'sm', variant: 'outline' })}
     >

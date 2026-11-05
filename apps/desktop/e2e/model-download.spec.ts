@@ -40,6 +40,7 @@ const catalog = {
 let server: Server
 let base = ''
 let failing = false
+let slow = false
 
 test.beforeAll(async () => {
   server = createServer((req, res) => {
@@ -47,6 +48,9 @@ test.beforeAll(async () => {
     if (!body) return void res.writeHead(404).end()
     if (failing && req.url?.startsWith('/stub/asr-en/') && req.url.endsWith('model.bin')) {
       return void res.writeHead(500).end()
+    }
+    if (slow && req.url?.startsWith('/stub/asr-en/') && req.url.endsWith('model.bin')) {
+      return void setTimeout(() => res.writeHead(200).end(body), 2_000)
     }
     const range = /^bytes=(\d+)-$/.exec(req.headers['range'] ?? '')
     const from = range ? Number(range[1]) : 0
@@ -143,6 +147,7 @@ test('a custom folder is saved, receives the models and is found on the next lau
   const again = await launch(userData, catalogFile)
   const p2 = await again.firstWindow()
   await p2.getByTestId('nav-settings').click()
+  await p2.getByTestId('settings-tab-models').click()
   for (const id of ids)
     await expect(p2.getByTestId(`model-state-${id}`)).toContainText(/Ready|Sẵn sàng/)
   await again.close()
@@ -166,5 +171,22 @@ test('an unwritable folder is rejected with a clear error and not saved', async 
   await page.getByTestId('model-download-choose-folder').click()
   await expect(page.getByTestId('model-download-folder-error')).toBeVisible()
   await expect(page.getByTestId('model-download-dir')).toHaveText(before)
+  await app.close()
+})
+
+test('a download started from Settings shows progress state without leaving the page', async () => {
+  const { userData, catalogFile } = setup()
+  slow = true
+  const app = await launch(userData, catalogFile)
+  const page = await app.firstWindow()
+  await page.getByTestId('nav-settings').click()
+  await page.getByTestId('settings-tab-models').click()
+  await page.getByRole('button', { name: 'Download' }).nth(1).click()
+  await page.getByTestId('model-consent').getByRole('button').last().click()
+  await expect(page.getByTestId('model-state-asr-en')).toContainText(/Downloading|Đang tải/)
+  await expect(page.getByTestId('model-state-asr-en')).toContainText(/Ready|Sẵn sàng/, {
+    timeout: 30_000,
+  })
+  slow = false
   await app.close()
 })
