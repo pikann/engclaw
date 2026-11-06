@@ -449,6 +449,7 @@
       "ipaLoading": "Loading IPA…",
       "ipaError": "Couldn’t load IPA.",
       "attempt": {
+        "idle": "Record yourself saying this sentence to see your score and the words to fix.",
         "record": "Record my attempt",
         "stop": "Stop",
         "analyzing": "Checking…",
@@ -464,6 +465,7 @@
         "missing": "Download the speech models to check your pronunciation.",
         "mic": "Couldn’t use the microphone."
       },
+      "attemptTab": "Attempt",
       "toggleRail": "Show transcript",
       "focus": "Focus mode",
       "segment": "Sentence {{n}} / {{total}}",

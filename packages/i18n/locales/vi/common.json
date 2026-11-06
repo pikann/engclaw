@@ -449,6 +449,7 @@
       "ipaLoading": "Đang tải IPA…",
       "ipaError": "Không tải được IPA.",
       "attempt": {
+        "idle": "Hãy đọc câu này để xem điểm và các từ cần sửa.",
         "record": "Ghi âm lượt nói",
         "stop": "Dừng",
         "analyzing": "Đang chấm…",
@@ -464,6 +465,7 @@
         "missing": "Hãy tải mô hình giọng nói để chấm phát âm.",
         "mic": "Không dùng được micro."
       },
+      "attemptTab": "Lượt nói",
       "toggleRail": "Hiện phụ đề",
       "focus": "Chế độ tập trung",
       "segment": "Câu {{n}} / {{total}}",

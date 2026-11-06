@@ -12,17 +12,13 @@ import {
 } from 'lucide-react'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  AttemptRecordButton,
-  AttemptResult,
-  ATTEMPT_RESULT_HEIGHT,
-} from '@/components/shadowing/attempt-bar'
+import { AttemptPanel } from '@/components/shadowing/attempt-panel'
 import { PlayerSurface } from '@/components/shadowing/player-surface'
-import { Pane } from '@/components/screens/shell'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,7 +41,7 @@ import { fitStage, formatClock, type Segment } from '@/lib/shadowing'
 import { cn } from '@/lib/utils'
 
 /** Fixed chrome under the video and sentence: the control bar plus the gaps between blocks. */
-const CHROME_HEIGHT = 64 + ATTEMPT_RESULT_HEIGHT + 12
+const CHROME_HEIGHT = 64 + 12
 
 function useContentSize() {
   const ref = useRef<HTMLDivElement>(null)
@@ -82,6 +78,7 @@ export function ShadowingSession({
   )
   const index = loop.index
   const [railOpen, setRailOpen] = useState(true)
+  const [sideTab, setSideTab] = useState<'transcript' | 'attempt'>('attempt')
   const [speedOpen, setSpeedOpen] = useState(false)
   const autoOn = settings.autoContinuePct > 0
   const lastAutoPct = useRef(autoOn ? settings.autoContinuePct : DEFAULT_SETTINGS.autoContinuePct)
@@ -93,6 +90,11 @@ export function ShadowingSession({
   }, [loop.mode, dispatch])
   const attempt = useSegmentAttempt(videoId, segments, index, pauseForRecording)
   const [stageRef, stage] = useContentSize()
+  const toggleRecord = useCallback(() => {
+    setRailOpen(true)
+    setSideTab('attempt')
+    attempt.toggleRecord()
+  }, [attempt])
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([])
 
   const shown = segments[index]
@@ -132,7 +134,7 @@ export function ShadowingSession({
         return
       }
       if (e.key.toLowerCase() === 'm') {
-        if (!blocked) attempt.toggleRecord()
+        if (!blocked) toggleRecord()
         return
       }
       if (e.key.toLowerCase() === 'i') {
@@ -147,7 +149,7 @@ export function ShadowingSession({
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [blocked, runShortcut, showIpa, setShowIpa, attempt])
+  }, [blocked, runShortcut, showIpa, setShowIpa, toggleRecord])
 
   return (
     <div data-testid="shadowing-session" className="flex h-full min-h-0 flex-col">
@@ -181,7 +183,7 @@ export function ShadowingSession({
       <div
         className={cn(
           'grid min-h-0 flex-1',
-          railOpen ? 'grid-cols-[minmax(0,1fr)_320px]' : 'grid-cols-1',
+          railOpen ? 'grid-cols-[minmax(0,1fr)_400px]' : 'grid-cols-1',
         )}
       >
         <div className="flex min-h-0 min-w-0 flex-col p-4">
@@ -414,11 +416,6 @@ export function ShadowingSession({
                   </span>
                 )}
               </div>
-              <AttemptRecordButton
-                state={attempt.state}
-                disabled={blocked}
-                onToggle={attempt.toggleRecord}
-              />
               <Badge variant="secondary" className="tabular-nums" data-testid="shadowing-position">
                 {t('screens.shadowing.segment', {
                   n: index + 1,
@@ -426,56 +423,82 @@ export function ShadowingSession({
                 })}
               </Badge>
             </div>
-            <AttemptResult
-              state={attempt.state}
-              text={shown?.text ?? ''}
-              best={attempt.best}
-              isPlaying={attempt.isPlaying}
-              onPlay={attempt.play}
-              onRetry={attempt.retry}
-            />
           </div>
         </div>
         {railOpen && (
-          <Pane title={t('screens.shadowing.transcript')} className="border-l">
-            <ol className="space-y-1 text-sm" data-testid="shadowing-rail">
-              {segments.map((s, i) => (
-                <li key={s.index}>
-                  <button
-                    type="button"
-                    ref={(el) => {
-                      itemRefs.current[i] = el
-                    }}
-                    aria-current={i === index ? 'true' : undefined}
-                    onClick={() => dispatch({ type: 'start', index: i })}
-                    className={cn(
-                      'focus-visible:ring-ring/50 hover:bg-muted flex w-full gap-2 rounded-md px-2 py-1.5 text-left outline-none focus-visible:ring-[3px]',
-                      i === index && 'bg-primary-soft font-medium',
-                    )}
-                  >
-                    <span className="text-muted-foreground w-10 shrink-0 tabular-nums">
-                      {formatClock(s.start)}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      {s.text}
-                      {showIpa && (
-                        <span
-                          lang="en-fonipa"
-                          className="text-muted-foreground block truncate text-xs font-normal"
-                        >
-                          {ipaWords(s.text)
-                            ?.map((tok) => tok.ipa)
-                            .filter(Boolean)
-                            .map((v) => `/${v}/`)
-                            .join(' ') || '\u00a0'}
-                        </span>
+          <aside
+            aria-label={t('screens.shadowing.transcript')}
+            data-testid="shadowing-sidebar"
+            className="flex min-h-0 min-w-0 flex-col border-l"
+          >
+            <Tabs
+              value={sideTab}
+              onValueChange={(v) => setSideTab(v as 'transcript' | 'attempt')}
+              className="shrink-0 items-center p-2"
+            >
+              <TabsList>
+                <TabsTrigger value="attempt" data-testid="shadowing-tab-attempt">
+                  {t('screens.shadowing.attemptTab')}
+                </TabsTrigger>
+                <TabsTrigger value="transcript" data-testid="shadowing-tab-transcript">
+                  {t('screens.shadowing.transcript')}
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <div
+              hidden={sideTab !== 'transcript'}
+              className="min-h-0 flex-1 overflow-auto px-4 pb-4"
+            >
+              <ol className="space-y-1 text-sm" data-testid="shadowing-rail">
+                {segments.map((s, i) => (
+                  <li key={s.index}>
+                    <button
+                      type="button"
+                      ref={(el) => {
+                        itemRefs.current[i] = el
+                      }}
+                      aria-current={i === index ? 'true' : undefined}
+                      onClick={() => dispatch({ type: 'start', index: i })}
+                      className={cn(
+                        'focus-visible:ring-ring/50 hover:bg-muted flex w-full gap-2 rounded-md px-2 py-1.5 text-left outline-none focus-visible:ring-[3px]',
+                        i === index && 'bg-primary-soft font-medium',
                       )}
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ol>
-          </Pane>
+                    >
+                      <span className="text-muted-foreground w-10 shrink-0 tabular-nums">
+                        {formatClock(s.start)}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        {s.text}
+                        {showIpa && (
+                          <span
+                            lang="en-fonipa"
+                            className="text-muted-foreground block truncate text-xs font-normal"
+                          >
+                            {ipaWords(s.text)
+                              ?.map((tok) => tok.ipa)
+                              .filter(Boolean)
+                              .map((v) => `/${v}/`)
+                              .join(' ') || '\u00a0'}
+                          </span>
+                        )}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            </div>
+            <div hidden={sideTab !== 'attempt'} className="min-h-0 flex-1 overflow-auto px-4 pb-4">
+              <AttemptPanel
+                state={attempt.state}
+                text={shown?.text ?? ''}
+                best={attempt.best}
+                disabled={blocked}
+                onToggleRecord={toggleRecord}
+                onPlay={attempt.play}
+                onRetry={attempt.retry}
+              />
+            </div>
+          </aside>
         )}
       </div>
     </div>
