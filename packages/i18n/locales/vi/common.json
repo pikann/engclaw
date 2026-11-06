@@ -522,7 +522,11 @@
       "reviewList": "Từ cần xem lại",
       "summary": "Tổng kết",
       "summaryBody": "Bạn làm đúng {{right}} trên {{total}} câu.",
-      "practiseWords": "Luyện các từ này"
+      "practiseWords": "Luyện các từ này",
+      "autoAdvance": "Tự chuyển câu sau khi kiểm tra",
+      "longSegment": "Câu dài — dùng Phát lại để nghe lại.",
+      "noReview": "Chưa có từ nào sai.",
+      "checkedCount": "Đã kiểm tra {{n}}"
     },
     "provider": {
       "title": "Thiết lập trợ lý AI",

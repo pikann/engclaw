@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { DictationActions, DictationRail, DictationSheet } from '@/components/shadowing/dictation'
 import { AttemptPanel } from '@/components/shadowing/attempt-panel'
 import { PlayerSurface } from '@/components/shadowing/player-surface'
 import { Badge } from '@/components/ui/badge'
@@ -26,7 +27,9 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { DEFAULT_BLANK_PERCENT, scoreSegment } from '@/lib/dictation'
 import { alignIpa } from '@/lib/ipa'
+import { useDictation } from '@/lib/use-dictation'
 import { useShowIpa, useTranscriptIpa } from '@/lib/use-ipa'
 import { useSegmentAttempt } from '@/lib/use-segment-attempt'
 import { useSentenceLoop } from '@/lib/use-sentence-loop'
@@ -37,11 +40,27 @@ import {
   SPEED_OPTIONS,
   shortcutFor,
 } from '@/lib/sentence-loop'
-import { fitStage, formatClock, type Segment } from '@/lib/shadowing'
+import { fitDictation, fitStage, formatClock, type Segment } from '@/lib/shadowing'
 import { cn } from '@/lib/utils'
+
+const REPEAT_CYCLE = [1, 3, MAX_REPEAT]
+const DICTATION_SHORTCUTS: Record<
+  string,
+  'check' | 'cycleRepeat' | { type: 'back' | 'next' | 'replay' | 'toggle' }
+> = {
+  arrowleft: { type: 'back' },
+  arrowright: { type: 'next' },
+  r: { type: 'replay' },
+  ' ': { type: 'toggle' },
+  enter: 'check',
+  l: 'cycleRepeat',
+}
 
 /** Fixed chrome under the video and sentence: the control bar plus the gaps between blocks. */
 const CHROME_HEIGHT = 64 + 12
+
+/** The dictation action row under the sentence, plus its gap. */
+const ACTIONS_HEIGHT = 44
 
 function useContentSize() {
   const ref = useRef<HTMLDivElement>(null)
@@ -72,11 +91,23 @@ export function ShadowingSession({
   onBack: () => void
 }) {
   const { t } = useTranslation()
+  const [mode, setMode] = useState<'shadowing' | 'dictation'>('shadowing')
+  const dictation = mode === 'dictation'
   const { state, retry, loop, settings, setSettings, dispatch, runShortcut } = useSentenceLoop(
     videoId,
     segments,
+    dictation,
   )
   const index = loop.index
+  const [percent, setPercent] = useState(DEFAULT_BLANK_PERCENT)
+  const [autoAdvance, setAutoAdvance] = useState(false)
+  const dict = useDictation(segments, percent)
+  const entry = dict.entries.get(index)
+  const { ensure } = dict
+  useEffect(() => {
+    if (dictation) ensure(index)
+  }, [dictation, index, ensure])
+  const checkedRight = !!entry?.result && scoreSegment(entry.result) === 1
   const [railOpen, setRailOpen] = useState(true)
   const [sideTab, setSideTab] = useState<'transcript' | 'attempt'>('attempt')
   const [speedOpen, setSpeedOpen] = useState(false)
@@ -98,12 +129,20 @@ export function ShadowingSession({
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([])
 
   const shown = segments[index]
-  const fit = fitStage({
-    stageWidth: stage.width,
-    stageHeight: stage.height,
-    chromeHeight: CHROME_HEIGHT,
-    sentenceChars: (shown?.text.length ?? 0) * (showIpa ? 2 : 1),
-  })
+  const fit = dictation
+    ? fitDictation({
+        stageWidth: stage.width,
+        stageHeight: stage.height,
+        chromeHeight: CHROME_HEIGHT + ACTIONS_HEIGHT,
+        sentenceChars: (shown?.text.length ?? 0) + (entry?.blanks.length ?? 0) * 5,
+        extraHeight: (shown && shown.end - shown.start > 15 ? 24 : 0) + 8,
+      })
+    : fitStage({
+        stageWidth: stage.width,
+        stageHeight: stage.height,
+        chromeHeight: CHROME_HEIGHT,
+        sentenceChars: (shown?.text.length ?? 0) * (showIpa ? 2 : 1),
+      })
   const ipaWords = (text: string) => {
     if (!showIpa || ipa.status !== 'ready') return null
     const words = ipa.byText.get(text)
@@ -120,12 +159,37 @@ export function ShadowingSession({
   const failed = state.phase === 'error'
   const blocked = state.phase !== 'ready'
 
+  const { check } = dict
+  const runCheck = useCallback(() => {
+    if (blocked || entry?.result) return
+    if (loop.mode === 'playing' || loop.mode === 'waiting') dispatch({ type: 'toggle' })
+    check(index)
+  }, [blocked, entry?.result, loop.mode, dispatch, check, index])
+
+  useEffect(() => {
+    if (!dictation || !autoAdvance || !checkedRight || index >= segments.length - 1) return
+    const timer = setTimeout(() => dispatch({ type: 'next' }), 2000)
+    return () => clearTimeout(timer)
+  }, [dictation, autoAdvance, checkedRight, index, segments.length, dispatch])
+
   useEffect(() => {
     if (railOpen) itemRefs.current[index]?.scrollIntoView({ block: 'nearest' })
   }, [index, railOpen])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (dictation) {
+        if (!(e.metaKey || e.ctrlKey) || e.altKey) return
+        const cmd = DICTATION_SHORTCUTS[e.key.toLowerCase()]
+        if (!cmd || blocked) return
+        e.preventDefault()
+        if (cmd === 'check') runCheck()
+        else if (cmd === 'cycleRepeat') {
+          const at = REPEAT_CYCLE.indexOf(settings.repeat)
+          setSettings({ repeat: REPEAT_CYCLE[(at + 1) % REPEAT_CYCLE.length]! })
+        } else dispatch(cmd)
+        return
+      }
       if (e.metaKey || e.ctrlKey || e.altKey) return
       const target = e.target as HTMLElement | null
       if (target?.closest('input, textarea, select, [contenteditable], [role="radiogroup"]')) return
@@ -149,7 +213,18 @@ export function ShadowingSession({
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [blocked, runShortcut, showIpa, setShowIpa, toggleRecord])
+  }, [
+    blocked,
+    runShortcut,
+    showIpa,
+    setShowIpa,
+    toggleRecord,
+    dictation,
+    runCheck,
+    dispatch,
+    settings.repeat,
+    setSettings,
+  ])
 
   return (
     <div data-testid="shadowing-session" className="flex h-full min-h-0 flex-col">
@@ -169,6 +244,24 @@ export function ShadowingSession({
               {t('screens.shadowing.play', { n: loop.plays, total: settings.repeat })}
             </Badge>
           ) : null}
+        </div>
+        <div
+          role="group"
+          aria-label={t('screens.shadowing.modeLabel')}
+          className="flex shrink-0 items-center gap-1"
+        >
+          {(['shadowing', 'dictation'] as const).map((m) => (
+            <Button
+              key={m}
+              size="sm"
+              variant={mode === m ? 'secondary' : 'ghost'}
+              aria-pressed={mode === m}
+              data-testid={`mode-${m}`}
+              onClick={() => setMode(m)}
+            >
+              {t(`screens.shadowing.mode.${m}`)}
+            </Button>
+          ))}
         </div>
         <Button
           variant="ghost"
@@ -228,35 +321,52 @@ export function ShadowingSession({
                 </div>
               )}
             </div>
-            <div
-              className="w-full shrink-0 overflow-auto text-center"
-              style={{ height: fit.sentenceHeight }}
-            >
-              <p
-                data-testid="shadowing-sentence"
-                className="leading-snug"
-                style={{ fontSize: fit.fontSize }}
+            {dictation ? (
+              <div
+                className="order-3 w-full shrink-0 overflow-auto text-center"
+                style={{ height: fit.sentenceHeight }}
               >
-                {shownTokens
-                  ? shownTokens.map((tok, i) => (
-                      <span
-                        key={i}
-                        className="mx-[0.25em] inline-flex flex-col items-center align-top"
-                      >
-                        <span>{tok.text}</span>
+                {shown && entry && (
+                  <DictationSheet
+                    segment={shown}
+                    entry={entry}
+                    onAnswer={(blank, value) => dict.setAnswer(index, blank, value)}
+                    onCheck={runCheck}
+                    fontSize={fit.fontSize}
+                  />
+                )}
+              </div>
+            ) : (
+              <div
+                className="w-full shrink-0 overflow-auto text-center"
+                style={{ height: fit.sentenceHeight }}
+              >
+                <p
+                  data-testid="shadowing-sentence"
+                  className="leading-snug"
+                  style={{ fontSize: fit.fontSize }}
+                >
+                  {shownTokens
+                    ? shownTokens.map((tok, i) => (
                         <span
-                          lang="en-fonipa"
-                          data-testid="shadowing-word-ipa"
-                          className="text-muted-foreground text-[0.55em] leading-tight"
+                          key={i}
+                          className="mx-[0.25em] inline-flex flex-col items-center align-top"
                         >
-                          {tok.ipa ? `/${tok.ipa}/` : '\u00a0'}
+                          <span>{tok.text}</span>
+                          <span
+                            lang="en-fonipa"
+                            data-testid="shadowing-word-ipa"
+                            className="text-muted-foreground text-[0.55em] leading-tight"
+                          >
+                            {tok.ipa ? `/${tok.ipa}/` : '\u00a0'}
+                          </span>
                         </span>
-                      </span>
-                    ))
-                  : shown?.text}
-              </p>
-            </div>
-            <div className="flex shrink-0 flex-wrap items-center justify-center gap-x-4 gap-y-2">
+                      ))
+                    : shown?.text}
+                </p>
+              </div>
+            )}
+            <div className="order-2 flex shrink-0 flex-wrap items-center justify-center gap-x-4 gap-y-2">
               <div
                 role="toolbar"
                 aria-label={t('ds.player.label')}
@@ -350,72 +460,90 @@ export function ShadowingSession({
                   }}
                 />
               </label>
-              <div className="flex items-center gap-2 text-sm">
-                <Switch
-                  id="shadowing-auto-on"
-                  size="sm"
-                  data-testid="shadowing-auto-toggle"
-                  checked={autoOn}
-                  onCheckedChange={(on) => {
-                    if (!on && settings.autoContinuePct > 0)
-                      lastAutoPct.current = settings.autoContinuePct
-                    setSettings({ autoContinuePct: on ? lastAutoPct.current : 0 })
-                  }}
-                />
-                <label htmlFor="shadowing-auto">{t('screens.shadowing.autoContinue')}</label>
-                <Input
-                  id="shadowing-auto"
-                  disabled={!autoOn}
-                  type="number"
-                  inputMode="numeric"
-                  min={0}
-                  max={MAX_AUTO_CONTINUE}
-                  step={25}
-                  className="w-20"
-                  data-testid="shadowing-auto"
-                  aria-keyshortcuts=", ."
-                  aria-describedby="shadowing-auto-hint"
-                  value={settings.autoContinuePct}
-                  onChange={(e) => {
-                    const n = e.currentTarget.valueAsNumber
-                    if (Number.isFinite(n)) setSettings({ autoContinuePct: n })
-                  }}
-                />
-                <span aria-hidden="true">%</span>
-                <span id="shadowing-auto-hint" className="sr-only">
-                  {t('screens.shadowing.autoContinueHint')}
-                </span>
-              </div>
-              <div className="relative flex items-center gap-2 text-sm">
-                <Switch
-                  id="shadowing-ipa"
-                  size="sm"
-                  data-testid="shadowing-ipa-toggle"
-                  aria-keyshortcuts="I"
-                  checked={showIpa}
-                  onCheckedChange={setShowIpa}
-                />
-                <label htmlFor="shadowing-ipa">{t('screens.shadowing.ipa')}</label>
-                {showIpa && ipa.status === 'loading' && (
-                  <span
-                    role="status"
-                    className="text-muted-foreground absolute top-full left-0 mt-1 whitespace-nowrap"
-                  >
-                    {t('screens.shadowing.ipaLoading')}
+              {dictation && (
+                <div className="flex items-center gap-2 text-sm">
+                  <Switch
+                    id="dictation-auto-advance"
+                    size="sm"
+                    data-testid="dictation-auto-advance"
+                    checked={autoAdvance}
+                    onCheckedChange={setAutoAdvance}
+                  />
+                  <label htmlFor="dictation-auto-advance">
+                    {t('screens.dictation.autoAdvance')}
+                  </label>
+                </div>
+              )}
+              {!dictation && (
+                <div className="flex items-center gap-2 text-sm">
+                  <Switch
+                    id="shadowing-auto-on"
+                    size="sm"
+                    data-testid="shadowing-auto-toggle"
+                    checked={autoOn}
+                    onCheckedChange={(on) => {
+                      if (!on && settings.autoContinuePct > 0)
+                        lastAutoPct.current = settings.autoContinuePct
+                      setSettings({ autoContinuePct: on ? lastAutoPct.current : 0 })
+                    }}
+                  />
+                  <label htmlFor="shadowing-auto">{t('screens.shadowing.autoContinue')}</label>
+                  <Input
+                    id="shadowing-auto"
+                    disabled={!autoOn}
+                    type="number"
+                    inputMode="numeric"
+                    min={0}
+                    max={MAX_AUTO_CONTINUE}
+                    step={25}
+                    className="w-20"
+                    data-testid="shadowing-auto"
+                    aria-keyshortcuts=", ."
+                    aria-describedby="shadowing-auto-hint"
+                    value={settings.autoContinuePct}
+                    onChange={(e) => {
+                      const n = e.currentTarget.valueAsNumber
+                      if (Number.isFinite(n)) setSettings({ autoContinuePct: n })
+                    }}
+                  />
+                  <span aria-hidden="true">%</span>
+                  <span id="shadowing-auto-hint" className="sr-only">
+                    {t('screens.shadowing.autoContinueHint')}
                   </span>
-                )}
-                {showIpa && ipa.status === 'error' && (
-                  <span
-                    role="alert"
-                    className="absolute top-full left-0 mt-1 flex items-center gap-1 whitespace-nowrap"
-                  >
-                    {t('screens.shadowing.ipaError')}
-                    <Button size="sm" variant="outline" onClick={retryIpa}>
-                      {t('practice.retry')}
-                    </Button>
-                  </span>
-                )}
-              </div>
+                </div>
+              )}
+              {!dictation && (
+                <div className="relative flex items-center gap-2 text-sm">
+                  <Switch
+                    id="shadowing-ipa"
+                    size="sm"
+                    data-testid="shadowing-ipa-toggle"
+                    aria-keyshortcuts="I"
+                    checked={showIpa}
+                    onCheckedChange={setShowIpa}
+                  />
+                  <label htmlFor="shadowing-ipa">{t('screens.shadowing.ipa')}</label>
+                  {showIpa && ipa.status === 'loading' && (
+                    <span
+                      role="status"
+                      className="text-muted-foreground absolute top-full left-0 mt-1 whitespace-nowrap"
+                    >
+                      {t('screens.shadowing.ipaLoading')}
+                    </span>
+                  )}
+                  {showIpa && ipa.status === 'error' && (
+                    <span
+                      role="alert"
+                      className="absolute top-full left-0 mt-1 flex items-center gap-1 whitespace-nowrap"
+                    >
+                      {t('screens.shadowing.ipaError')}
+                      <Button size="sm" variant="outline" onClick={retryIpa}>
+                        {t('practice.retry')}
+                      </Button>
+                    </span>
+                  )}
+                </div>
+              )}
               <Badge variant="secondary" className="tabular-nums" data-testid="shadowing-position">
                 {t('screens.shadowing.segment', {
                   n: index + 1,
@@ -423,9 +551,31 @@ export function ShadowingSession({
                 })}
               </Badge>
             </div>
+            {dictation && entry && (
+              <div className="order-4 flex shrink-0 justify-center">
+                <DictationActions
+                  checked={!!entry.result}
+                  percent={percent}
+                  onPercent={setPercent}
+                  onCheck={runCheck}
+                  onNewBlanks={() => dict.newBlanks(index)}
+                  onRetry={() => dict.retry(index)}
+                />
+              </div>
+            )}
           </div>
         </div>
-        {railOpen && (
+        {dictation && railOpen && (
+          <DictationRail
+            segments={segments}
+            index={index}
+            results={dict.results}
+            score={dict.score}
+            review={dict.review}
+            onSelect={(i) => dispatch({ type: 'start', index: i })}
+          />
+        )}
+        {!dictation && railOpen && (
           <aside
             aria-label={t('screens.shadowing.transcript')}
             data-testid="shadowing-sidebar"

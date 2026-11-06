@@ -522,7 +522,11 @@
       "reviewList": "Words to review",
       "summary": "Summary",
       "summaryBody": "You got {{right}} of {{total}} sentences right.",
-      "practiseWords": "Practise these words"
+      "practiseWords": "Practise these words",
+      "autoAdvance": "Auto-advance after check",
+      "longSegment": "Long sentence — use Replay to hear it again.",
+      "noReview": "No missed words yet.",
+      "checkedCount": "{{n}} checked"
     },
     "provider": {
       "title": "Set up your AI partner",
