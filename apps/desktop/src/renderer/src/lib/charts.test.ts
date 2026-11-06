@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { PronunciationResult } from '@engclaw/ipc-contract'
-import { detailSeries, domainOf, linePath } from './charts'
+import { detailSeries, domainOf, gapPath, linePath } from './charts'
 
 describe('domainOf', () => {
   it('spans all series', () => {
@@ -37,5 +37,14 @@ describe('detailSeries', () => {
     expect(s.phoneme).toEqual({ reference: [1, 2], you: [1, 3] })
     expect(s.f0).toEqual([100, 120, 110])
     expect(s.energy).toEqual([10, 50])
+  })
+})
+
+describe('gapPath', () => {
+  it('starts a new sub-path after each gap', () => {
+    expect(gapPath([0, 1, null, null, 1, 0], 50, 10, [0, 1])).toBe('M0,10L10,0 M40,0L50,10')
+  })
+  it('is empty when nothing has a value', () => {
+    expect(gapPath([null, null], 10, 10, [0, 1])).toBe('')
   })
 })

@@ -13,7 +13,9 @@ import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { firstFlagged } from '@/lib/result'
 import { cn } from '@/lib/utils'
-import { type AttemptState } from '@/lib/use-segment-attempt'
+import { accuracyScore, type IntonationState } from '@/lib/intonation'
+import type { AttemptState } from '@/lib/use-segment-attempt'
+import { IntonationBody } from './intonation-section'
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -27,11 +29,13 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function FullResult({
   result,
   text,
+  intonation,
   onPlay,
   onRetry,
 }: {
   result: PronunciationResult
   text: string
+  intonation: IntonationState | null
   onPlay: () => void
   onRetry: () => void
 }) {
@@ -53,11 +57,26 @@ function FullResult({
         onTryAgain={onRetry}
         onReplay={onPlay}
       />
+      <Section title={t('screens.shadowing.attempt.accuracy')}>
+        <p className="text-2xl font-semibold tabular-nums" data-testid="shadowing-accuracy-score">
+          {accuracyScore(result.differences.word_error_rate)}
+          <span className="text-muted-foreground text-sm font-normal"> / 100</span>
+        </p>
+        <p className="text-muted-foreground text-sm">
+          {t('screens.shadowing.attempt.detected')}{' '}
+          <span className="text-foreground" data-testid="shadowing-detected">
+            {result.differences.transcribe.toLowerCase() || '…'}
+          </span>
+        </p>
+      </Section>
       <Section title={t('screens.practice.tabWords')}>
         <WordsDetail view={view} selected={selected} onSelect={setSelected} />
       </Section>
       <Section title={t('screens.practice.tabPhonemes')}>
         <PhonemesDetail result={result} view={view} />
+      </Section>
+      <Section title={t('screens.shadowing.attempt.fluency')}>
+        <IntonationBody state={intonation} />
       </Section>
       <Section title={t('screens.practice.tabPitch')}>
         <PitchDetail result={result} />
@@ -69,6 +88,7 @@ function FullResult({
 /** Sidebar tab: record at the shown sentence and read the full pronunciation result. */
 export function AttemptPanel({
   state,
+  intonation,
   text,
   best,
   disabled,
@@ -77,6 +97,7 @@ export function AttemptPanel({
   onRetry,
 }: {
   state: AttemptState
+  intonation: IntonationState | null
   text: string
   best: number | null
   disabled: boolean
@@ -148,7 +169,13 @@ export function AttemptPanel({
         </Alert>
       )}
       {state.phase === 'result' && (
-        <FullResult result={state.result} text={text} onPlay={onPlay} onRetry={onRetry} />
+        <FullResult
+          result={state.result}
+          text={text}
+          intonation={intonation}
+          onPlay={onPlay}
+          onRetry={onRetry}
+        />
       )}
     </div>
   )

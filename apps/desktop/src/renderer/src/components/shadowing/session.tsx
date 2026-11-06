@@ -490,6 +490,7 @@ export function ShadowingSession({
             <div hidden={sideTab !== 'attempt'} className="min-h-0 flex-1 overflow-auto px-4 pb-4">
               <AttemptPanel
                 state={attempt.state}
+                intonation={attempt.intonation}
                 text={shown?.text ?? ''}
                 best={attempt.best}
                 disabled={blocked}

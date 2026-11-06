@@ -12,6 +12,11 @@ export interface Cue {
   dur: number
   text: string
 }
+export interface CachedContour {
+  f0: number[]
+  energy: number[]
+  frameSec: number
+}
 export interface IpaWord {
   word: string
   ipa: string
@@ -136,8 +141,43 @@ export class VideoStore {
       .run(videoId, text, JSON.stringify(words))
   }
 
+  /** Reference pitch/energy contour of a video segment (keyed by its time range), or null. */
+  getContour(videoId: string, startSec: number, endSec: number): CachedContour | null {
+    const row = this.db
+      .prepare(
+        'SELECT f0, energy, frame_sec FROM contours WHERE video_id = ? AND start_ms = ? AND end_ms = ?',
+      )
+      .get(videoId, toMs(startSec), toMs(endSec)) as
+      { f0: string; energy: string; frame_sec: number } | undefined
+    if (!row) return null
+    const f0 = parseNumbers(row.f0)
+    const energy = parseNumbers(row.energy)
+    return f0 && energy && f0.length === energy.length
+      ? { f0, energy, frameSec: row.frame_sec }
+      : null
+  }
+
+  putContour(videoId: string, startSec: number, endSec: number, c: CachedContour): void {
+    this.db
+      .prepare(
+        `INSERT INTO contours (video_id, start_ms, end_ms, f0, energy, frame_sec)
+         VALUES (?, ?, ?, ?, ?, ?)
+         ON CONFLICT(video_id, start_ms, end_ms) DO UPDATE SET f0 = excluded.f0,
+           energy = excluded.energy, frame_sec = excluded.frame_sec`,
+      )
+      .run(
+        videoId,
+        toMs(startSec),
+        toMs(endSec),
+        JSON.stringify(c.f0),
+        JSON.stringify(c.energy),
+        c.frameSec,
+      )
+  }
+
   remove(videoId: string): void {
     this.db.transaction(() => {
+      this.db.prepare('DELETE FROM contours WHERE video_id = ?').run(videoId)
       this.db.prepare('DELETE FROM transcript_ipa WHERE video_id = ?').run(videoId)
       this.db.prepare('DELETE FROM transcripts WHERE video_id = ?').run(videoId)
       this.db.prepare('DELETE FROM videos WHERE video_id = ?').run(videoId)
@@ -146,6 +186,7 @@ export class VideoStore {
 
   clear(): void {
     this.db.transaction(() => {
+      this.db.prepare('DELETE FROM contours').run()
       this.db.prepare('DELETE FROM transcript_ipa').run()
       this.db.prepare('DELETE FROM transcripts').run()
       this.db.prepare('DELETE FROM videos').run()
@@ -185,6 +226,17 @@ function parse<T>(raw: string, guard: (v: unknown) => v is T): T[] | null {
 function safeJson(raw: string): unknown {
   try {
     return JSON.parse(raw)
+  } catch {
+    return null
+  }
+}
+
+const toMs = (sec: number) => Math.round(sec * 1000)
+
+function parseNumbers(raw: string): number[] | null {
+  try {
+    const v: unknown = JSON.parse(raw)
+    return Array.isArray(v) && v.every((x) => typeof x === 'number') ? (v as number[]) : null
   } catch {
     return null
   }

@@ -1,10 +1,12 @@
 // Inference worker entry (utility process): serves the main process over `rpc` messages.
 import { join } from 'node:path'
+import type { ContourData } from '@engclaw/ipc-contract'
 import { CachedPhonemizer, TTS_MODEL_ID } from '@engclaw/pronounce'
 import { EspeakProcess } from './espeak'
 import { DEFAULT_KOKORO_FILES, loadKokoro } from './kokoro'
 import { InferenceError, toInferenceError } from './errors'
 import { InferenceService, type ModelDirs } from './inference'
+import { analyzeIntonation } from './intonation'
 import { loadModelAdapter } from './model-adapter'
 import type { RpcCancel, RpcRequest, RpcResult } from './rpc'
 import { runSmoke } from './smoke'
@@ -52,6 +54,7 @@ async function dispatch(req: RpcRequest, signal: AbortSignal): Promise<unknown> 
     audio?: Float32Array
     text?: string
     language?: string
+    reference?: { audio: Float32Array } | { contour: ContourData }
     models?: ModelDirs
     kokoro?: { modelDir: string; cacheDir: string }
   }
@@ -65,6 +68,8 @@ async function dispatch(req: RpcRequest, signal: AbortSignal): Promise<unknown> 
       return inference.analyze(p.audio!, p.text!, p.language, p.models ?? {}, opts)
     case 'transcribe':
       return inference.transcribe(p.audio!, p.language, p.models ?? {}, opts)
+    case 'intonation':
+      return analyzeIntonation(p.audio!, p.reference!)
     case 'phonemize':
       return inference.phonemize(p.text!, p.language)
     case 'speak': {

@@ -36,6 +36,7 @@ describe('preload bridge', () => {
     const api = await load()
     expect(Object.keys(api).sort()).toEqual([
       'app',
+      'contours',
       'history',
       'inference',
       'models',
