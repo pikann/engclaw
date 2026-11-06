@@ -37,6 +37,12 @@ export const MIGRATIONS: readonly string[] = [
      PRIMARY KEY (video_id, lang)
    );`,
   `ALTER TABLE videos ADD COLUMN sentence_settings TEXT;`,
+  `CREATE TABLE transcript_ipa (
+     video_id  TEXT NOT NULL,
+     text      TEXT NOT NULL,
+     words     TEXT NOT NULL,
+     PRIMARY KEY (video_id, text)
+   );`,
 ]
 
 export class FutureSchemaError extends Error {

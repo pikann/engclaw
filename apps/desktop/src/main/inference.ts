@@ -1,7 +1,14 @@
-import { IPC, type InferenceErrorCode, type InferenceResult } from '@engclaw/ipc-contract'
+import {
+  IPC,
+  type InferenceErrorCode,
+  type InferenceResult,
+  type PhonemizeResult,
+} from '@engclaw/ipc-contract'
 import type { ModelManager } from '@engclaw/models'
 import { DEFAULT_LANGUAGE, LANGUAGES, TARGET_SAMPLE_RATE, getLanguage } from '@engclaw/pronounce'
 import { handle } from './ipc'
+import type { VideoStore } from './store/videos'
+import { transcriptIpa } from './transcript-ipa'
 import { kokoroLocation, KOKORO_MODEL_ID } from './tts'
 import { RpcFailure, type UtilityClient } from './utility-client'
 
@@ -20,7 +27,11 @@ async function installed(models: ModelManager, id: string): Promise<string | nul
  * The OpenPronounce endpoints (`/pronunciation`, `/speech2text`, `/phonemes`, `/languages`) as
  * contract channels, forwarded to the inference service in the utility process.
  */
-export function registerInferenceHandlers(client: UtilityClient, models: ModelManager): void {
+export function registerInferenceHandlers(
+  client: UtilityClient,
+  models: ModelManager,
+  videos: VideoStore,
+): void {
   const active = new Map<string, number>()
 
   async function run<T>(
@@ -84,6 +95,16 @@ export function registerInferenceHandlers(client: UtilityClient, models: ModelMa
       return fail('UNSUPPORTED_LANGUAGE', `unsupported language: ${language}`)
     return run(event, null, 'phonemize', { text, language: language ?? DEFAULT_LANGUAGE })
   })
+  handle(IPC.youtubeIpa, ({ videoId, texts, cachedOnly }, event) =>
+    transcriptIpa(
+      videos,
+      (text) =>
+        run<PhonemizeResult>(event, null, 'phonemize', { text, language: DEFAULT_LANGUAGE }),
+      videoId,
+      texts,
+      cachedOnly,
+    ),
+  )
   handle(IPC.inferenceLanguages, () =>
     Object.values(LANGUAGES).map(({ code, name, experimental }) => ({ code, name, experimental })),
   )

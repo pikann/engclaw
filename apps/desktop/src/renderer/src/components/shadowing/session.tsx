@@ -25,6 +25,8 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { alignIpa } from '@/lib/ipa'
+import { useShowIpa, useTranscriptIpa } from '@/lib/use-ipa'
 import { useSentenceLoop } from '@/lib/use-sentence-loop'
 import {
   DEFAULT_SETTINGS,
@@ -78,6 +80,8 @@ export function ShadowingSession({
   const autoOn = settings.autoContinuePct > 0
   const lastAutoPct = useRef(autoOn ? settings.autoContinuePct : DEFAULT_SETTINGS.autoContinuePct)
   if (autoOn) lastAutoPct.current = settings.autoContinuePct
+  const [showIpa, setShowIpa] = useShowIpa()
+  const { state: ipa, retry: retryIpa } = useTranscriptIpa(videoId, segments, showIpa)
   const [stageRef, stage] = useContentSize()
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([])
 
@@ -86,8 +90,21 @@ export function ShadowingSession({
     stageWidth: stage.width,
     stageHeight: stage.height,
     chromeHeight: CHROME_HEIGHT,
-    sentenceChars: shown?.text.length ?? 0,
+    sentenceChars: (shown?.text.length ?? 0) * (showIpa ? 2 : 1),
   })
+  const ipaWords = (text: string) => {
+    if (!showIpa || ipa.status !== 'ready') return null
+    const words = ipa.byText.get(text)
+    return words ? alignIpa(text, words) : null
+  }
+  const shownTokens =
+    shown && showIpa
+      ? (ipaWords(shown.text) ??
+        shown.text
+          .split(/\s+/)
+          .filter(Boolean)
+          .map((text) => ({ text, ipa: null })))
+      : null
   const failed = state.phase === 'error'
   const blocked = state.phase !== 'ready'
 
@@ -104,6 +121,10 @@ export function ShadowingSession({
         setRailOpen((open) => !open)
         return
       }
+      if (e.key.toLowerCase() === 'i') {
+        setShowIpa(!showIpa)
+        return
+      }
       if (e.key === ' ' && target?.closest('button, a')) return
       const cmd = shortcutFor(e.key)
       if (!cmd || blocked) return
@@ -112,7 +133,7 @@ export function ShadowingSession({
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [blocked, runShortcut])
+  }, [blocked, runShortcut, showIpa, setShowIpa])
 
   return (
     <div data-testid="shadowing-session" className="flex h-full min-h-0 flex-col">
@@ -200,7 +221,23 @@ export function ShadowingSession({
                 className="leading-snug"
                 style={{ fontSize: fit.fontSize }}
               >
-                {shown?.text}
+                {shownTokens
+                  ? shownTokens.map((tok, i) => (
+                      <span
+                        key={i}
+                        className="mx-[0.25em] inline-flex flex-col items-center align-top"
+                      >
+                        <span>{tok.text}</span>
+                        <span
+                          lang="en-fonipa"
+                          data-testid="shadowing-word-ipa"
+                          className="text-muted-foreground text-[0.55em] leading-tight"
+                        >
+                          {tok.ipa ? `/${tok.ipa}/` : '\u00a0'}
+                        </span>
+                      </span>
+                    ))
+                  : shown?.text}
               </p>
             </div>
             <div className="flex shrink-0 flex-wrap items-center justify-center gap-x-4 gap-y-2">
@@ -333,6 +370,36 @@ export function ShadowingSession({
                   {t('screens.shadowing.autoContinueHint')}
                 </span>
               </div>
+              <div className="relative flex items-center gap-2 text-sm">
+                <Switch
+                  id="shadowing-ipa"
+                  size="sm"
+                  data-testid="shadowing-ipa-toggle"
+                  aria-keyshortcuts="I"
+                  checked={showIpa}
+                  onCheckedChange={setShowIpa}
+                />
+                <label htmlFor="shadowing-ipa">{t('screens.shadowing.ipa')}</label>
+                {showIpa && ipa.status === 'loading' && (
+                  <span
+                    role="status"
+                    className="text-muted-foreground absolute top-full left-0 mt-1 whitespace-nowrap"
+                  >
+                    {t('screens.shadowing.ipaLoading')}
+                  </span>
+                )}
+                {showIpa && ipa.status === 'error' && (
+                  <span
+                    role="alert"
+                    className="absolute top-full left-0 mt-1 flex items-center gap-1 whitespace-nowrap"
+                  >
+                    {t('screens.shadowing.ipaError')}
+                    <Button size="sm" variant="outline" onClick={retryIpa}>
+                      {t('practice.retry')}
+                    </Button>
+                  </span>
+                )}
+              </div>
               <Badge variant="secondary" className="tabular-nums" data-testid="shadowing-position">
                 {t('screens.shadowing.segment', {
                   n: index + 1,
@@ -362,7 +429,21 @@ export function ShadowingSession({
                     <span className="text-muted-foreground w-10 shrink-0 tabular-nums">
                       {formatClock(s.start)}
                     </span>
-                    <span>{s.text}</span>
+                    <span className="min-w-0 flex-1">
+                      {s.text}
+                      {showIpa && (
+                        <span
+                          lang="en-fonipa"
+                          className="text-muted-foreground block truncate text-xs font-normal"
+                        >
+                          {ipaWords(s.text)
+                            ?.map((tok) => tok.ipa)
+                            .filter(Boolean)
+                            .map((v) => `/${v}/`)
+                            .join(' ') || '\u00a0'}
+                        </span>
+                      )}
+                    </span>
                   </button>
                 </li>
               ))}

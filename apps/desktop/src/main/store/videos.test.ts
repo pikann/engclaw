@@ -103,6 +103,19 @@ describe('video cache', () => {
     expect(store.videos.getSettings('aaaaaaaaaaa')).toBeNull()
   })
 
+  it('persists IPA per video and drops it with the video and on deleteAll', () => {
+    const words = [{ word: 'hi', ipa: 'haɪ' }]
+    expect(store.videos.getIpa('aaaaaaaaaaa', 'Hi')).toBeNull()
+    store.videos.putIpa('aaaaaaaaaaa', 'Hi', words)
+    store.videos.putIpa('bbbbbbbbbbb', 'Hi', words)
+    expect(store.videos.getIpa('aaaaaaaaaaa', 'Hi')).toEqual(words)
+    store.videos.remove('aaaaaaaaaaa')
+    expect(store.videos.getIpa('aaaaaaaaaaa', 'Hi')).toBeNull()
+    expect(store.videos.getIpa('bbbbbbbbbbb', 'Hi')).toEqual(words)
+    store.deleteAll()
+    expect(store.videos.getIpa('bbbbbbbbbbb', 'Hi')).toBeNull()
+  })
+
   it('deleteAll wipes cached videos too', () => {
     store.videos.putMeta(meta('aaaaaaaaaaa'))
     store.videos.putTranscript('aaaaaaaaaaa', 'en', cues)
