@@ -445,6 +445,9 @@
         "shadowing": "Nhại giọng",
         "dictation": "Nghe chép"
       },
+      "ipa": "IPA dưới từng từ",
+      "ipaLoading": "Đang tải IPA…",
+      "ipaError": "Không tải được IPA.",
       "toggleRail": "Hiện phụ đề",
       "focus": "Chế độ tập trung",
       "segment": "Câu {{n}} / {{total}}",

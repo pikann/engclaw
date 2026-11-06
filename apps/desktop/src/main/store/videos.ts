@@ -12,6 +12,10 @@ export interface Cue {
   dur: number
   text: string
 }
+export interface IpaWord {
+  word: string
+  ipa: string
+}
 export interface RecentVideo {
   videoId: string
   title: string
@@ -115,8 +119,26 @@ export class VideoStore {
       .run(JSON.stringify(settings), videoId)
   }
 
+  /** IPA words of one transcript sentence, or null when it was not phonemized yet. */
+  getIpa(videoId: string, text: string): IpaWord[] | null {
+    const row = this.db
+      .prepare('SELECT words FROM transcript_ipa WHERE video_id = ? AND text = ?')
+      .get(videoId, text) as { words: string } | undefined
+    return row ? parse(row.words, isIpaWord) : null
+  }
+
+  putIpa(videoId: string, text: string, words: readonly IpaWord[]): void {
+    this.db
+      .prepare(
+        `INSERT INTO transcript_ipa (video_id, text, words) VALUES (?, ?, ?)
+         ON CONFLICT(video_id, text) DO UPDATE SET words = excluded.words`,
+      )
+      .run(videoId, text, JSON.stringify(words))
+  }
+
   remove(videoId: string): void {
     this.db.transaction(() => {
+      this.db.prepare('DELETE FROM transcript_ipa WHERE video_id = ?').run(videoId)
       this.db.prepare('DELETE FROM transcripts WHERE video_id = ?').run(videoId)
       this.db.prepare('DELETE FROM videos WHERE video_id = ?').run(videoId)
     })()
@@ -124,6 +146,7 @@ export class VideoStore {
 
   clear(): void {
     this.db.transaction(() => {
+      this.db.prepare('DELETE FROM transcript_ipa').run()
       this.db.prepare('DELETE FROM transcripts').run()
       this.db.prepare('DELETE FROM videos').run()
     })()
@@ -135,6 +158,12 @@ const isTrack = (v: unknown): v is CachedVideo['captionTracks'][number] =>
   v !== null &&
   typeof (v as { lang?: unknown }).lang === 'string' &&
   typeof (v as { auto?: unknown }).auto === 'boolean'
+
+const isIpaWord = (v: unknown): v is IpaWord =>
+  typeof v === 'object' &&
+  v !== null &&
+  typeof (v as { word?: unknown }).word === 'string' &&
+  typeof (v as { ipa?: unknown }).ipa === 'string'
 
 const isCue = (v: unknown): v is Cue =>
   typeof v === 'object' &&

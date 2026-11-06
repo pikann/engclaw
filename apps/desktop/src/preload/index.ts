@@ -71,6 +71,7 @@ const api: EngclawApi = {
     recent: () => invoke(IPC.youtubeRecent),
     getSettings: (req) => invoke(IPC.youtubeGetSettings, req),
     saveSettings: (req) => invoke(IPC.youtubeSaveSettings, req),
+    ipa: (req) => invoke(IPC.youtubeIpa, req),
   },
   player: {
     load: (req) => invoke(IPC.playerLoad, req),

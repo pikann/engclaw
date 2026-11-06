@@ -224,6 +224,13 @@ export const PhonemizeResult = z.object({
 })
 export type PhonemizeResult = z.infer<typeof PhonemizeResult>
 
+export const IpaWord = z.object({ word: z.string(), ipa: z.string() })
+export type IpaWord = z.infer<typeof IpaWord>
+/** IPA for the sentences of a video's transcript; results are cached per video. */
+export const TranscriptIpaRequest = VideoRef.extend({
+  texts: z.array(z.string().min(1).max(1000)).min(1).max(5000),
+}).strict()
+
 export const LanguageRequest = z.object({ language: z.string().min(2).max(16) }).strict()
 
 export const ModelErrorCode = z.enum([
@@ -368,6 +375,7 @@ export const IPC = {
   youtubeRecent: 'youtube:recent',
   youtubeGetSettings: 'youtube:getSettings',
   youtubeSaveSettings: 'youtube:saveSettings',
+  youtubeIpa: 'youtube:ipa',
   playerLoad: 'player:load',
   playerBounds: 'player:bounds',
   playerCommand: 'player:command',
@@ -437,6 +445,10 @@ export const invokeChannels = {
   /** Remembered practice settings for a video, or null when none were saved. */
   [IPC.youtubeGetSettings]: { request: VideoRef, response: SentenceSettings.nullable() },
   [IPC.youtubeSaveSettings]: { request: SentenceSettingsSave, response: z.null() },
+  [IPC.youtubeIpa]: {
+    request: TranscriptIpaRequest,
+    response: inferenceResult(z.array(z.array(IpaWord))),
+  },
   /** Creates (or replaces) the sandboxed player view for a video, hidden until bounds are set. */
   [IPC.playerLoad]: { request: VideoRef, response: z.null() },
   [IPC.playerBounds]: { request: PlayerBounds, response: z.null() },
@@ -529,6 +541,9 @@ export interface EngclawApi {
     recent(): Promise<RecentVideo[]>
     getSettings(req: z.infer<typeof VideoRef>): Promise<SentenceSettings | null>
     saveSettings(req: z.infer<typeof SentenceSettingsSave>): Promise<null>
+    ipa(
+      req: z.infer<typeof TranscriptIpaRequest>,
+    ): Promise<InferenceResult<z.infer<typeof IpaWord>[][]>>
   }
   player: {
     load(req: z.infer<typeof VideoRef>): Promise<null>

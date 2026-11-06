@@ -171,7 +171,7 @@ void app.whenReady().then(async () => {
   if (process.env['ENGCLAW_SMOKE']) runSmoke(startUtility())
   const inference = new UtilityClient(startUtility)
   registerTtsHandlers(inference, models)
-  registerInferenceHandlers(inference, models)
+  registerInferenceHandlers(inference, models, store.videos)
 })
 
 app.on('window-all-closed', () => app.quit())

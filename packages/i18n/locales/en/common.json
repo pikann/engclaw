@@ -445,6 +445,9 @@
         "shadowing": "Shadowing",
         "dictation": "Dictation"
       },
+      "ipa": "IPA under words",
+      "ipaLoading": "Loading IPA…",
+      "ipaError": "Couldn’t load IPA.",
       "toggleRail": "Show transcript",
       "focus": "Focus mode",
       "segment": "Sentence {{n}} / {{total}}",
