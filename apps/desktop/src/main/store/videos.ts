@@ -1,5 +1,5 @@
 import type Database from 'better-sqlite3'
-import { SentenceSettings } from '@engclaw/ipc-contract'
+import { SegmentProsody, SentenceSettings } from '@engclaw/ipc-contract'
 
 export interface CachedVideo {
   videoId: string
@@ -141,6 +141,46 @@ export class VideoStore {
       .run(videoId, text, JSON.stringify(words))
   }
 
+  /** Prosody of a segment's text for one algorithm version, or null when not computed (or corrupt). */
+  getProsody(
+    videoId: string,
+    startSec: number,
+    endSec: number,
+    text: string,
+    version: number,
+  ): SegmentProsody | null {
+    const row = this.db
+      .prepare(
+        `SELECT result FROM segment_prosody
+         WHERE video_id = ? AND start_ms = ? AND end_ms = ? AND text = ? AND version = ?`,
+      )
+      .get(videoId, toMs(startSec), toMs(endSec), text, version) as { result: string } | undefined
+    if (!row) return null
+    try {
+      const parsed = SegmentProsody.safeParse(JSON.parse(row.result))
+      return parsed.success ? parsed.data : null
+    } catch {
+      return null
+    }
+  }
+
+  putProsody(
+    videoId: string,
+    startSec: number,
+    endSec: number,
+    text: string,
+    version: number,
+    result: SegmentProsody,
+  ): void {
+    this.db
+      .prepare(
+        `INSERT INTO segment_prosody (video_id, start_ms, end_ms, text, version, result)
+         VALUES (?, ?, ?, ?, ?, ?)
+         ON CONFLICT(video_id, start_ms, end_ms, text, version) DO UPDATE SET result = excluded.result`,
+      )
+      .run(videoId, toMs(startSec), toMs(endSec), text, version, JSON.stringify(result))
+  }
+
   /** Reference pitch/energy contour of a video segment (keyed by its time range), or null. */
   getContour(videoId: string, startSec: number, endSec: number): CachedContour | null {
     const row = this.db
@@ -178,6 +218,7 @@ export class VideoStore {
   remove(videoId: string): void {
     this.db.transaction(() => {
       this.db.prepare('DELETE FROM contours WHERE video_id = ?').run(videoId)
+      this.db.prepare('DELETE FROM segment_prosody WHERE video_id = ?').run(videoId)
       this.db.prepare('DELETE FROM transcript_ipa WHERE video_id = ?').run(videoId)
       this.db.prepare('DELETE FROM transcripts WHERE video_id = ?').run(videoId)
       this.db.prepare('DELETE FROM videos WHERE video_id = ?').run(videoId)
@@ -187,6 +228,7 @@ export class VideoStore {
   clear(): void {
     this.db.transaction(() => {
       this.db.prepare('DELETE FROM contours').run()
+      this.db.prepare('DELETE FROM segment_prosody').run()
       this.db.prepare('DELETE FROM transcript_ipa').run()
       this.db.prepare('DELETE FROM transcripts').run()
       this.db.prepare('DELETE FROM videos').run()

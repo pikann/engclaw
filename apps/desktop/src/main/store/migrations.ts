@@ -57,6 +57,15 @@ export const MIGRATIONS: readonly string[] = [
    );`,
   // Contours extracted with the old pitch range can be empty; they are re-extracted on demand.
   `DELETE FROM contours;`,
+  `CREATE TABLE segment_prosody (
+     video_id  TEXT NOT NULL,
+     start_ms  INTEGER NOT NULL,
+     end_ms    INTEGER NOT NULL,
+     text      TEXT NOT NULL,
+     version   INTEGER NOT NULL,
+     result    TEXT NOT NULL,
+     PRIMARY KEY (video_id, start_ms, end_ms, text, version)
+   );`,
 ]
 
 export class FutureSchemaError extends Error {

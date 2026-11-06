@@ -4,7 +4,7 @@ import type { InferenceErrorCode } from '@engclaw/ipc-contract'
 export type RpcRequest = {
   type: 'rpc'
   id: number
-  method: 'analyze' | 'transcribe' | 'phonemize' | 'speak' | 'intonation'
+  method: 'analyze' | 'transcribe' | 'phonemize' | 'speak' | 'intonation' | 'prosody'
   params: Record<string, unknown>
 }
 export type RpcCancel = { type: 'rpc-cancel'; id: number }

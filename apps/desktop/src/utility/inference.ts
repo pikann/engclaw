@@ -1,5 +1,6 @@
 import type { InferenceProgress, PhonemizeResult } from '@engclaw/ipc-contract'
-import { getLanguage, type Phonemizer } from '@engclaw/pronounce'
+import { forcedAlignWords, getLanguage, logSoftmax, type Phonemizer } from '@engclaw/pronounce'
+import { analyzeSegmentProsody, type SegmentProsody } from '@engclaw/prosody'
 import { analyzeRecording, transcribeAudio, type Control } from './analyze'
 import { InferenceError } from './errors'
 import type { ModelAdapter } from './model-adapter'
@@ -82,6 +83,37 @@ export class InferenceService {
       const asr = await this.adapter('asr', dirs.asr, lang.asrModelId, ctl)
       ctl.stage('transcribing')
       return { text: (await transcribeAudio(asr, audio)).text, language: lang.code }
+    })
+  }
+
+  /** Word timings from forced CTC alignment of `text` to `audio`, then pause/stress/pitch analysis. */
+  prosody(
+    audio: Float32Array,
+    text: string,
+    languageCode: string | undefined,
+    dirs: ModelDirs,
+    opts: CallOptions,
+  ): Promise<SegmentProsody> {
+    return this.exclusive(opts, async (ctl) => {
+      const lang = this.language(languageCode)
+      const asr = await this.adapter('asr', dirs.asr, lang.asrModelId, ctl)
+      ctl.stage('transcribing')
+      const out = await asr.run(audio)
+      const logProbs = logSoftmax(out.logits, out.frames, out.vocabSize)
+      const words = text.split(/\s+/).filter(Boolean)
+      let spans
+      try {
+        spans = forcedAlignWords(logProbs, out.frames, asr.vocab, words)
+      } catch (e) {
+        throw new InferenceError('INVALID_INPUT', e instanceof Error ? e.message : String(e))
+      }
+      const frameSec = audio.length / 16000 / out.frames
+      const timed = words.flatMap((w, i) =>
+        spans[i]
+          ? [{ text: w, start: spans[i]!.start * frameSec, end: spans[i]!.end * frameSec }]
+          : [],
+      )
+      return analyzeSegmentProsody(audio, 16000, timed)
     })
   }
 

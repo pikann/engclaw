@@ -2,6 +2,7 @@
 export * from './audio'
 export * from './compare'
 export * from './dtw'
+export * from './forced-align'
 export * from './ctc'
 export * from './languages'
 export * from './levenshtein'

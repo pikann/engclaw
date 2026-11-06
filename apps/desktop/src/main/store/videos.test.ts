@@ -116,6 +116,31 @@ describe('video cache', () => {
     expect(store.videos.getIpa('bbbbbbbbbbb', 'Hi')).toBeNull()
   })
 
+  it('caches segment prosody per segment, text and version, and drops it with the video', () => {
+    const r = {
+      words: [
+        {
+          text: 'hi',
+          start: 0,
+          end: 0.3,
+          stressed: true,
+          pitch: { direction: 'flat' as const, contour: [] },
+        },
+      ],
+      pauses: [],
+    }
+    expect(store.videos.getProsody('aaaaaaaaaaa', 1, 4, 'hi', 1)).toBeNull()
+    store.videos.putProsody('aaaaaaaaaaa', 1, 4, 'hi', 1, r)
+    expect(store.videos.getProsody('aaaaaaaaaaa', 1, 4, 'hi', 1)).toEqual(r)
+    expect(store.videos.getProsody('aaaaaaaaaaa', 1, 4, 'hi', 2)).toBeNull()
+    expect(store.videos.getProsody('aaaaaaaaaaa', 1, 4, 'ho', 1)).toBeNull()
+    store.db.prepare("UPDATE segment_prosody SET result = 'oops'").run()
+    expect(store.videos.getProsody('aaaaaaaaaaa', 1, 4, 'hi', 1)).toBeNull()
+    store.videos.putProsody('aaaaaaaaaaa', 1, 4, 'hi', 1, r)
+    store.videos.remove('aaaaaaaaaaa')
+    expect(store.videos.getProsody('aaaaaaaaaaa', 1, 4, 'hi', 1)).toBeNull()
+  })
+
   it('caches reference contours per video segment and drops them with the video and on deleteAll', () => {
     const c = { f0: [0, 120.5, 130], energy: [0, 100, 250], frameSec: 0.032 }
     expect(store.videos.getContour('aaaaaaaaaaa', 1.5, 4)).toBeNull()
