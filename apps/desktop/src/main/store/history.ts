@@ -21,6 +21,8 @@ interface Row {
   score: number
   errors: string
   has_audio: number
+  video_id: string | null
+  segment_index: number | null
 }
 
 const toAttempt = (r: Row): HistoryAttempt => ({
@@ -32,6 +34,7 @@ const toAttempt = (r: Row): HistoryAttempt => ({
   score: r.score,
   errors: JSON.parse(r.errors) as HistoryAttempt['errors'],
   hasAudio: r.has_audio === 1,
+  ...(r.video_id !== null && { videoId: r.video_id, segmentIndex: r.segment_index }),
 })
 
 /** Practice attempts: rows in SQLite, optional recordings as `audio/<id>.wav` beside the DB. */
@@ -49,10 +52,16 @@ export class HistoryStore {
   private insert(a: HistoryAttempt, wav: Buffer | null): boolean {
     const res = this.db
       .prepare(
-        `INSERT OR IGNORE INTO attempts (id, created_at, mode, text, language, score, errors, has_audio)
-         VALUES (@id, @createdAt, @mode, @text, @language, @score, @errors, @hasAudio)`,
+        `INSERT OR IGNORE INTO attempts (id, created_at, mode, text, language, score, errors, has_audio, video_id, segment_index)
+         VALUES (@id, @createdAt, @mode, @text, @language, @score, @errors, @hasAudio, @videoId, @segmentIndex)`,
       )
-      .run({ ...a, errors: JSON.stringify(a.errors), hasAudio: wav ? 1 : 0 })
+      .run({
+        ...a,
+        errors: JSON.stringify(a.errors),
+        hasAudio: wav ? 1 : 0,
+        videoId: a.videoId ?? null,
+        segmentIndex: a.videoId ? (a.segmentIndex ?? null) : null,
+      })
     if (res.changes === 0) return false
     if (wav) {
       mkdirSync(this.audioDir, { recursive: true })
@@ -73,16 +82,23 @@ export class HistoryStore {
     return attempt
   }
 
-  list(limit = 100, offset = 0): HistoryAttempt[] {
+  list(limit = 100, offset = 0, videoId?: string): HistoryAttempt[] {
+    const where = videoId === undefined ? '' : 'WHERE video_id = @videoId'
     return (
       this.db
-        .prepare('SELECT * FROM attempts ORDER BY created_at DESC, id LIMIT ? OFFSET ?')
-        .all(limit, offset) as Row[]
+        .prepare(
+          `SELECT * FROM attempts ${where} ORDER BY created_at DESC, id LIMIT @limit OFFSET @offset`,
+        )
+        .all({ limit, offset, ...(videoId === undefined ? {} : { videoId }) }) as Row[]
     ).map(toAttempt)
   }
 
-  count(): number {
-    return (this.db.prepare('SELECT COUNT(*) AS n FROM attempts').get() as { n: number }).n
+  count(videoId?: string): number {
+    const row =
+      videoId === undefined
+        ? this.db.prepare('SELECT COUNT(*) AS n FROM attempts').get()
+        : this.db.prepare('SELECT COUNT(*) AS n FROM attempts WHERE video_id = ?').get(videoId)
+    return (row as { n: number }).n
   }
 
   audio(id: string): Float32Array | null {

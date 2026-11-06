@@ -43,6 +43,9 @@ export const MIGRATIONS: readonly string[] = [
      words     TEXT NOT NULL,
      PRIMARY KEY (video_id, text)
    );`,
+  `ALTER TABLE attempts ADD COLUMN video_id TEXT;
+   ALTER TABLE attempts ADD COLUMN segment_index INTEGER;
+   CREATE INDEX attempts_video ON attempts (video_id, segment_index);`,
 ]
 
 export class FutureSchemaError extends Error {

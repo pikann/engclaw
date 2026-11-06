@@ -20,8 +20,8 @@ export function registerStoreHandlers(): Store {
 
   handle(IPC.historySave, (req) => store.history.save(req))
   handle(IPC.historyList, (req) => ({
-    attempts: store.history.list(req?.limit, req?.offset),
-    total: store.history.count(),
+    attempts: store.history.list(req?.limit, req?.offset, req?.videoId),
+    total: store.history.count(req?.videoId),
   }))
   handle(IPC.historyAudio, ({ id }) => store.history.audio(id))
   handle(IPC.historyDelete, ({ id }) => store.history.remove(id))
