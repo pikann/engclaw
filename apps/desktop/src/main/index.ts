@@ -161,6 +161,11 @@ void app.whenReady().then(async () => {
     yt(() => youtube.audioRange(parseVideoId(videoId), start, end)),
   )
   handle(IPC.youtubeRecent, () => cachedYoutube.recent())
+  handle(IPC.youtubeGetSettings, ({ videoId }) => store.videos.getSettings(parseVideoId(videoId)))
+  handle(IPC.youtubeSaveSettings, ({ videoId, settings }) => {
+    store.videos.saveSettings(parseVideoId(videoId), settings)
+    return null
+  })
   registerPlayerHandlers()
   createWindow()
   if (process.env['ENGCLAW_SMOKE']) runSmoke(startUtility())

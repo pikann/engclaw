@@ -69,6 +69,8 @@ const api: EngclawApi = {
     transcript: (req) => invoke(IPC.youtubeTranscript, req),
     audioRange: (req) => invoke(IPC.youtubeAudioRange, req),
     recent: () => invoke(IPC.youtubeRecent),
+    getSettings: (req) => invoke(IPC.youtubeGetSettings, req),
+    saveSettings: (req) => invoke(IPC.youtubeSaveSettings, req),
   },
   player: {
     load: (req) => invoke(IPC.playerLoad, req),

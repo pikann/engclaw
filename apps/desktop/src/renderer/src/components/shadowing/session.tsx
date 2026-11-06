@@ -1,9 +1,11 @@
 import {
   AlertTriangle,
   ArrowLeft,
+  ChevronDown,
   List,
   Pause,
   Play,
+  RotateCcw,
   SkipBack,
   SkipForward,
   WifiOff,
@@ -14,7 +16,23 @@ import { PlayerSurface } from '@/components/shadowing/player-surface'
 import { Pane } from '@/components/screens/shell'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { usePlayer } from '@/lib/use-player'
+import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { useSentenceLoop } from '@/lib/use-sentence-loop'
+import {
+  DEFAULT_SETTINGS,
+  MAX_AUTO_CONTINUE,
+  MAX_REPEAT,
+  SPEED_OPTIONS,
+  shortcutFor,
+} from '@/lib/sentence-loop'
 import { fitStage, formatClock, type Segment } from '@/lib/shadowing'
 import { cn } from '@/lib/utils'
 
@@ -50,12 +68,20 @@ export function ShadowingSession({
   onBack: () => void
 }) {
   const { t } = useTranslation()
-  const { state, index, command, seekToSegment, retry } = usePlayer(videoId, segments)
+  const { state, retry, loop, settings, setSettings, dispatch, runShortcut } = useSentenceLoop(
+    videoId,
+    segments,
+  )
+  const index = loop.index
   const [railOpen, setRailOpen] = useState(true)
+  const [speedOpen, setSpeedOpen] = useState(false)
+  const autoOn = settings.autoContinuePct > 0
+  const lastAutoPct = useRef(autoOn ? settings.autoContinuePct : DEFAULT_SETTINGS.autoContinuePct)
+  if (autoOn) lastAutoPct.current = settings.autoContinuePct
   const [stageRef, stage] = useContentSize()
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([])
 
-  const shown = segments[Math.max(index, 0)]
+  const shown = segments[index]
   const fit = fitStage({
     stageWidth: stage.width,
     stageHeight: stage.height,
@@ -63,23 +89,30 @@ export function ShadowingSession({
     sentenceChars: shown?.text.length ?? 0,
   })
   const failed = state.phase === 'error'
+  const blocked = state.phase !== 'ready'
 
   useEffect(() => {
-    if (railOpen && index >= 0) itemRefs.current[index]?.scrollIntoView({ block: 'nearest' })
+    if (railOpen) itemRefs.current[index]?.scrollIntoView({ block: 'nearest' })
   }, [index, railOpen])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return
       const target = e.target as HTMLElement | null
-      if (target?.closest('input, textarea, select, [contenteditable]')) return
-      if (e.key.toLowerCase() === 't' && !e.metaKey && !e.ctrlKey && !e.altKey)
+      if (target?.closest('input, textarea, select, [contenteditable], [role="radiogroup"]')) return
+      if (e.key.toLowerCase() === 't') {
         setRailOpen((open) => !open)
+        return
+      }
+      if (e.key === ' ' && target?.closest('button, a')) return
+      const cmd = shortcutFor(e.key)
+      if (!cmd || blocked) return
+      e.preventDefault()
+      runShortcut(cmd)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [])
-
-  const go = (i: number) => seekToSegment(Math.min(Math.max(i, 0), segments.length - 1))
+  }, [blocked, runShortcut])
 
   return (
     <div data-testid="shadowing-session" className="flex h-full min-h-0 flex-col">
@@ -91,6 +124,15 @@ export function ShadowingSession({
         <h2 className="min-w-0 flex-1 truncate font-medium" data-testid="shadowing-title">
           {title}
         </h2>
+        <div role="status" className="flex shrink-0 items-center">
+          {loop.mode === 'waiting' ? (
+            <Badge data-testid="shadowing-your-turn">{t('screens.shadowing.yourTurn')}</Badge>
+          ) : loop.mode === 'playing' && settings.repeat > 1 ? (
+            <Badge variant="outline" className="tabular-nums" data-testid="shadowing-plays">
+              {t('screens.shadowing.play', { n: loop.plays, total: settings.repeat })}
+            </Badge>
+          ) : null}
+        </div>
         <Button
           variant="ghost"
           size="icon"
@@ -116,7 +158,7 @@ export function ShadowingSession({
               <PlayerSurface
                 width={fit.videoWidth}
                 height={fit.videoHeight}
-                visible={!failed && fit.videoWidth > 0}
+                visible={!failed && fit.videoWidth > 0 && !speedOpen}
                 label={t('screens.shadowing.videoAlt')}
               />
               {failed && (
@@ -161,7 +203,7 @@ export function ShadowingSession({
                 {shown?.text}
               </p>
             </div>
-            <div className="flex shrink-0 flex-wrap items-center justify-center gap-3">
+            <div className="flex shrink-0 flex-wrap items-center justify-center gap-x-4 gap-y-2">
               <div
                 role="toolbar"
                 aria-label={t('ds.player.label')}
@@ -170,34 +212,130 @@ export function ShadowingSession({
                 <Button
                   variant="ghost"
                   size="icon"
+                  data-testid="shadowing-back"
                   aria-label={t('ds.player.prev')}
-                  disabled={failed}
-                  onClick={() => go(index - 1)}
+                  aria-keyshortcuts="ArrowLeft"
+                  disabled={blocked}
+                  onClick={() => dispatch({ type: 'back' })}
                 >
                   <SkipBack />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  data-testid="shadowing-replay"
+                  aria-label={t('screens.shadowing.replay')}
+                  aria-keyshortcuts="R"
+                  disabled={blocked}
+                  onClick={() => dispatch({ type: 'replay' })}
+                >
+                  <RotateCcw />
                 </Button>
                 <Button
                   size="icon"
                   data-testid="shadowing-toggle"
                   aria-label={state.playing ? t('ds.player.pause') : t('ds.player.play')}
-                  disabled={failed}
-                  onClick={() => command({ type: state.playing ? 'pause' : 'play' })}
+                  aria-keyshortcuts="Space"
+                  disabled={blocked}
+                  onClick={() => dispatch({ type: 'toggle' })}
                 >
                   {state.playing ? <Pause /> : <Play />}
                 </Button>
                 <Button
                   variant="ghost"
                   size="icon"
+                  data-testid="shadowing-next"
                   aria-label={t('ds.player.next')}
-                  disabled={failed}
-                  onClick={() => go(index + 1)}
+                  aria-keyshortcuts="ArrowRight"
+                  disabled={blocked}
+                  onClick={() => dispatch({ type: 'next' })}
                 >
                   <SkipForward />
                 </Button>
               </div>
+              <DropdownMenu open={speedOpen} onOpenChange={setSpeedOpen}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="tabular-nums"
+                    aria-label={`${t('ds.player.speed')}: ${settings.speed}×`}
+                    data-testid="shadowing-speed"
+                  >
+                    {settings.speed}×
+                    <ChevronDown />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="center">
+                  <DropdownMenuRadioGroup
+                    value={String(settings.speed)}
+                    onValueChange={(v) => setSettings({ speed: Number(v) })}
+                  >
+                    {SPEED_OPTIONS.map((s) => (
+                      <DropdownMenuRadioItem key={s} value={String(s)} className="tabular-nums">
+                        {s}×
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <label className="flex items-center gap-2 text-sm">
+                {t('screens.shadowing.repeat')}
+                <Input
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  max={MAX_REPEAT}
+                  step={1}
+                  className="w-16"
+                  data-testid="shadowing-repeat"
+                  aria-keyshortcuts="- ="
+                  value={settings.repeat}
+                  onChange={(e) => {
+                    const n = e.currentTarget.valueAsNumber
+                    if (Number.isFinite(n)) setSettings({ repeat: n })
+                  }}
+                />
+              </label>
+              <div className="flex items-center gap-2 text-sm">
+                <Switch
+                  id="shadowing-auto-on"
+                  size="sm"
+                  data-testid="shadowing-auto-toggle"
+                  checked={autoOn}
+                  onCheckedChange={(on) => {
+                    if (!on && settings.autoContinuePct > 0)
+                      lastAutoPct.current = settings.autoContinuePct
+                    setSettings({ autoContinuePct: on ? lastAutoPct.current : 0 })
+                  }}
+                />
+                <label htmlFor="shadowing-auto">{t('screens.shadowing.autoContinue')}</label>
+                <Input
+                  id="shadowing-auto"
+                  disabled={!autoOn}
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  max={MAX_AUTO_CONTINUE}
+                  step={25}
+                  className="w-20"
+                  data-testid="shadowing-auto"
+                  aria-keyshortcuts=", ."
+                  aria-describedby="shadowing-auto-hint"
+                  value={settings.autoContinuePct}
+                  onChange={(e) => {
+                    const n = e.currentTarget.valueAsNumber
+                    if (Number.isFinite(n)) setSettings({ autoContinuePct: n })
+                  }}
+                />
+                <span aria-hidden="true">%</span>
+                <span id="shadowing-auto-hint" className="sr-only">
+                  {t('screens.shadowing.autoContinueHint')}
+                </span>
+              </div>
               <Badge variant="secondary" className="tabular-nums" data-testid="shadowing-position">
                 {t('screens.shadowing.segment', {
-                  n: Math.max(index, 0) + 1,
+                  n: index + 1,
                   total: segments.length,
                 })}
               </Badge>
@@ -215,7 +353,7 @@ export function ShadowingSession({
                       itemRefs.current[i] = el
                     }}
                     aria-current={i === index ? 'true' : undefined}
-                    onClick={() => seekToSegment(i)}
+                    onClick={() => dispatch({ type: 'start', index: i })}
                     className={cn(
                       'focus-visible:ring-ring/50 hover:bg-muted flex w-full gap-2 rounded-md px-2 py-1.5 text-left outline-none focus-visible:ring-[3px]',
                       i === index && 'bg-primary-soft font-medium',
