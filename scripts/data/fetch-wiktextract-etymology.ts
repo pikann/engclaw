@@ -21,7 +21,7 @@ const USER_AGENT =
   'engclaw-data-pipeline/0.1 (+https://github.com/pikann/engclaw; open-source build-time script)'
 const REQUEST_DELAY_MS = 1100
 const ROOT = resolve(import.meta.dirname, '../..')
-const ROOTS_FILE = resolve(ROOT, 'apps/desktop/resources/data/word-roots.json')
+const ROOTS_FILE = resolve(ROOT, '.cache/data/word-roots.json')
 const CACHE_DIR = resolve(ROOT, '.cache/wiktextract')
 const DEFAULT_OUT = resolve(ROOT, '.cache/data/word-etymology.json')
 const ORIGIN = 'https://kaikki.org'

@@ -1,7 +1,7 @@
 /**
  * Build-time pipeline: Open English WordNet + CMUdict + word-roots.json + word-etymology.json
  * -> dictionary.sqlite (read-only, FTS5) + dictionary.manifest.json (version + sha256).
- * Source archives are downloaded once into .cache/dictionary (git-ignored), never committed.
+ * Source archives go to .cache/dictionary and inputs/outputs to .cache/data (git-ignored), never committed.
  *
  *   bun scripts/data/build-dictionary.ts [--refresh] [--out <dir>]
  */
@@ -17,7 +17,7 @@ import type { WordEtymology } from './wiktextract-etymology'
 const USER_AGENT =
   'engclaw-data-pipeline/0.1 (+https://github.com/pikann/engclaw; open-source build-time script)'
 const ROOT = resolve(import.meta.dirname, '../..')
-const DATA_DIR = resolve(ROOT, 'apps/desktop/resources/data')
+const DATA_DIR = resolve(ROOT, '.cache/data')
 const CACHE_DIR = resolve(ROOT, '.cache/dictionary')
 const WORDNET_URL = 'https://en-word.net/static/english-wordnet-2024.xml.gz'
 const CMUDICT_URL = 'https://raw.githubusercontent.com/cmusphinx/cmudict/master/cmudict.dict'

@@ -7,7 +7,7 @@
 - **HunanBean CMU39 mouth images** (`apps/desktop/src/renderer/src/assets/mouths`): from the papagayo-ng project (GPL-3.0). Upstream OpenPronounce ships them with a README that only names the source and states no license of their own; confirm before a public release. Source: https://github.com/morevnaproject-org/papagayo-ng
 - **Models** (downloaded at runtime, not redistributed in this repo): wav2vec2 models (Apache-2.0), Kokoro-82M (Apache-2.0). Each keeps its own license, shown before download.
 
-## Dictionary data (`apps/desktop/resources/data/dictionary.sqlite`, built by `scripts/data/build-dictionary.ts`)
+## Dictionary data (`.cache/data/dictionary.sqlite`, built by `scripts/data/build-dictionary.ts`)
 
 Full attribution text: `apps/desktop/resources/data/DICTIONARY_SOURCES.md`.
 
