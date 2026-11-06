@@ -1,0 +1,41 @@
+{
+  "version": "2024.1",
+  "schemaVersion": 1,
+  "file": "dictionary.sqlite",
+  "bytes": 37175296,
+  "sha256": "0417eea1218e3256bd4770bfa05bed36bbe4cf95d5b2721afe3fa0bd8bbf153f",
+  "counts": {
+    "entries": 153835,
+    "senses": 212478,
+    "pronunciations": 40460,
+    "roots": 368,
+    "morphemes": 1052,
+    "etymology": 615
+  },
+  "sources": [
+    {
+      "name": "Open English WordNet",
+      "version": "2024",
+      "license": "CC BY 4.0",
+      "url": "https://en-word.net/"
+    },
+    {
+      "name": "CMUdict",
+      "version": "cmusphinx/cmudict master",
+      "license": "BSD-2-Clause",
+      "url": "https://github.com/cmusphinx/cmudict"
+    },
+    {
+      "name": "Wiktionary",
+      "version": "via Wiktextract (kaikki.org)",
+      "license": "CC BY-SA 4.0",
+      "url": "https://en.wiktionary.org/"
+    },
+    {
+      "name": "learnthat.org roots (facts only)",
+      "version": "",
+      "license": "Facts only, attribution and link-back",
+      "url": "https://www.learnthat.org/pages/view/roots.html"
+    }
+  ]
+}
