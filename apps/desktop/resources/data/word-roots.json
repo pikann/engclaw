@@ -1,0 +1,5935 @@
+{
+  "source": "https://www.learnthat.org/pages/view/roots.html",
+  "roots": [
+    {
+      "root": "a/n",
+      "forms": [
+        "a/n"
+      ],
+      "meaning": "not, without",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "abyss",
+        "achromatic",
+        "anhydrous"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "a",
+      "forms": [
+        "a"
+      ],
+      "meaning": "on",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "afire",
+        "ashore",
+        "aside"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "a, ab/s",
+      "forms": [
+        "a",
+        "ab/s"
+      ],
+      "meaning": "from, away, off",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "abduct",
+        "abnormal",
+        "absent",
+        "aversion",
+        "abbreviate"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "a/c/d",
+      "forms": [
+        "a/c/d"
+      ],
+      "meaning": "to, toward, near",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "accelerate",
+        "accessible",
+        "admittance"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "acro",
+      "forms": [
+        "acro"
+      ],
+      "meaning": "top, height, tip, beginning",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "acrobat",
+        "acronym",
+        "acrophobia"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "act",
+      "forms": [
+        "act"
+      ],
+      "meaning": "do",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "activity",
+        "react",
+        "interaction"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "aer/o",
+      "forms": [
+        "aer/o"
+      ],
+      "meaning": "air",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "aerate",
+        "aerial",
+        "aerospace"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "agr/i/o",
+      "forms": [
+        "agr/i/o"
+      ],
+      "meaning": "farming",
+      "origins": [
+        "Latin",
+        "Greek"
+      ],
+      "examples": [
+        "agriculture",
+        "agrarian"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "alg/o",
+      "forms": [
+        "alg/o"
+      ],
+      "meaning": "pain",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "neuralgia",
+        "analgesic",
+        "nostalgia"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "ambi, amphi",
+      "forms": [
+        "ambi",
+        "amphi"
+      ],
+      "meaning": "both, on both sides, around",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "ambidextrous",
+        "ambiguous",
+        "ambivalence"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "ambul",
+      "forms": [
+        "ambul"
+      ],
+      "meaning": "walk, move",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "amble",
+        "ambulant",
+        "ambulance"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "ami/o",
+      "forms": [
+        "ami/o"
+      ],
+      "meaning": "love",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "amiable",
+        "amity",
+        "amorous"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "ana",
+      "forms": [
+        "ana"
+      ],
+      "meaning": "up, back, against, again, throughout",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "analysis",
+        "anatomy",
+        "anachronism"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "andr/o",
+      "forms": [
+        "andr/o"
+      ],
+      "meaning": "man, male",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "androgynous",
+        "android",
+        "misandry"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "anim",
+      "forms": [
+        "anim"
+      ],
+      "meaning": "life, spirit",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "animal",
+        "animate",
+        "equanimity"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "ann/enn",
+      "forms": [
+        "ann/enn"
+      ],
+      "meaning": "year",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "anniversary",
+        "annual",
+        "millennium"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "ante",
+      "forms": [
+        "ante"
+      ],
+      "meaning": "before, in front",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "antecede",
+        "antemeridian",
+        "anteroom- a small room before the main room"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "anth/o",
+      "forms": [
+        "anth/o"
+      ],
+      "meaning": "flower",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "chrysanthemum and amaranth",
+        "anthology",
+        "anthozoan"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "anthrop/o",
+      "forms": [
+        "anthrop/o"
+      ],
+      "meaning": "human",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "anthropology",
+        "anthropomorphism",
+        "philanthropy"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "anti",
+      "forms": [
+        "anti"
+      ],
+      "meaning": "against, opposite of",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "antibody",
+        "antiseptic",
+        "antisocial"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "apo, apho",
+      "forms": [
+        "apo",
+        "apho"
+      ],
+      "meaning": "away, off, separate",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "aphorism",
+        "apology"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "aqu/a",
+      "forms": [
+        "aqu/a"
+      ],
+      "meaning": "water",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "aquarium",
+        "aquatic- relating to water",
+        "aqueduct"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "arbor",
+      "forms": [
+        "arbor"
+      ],
+      "meaning": "tree",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "arborist",
+        "arbor",
+        "arborous"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "arch/i",
+      "forms": [
+        "arch/i"
+      ],
+      "meaning": "chief, most important, rule",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "archbishop",
+        "archenemy",
+        "matriarch",
+        "monarch"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "arch/a/i",
+      "forms": [
+        "arch/a/i"
+      ],
+      "meaning": "primitive, ancient",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "archaeology",
+        "archaic",
+        "archive"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "arthr/o",
+      "forms": [
+        "arthr/o"
+      ],
+      "meaning": "joint",
+      "origins": [
+        "Latin",
+        "Greek"
+      ],
+      "examples": [
+        "arthroscope",
+        "arthritis",
+        "arthropod"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "art",
+      "forms": [
+        "art"
+      ],
+      "meaning": "skill",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "artifact",
+        "artisan",
+        "artist"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "astro, aster",
+      "forms": [
+        "astro",
+        "aster"
+      ],
+      "meaning": "star, stars, outer space",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "astronaut",
+        "astronomer",
+        "asterisk"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "aud/i/io",
+      "forms": [
+        "aud/i/io"
+      ],
+      "meaning": "hear",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "audible",
+        "audience",
+        "audiovisual"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "auto",
+      "forms": [
+        "auto"
+      ],
+      "meaning": "self, same, one",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "autocrat",
+        "autograph",
+        "automatic"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "avi/a",
+      "forms": [
+        "avi/a"
+      ],
+      "meaning": "bird",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "aviary",
+        "aviatrix",
+        "aviation"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "bar/o",
+      "forms": [
+        "bar/o"
+      ],
+      "meaning": "pressure, weight",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "baric",
+        "milliard",
+        "baryon"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "bell/i",
+      "forms": [
+        "bell/i"
+      ],
+      "meaning": "war",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "bellicose",
+        "belligerent",
+        "rebel"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "bene",
+      "forms": [
+        "bene"
+      ],
+      "meaning": "good, well",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "benefactor",
+        "beneficial",
+        "benevolent"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "bi/n",
+      "forms": [
+        "bi/n"
+      ],
+      "meaning": "two, twice, once in every two",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "biannual",
+        "binoculars",
+        "bilateral"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "bibli/o",
+      "forms": [
+        "bibli/o"
+      ],
+      "meaning": "book",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "bibliography",
+        "bibliomania",
+        "bibliophile"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "bio",
+      "forms": [
+        "bio"
+      ],
+      "meaning": "life, living matter",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "biography- a life story written by another person",
+        "biology",
+        "biosphere"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "blast/o",
+      "forms": [
+        "blast/o"
+      ],
+      "meaning": "cell, primitive, immature cell",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "blastula",
+        "fibroblast",
+        "blastoderm"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "burs",
+      "forms": [
+        "burs"
+      ],
+      "meaning": "pouch, purse",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "bursar-",
+        "bursary-",
+        "disburse-"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "calc",
+      "forms": [
+        "calc"
+      ],
+      "meaning": "stone",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "calcite",
+        "calcium-",
+        "calcification-"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "cand",
+      "forms": [
+        "cand"
+      ],
+      "meaning": "glowing, iridescent",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "candid-",
+        "prejudice",
+        "or",
+        "candle-",
+        "incandescent-",
+        "glowing"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "capt, cept, ceive",
+      "forms": [
+        "capt",
+        "cept",
+        "ceive"
+      ],
+      "meaning": "take, hold",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "intercept",
+        "perceive",
+        "captivating"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "cardi/o",
+      "forms": [
+        "cardi/o"
+      ],
+      "meaning": "heart",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "cardiac",
+        "cardiogenic",
+        "cardiologist"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "carn/i",
+      "forms": [
+        "carn/i"
+      ],
+      "meaning": "flesh, meat",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "carnivorous",
+        "carnal",
+        "incarnate"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "cata",
+      "forms": [
+        "cata"
+      ],
+      "meaning": "down, against completely, intensive, according to",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "cataclysm",
+        "catastrophe"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "caust, caut",
+      "forms": [
+        "caust",
+        "caut"
+      ],
+      "meaning": "to burn",
+      "origins": [
+        "Latin",
+        "Greek"
+      ],
+      "examples": [
+        "cauterize",
+        "caustic",
+        "holocaust"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "cede, ceed, cess",
+      "forms": [
+        "cede",
+        "ceed",
+        "cess"
+      ],
+      "meaning": "go, yield",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "exceed",
+        "recede",
+        "accessible"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "celer",
+      "forms": [
+        "celer"
+      ],
+      "meaning": "fast",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "accelerate",
+        "decelerate"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "cent/i",
+      "forms": [
+        "cent/i"
+      ],
+      "meaning": "hundred, hundredth",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "centimeter",
+        "century"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "centr/o/i",
+      "forms": [
+        "centr/o/i"
+      ],
+      "meaning": "center",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "egocentric",
+        "eccentric",
+        "centrifugal"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "cephal/o",
+      "forms": [
+        "cephal/o"
+      ],
+      "meaning": "head",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "encephalitis",
+        "cephalic",
+        "cephalopod"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "cerebr/o",
+      "forms": [
+        "cerebr/o"
+      ],
+      "meaning": "brain",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "cerebral",
+        "cerebrate",
+        "cerebrospinal"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "cert",
+      "forms": [
+        "cert"
+      ],
+      "meaning": "sure",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "ascertain- to find out something with certainty",
+        "certain",
+        "certify"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "chrom/o chromat/o, chros",
+      "forms": [
+        "chrom/o chromat/o",
+        "chros"
+      ],
+      "meaning": "color, pigment",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "achromatic",
+        "chromium"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "chron/o",
+      "forms": [
+        "chron/o"
+      ],
+      "meaning": "time",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "chronic",
+        "chronological"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "chrys/o",
+      "forms": [
+        "chrys/o"
+      ],
+      "meaning": "gold, yellow",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "chrysanthemum and helichrysum",
+        "chrysolite"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "cide, cise",
+      "forms": [
+        "cide",
+        "cise"
+      ],
+      "meaning": "cut, kill",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "homicide",
+        "incisor",
+        "insecticide"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "circum, circle",
+      "forms": [
+        "circum",
+        "circle"
+      ],
+      "meaning": "around, about",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "circumnavigate",
+        "circumscribe",
+        "circumspect"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "claim, clam",
+      "forms": [
+        "claim",
+        "clam"
+      ],
+      "meaning": "shout, speak out",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "clamor",
+        "exclaim",
+        "proclamation"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "clar",
+      "forms": [
+        "clar"
+      ],
+      "meaning": "clear",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "clarification",
+        "clarify",
+        "declare"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "clud, clus",
+      "forms": [
+        "clud",
+        "clus"
+      ],
+      "meaning": "close",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "conclusion",
+        "exclusion",
+        "seclude",
+        "to isolate"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "cline",
+      "forms": [
+        "cline"
+      ],
+      "meaning": "lean",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "inclination",
+        "incline",
+        "recline"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "co",
+      "forms": [
+        "co"
+      ],
+      "meaning": "with, together, joint",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "coauthor",
+        "coeducation",
+        "cohousing"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "col",
+      "forms": [
+        "col"
+      ],
+      "meaning": "together, jointly",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "collaborate",
+        "collision",
+        "colloquial"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "com",
+      "forms": [
+        "com"
+      ],
+      "meaning": "together, common",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "commemorate",
+        "composition",
+        "commune"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "cogn/i",
+      "forms": [
+        "cogn/i"
+      ],
+      "meaning": "know",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "cognition",
+        "incognito",
+        "recognize"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "con",
+      "forms": [
+        "con"
+      ],
+      "meaning": "with, jointly",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "concur",
+        "contemporary",
+        "convention"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "contra/o",
+      "forms": [
+        "contra/o"
+      ],
+      "meaning": "against, opposite",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "contradict",
+        "contraflow",
+        "contraception",
+        "contrary",
+        "controversy"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "corp/o",
+      "forms": [
+        "corp/o"
+      ],
+      "meaning": "body",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "corporation",
+        "corpse",
+        "corporal"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "cosm/o",
+      "forms": [
+        "cosm/o"
+      ],
+      "meaning": "universe",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "cosmonaut",
+        "cosmos",
+        "microcosm"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "counter",
+      "forms": [
+        "counter"
+      ],
+      "meaning": "opposite, contrary, opposing",
+      "origins": [],
+      "examples": [
+        "counteract",
+        "countermand",
+        "counteroffensive"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "cranio",
+      "forms": [
+        "cranio"
+      ],
+      "meaning": "skull",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "craniology",
+        "cranium",
+        "cranial"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "cred",
+      "forms": [
+        "cred"
+      ],
+      "meaning": "believe",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "credence",
+        "credulous",
+        "incredible"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "cruc",
+      "forms": [
+        "cruc"
+      ],
+      "meaning": "cross",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "crucial-characteristic",
+        "crucifix-",
+        "excruciating-"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "crypto",
+      "forms": [
+        "crypto"
+      ],
+      "meaning": "hidden, secret",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "cryptic",
+        "cryptography",
+        "encrypt"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "cumul",
+      "forms": [
+        "cumul"
+      ],
+      "meaning": "mass, heap",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "accumulate",
+        "cumulative"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "curr, curs",
+      "forms": [
+        "curr",
+        "curs"
+      ],
+      "meaning": "run",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "concurrent-",
+        "current-",
+        "cursive-",
+        "easy",
+        "impromptu"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "cycl",
+      "forms": [
+        "cycl"
+      ],
+      "meaning": "circle, ring",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "bicycle",
+        "cycle",
+        "cyclone"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "de",
+      "forms": [
+        "de"
+      ],
+      "meaning": "reduce, away, down, remove",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "decelerate",
+        "dethrone",
+        "debug"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "dec/a, deka",
+      "forms": [
+        "dec/a",
+        "deka"
+      ],
+      "meaning": "ten",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "decade",
+        "decathlon",
+        "december"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "deci",
+      "forms": [
+        "deci"
+      ],
+      "meaning": "one tenth",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "deciliter",
+        "decimate",
+        "decibel"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "dem/o",
+      "forms": [
+        "dem/o"
+      ],
+      "meaning": "people",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "democracy",
+        "demographic",
+        "epidemic"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "demi",
+      "forms": [
+        "demi"
+      ],
+      "meaning": "half, less than",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "demitasse",
+        "demimonde"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "dendr/o/i",
+      "forms": [
+        "dendr/o/i"
+      ],
+      "meaning": "tree",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "philodendron",
+        "dendrochronology",
+        "dendriform"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "dent, dont",
+      "forms": [
+        "dent",
+        "dont"
+      ],
+      "meaning": "tooth",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "dental",
+        "dentist",
+        "dentures"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "derm/a",
+      "forms": [
+        "derm/a"
+      ],
+      "meaning": "skin",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "dermatologist",
+        "pachyderm",
+        "dermatitis"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "di/plo",
+      "forms": [
+        "di/plo"
+      ],
+      "meaning": "two, twice",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "dichromatic",
+        "diploma",
+        "dilemma"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "di/s",
+      "forms": [
+        "di/s"
+      ],
+      "meaning": "apart, away, not, to the opposite",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "digression",
+        "disappear",
+        "dissect"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "dia",
+      "forms": [
+        "dia"
+      ],
+      "meaning": "through, between, apart, across",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "diabetes",
+        "diagnosis",
+        "dialog"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "dict",
+      "forms": [
+        "dict"
+      ],
+      "meaning": "speak",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "contradict",
+        "prediction",
+        "dictate"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "domin",
+      "forms": [
+        "domin"
+      ],
+      "meaning": "master",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "dominate",
+        "domineering",
+        "predominate"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "don/at",
+      "forms": [
+        "don/at"
+      ],
+      "meaning": "give",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "donation",
+        "donor",
+        "pardon"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "duc/t",
+      "forms": [
+        "duc/t"
+      ],
+      "meaning": "lead",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "conduct",
+        "educate",
+        "deduction"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "du/o",
+      "forms": [
+        "du/o"
+      ],
+      "meaning": "two, twice",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "duplicate",
+        "duet",
+        "duo"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "dur",
+      "forms": [
+        "dur"
+      ],
+      "meaning": "harden, to last, lasting",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "durable",
+        "duration",
+        "enduring"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "dyn/a/am",
+      "forms": [
+        "dyn/a/am"
+      ],
+      "meaning": "power, energy, strength",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "dynamo",
+        "dynamic",
+        "dynamite"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "dys",
+      "forms": [
+        "dys"
+      ],
+      "meaning": "abnormal, bad",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "dyspepsia",
+        "dystopia",
+        "dyslexia"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "e-",
+      "forms": [
+        "e-"
+      ],
+      "meaning": "out, away",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "eloquent",
+        "emissary",
+        "eject"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "ego",
+      "forms": [
+        "ego"
+      ],
+      "meaning": "self",
+      "origins": [
+        "Latin",
+        "Greek"
+      ],
+      "examples": [
+        "egoistic",
+        "alter ego",
+        "egomania"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "em, en",
+      "forms": [
+        "em",
+        "en"
+      ],
+      "meaning": "into, cover with, cause",
+      "origins": [],
+      "examples": [
+        "empathy",
+        "empower",
+        "engorge"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "endo",
+      "forms": [
+        "endo"
+      ],
+      "meaning": "within, inside",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "endotherm",
+        "endocrine",
+        "endogamy"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "enn/i, anni",
+      "forms": [
+        "enn/i",
+        "anni"
+      ],
+      "meaning": "years",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "bicentennial",
+        "centennial"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "en, in",
+      "forms": [
+        "en",
+        "in"
+      ],
+      "meaning": "inside, inwards",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "envision",
+        "enclose",
+        "inwards"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "ep/i",
+      "forms": [
+        "ep/i"
+      ],
+      "meaning": "on, upon, over, among, at, after, to, outside",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "epidemic",
+        "epilogue",
+        "epicenter"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "equ/i",
+      "forms": [
+        "equ/i"
+      ],
+      "meaning": "equal, equally",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "equidistant",
+        "equanimity",
+        "equation"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "erg/o",
+      "forms": [
+        "erg/o"
+      ],
+      "meaning": "work",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "ergonomics",
+        "energy",
+        "energetics"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "esth/aesth",
+      "forms": [
+        "esth/aesth"
+      ],
+      "meaning": "feeling, sensation, beauty",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "esthetician",
+        "aesthetic",
+        "kinesthesia"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "ethno",
+      "forms": [
+        "ethno"
+      ],
+      "meaning": "race, people",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "ethnic",
+        "ethnocentric",
+        "ethnology"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "eu",
+      "forms": [
+        "eu"
+      ],
+      "meaning": "good, well",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "euphemism",
+        "euphonious",
+        "euphoria"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "ex",
+      "forms": [
+        "ex"
+      ],
+      "meaning": "from, out,",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "excavate",
+        "exhale",
+        "extract"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "extra, extro",
+      "forms": [
+        "extra",
+        "extro"
+      ],
+      "meaning": "outside, beyond",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "extraordinary",
+        "extraterrestrial",
+        "extrovert"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "fac/t",
+      "forms": [
+        "fac/t"
+      ],
+      "meaning": "make, do",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "artifact",
+        "factory",
+        "malefact"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "fer",
+      "forms": [
+        "fer"
+      ],
+      "meaning": "bear, bring, carry",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "confer",
+        "ferry",
+        "transfer"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "fid",
+      "forms": [
+        "fid"
+      ],
+      "meaning": "faith",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "confide",
+        "fiduciary"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "flect",
+      "forms": [
+        "flect"
+      ],
+      "meaning": "bend",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "deflect",
+        "inflection",
+        "flexible"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "flor/a, fleur",
+      "forms": [
+        "flor/a",
+        "fleur"
+      ],
+      "meaning": "flower",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "florist",
+        "floral",
+        "flora"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "for",
+      "forms": [
+        "for"
+      ],
+      "meaning": "completely (used to intensify the meaning of a word)",
+      "origins": [],
+      "examples": [
+        "forsaken or forfeited",
+        "forgiven"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "fore",
+      "forms": [
+        "fore"
+      ],
+      "meaning": "in front of, previous, earlier",
+      "origins": [],
+      "examples": [
+        "forebear",
+        "forebode",
+        "forecast"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "form",
+      "forms": [
+        "form"
+      ],
+      "meaning": "shape",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "conformity-",
+        "manner",
+        "or",
+        "formation-",
+        "reformatory-"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "fract, frag",
+      "forms": [
+        "fract",
+        "frag"
+      ],
+      "meaning": "break",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "fracture",
+        "fragile",
+        "fragment or fraction"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "fug",
+      "forms": [
+        "fug"
+      ],
+      "meaning": "flee, run away, escape",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "fugitive",
+        "refuge",
+        "refugee"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "funct",
+      "forms": [
+        "funct"
+      ],
+      "meaning": "perform, work",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "defunct",
+        "function",
+        "malfunction"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "fus",
+      "forms": [
+        "fus"
+      ],
+      "meaning": "pour",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "confusion",
+        "fuse",
+        "infuse"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "gastr/o",
+      "forms": [
+        "gastr/o"
+      ],
+      "meaning": "stomach",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "gastric",
+        "gastronomy",
+        "gastritis"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "gen/o/e/ genesis",
+      "forms": [
+        "gen/o/e/ genesis"
+      ],
+      "meaning": "birth, production, formation, kind",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "genealogy",
+        "generation"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "geo",
+      "forms": [
+        "geo"
+      ],
+      "meaning": "earth, soil, global",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "geography",
+        "geology",
+        "geoponics"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "ger",
+      "forms": [
+        "ger"
+      ],
+      "meaning": "old age",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "geriatrics",
+        "gerontocracy",
+        "gerontology"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "giga",
+      "forms": [
+        "giga"
+      ],
+      "meaning": "a billion",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "gigabyte",
+        "gigahertz"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "gon",
+      "forms": [
+        "gon"
+      ],
+      "meaning": "angle",
+      "origins": [
+        "Latin",
+        "Greek"
+      ],
+      "examples": [
+        "decagon",
+        "diagonal",
+        "octagon"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "gram",
+      "forms": [
+        "gram"
+      ],
+      "meaning": "letter, written",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "diagram",
+        "grammar",
+        "telegram"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "gran",
+      "forms": [
+        "gran"
+      ],
+      "meaning": "grain",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "granary-",
+        "granola-",
+        "granule-"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "graph/y",
+      "forms": [
+        "graph/y"
+      ],
+      "meaning": "writing, recording, written",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "graphology",
+        "autograph",
+        "seismograph"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "grat",
+      "forms": [
+        "grat"
+      ],
+      "meaning": "pleasing",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "gratify",
+        "grateful",
+        "gratuity"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "gyn/o/e",
+      "forms": [
+        "gyn/o/e"
+      ],
+      "meaning": "woman, female",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "gynecology",
+        "gynephobia",
+        "gynecoid"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "gress, grad/e/i",
+      "forms": [
+        "gress",
+        "grad/e/i"
+      ],
+      "meaning": "to step, to go",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "digression",
+        "progress",
+        "gradual"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "hect/o, hecat",
+      "forms": [
+        "hect/o",
+        "hecat"
+      ],
+      "meaning": "hundred",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "hectoliter",
+        "hectare",
+        "hectometer"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "helic/o",
+      "forms": [
+        "helic/o"
+      ],
+      "meaning": "spiral, circular",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "helicopter",
+        "helix",
+        "helicon"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "heli/o",
+      "forms": [
+        "heli/o"
+      ],
+      "meaning": "sun",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "heliotropism",
+        "heliograph",
+        "helianthus"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "hemi",
+      "forms": [
+        "hemi"
+      ],
+      "meaning": "half, partial",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "hemicycle",
+        "hemisphere",
+        "hemistich"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "hem/o/a",
+      "forms": [
+        "hem/o/a"
+      ],
+      "meaning": "blood",
+      "origins": [
+        "Latin",
+        "Greek"
+      ],
+      "examples": [
+        "hemorrhage",
+        "hemorrhoids",
+        "hemoglobin"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "hepa",
+      "forms": [
+        "hepa"
+      ],
+      "meaning": "liver",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "hepatitis",
+        "hepatoma",
+        "hepatotoxic"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "hept/a",
+      "forms": [
+        "hept/a"
+      ],
+      "meaning": "seven",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "heptagon",
+        "heptateuch",
+        "heptameter"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "herbi",
+      "forms": [
+        "herbi"
+      ],
+      "meaning": "grass, plant",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "herbicide",
+        "herbivorous",
+        "herbal"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "hetero",
+      "forms": [
+        "hetero"
+      ],
+      "meaning": "different, other",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "heterogeneous",
+        "heteronyms",
+        "heterodox"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "hex/a",
+      "forms": [
+        "hex/a"
+      ],
+      "meaning": "six",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "hexagon",
+        "hexameter",
+        "hexapod"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "histo",
+      "forms": [
+        "histo"
+      ],
+      "meaning": "tissue",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "histology",
+        "histochemistry"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "homo, homeo",
+      "forms": [
+        "homo",
+        "homeo"
+      ],
+      "meaning": "like, alike, same",
+      "origins": [
+        "Latin",
+        "Greek"
+      ],
+      "examples": [
+        "homogeneous",
+        "homonym",
+        "homeopath"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "hydr/o",
+      "forms": [
+        "hydr/o"
+      ],
+      "meaning": "liquid, water",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "hydrate",
+        "hydrophobia",
+        "hydroponics",
+        "hydraulic"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "hygr/o",
+      "forms": [
+        "hygr/o"
+      ],
+      "meaning": "moisture, humidity",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "hygrometer",
+        "hygrograph"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "hyper",
+      "forms": [
+        "hyper"
+      ],
+      "meaning": "too much, over, excessive, beyond",
+      "origins": [
+        "Latin",
+        "Greek"
+      ],
+      "examples": [
+        "hyperactive",
+        "hypercritical",
+        "hypertension"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "hyp/o",
+      "forms": [
+        "hyp/o"
+      ],
+      "meaning": "under",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "hypoglycemia",
+        "hypothermia",
+        "hypothesis"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "iatr/o",
+      "forms": [
+        "iatr/o"
+      ],
+      "meaning": "medical care",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "geriatrics",
+        "pediatrician",
+        "podiatry"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "icon/o",
+      "forms": [
+        "icon/o"
+      ],
+      "meaning": "image",
+      "origins": [
+        "Latin",
+        "Greek"
+      ],
+      "examples": [
+        "icon",
+        "iconology",
+        "iconoclast"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "idio",
+      "forms": [
+        "idio"
+      ],
+      "meaning": "peculiar, personal, distinct",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "idiomatic",
+        "idiosyncracy",
+        "idiot"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "il, in",
+      "forms": [
+        "il",
+        "in"
+      ],
+      "meaning": "in, into",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "illuminate",
+        "innovation",
+        "inspection"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "ig, il, im, in, ir",
+      "forms": [
+        "ig",
+        "il",
+        "im",
+        "in",
+        "ir"
+      ],
+      "meaning": "not, without",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "illegal",
+        "impossible",
+        "inappropriate",
+        "irresponsible"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "imag",
+      "forms": [
+        "imag"
+      ],
+      "meaning": "likeness",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "image",
+        "imaginative",
+        "imagine"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "infra",
+      "forms": [
+        "infra"
+      ],
+      "meaning": "beneath, below",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "infrastructure",
+        "infrared"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "inter",
+      "forms": [
+        "inter"
+      ],
+      "meaning": "between, among, jointly",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "international",
+        "intersection",
+        "intercept"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "intra, intro",
+      "forms": [
+        "intra",
+        "intro"
+      ],
+      "meaning": "within, inside",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "intrastate",
+        "intravenous",
+        "introvert"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "ir",
+      "forms": [
+        "ir"
+      ],
+      "meaning": "not",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "irredeemable",
+        "irreformable",
+        "irrational"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "iso",
+      "forms": [
+        "iso"
+      ],
+      "meaning": "equal",
+      "origins": [],
+      "examples": [
+        "isobar",
+        "isometric",
+        "isothermal"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "ject",
+      "forms": [
+        "ject"
+      ],
+      "meaning": "throw",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "eject",
+        "interject",
+        "project"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "jud",
+      "forms": [
+        "jud"
+      ],
+      "meaning": "law",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "judgment",
+        "judicial",
+        "judiciary"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "junct",
+      "forms": [
+        "junct"
+      ],
+      "meaning": "join",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "conjunction",
+        "disjunction",
+        "junction"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "juven",
+      "forms": [
+        "juven"
+      ],
+      "meaning": "young",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "juvenile",
+        "rejuvenate"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "kilo",
+      "forms": [
+        "kilo"
+      ],
+      "meaning": "thousand",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "kilobyte",
+        "kilometer",
+        "kilograms"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "kine/t /mat",
+      "forms": [
+        "kine/t /mat"
+      ],
+      "meaning": "motion, division",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "kinetics",
+        "psychokinesis or telekinesis",
+        "cinematography"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "lab",
+      "forms": [
+        "lab"
+      ],
+      "meaning": "work",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "collaborate",
+        "elaborate",
+        "laborious"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "lact/o",
+      "forms": [
+        "lact/o"
+      ],
+      "meaning": "milk",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "lactate",
+        "lactose"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "later",
+      "forms": [
+        "later"
+      ],
+      "meaning": "side",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "bilateral",
+        "unilateral"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "leuk/o, leuc/o",
+      "forms": [
+        "leuk/o",
+        "leuc/o"
+      ],
+      "meaning": "white, colorless",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "leukemia",
+        "leukocyte",
+        "leucine"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "lex",
+      "forms": [
+        "lex"
+      ],
+      "meaning": "word, law, reading",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "lexicology",
+        "alexia -loss of the ability to read",
+        "illegal"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "liber",
+      "forms": [
+        "liber"
+      ],
+      "meaning": "free",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "liberate",
+        "libertine",
+        "liberty"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "lingu",
+      "forms": [
+        "lingu"
+      ],
+      "meaning": "language, tongue",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "linguist",
+        "multilingual",
+        "linguine"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "lip/o",
+      "forms": [
+        "lip/o"
+      ],
+      "meaning": "fat",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "liposuction",
+        "lipase",
+        "lipoid"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "lite, ite, lith/o",
+      "forms": [
+        "lite",
+        "ite",
+        "lith/o"
+      ],
+      "meaning": "mineral, rock, fossil",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "apatite",
+        "granite",
+        "monolith"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "loc",
+      "forms": [
+        "loc"
+      ],
+      "meaning": "place",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "dislocate",
+        "location",
+        "relocate"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "log/o",
+      "forms": [
+        "log/o"
+      ],
+      "meaning": "word, doctrine, discourse",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "logic",
+        "monologue",
+        "analogy"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "loqu, locu",
+      "forms": [
+        "loqu",
+        "locu"
+      ],
+      "meaning": "speak",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "eloquent",
+        "loquacious",
+        "elocution"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "luc",
+      "forms": [
+        "luc"
+      ],
+      "meaning": "light",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "elucidate",
+        "lucid",
+        "translucent"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "lud, lus",
+      "forms": [
+        "lud",
+        "lus"
+      ],
+      "meaning": "to play",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "prelude",
+        "illusion",
+        "delude"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "lumin",
+      "forms": [
+        "lumin"
+      ],
+      "meaning": "light",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "illuminate",
+        "lumen"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "lun/a/i",
+      "forms": [
+        "lun/a/i"
+      ],
+      "meaning": "moon",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "lunar",
+        "lunarscape",
+        "lunatic"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "macro",
+      "forms": [
+        "macro"
+      ],
+      "meaning": "large, great",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "macroevolution",
+        "macromolecule",
+        "macroeconomics"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "magn/a/i",
+      "forms": [
+        "magn/a/i"
+      ],
+      "meaning": "great, large",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "magnify",
+        "magnificent",
+        "magnate"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "mal/e",
+      "forms": [
+        "mal/e"
+      ],
+      "meaning": "bad, ill, wrong",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "malcontent",
+        "malaria",
+        "malicious"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "man/i/u",
+      "forms": [
+        "man/i/u"
+      ],
+      "meaning": "hand",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "maneuver",
+        "manual",
+        "manuscript"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "mand",
+      "forms": [
+        "mand"
+      ],
+      "meaning": "to order",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "command",
+        "demand",
+        "mandate"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "mania",
+      "forms": [
+        "mania"
+      ],
+      "meaning": "madness, insanity, excessive desire",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "bibliomania",
+        "egomania"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "mar/i",
+      "forms": [
+        "mar/i"
+      ],
+      "meaning": "sea",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "marina",
+        "maritime",
+        "submarine",
+        "aquamarine"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "mater, matr/i",
+      "forms": [
+        "mater",
+        "matr/i"
+      ],
+      "meaning": "mother",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "maternal",
+        "maternity",
+        "matriarch"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "max",
+      "forms": [
+        "max"
+      ],
+      "meaning": "greatest",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "maximal",
+        "maximize",
+        "maximum"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "medi",
+      "forms": [
+        "medi"
+      ],
+      "meaning": "middle",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "medieval",
+        "medium",
+        "mediocre"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "mega",
+      "forms": [
+        "mega"
+      ],
+      "meaning": "great, large, million",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "megalopolis",
+        "megaphone",
+        "megastructure"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "melan/o",
+      "forms": [
+        "melan/o"
+      ],
+      "meaning": "black",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "melancholy",
+        "melanoma",
+        "melodrama"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "memor/i",
+      "forms": [
+        "memor/i"
+      ],
+      "meaning": "remember",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "commemorate",
+        "memorial",
+        "memory"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "merge, mers",
+      "forms": [
+        "merge",
+        "mers"
+      ],
+      "meaning": "dip, dive",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "immerge or immerse"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "meso",
+      "forms": [
+        "meso"
+      ],
+      "meaning": "middle",
+      "origins": [
+        "Latin",
+        "Greek"
+      ],
+      "examples": [
+        "mesoamerica",
+        "meson"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "meta",
+      "forms": [
+        "meta"
+      ],
+      "meaning": "change, after, beyond, between",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "metaphysics",
+        "metamorphosis",
+        "metastasis"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "meter, metr/y",
+      "forms": [
+        "meter",
+        "metr/y"
+      ],
+      "meaning": "measure",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "audiometer- an instrument that measures hearing acuteness",
+        "chronometer- an instrument that measures time",
+        "metric"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "micro",
+      "forms": [
+        "micro"
+      ],
+      "meaning": "very small, short, minute",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "microbe",
+        "microchip",
+        "microscope"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "mid",
+      "forms": [
+        "mid"
+      ],
+      "meaning": "middle",
+      "origins": [
+        "Latin",
+        "Greek"
+      ],
+      "examples": [
+        "midriff",
+        "midterm",
+        "midway"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "migr",
+      "forms": [
+        "migr"
+      ],
+      "meaning": "move",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "immigrant",
+        "migrant",
+        "migration"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "milli",
+      "forms": [
+        "milli"
+      ],
+      "meaning": "onethousandth",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "millimeter",
+        "millibar",
+        "milliliter"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "min/i",
+      "forms": [
+        "min/i"
+      ],
+      "meaning": "small, less",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "mini",
+        "minuscule",
+        "minutiae"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "mis/o",
+      "forms": [
+        "mis/o"
+      ],
+      "meaning": "bad, badly, wrong, wrongly, to hate",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "misbehave",
+        "misprint",
+        "misnomer"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "miss, mit",
+      "forms": [
+        "miss",
+        "mit"
+      ],
+      "meaning": "send, let go",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "dismiss",
+        "missile",
+        "emit",
+        "admittance"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "mob",
+      "forms": [
+        "mob"
+      ],
+      "meaning": "move",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "immobilize",
+        "mobile",
+        "mobility"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "mon/o",
+      "forms": [
+        "mon/o"
+      ],
+      "meaning": "one, single, alone",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "monochromat",
+        "monologue",
+        "monotheism"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "mot, mov",
+      "forms": [
+        "mot",
+        "mov"
+      ],
+      "meaning": "move",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "motion",
+        "motivate",
+        "promote to move someone forward",
+        "removable"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "morph/o",
+      "forms": [
+        "morph/o"
+      ],
+      "meaning": "form",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "metamorphosis",
+        "endorphins",
+        "amorphous"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "mort",
+      "forms": [
+        "mort"
+      ],
+      "meaning": "death",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "immortal",
+        "mortal",
+        "mortician"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "multi",
+      "forms": [
+        "multi"
+      ],
+      "meaning": "many, more than one or two",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "multicolored",
+        "multimedia",
+        "multitasking"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "mut",
+      "forms": [
+        "mut"
+      ],
+      "meaning": "change",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "immutable",
+        "mutant",
+        "mutate"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "my/o",
+      "forms": [
+        "my/o"
+      ],
+      "meaning": "muscle",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "myocardium",
+        "myasthenia",
+        "myosin"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "narr",
+      "forms": [
+        "narr"
+      ],
+      "meaning": "tell",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "narrate",
+        "narrative",
+        "narrator"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "nat",
+      "forms": [
+        "nat"
+      ],
+      "meaning": "born",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "innate",
+        "natal",
+        "natural"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "nav",
+      "forms": [
+        "nav"
+      ],
+      "meaning": "ship",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "circumnavigate",
+        "naval",
+        "navigate"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "necr/o",
+      "forms": [
+        "necr/o"
+      ],
+      "meaning": "dead, death",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "necrophil",
+        "necrosis",
+        "necrology"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "neg",
+      "forms": [
+        "neg"
+      ],
+      "meaning": "no",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "negate",
+        "negative",
+        "renege"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "neo",
+      "forms": [
+        "neo"
+      ],
+      "meaning": "new, recent",
+      "origins": [],
+      "examples": [
+        "neoclassic",
+        "neonatal"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "nephr/o",
+      "forms": [
+        "nephr/o"
+      ],
+      "meaning": "kidney",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "nephritis",
+        "nephrotomy",
+        "nephron"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "neur/o",
+      "forms": [
+        "neur/o"
+      ],
+      "meaning": "nerve",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "neuralgia",
+        "neurologist",
+        "neurotic"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "nom/in",
+      "forms": [
+        "nom/in"
+      ],
+      "meaning": "name",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "misnomer",
+        "nominal",
+        "nominate"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "non",
+      "forms": [
+        "non"
+      ],
+      "meaning": "no, not, without",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "nondescript",
+        "nonfiction",
+        "nonsense"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "not",
+      "forms": [
+        "not"
+      ],
+      "meaning": "mark",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "notable",
+        "notarize",
+        "annotate"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "noun, nunc",
+      "forms": [
+        "noun",
+        "nunc"
+      ],
+      "meaning": "declare",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "announce",
+        "denounce",
+        "enunciate"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "nov",
+      "forms": [
+        "nov"
+      ],
+      "meaning": "new",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "innovate",
+        "novelty",
+        "novice",
+        "renovate"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "numer",
+      "forms": [
+        "numer"
+      ],
+      "meaning": "number",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "enumerate",
+        "numerology",
+        "numerous"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "ob, op",
+      "forms": [
+        "ob",
+        "op"
+      ],
+      "meaning": "in the way, against",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "object",
+        "obscure",
+        "opposition"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "oct/a/o",
+      "forms": [
+        "oct/a/o"
+      ],
+      "meaning": "eight",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "octagon",
+        "octogenarian",
+        "octopus"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "ocu",
+      "forms": [
+        "ocu"
+      ],
+      "meaning": "eye",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "binoculars",
+        "monocula",
+        "oculist"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "od",
+      "forms": [
+        "od"
+      ],
+      "meaning": "path, way",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "diode",
+        "odometer",
+        "triode"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "odor",
+      "forms": [
+        "odor"
+      ],
+      "meaning": "smell, scent",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "deodorant",
+        "malodorous",
+        "odoriferous- something that bears or diffuses a scent"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "omni",
+      "forms": [
+        "omni"
+      ],
+      "meaning": "all",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "omnipotent",
+        "omniscient"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "op/t/s",
+      "forms": [
+        "op/t/s"
+      ],
+      "meaning": "eye, visual condition, sight",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "optic",
+        "optician",
+        "autopsy"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "opt",
+      "forms": [
+        "opt"
+      ],
+      "meaning": "best",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "optimal",
+        "optimize",
+        "optimum"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "ortho",
+      "forms": [
+        "ortho"
+      ],
+      "meaning": "straight",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "orthodontist",
+        "orthopedic",
+        "orthography"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "osteo",
+      "forms": [
+        "osteo"
+      ],
+      "meaning": "bone",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "osteoarthritis",
+        "osteopathy",
+        "osteology"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "out",
+      "forms": [
+        "out"
+      ],
+      "meaning": "goes beyond, surpasses, exceeds",
+      "origins": [],
+      "examples": [
+        "outgoing",
+        "outdoing",
+        "outdoor"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "over",
+      "forms": [
+        "over"
+      ],
+      "meaning": "excessive",
+      "origins": [
+        "English"
+      ],
+      "examples": [
+        "overconfident",
+        "overstock",
+        "overexcited"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "oxi/oxy",
+      "forms": [
+        "oxi/oxy"
+      ],
+      "meaning": "sharp",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "oxymoron",
+        "oxidize"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "pale/o",
+      "forms": [
+        "pale/o"
+      ],
+      "meaning": "ancient",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "paleontology",
+        "paleography",
+        "paleolithic"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "pan",
+      "forms": [
+        "pan"
+      ],
+      "meaning": "all, any, everyone",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "panacea",
+        "panorama",
+        "pantheism",
+        "pandemic"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "para",
+      "forms": [
+        "para"
+      ],
+      "meaning": "beside, beyond, abnormal, assistant",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "parasite",
+        "parallel",
+        "paragraph"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "para",
+      "forms": [
+        "para"
+      ],
+      "meaning": "protection from",
+      "origins": [],
+      "examples": [
+        "parachute",
+        "parasol"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "pater, patr/i",
+      "forms": [
+        "pater",
+        "patr/i"
+      ],
+      "meaning": "father",
+      "origins": [
+        "Latin",
+        "Greek"
+      ],
+      "examples": [
+        "paternal",
+        "paternity",
+        "patriarch"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "path",
+      "forms": [
+        "path"
+      ],
+      "meaning": "feeling, emotion",
+      "origins": [],
+      "examples": [
+        "antipathy",
+        "apathy",
+        "empathy"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "ped/i/e",
+      "forms": [
+        "ped/i/e"
+      ],
+      "meaning": "foot, feet",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "pedal",
+        "pedestrian",
+        "pedicure"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "pel",
+      "forms": [
+        "pel"
+      ],
+      "meaning": "drive, force",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "compel",
+        "expel",
+        "repel"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "pent/a",
+      "forms": [
+        "pent/a"
+      ],
+      "meaning": "five",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "pentagon",
+        "pentathlon"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "pept, peps",
+      "forms": [
+        "pept",
+        "peps"
+      ],
+      "meaning": "digestion",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "dyspepsia",
+        "peptic",
+        "pepsin"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "per",
+      "forms": [
+        "per"
+      ],
+      "meaning": "through, throughout",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "permanent",
+        "permeate",
+        "persist",
+        "perennial"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "peri",
+      "forms": [
+        "peri"
+      ],
+      "meaning": "around, enclosing",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "periodontal",
+        "peripheral",
+        "perimeter"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "phag/e",
+      "forms": [
+        "phag/e"
+      ],
+      "meaning": "to eat",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "esophagus",
+        "anthropophagy or sarcophagy",
+        "xylophagous"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "phil/o",
+      "forms": [
+        "phil/o"
+      ],
+      "meaning": "love, friend",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "philanthropist",
+        "philology",
+        "philosophy",
+        "bibliophil"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "phon/o /e/y",
+      "forms": [
+        "phon/o /e/y"
+      ],
+      "meaning": "sound",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "cacophony",
+        "microphone",
+        "phonetic"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "phot/o",
+      "forms": [
+        "phot/o"
+      ],
+      "meaning": "light",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "photogenic",
+        "photograph",
+        "photon"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "phyll/o",
+      "forms": [
+        "phyll/o"
+      ],
+      "meaning": "leaf",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "chlorophyll",
+        "phyllotaxis",
+        "phyllite"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "phys",
+      "forms": [
+        "phys"
+      ],
+      "meaning": "nature, medicine, the body",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "physical",
+        "physician",
+        "physique"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "phyt/o/e",
+      "forms": [
+        "phyt/o/e"
+      ],
+      "meaning": "plant, to grow",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "epiphyte",
+        "hydrophyte",
+        "neophyte"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "plas/t/m",
+      "forms": [
+        "plas/t/m"
+      ],
+      "meaning": "to form, development, forming cells",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "protoplasm",
+        "plastic",
+        "plaster"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "plaud, plod, plaus, plos",
+      "forms": [
+        "plaud",
+        "plod",
+        "plaus",
+        "plos"
+      ],
+      "meaning": "approve, clap",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "applaud-",
+        "explosion-",
+        "plausible-"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "pneum/o",
+      "forms": [
+        "pneum/o"
+      ],
+      "meaning": "breathing, lung, air, spirit",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "pneumonia",
+        "pneumatic",
+        "dyspnea"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "pod/e",
+      "forms": [
+        "pod/e"
+      ],
+      "meaning": "foot",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "podiatrist",
+        "podium",
+        "tripod"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "poli",
+      "forms": [
+        "poli"
+      ],
+      "meaning": "city",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "metropolis",
+        "police",
+        "politics"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "poly",
+      "forms": [
+        "poly"
+      ],
+      "meaning": "many, more than one",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "polychrome",
+        "polyglot",
+        "polygon"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "pon",
+      "forms": [
+        "pon"
+      ],
+      "meaning": "place, put",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "opponent",
+        "postpone"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "pop",
+      "forms": [
+        "pop"
+      ],
+      "meaning": "people",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "popular",
+        "population",
+        "populist"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "port",
+      "forms": [
+        "port"
+      ],
+      "meaning": "carry",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "export",
+        "portable",
+        "porter"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "pos",
+      "forms": [
+        "pos"
+      ],
+      "meaning": "place, put",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "deposit",
+        "expose to place out into the open for all to see",
+        "position"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "post",
+      "forms": [
+        "post"
+      ],
+      "meaning": "after, behind",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "posthumous",
+        "postpone",
+        "postscript"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "pre",
+      "forms": [
+        "pre"
+      ],
+      "meaning": "earlier, before, in front of",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "preamble",
+        "prepare",
+        "prediction"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "pro",
+      "forms": [
+        "pro"
+      ],
+      "meaning": "before, in front of, for, forward",
+      "origins": [
+        "Greek",
+        "Latin"
+      ],
+      "examples": [
+        "prognosis",
+        "prologue",
+        "prophet"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "prot/o",
+      "forms": [
+        "prot/o"
+      ],
+      "meaning": "primitive, first, chief",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "prototype",
+        "proton",
+        "protocol"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "pseud/o",
+      "forms": [
+        "pseud/o"
+      ],
+      "meaning": "wrong,false",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "pseudonym",
+        "pseudoscience",
+        "pseudopregnancy"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "psych/o",
+      "forms": [
+        "psych/o"
+      ],
+      "meaning": "mind, mental",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "psyche",
+        "psychic",
+        "psychology"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "pugn/a, pung",
+      "forms": [
+        "pugn/a",
+        "pung"
+      ],
+      "meaning": "to fight",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "pugnacious",
+        "repugnant",
+        "pungent"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "pul",
+      "forms": [
+        "pul"
+      ],
+      "meaning": "urge",
+      "origins": [],
+      "examples": [
+        "compulsion",
+        "expulsion",
+        "impulsive"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "purg",
+      "forms": [
+        "purg"
+      ],
+      "meaning": "clean",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "purge",
+        "purgatory",
+        "expurgate"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "put",
+      "forms": [
+        "put"
+      ],
+      "meaning": "think",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "computer",
+        "dispute",
+        "input"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "pyr/o",
+      "forms": [
+        "pyr/o"
+      ],
+      "meaning": "fire, heat",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "pyrotechnics",
+        "pyrometer",
+        "pyretic"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "quad/r/ri",
+      "forms": [
+        "quad/r/ri"
+      ],
+      "meaning": "four",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "quadrant",
+        "quadrennium",
+        "quadruped"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "quart",
+      "forms": [
+        "quart"
+      ],
+      "meaning": "fourth",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "quarter",
+        "quart",
+        "quartet"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "quin/t",
+      "forms": [
+        "quin/t"
+      ],
+      "meaning": "five, fifth",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "quintett",
+        "quintessence",
+        "quintuple"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "radic, radix",
+      "forms": [
+        "radic",
+        "radix"
+      ],
+      "meaning": "root",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "eradicate",
+        "radical",
+        "radish"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "radio",
+      "forms": [
+        "radio"
+      ],
+      "meaning": "radiation, ray",
+      "origins": [],
+      "examples": [
+        "radioactive",
+        "radiologist"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "ram/i",
+      "forms": [
+        "ram/i"
+      ],
+      "meaning": "branch",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "ramification",
+        "ramify",
+        "ramus"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "re",
+      "forms": [
+        "re"
+      ],
+      "meaning": "again, back, backward",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "rebound -to spring back again",
+        "rewind",
+        "reaction",
+        "recognize"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "reg",
+      "forms": [
+        "reg"
+      ],
+      "meaning": "guide, rule",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "regent",
+        "regime",
+        "regulate"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "retro",
+      "forms": [
+        "retro"
+      ],
+      "meaning": "backward, back",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "retroactive",
+        "retrogress",
+        "retrospect"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "rhin/o",
+      "forms": [
+        "rhin/o"
+      ],
+      "meaning": "nose",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "rhinoceros",
+        "rhinoplasty",
+        "rhinovirus"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "rhod/o",
+      "forms": [
+        "rhod/o"
+      ],
+      "meaning": "red",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "rhododendron",
+        "rhodium",
+        "rhodopsin"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "rid",
+      "forms": [
+        "rid"
+      ],
+      "meaning": "laugh",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "deride",
+        "ridicule",
+        "ridiculous"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "rrh/ea /oea/ag",
+      "forms": [
+        "rrh/ea /oea/ag"
+      ],
+      "meaning": "flow, discharge",
+      "origins": [
+        "Latin",
+        "Greek"
+      ],
+      "examples": [
+        "diarrhea",
+        "hemorrhage",
+        "catarrh"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "rub",
+      "forms": [
+        "rub"
+      ],
+      "meaning": "red",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "ruby",
+        "rubella",
+        "bilirubin"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "rupt",
+      "forms": [
+        "rupt"
+      ],
+      "meaning": "break, burst",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "bankrupt",
+        "interrupt",
+        "rupture"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "san",
+      "forms": [
+        "san"
+      ],
+      "meaning": "health",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "sane",
+        "sanitary",
+        "sanitation"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "scend",
+      "forms": [
+        "scend"
+      ],
+      "meaning": "climb, go",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "ascend",
+        "crescendo",
+        "descend"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "sci",
+      "forms": [
+        "sci"
+      ],
+      "meaning": "know",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "conscience",
+        "conscious",
+        "omniscient"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "scler/o",
+      "forms": [
+        "scler/o"
+      ],
+      "meaning": "hard",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "arteriosclerosis",
+        "multiple sclerosis",
+        "sclerometer"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "scop/e/y",
+      "forms": [
+        "scop/e/y"
+      ],
+      "meaning": "see, examine, observe",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "microscope",
+        "periscope",
+        "telescope"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "scrib, script",
+      "forms": [
+        "scrib",
+        "script"
+      ],
+      "meaning": "write, written",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "inscribe",
+        "scribe",
+        "describe"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "se",
+      "forms": [
+        "se"
+      ],
+      "meaning": "apart",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "secede",
+        "seclude",
+        "serum"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "sect",
+      "forms": [
+        "sect"
+      ],
+      "meaning": "cut",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "dissect",
+        "intersection",
+        "bisect"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "sed, sid, sess",
+      "forms": [
+        "sed",
+        "sid",
+        "sess"
+      ],
+      "meaning": "sit",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "reside-",
+        "sediment-",
+        "session-"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "self",
+      "forms": [
+        "self"
+      ],
+      "meaning": "of, for, or by itself",
+      "origins": [],
+      "examples": [
+        "self-discipline",
+        "self-respect"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "semi",
+      "forms": [
+        "semi"
+      ],
+      "meaning": "half, partial",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "semiannual",
+        "semicircle",
+        "semiconscious"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "sept/i",
+      "forms": [
+        "sept/i"
+      ],
+      "meaning": "seven",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "september",
+        "septet",
+        "septuagenarian"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "serv",
+      "forms": [
+        "serv"
+      ],
+      "meaning": "save, keep",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "conserve",
+        "preserve",
+        "reservation"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "sex",
+      "forms": [
+        "sex"
+      ],
+      "meaning": "six",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "sextet or sextette",
+        "sexagenarian"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "sol",
+      "forms": [
+        "sol"
+      ],
+      "meaning": "alone",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "desolate",
+        "solitary",
+        "solo"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "sol",
+      "forms": [
+        "sol"
+      ],
+      "meaning": "sun",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "solar",
+        "parasol",
+        "solarium"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "somn/I",
+      "forms": [
+        "somn/I"
+      ],
+      "meaning": "sleep",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "insomnia",
+        "somniloquy",
+        "somnolent"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "son",
+      "forms": [
+        "son"
+      ],
+      "meaning": "sound",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "consonant",
+        "sonorous",
+        "supersonic",
+        "unison"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "soph",
+      "forms": [
+        "soph"
+      ],
+      "meaning": "wise",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "philosopher",
+        "sophisticated",
+        "sophism"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "spec/t, spic",
+      "forms": [
+        "spec/t",
+        "spic"
+      ],
+      "meaning": "see, look",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "circumspect",
+        "retrospective",
+        "spectator"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "sphere",
+      "forms": [
+        "sphere"
+      ],
+      "meaning": "ball",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "biosphere",
+        "hemisphere"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "spir",
+      "forms": [
+        "spir"
+      ],
+      "meaning": "breathe",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "inspire",
+        "transpire",
+        "spirit"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "sta",
+      "forms": [
+        "sta"
+      ],
+      "meaning": "stand",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "stable",
+        "stagnant",
+        "stationary"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "stell",
+      "forms": [
+        "stell"
+      ],
+      "meaning": "star",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "constellation",
+        "interstellar",
+        "stellar"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "struct",
+      "forms": [
+        "struct"
+      ],
+      "meaning": "build",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "construct",
+        "destruction",
+        "structure",
+        "infrastructure"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "sub",
+      "forms": [
+        "sub"
+      ],
+      "meaning": "under, lower than, inferior to",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "submarine",
+        "submerge",
+        "substandard"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "sum",
+      "forms": [
+        "sum"
+      ],
+      "meaning": "highest",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "sum",
+        "summation"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "super",
+      "forms": [
+        "super"
+      ],
+      "meaning": "higher in quality or quantity",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "super bowl",
+        "superior",
+        "supersonic"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "sy/m /n/l/s",
+      "forms": [
+        "sy/m /n/l/s"
+      ],
+      "meaning": "together, with, same",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "synergy",
+        "synchronize"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "tact, tang",
+      "forms": [
+        "tact",
+        "tang"
+      ],
+      "meaning": "touch",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "contact",
+        "tactile",
+        "tangible",
+        "intact"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "tax/o",
+      "forms": [
+        "tax/o"
+      ],
+      "meaning": "arrangement",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "syntax",
+        "taxonomy",
+        "ataxia"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "techno",
+      "forms": [
+        "techno"
+      ],
+      "meaning": "technique, skill",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "technology",
+        "technocracy",
+        "technologically"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "tel/e/o",
+      "forms": [
+        "tel/e/o"
+      ],
+      "meaning": "far, distant, complete",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "telephone",
+        "telescope",
+        "television",
+        "telecommuting"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "temp/or",
+      "forms": [
+        "temp/or"
+      ],
+      "meaning": "time",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "contemporary- existing at the same time",
+        "temporal",
+        "temporary"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "ten, tin, tent",
+      "forms": [
+        "ten",
+        "tin",
+        "tent"
+      ],
+      "meaning": "hold",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "continent-",
+        "detention-",
+        "tenacious-"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "ter, trit",
+      "forms": [
+        "ter",
+        "trit"
+      ],
+      "meaning": "rub",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "attrition-",
+        "detritus-",
+        "trite-",
+        "freshness",
+        "or"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "term/ina",
+      "forms": [
+        "term/ina"
+      ],
+      "meaning": "end, limit",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "determine",
+        "terminate",
+        "exterminate"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "terr/a/i",
+      "forms": [
+        "terr/a/i"
+      ],
+      "meaning": "land, earth",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "extraterrestrial",
+        "terrain",
+        "territory"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "tetra",
+      "forms": [
+        "tetra"
+      ],
+      "meaning": "four",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "tetrapod",
+        "tetrarchy",
+        "tetrose"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "the",
+      "forms": [
+        "the"
+      ],
+      "meaning": "put",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "bibliotheca-",
+        "theme-",
+        "thesis-"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "the/o",
+      "forms": [
+        "the/o"
+      ],
+      "meaning": "god",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "monotheism",
+        "polytheism",
+        "theology"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "therm/o",
+      "forms": [
+        "therm/o"
+      ],
+      "meaning": "heat",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "thermal",
+        "thermos",
+        "thermostat"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "tort",
+      "forms": [
+        "tort"
+      ],
+      "meaning": "twist",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "contortion",
+        "distort",
+        "retort"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "tox",
+      "forms": [
+        "tox"
+      ],
+      "meaning": "poison",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "detoxification",
+        "toxic",
+        "toxicology",
+        "intoxicated"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "tract",
+      "forms": [
+        "tract"
+      ],
+      "meaning": "pull, drag",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "attract",
+        "distract",
+        "tractor"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "trans",
+      "forms": [
+        "trans"
+      ],
+      "meaning": "across,beyond, through",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "transcontinental",
+        "transfer",
+        "transport"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "tri",
+      "forms": [
+        "tri"
+      ],
+      "meaning": "three, once in every three, third",
+      "origins": [
+        "Greek",
+        "Latin"
+      ],
+      "examples": [
+        "triangle",
+        "triathlon",
+        "tricycle"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "ultra",
+      "forms": [
+        "ultra"
+      ],
+      "meaning": "beyond, extreme, more than",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "ultrahigh",
+        "ultramodern",
+        "ultrasonic"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "un",
+      "forms": [
+        "un"
+      ],
+      "meaning": "not,opposite of, lacking",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "unabridged",
+        "unfair",
+        "unfriendly"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "uni",
+      "forms": [
+        "uni"
+      ],
+      "meaning": "one, single",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "unicycle",
+        "unilateral",
+        "unique",
+        "unison"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "urb",
+      "forms": [
+        "urb"
+      ],
+      "meaning": "city",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "suburb",
+        "urban",
+        "urbanology"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "vac",
+      "forms": [
+        "vac"
+      ],
+      "meaning": "empty",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "evacuate",
+        "vacant",
+        "vacation"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "ven/t",
+      "forms": [
+        "ven/t"
+      ],
+      "meaning": "come",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "circumvent",
+        "convention",
+        "intervene"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "ver/I",
+      "forms": [
+        "ver/I"
+      ],
+      "meaning": "truth",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "veracious",
+        "veracity",
+        "verify"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "verb",
+      "forms": [
+        "verb"
+      ],
+      "meaning": "word",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "verbalize",
+        "adverb",
+        "proverb"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "vers, vert",
+      "forms": [
+        "vers",
+        "vert"
+      ],
+      "meaning": "turn",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "reverse",
+        "introvert",
+        "version",
+        "controversy"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "vice",
+      "forms": [
+        "vice"
+      ],
+      "meaning": "acting in place of, next in rank",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "vice-president"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "vid",
+      "forms": [
+        "vid"
+      ],
+      "meaning": "see",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "evident"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "vince, vic",
+      "forms": [
+        "vince",
+        "vic"
+      ],
+      "meaning": "conquer",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "convince",
+        "invincible",
+        "victory"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "vis, vid",
+      "forms": [
+        "vis",
+        "vid"
+      ],
+      "meaning": "see",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "vision",
+        "envision",
+        "evident"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "viv/i vit",
+      "forms": [
+        "viv/i vit"
+      ],
+      "meaning": "live, life",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "revival",
+        "vital",
+        "vivacious"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "voc/i",
+      "forms": [
+        "voc/i"
+      ],
+      "meaning": "voice, call",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "advocate",
+        "equivocate",
+        "vocalize"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "vol/i/u",
+      "forms": [
+        "vol/i/u"
+      ],
+      "meaning": "wish, will",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "benevolent",
+        "volition"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "vor, vour",
+      "forms": [
+        "vor",
+        "vour"
+      ],
+      "meaning": "eat",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "carnivorous",
+        "voracious",
+        "devour"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "xanth",
+      "forms": [
+        "xanth"
+      ],
+      "meaning": "yellow",
+      "origins": [
+        "Latin"
+      ],
+      "examples": [
+        "xanthium-",
+        "xanthochromia-",
+        "xanthogenic"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "xen/o",
+      "forms": [
+        "xen/o"
+      ],
+      "meaning": "foreign",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "xenophobic",
+        "xenogenesis",
+        "xenophile"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "xer/o/I",
+      "forms": [
+        "xer/o/I"
+      ],
+      "meaning": "dry",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "xerophyte",
+        "xerography",
+        "xeric"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "xyl",
+      "forms": [
+        "xyl"
+      ],
+      "meaning": "wood",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "xylocarp",
+        "xyloid-",
+        "xylophone-an"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "zo/o",
+      "forms": [
+        "zo/o"
+      ],
+      "meaning": "animal life",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "zoology",
+        "zooid",
+        "zooplankton"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    },
+    {
+      "root": "zyg/o",
+      "forms": [
+        "zyg/o"
+      ],
+      "meaning": "pair",
+      "origins": [
+        "Greek"
+      ],
+      "examples": [
+        "zygote",
+        "zygomorphic"
+      ],
+      "sourceUrl": "https://www.learnthat.org/pages/view/roots.html"
+    }
+  ]
+}
