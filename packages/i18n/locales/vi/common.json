@@ -454,7 +454,13 @@
       "sentenceHidden": "Câu đang ẩn. Di chuột hoặc nhấn H để hiện.",
       "stopped": "Phát lại đã dừng.",
       "transcript": "Phụ đề",
-      "sampleLine": "Câu mẫu số {{n}} của video."
+      "sampleLine": "Câu mẫu số {{n}} của video.",
+      "replay": "Phát lại câu",
+      "repeat": "Số lần phát",
+      "autoContinue": "Tự chuyển câu",
+      "autoContinueHint": "Sau lần phát cuối, chờ theo tỉ lệ phần trăm độ dài câu để bạn nói, rồi chuyển sang câu tiếp theo. Tắt công tắc để vô hiệu hóa.",
+      "play": "Lần {{n}}/{{total}}",
+      "yourTurn": "Đến lượt bạn"
     },
     "dictation": {
       "listen": "Nghe",

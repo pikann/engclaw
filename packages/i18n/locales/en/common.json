@@ -454,7 +454,13 @@
       "sentenceHidden": "Sentence hidden. Hover or press H to reveal.",
       "stopped": "Playback stopped.",
       "transcript": "Transcript",
-      "sampleLine": "Sample sentence number {{n}} of the video."
+      "sampleLine": "Sample sentence number {{n}} of the video.",
+      "replay": "Replay sentence",
+      "repeat": "Plays",
+      "autoContinue": "Auto-continue",
+      "autoContinueHint": "After the last play, wait this percentage of the sentence length for your turn, then move to the next sentence. Turn the switch off to disable it.",
+      "play": "Play {{n}} of {{total}}",
+      "yourTurn": "Your turn"
     },
     "dictation": {
       "listen": "Listen",

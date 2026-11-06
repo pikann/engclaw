@@ -1,4 +1,5 @@
 import type Database from 'better-sqlite3'
+import { SentenceSettings } from '@engclaw/ipc-contract'
 
 export interface CachedVideo {
   videoId: string
@@ -99,6 +100,21 @@ export class VideoStore {
     }))
   }
 
+  getSettings(videoId: string): SentenceSettings | null {
+    const row = this.db
+      .prepare('SELECT sentence_settings FROM videos WHERE video_id = ?')
+      .get(videoId) as { sentence_settings: string | null } | undefined
+    if (!row?.sentence_settings) return null
+    const parsed = SentenceSettings.safeParse(safeJson(row.sentence_settings))
+    return parsed.success ? parsed.data : null
+  }
+
+  saveSettings(videoId: string, settings: SentenceSettings): void {
+    this.db
+      .prepare('UPDATE videos SET sentence_settings = ? WHERE video_id = ?')
+      .run(JSON.stringify(settings), videoId)
+  }
+
   remove(videoId: string): void {
     this.db.transaction(() => {
       this.db.prepare('DELETE FROM transcripts WHERE video_id = ?').run(videoId)
@@ -132,6 +148,14 @@ function parse<T>(raw: string, guard: (v: unknown) => v is T): T[] | null {
   try {
     const value: unknown = JSON.parse(raw)
     return Array.isArray(value) && value.every(guard) ? value : null
+  } catch {
+    return null
+  }
+}
+
+function safeJson(raw: string): unknown {
+  try {
+    return JSON.parse(raw)
   } catch {
     return null
   }

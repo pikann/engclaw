@@ -39,6 +39,17 @@ export const RecentVideo = z.object({
 })
 export type RecentVideo = z.infer<typeof RecentVideo>
 
+/** Practice settings remembered per video: playback speed, plays per sentence, auto-continue %. */
+export const SentenceSettings = z
+  .object({
+    speed: z.number().min(0.5).max(1.5),
+    repeat: z.number().int().min(1).max(10),
+    autoContinuePct: z.number().int().min(0).max(200),
+  })
+  .strict()
+export type SentenceSettings = z.infer<typeof SentenceSettings>
+export const SentenceSettingsSave = VideoRef.extend({ settings: SentenceSettings })
+
 /** Where the player view sits, in the main window's content coordinates (CSS pixels). */
 export const PlayerBounds = z
   .object({
@@ -54,6 +65,7 @@ export const PlayerCommand = z.discriminatedUnion('type', [
   z.object({ type: z.literal('play') }).strict(),
   z.object({ type: z.literal('pause') }).strict(),
   z.object({ type: z.literal('seek'), seconds: z.number().min(0).max(86_400) }).strict(),
+  z.object({ type: z.literal('rate'), rate: z.number().min(0.25).max(2) }).strict(),
 ])
 export type PlayerCommand = z.infer<typeof PlayerCommand>
 
@@ -354,6 +366,8 @@ export const IPC = {
   youtubeTranscript: 'youtube:transcript',
   youtubeAudioRange: 'youtube:audioRange',
   youtubeRecent: 'youtube:recent',
+  youtubeGetSettings: 'youtube:getSettings',
+  youtubeSaveSettings: 'youtube:saveSettings',
   playerLoad: 'player:load',
   playerBounds: 'player:bounds',
   playerCommand: 'player:command',
@@ -420,6 +434,9 @@ export const invokeChannels = {
   },
   /** Videos opened before (with a cached transcript), newest first. */
   [IPC.youtubeRecent]: { request: noArgs, response: z.array(RecentVideo) },
+  /** Remembered practice settings for a video, or null when none were saved. */
+  [IPC.youtubeGetSettings]: { request: VideoRef, response: SentenceSettings.nullable() },
+  [IPC.youtubeSaveSettings]: { request: SentenceSettingsSave, response: z.null() },
   /** Creates (or replaces) the sandboxed player view for a video, hidden until bounds are set. */
   [IPC.playerLoad]: { request: VideoRef, response: z.null() },
   [IPC.playerBounds]: { request: PlayerBounds, response: z.null() },
@@ -510,6 +527,8 @@ export interface EngclawApi {
       req: z.infer<typeof AudioRangeRequest>,
     ): Promise<YouTubeResult<z.infer<typeof AudioRangeResponse>>>
     recent(): Promise<RecentVideo[]>
+    getSettings(req: z.infer<typeof VideoRef>): Promise<SentenceSettings | null>
+    saveSettings(req: z.infer<typeof SentenceSettingsSave>): Promise<null>
   }
   player: {
     load(req: z.infer<typeof VideoRef>): Promise<null>

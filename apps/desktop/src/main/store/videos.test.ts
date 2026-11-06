@@ -88,6 +88,21 @@ describe('video cache', () => {
     expect(store.videos.getMeta('aaaaaaaaaaa')).toBeNull()
   })
 
+  it('remembers practice settings per video across restarts and ignores corrupt rows', () => {
+    const a = { speed: 0.75, repeat: 3, autoContinuePct: 150 }
+    store.videos.putMeta(meta('aaaaaaaaaaa'))
+    store.videos.putMeta(meta('bbbbbbbbbbb'))
+    expect(store.videos.getSettings('aaaaaaaaaaa')).toBeNull()
+    store.videos.saveSettings('aaaaaaaaaaa', a)
+    expect(store.videos.getSettings('aaaaaaaaaaa')).toEqual(a)
+    expect(store.videos.getSettings('bbbbbbbbbbb')).toBeNull()
+    store.db.close()
+    store = openStore(dbPath())
+    expect(store.videos.getSettings('aaaaaaaaaaa')).toEqual(a)
+    store.db.prepare('UPDATE videos SET sentence_settings = \'{"speed":9}\'').run()
+    expect(store.videos.getSettings('aaaaaaaaaaa')).toBeNull()
+  })
+
   it('deleteAll wipes cached videos too', () => {
     store.videos.putMeta(meta('aaaaaaaaaaa'))
     store.videos.putTranscript('aaaaaaaaaaa', 'en', cues)

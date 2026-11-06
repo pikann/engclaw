@@ -1,28 +1,24 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { PlayerCommand } from '@engclaw/ipc-contract'
 import { initialPlayerState, reducePlayer } from './player-state'
-import { segmentIndexAt, type Segment } from './shadowing'
 
 /**
- * Drives the main-process player view for one video. `index` is the segment playing now; it only
- * changes when the playing segment changes, so the 20 Hz time ticks do not re-render the screen.
+ * Drives the main-process player view for one video. Time ticks (20 Hz) go to `onTime` instead of
+ * React state, so they do not re-render the screen.
  */
-export function usePlayer(videoId: string, segments: readonly Segment[]) {
+export function usePlayer(videoId: string, onTime: (seconds: number) => void) {
   const [state, setState] = useState(initialPlayerState)
-  const [index, setIndex] = useState(-1)
   const [attempt, setAttempt] = useState(0)
-  const segmentsRef = useRef(segments)
+  const onTimeRef = useRef(onTime)
   useEffect(() => {
-    segmentsRef.current = segments
-  }, [segments])
+    onTimeRef.current = onTime
+  }, [onTime])
 
   useEffect(() => {
     setState(initialPlayerState)
-    setIndex(-1)
     const off = window.engclaw.player.onEvent((e) => {
       if (e.type === 'time') {
-        const next = segmentIndexAt(segmentsRef.current, e.seconds)
-        setIndex((prev) => (prev === next ? prev : next))
+        onTimeRef.current(e.seconds)
         return
       }
       setState((s) => reducePlayer(s, e))
@@ -37,16 +33,7 @@ export function usePlayer(videoId: string, segments: readonly Segment[]) {
   const command = useCallback((c: PlayerCommand) => {
     void window.engclaw.player.command(c)
   }, [])
-  const seekToSegment = useCallback(
-    (i: number) => {
-      const seg = segmentsRef.current[i]
-      if (!seg) return
-      setIndex(i)
-      command({ type: 'seek', seconds: seg.start })
-    },
-    [command],
-  )
   const retry = useCallback(() => setAttempt((n) => n + 1), [])
 
-  return { state, index, command, seekToSegment, retry }
+  return { state, command, retry }
 }

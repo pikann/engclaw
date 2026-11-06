@@ -25,6 +25,7 @@ const PLAYER_JS = `(function () {
   var videoId = new URLSearchParams(location.search).get('v');
   var player = null;
   var ticker = 0;
+  var rate = 1;
   function emit(m) { if (bridge) bridge.emit(m); }
   function duration() { return player && player.getDuration ? player.getDuration() || 0 : 0; }
   function sendTime() {
@@ -47,11 +48,11 @@ const PLAYER_JS = `(function () {
       playerVars: { enablejsapi: 1, origin: location.origin, playsinline: 1, rel: 0, controls: 0,
         disablekb: 1, fs: 0, iv_load_policy: 3, cc_load_policy: 0 },
       events: {
-        onReady: function () { hideCaptions(); emit({ type: 'ready', duration: duration() }); sendTime(); },
+        onReady: function () { hideCaptions(); if (rate !== 1) player.setPlaybackRate(rate); emit({ type: 'ready', duration: duration() }); sendTime(); },
         onStateChange: function (e) {
           var state = STATES[e.data];
           if (!state) return;
-          if (state === 'playing') hideCaptions();
+          if (state === 'playing') { hideCaptions(); if (player.getPlaybackRate() !== rate) player.setPlaybackRate(rate); }
           setTicking(state === 'playing' || state === 'buffering');
           emit({ type: 'state', state: state });
           sendTime();
@@ -65,6 +66,7 @@ const PLAYER_JS = `(function () {
     if (c.type === 'play') player.playVideo();
     else if (c.type === 'pause') player.pauseVideo();
     else if (c.type === 'seek') { player.seekTo(c.seconds, true); sendTime(); }
+    else if (c.type === 'rate') { rate = c.rate; player.setPlaybackRate(rate); }
   });
   var s = document.createElement('script');
   s.src = 'https://www.youtube.com/iframe_api';

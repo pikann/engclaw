@@ -36,6 +36,7 @@ export const MIGRATIONS: readonly string[] = [
      fetched_at  INTEGER NOT NULL,
      PRIMARY KEY (video_id, lang)
    );`,
+  `ALTER TABLE videos ADD COLUMN sentence_settings TEXT;`,
 ]
 
 export class FutureSchemaError extends Error {
