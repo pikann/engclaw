@@ -1,0 +1,26 @@
+name: E2E
+# Slow; run manually from the Actions tab (Run workflow) instead of on every PR.
+on:
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - name: Build (with the dev-only design-system route for e2e)
+        run: bun run build
+        env:
+          VITE_DESIGN_SYSTEM: '1'
+      - name: E2E (Linux)
+        if: runner.os == 'Linux'
+        run: xvfb-run --auto-servernum bun run test:e2e
+      - name: E2E
+        if: runner.os != 'Linux'
+        run: bun run test:e2e
