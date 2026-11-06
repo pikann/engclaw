@@ -244,21 +244,6 @@ export function ShadowingSession({
         <h2 className="min-w-0 flex-1 truncate font-medium" data-testid="shadowing-title">
           {title}
         </h2>
-        <Badge variant="secondary" className="tabular-nums" data-testid="shadowing-position">
-          {t('screens.shadowing.segment', {
-            n: index + 1,
-            total: segments.length,
-          })}
-        </Badge>
-        <div role="status" className="flex shrink-0 items-center">
-          {loop.mode === 'waiting' ? (
-            <Badge data-testid="shadowing-your-turn">{t('screens.shadowing.yourTurn')}</Badge>
-          ) : loop.mode === 'playing' && settings.repeat > 1 ? (
-            <Badge variant="outline" className="tabular-nums" data-testid="shadowing-plays">
-              {t('screens.shadowing.play', { n: loop.plays, total: settings.repeat })}
-            </Badge>
-          ) : null}
-        </div>
         <div
           role="group"
           aria-label={t('screens.shadowing.modeLabel')}
@@ -683,6 +668,23 @@ export function ShadowingSession({
             </div>
           </aside>
         )}
+      </div>
+      <div className="flex shrink-0 items-center justify-end gap-2 border-t px-4 py-2">
+        <div role="status" className="flex shrink-0 items-center">
+          {loop.mode === 'waiting' ? (
+            <Badge data-testid="shadowing-your-turn">{t('screens.shadowing.yourTurn')}</Badge>
+          ) : loop.mode === 'playing' && settings.repeat > 1 ? (
+            <Badge variant="outline" className="tabular-nums" data-testid="shadowing-plays">
+              {t('screens.shadowing.play', { n: loop.plays, total: settings.repeat })}
+            </Badge>
+          ) : null}
+        </div>
+        <Badge variant="secondary" className="tabular-nums" data-testid="shadowing-position">
+          {t('screens.shadowing.segment', {
+            n: index + 1,
+            total: segments.length,
+          })}
+        </Badge>
       </div>
     </div>
   )
