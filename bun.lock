@@ -61,6 +61,10 @@
         "vite": "^7.0.0",
       },
     },
+    "packages/dictionary": {
+      "name": "@engclaw/dictionary",
+      "version": "0.0.0",
+    },
     "packages/i18n": {
       "name": "@engclaw/i18n",
       "version": "0.0.0",
@@ -170,6 +174,8 @@
     "@electron/universal": ["@electron/universal@2.0.1", "", { "dependencies": { "@electron/asar": "^3.2.7", "@malept/cross-spawn-promise": "^2.0.0", "debug": "^4.3.1", "dir-compare": "^4.2.0", "fs-extra": "^11.1.1", "minimatch": "^9.0.3", "plist": "^3.1.0" } }, "sha512-fKpv9kg4SPmt+hY7SVBnIYULE9QJl8L3sCfcBsnqbJwwBwAeTLokJ9TRt9y7bK0JAzIW2y78TVVjvnQEms/yyA=="],
 
     "@engclaw/desktop": ["@engclaw/desktop@workspace:apps/desktop"],
+
+    "@engclaw/dictionary": ["@engclaw/dictionary@workspace:packages/dictionary"],
 
     "@engclaw/i18n": ["@engclaw/i18n@workspace:packages/i18n"],
 
