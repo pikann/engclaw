@@ -17,12 +17,18 @@ import type { Segment } from './shadowing'
  * The practice loop of one video: sentence playback with back/replay/play/next, speed, repeat
  * count and auto-continue. Settings are remembered per video.
  */
-export function useSentenceLoop(videoId: string, segments: readonly Segment[]) {
+export function useSentenceLoop(
+  videoId: string,
+  segments: readonly Segment[],
+  noAutoContinue = false,
+) {
   const [loop, setLoop] = useState<LoopState>(idleLoop)
   const [settings, setSettingsState] = useState<SentenceSettings>(DEFAULT_SETTINGS)
   const loopRef = useRef(loop)
   const settingsRef = useRef(settings)
   const segmentsRef = useRef(segments)
+  const noAutoRef = useRef(noAutoContinue)
+  noAutoRef.current = noAutoContinue
   const waitTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const loaded = useRef(false)
   const commandRef = useRef<ReturnType<typeof usePlayer>['command']>(() => undefined)
@@ -38,7 +44,10 @@ export function useSentenceLoop(videoId: string, segments: readonly Segment[]) {
 
   const dispatch = useCallback(
     (input: LoopInput) => {
-      const step = stepLoop(loopRef.current, input, segmentsRef.current, settingsRef.current)
+      const effective = noAutoRef.current
+        ? { ...settingsRef.current, autoContinuePct: 0 }
+        : settingsRef.current
+      const step = stepLoop(loopRef.current, input, segmentsRef.current, effective)
       loopRef.current = step.state
       setLoop(step.state)
       for (const a of step.actions) {

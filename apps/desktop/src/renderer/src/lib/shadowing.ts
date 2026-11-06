@@ -246,6 +246,51 @@ export function fitStage(input: {
   }
 }
 
+const DICTATION_MIN_FONT = 14
+const DICTATION_MAX_FONT = 28
+const DICTATION_MIN_VIDEO_HEIGHT = 170
+const DICTATION_LINE_HEIGHT = 2.4
+const DICTATION_CHAR_EM = 0.6
+
+/**
+ * Dictation fit: the whole sentence (inputs included) must show without scrolling, so the font is the
+ * largest in 14-28 px whose wrapped height still leaves a usable video, and the video takes everything left.
+ */
+export function fitDictation(input: {
+  stageWidth: number
+  stageHeight: number
+  chromeHeight: number
+  sentenceChars: number
+  extraHeight: number
+}): StageFit {
+  const { stageWidth, stageHeight, chromeHeight, sentenceChars, extraHeight } = input
+  const available = Math.max(0, stageHeight - chromeHeight)
+  const textWidth = Math.max(1, stageWidth - SIDE_PADDING)
+  const needed = (font: number) =>
+    Math.max(1, Math.ceil((sentenceChars * font * DICTATION_CHAR_EM) / textWidth)) *
+      font *
+      DICTATION_LINE_HEIGHT +
+    extraHeight
+  const minVideo = Math.min(DICTATION_MIN_VIDEO_HEIGHT, available * 0.45)
+  let fontSize = DICTATION_MIN_FONT
+  for (let f = DICTATION_MAX_FONT; f >= DICTATION_MIN_FONT; f -= 1) {
+    if (available - needed(f) >= minVideo) {
+      fontSize = f
+      break
+    }
+  }
+  const sentenceHeight = Math.min(needed(fontSize), Math.max(0, available - minVideo))
+  const videoCap = available - needed(fontSize)
+  const videoWidth = Math.max(0, Math.min(stageWidth, (Math.max(videoCap, minVideo) * 16) / 9))
+  return {
+    videoWidth,
+    videoHeight: (videoWidth * 9) / 16,
+    sentenceHeight: Math.max(sentenceHeight, available - (videoWidth * 9) / 16),
+    fontSize,
+    sentenceScrolls: needed(fontSize) > available - minVideo,
+  }
+}
+
 /** `m:ss` (or `h:mm:ss`) for a position in seconds. */
 export function formatClock(seconds: number): string {
   const total = Number.isFinite(seconds) ? Math.max(0, Math.floor(seconds)) : 0
