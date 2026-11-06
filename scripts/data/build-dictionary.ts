@@ -1,7 +1,8 @@
 /**
  * Build-time pipeline: Open English WordNet + CMUdict + word-roots.json + word-etymology.json
  * -> dictionary.sqlite (read-only, FTS5) + dictionary.manifest.json (version + sha256).
- * Source archives go to .cache/dictionary and inputs/outputs to .cache/data (git-ignored), never committed.
+ * Source archives go to .cache/dictionary and word-roots/word-etymology are read from .cache/data (git-ignored).
+ * The sqlite + manifest are written to apps/desktop/resources/data and committed, to seed the app.
  *
  *   bun scripts/data/build-dictionary.ts [--refresh] [--out <dir>]
  */
@@ -18,6 +19,7 @@ const USER_AGENT =
   'engclaw-data-pipeline/0.1 (+https://github.com/pikann/engclaw; open-source build-time script)'
 const ROOT = resolve(import.meta.dirname, '../..')
 const DATA_DIR = resolve(ROOT, '.cache/data')
+const OUT_DIR = resolve(ROOT, 'apps/desktop/resources/data')
 const CACHE_DIR = resolve(ROOT, '.cache/dictionary')
 const WORDNET_URL = 'https://en-word.net/static/english-wordnet-2024.xml.gz'
 const CMUDICT_URL = 'https://raw.githubusercontent.com/cmusphinx/cmudict/master/cmudict.dict'
@@ -25,7 +27,7 @@ const CMUDICT_URL = 'https://raw.githubusercontent.com/cmusphinx/cmudict/master/
 const args = process.argv.slice(2)
 const refresh = args.includes('--refresh')
 const outIdx = args.indexOf('--out')
-const outDir = outIdx >= 0 ? resolve(args[outIdx + 1]!) : DATA_DIR
+const outDir = outIdx >= 0 ? resolve(args[outIdx + 1]!) : OUT_DIR
 
 async function cached(name: string, url: string): Promise<Buffer> {
   const file = resolve(CACHE_DIR, name)
