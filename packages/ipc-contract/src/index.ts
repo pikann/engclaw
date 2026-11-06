@@ -305,6 +305,9 @@ export const HistoryAttempt = z.object({
   score: z.number(),
   errors: z.array(HistoryError).max(500),
   hasAudio: z.boolean(),
+  /** Set for shadowing attempts: the YouTube video and the sentence's index in its transcript. */
+  videoId: z.string().min(1).max(32).nullish(),
+  segmentIndex: z.number().int().nonnegative().nullish(),
 })
 export type HistoryAttempt = z.infer<typeof HistoryAttempt>
 export const HistorySaveRequest = HistoryAttempt.omit({ id: true, createdAt: true, hasAudio: true })
@@ -315,6 +318,7 @@ export const HistoryListRequest = z
   .object({
     limit: z.number().int().min(1).max(500).optional(),
     offset: z.number().int().min(0).optional(),
+    videoId: z.string().min(1).max(32).optional(),
   })
   .strict()
 export const HistoryIdRequest = z.object({ id: z.string().min(1).max(64) }).strict()

@@ -10,8 +10,13 @@ import {
   SkipForward,
   WifiOff,
 } from 'lucide-react'
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import {
+  AttemptRecordButton,
+  AttemptResult,
+  ATTEMPT_RESULT_HEIGHT,
+} from '@/components/shadowing/attempt-bar'
 import { PlayerSurface } from '@/components/shadowing/player-surface'
 import { Pane } from '@/components/screens/shell'
 import { Badge } from '@/components/ui/badge'
@@ -27,6 +32,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { alignIpa } from '@/lib/ipa'
 import { useShowIpa, useTranscriptIpa } from '@/lib/use-ipa'
+import { useSegmentAttempt } from '@/lib/use-segment-attempt'
 import { useSentenceLoop } from '@/lib/use-sentence-loop'
 import {
   DEFAULT_SETTINGS,
@@ -39,7 +45,7 @@ import { fitStage, formatClock, type Segment } from '@/lib/shadowing'
 import { cn } from '@/lib/utils'
 
 /** Fixed chrome under the video and sentence: the control bar plus the gaps between blocks. */
-const CHROME_HEIGHT = 64
+const CHROME_HEIGHT = 64 + ATTEMPT_RESULT_HEIGHT + 12
 
 function useContentSize() {
   const ref = useRef<HTMLDivElement>(null)
@@ -82,6 +88,10 @@ export function ShadowingSession({
   if (autoOn) lastAutoPct.current = settings.autoContinuePct
   const [showIpa, setShowIpa] = useShowIpa()
   const { state: ipa, retry: retryIpa } = useTranscriptIpa(videoId, segments, showIpa)
+  const pauseForRecording = useCallback(() => {
+    if (loop.mode === 'playing' || loop.mode === 'waiting') dispatch({ type: 'toggle' })
+  }, [loop.mode, dispatch])
+  const attempt = useSegmentAttempt(videoId, segments, index, pauseForRecording)
   const [stageRef, stage] = useContentSize()
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([])
 
@@ -121,6 +131,10 @@ export function ShadowingSession({
         setRailOpen((open) => !open)
         return
       }
+      if (e.key.toLowerCase() === 'm') {
+        if (!blocked) attempt.toggleRecord()
+        return
+      }
       if (e.key.toLowerCase() === 'i') {
         setShowIpa(!showIpa)
         return
@@ -133,7 +147,7 @@ export function ShadowingSession({
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [blocked, runShortcut, showIpa, setShowIpa])
+  }, [blocked, runShortcut, showIpa, setShowIpa, attempt])
 
   return (
     <div data-testid="shadowing-session" className="flex h-full min-h-0 flex-col">
@@ -400,6 +414,11 @@ export function ShadowingSession({
                   </span>
                 )}
               </div>
+              <AttemptRecordButton
+                state={attempt.state}
+                disabled={blocked}
+                onToggle={attempt.toggleRecord}
+              />
               <Badge variant="secondary" className="tabular-nums" data-testid="shadowing-position">
                 {t('screens.shadowing.segment', {
                   n: index + 1,
@@ -407,6 +426,14 @@ export function ShadowingSession({
                 })}
               </Badge>
             </div>
+            <AttemptResult
+              state={attempt.state}
+              text={shown?.text ?? ''}
+              best={attempt.best}
+              isPlaying={attempt.isPlaying}
+              onPlay={attempt.play}
+              onRetry={attempt.retry}
+            />
           </div>
         </div>
         {railOpen && (

@@ -522,7 +522,7 @@ export function PracticeScreen() {
   const missing = s.phase === 'error' && s.error?.code === 'MODEL_MISSING'
   const canOpenMicSettings =
     mic?.reason === 'denied' && ['darwin', 'win32'].includes(platformOf(window.navigator.platform))
-  const recent = history.filter((a) => a.mode === mode).slice(0, HISTORY_SHOWN)
+  const recent = history.filter((a) => a.mode === mode && !a.videoId).slice(0, HISTORY_SHOWN)
 
   // One step on screen at a time: record → review → (loading) → result → details.
   const stage: 'record' | 'review' | 'loading' | 'result' = working
