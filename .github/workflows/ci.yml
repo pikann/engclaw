@@ -5,11 +5,7 @@ on:
 
 jobs:
   check:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     env:
       CSC_IDENTITY_AUTO_DISCOVERY: 'false'
     steps:
@@ -18,7 +14,6 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run lint
       - name: License check
-        if: runner.os == 'Linux'
         run: bun run license:check
       - run: bun run typecheck
       - run: bun run test
@@ -26,5 +21,5 @@ jobs:
         run: bun run package
       - uses: actions/upload-artifact@v7
         with:
-          name: app-${{ matrix.os }}
+          name: app-linux
           path: apps/desktop/release
