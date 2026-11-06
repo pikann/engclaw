@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next'
 import { DictationActions, DictationRail, DictationSheet } from '@/components/shadowing/dictation'
 import { AttemptPanel } from '@/components/shadowing/attempt-panel'
 import { PlayerSurface } from '@/components/shadowing/player-surface'
+import { SentenceWords } from '@/components/shadowing/sentence-words'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -31,6 +32,7 @@ import { DEFAULT_BLANK_PERCENT, scoreSegment } from '@/lib/dictation'
 import { alignIpa } from '@/lib/ipa'
 import { useDictation } from '@/lib/use-dictation'
 import { useShowIpa, useTranscriptIpa } from '@/lib/use-ipa'
+import { usePrefetchProsody, useSegmentProsody, useShowProsody } from '@/lib/use-prosody'
 import { useSegmentAttempt } from '@/lib/use-segment-attempt'
 import { useSentenceLoop } from '@/lib/use-sentence-loop'
 import {
@@ -116,6 +118,13 @@ export function ShadowingSession({
   if (autoOn) lastAutoPct.current = settings.autoContinuePct
   const [showIpa, setShowIpa] = useShowIpa()
   const { state: ipa, retry: retryIpa } = useTranscriptIpa(videoId, segments, showIpa)
+  const [showProsody, setShowProsody] = useShowProsody()
+  usePrefetchProsody(videoId, segments, index)
+  const { state: prosody, retry: retryProsody } = useSegmentProsody(
+    videoId,
+    segments[index],
+    showProsody,
+  )
   const pauseForRecording = useCallback(() => {
     if (loop.mode === 'playing' || loop.mode === 'waiting') dispatch({ type: 'toggle' })
   }, [loop.mode, dispatch])
@@ -141,21 +150,15 @@ export function ShadowingSession({
         stageWidth: stage.width,
         stageHeight: stage.height,
         chromeHeight: CHROME_HEIGHT,
-        sentenceChars: (shown?.text.length ?? 0) * (showIpa ? 2 : 1),
+        sentenceChars:
+          (shown?.text.length ?? 0) * (1 + (showIpa ? 1 : 0)),
       })
   const ipaWords = (text: string) => {
     if (!showIpa || ipa.status !== 'ready') return null
     const words = ipa.byText.get(text)
     return words ? alignIpa(text, words) : null
   }
-  const shownTokens =
-    shown && showIpa
-      ? (ipaWords(shown.text) ??
-        shown.text
-          .split(/\s+/)
-          .filter(Boolean)
-          .map((text) => ({ text, ipa: null })))
-      : null
+  const shownIpa = shown && showIpa ? ipaWords(shown.text) : null
   const failed = state.phase === 'error'
   const blocked = state.phase !== 'ready'
 
@@ -205,6 +208,10 @@ export function ShadowingSession({
         setShowIpa(!showIpa)
         return
       }
+      if (e.key.toLowerCase() === 'p') {
+        setShowProsody(!showProsody)
+        return
+      }
       if (e.key === ' ' && target?.closest('button, a')) return
       const cmd = shortcutFor(e.key)
       if (!cmd || blocked) return
@@ -218,6 +225,8 @@ export function ShadowingSession({
     runShortcut,
     showIpa,
     setShowIpa,
+    showProsody,
+    setShowProsody,
     toggleRecord,
     dictation,
     runCheck,
@@ -341,29 +350,16 @@ export function ShadowingSession({
                 className="w-full shrink-0 overflow-auto text-center"
                 style={{ height: fit.sentenceHeight }}
               >
-                <p
-                  data-testid="shadowing-sentence"
-                  className="leading-snug"
-                  style={{ fontSize: fit.fontSize }}
-                >
-                  {shownTokens
-                    ? shownTokens.map((tok, i) => (
-                        <span
-                          key={i}
-                          className="mx-[0.25em] inline-flex flex-col items-center align-top"
-                        >
-                          <span>{tok.text}</span>
-                          <span
-                            lang="en-fonipa"
-                            data-testid="shadowing-word-ipa"
-                            className="text-muted-foreground text-[0.55em] leading-tight"
-                          >
-                            {tok.ipa ? `/${tok.ipa}/` : '\u00a0'}
-                          </span>
-                        </span>
-                      ))
-                    : shown?.text}
-                </p>
+                {shown && (
+                  <div className="leading-snug" style={{ fontSize: fit.fontSize }}>
+                    <SentenceWords
+                      text={shown.text}
+                      ipa={shownIpa}
+                      showIpa={showIpa}
+                      prosody={showProsody ? prosody : null}
+                    />
+                  </div>
+                )}
               </div>
             )}
             <div className="order-2 flex shrink-0 flex-wrap items-center justify-center gap-x-4 gap-y-2">
@@ -538,6 +534,40 @@ export function ShadowingSession({
                     >
                       {t('screens.shadowing.ipaError')}
                       <Button size="sm" variant="outline" onClick={retryIpa}>
+                        {t('practice.retry')}
+                      </Button>
+                    </span>
+                  )}
+                </div>
+              )}
+              {!dictation && (
+                <div className="relative flex items-center gap-2 text-sm">
+                  <Switch
+                    id="shadowing-prosody"
+                    size="sm"
+                    data-testid="shadowing-prosody-toggle"
+                    aria-keyshortcuts="P"
+                    checked={showProsody}
+                    onCheckedChange={setShowProsody}
+                  />
+                  <label htmlFor="shadowing-prosody">{t('screens.shadowing.prosody.toggle')}</label>
+                  {showProsody && prosody.status === 'loading' && (
+                    <span
+                      role="status"
+                      data-testid="shadowing-prosody-loading"
+                      className="text-muted-foreground absolute top-full left-0 mt-1 whitespace-nowrap"
+                    >
+                      {t('screens.shadowing.prosody.loading')}
+                    </span>
+                  )}
+                  {showProsody && prosody.status === 'error' && (
+                    <span
+                      role="alert"
+                      data-testid="shadowing-prosody-error"
+                      className="absolute top-full left-0 mt-1 flex items-center gap-1 whitespace-nowrap"
+                    >
+                      {t('screens.shadowing.prosody.error')}
+                      <Button size="sm" variant="outline" onClick={retryProsody}>
                         {t('practice.retry')}
                       </Button>
                     </span>
