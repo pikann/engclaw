@@ -445,7 +445,8 @@
         "shadowing": "Shadowing",
         "dictation": "Dictation"
       },
-      "ipa": "IPA under words",
+      "ipa": "IPA",
+      "ipaHint": "Show IPA under words",
       "ipaLoading": "Loading IPA…",
       "ipaError": "Couldn’t load IPA.",
       "attempt": {

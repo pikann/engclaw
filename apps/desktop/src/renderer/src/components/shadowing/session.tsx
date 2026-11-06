@@ -150,8 +150,7 @@ export function ShadowingSession({
         stageWidth: stage.width,
         stageHeight: stage.height,
         chromeHeight: CHROME_HEIGHT,
-        sentenceChars:
-          (shown?.text.length ?? 0) * (1 + (showIpa ? 1 : 0)),
+        sentenceChars: (shown?.text.length ?? 0) * (1 + (showIpa ? 1 : 0)),
       })
   const ipaWords = (text: string) => {
     if (!showIpa || ipa.status !== 'ready') return null
@@ -245,6 +244,12 @@ export function ShadowingSession({
         <h2 className="min-w-0 flex-1 truncate font-medium" data-testid="shadowing-title">
           {title}
         </h2>
+        <Badge variant="secondary" className="tabular-nums" data-testid="shadowing-position">
+          {t('screens.shadowing.segment', {
+            n: index + 1,
+            total: segments.length,
+          })}
+        </Badge>
         <div role="status" className="flex shrink-0 items-center">
           {loop.mode === 'waiting' ? (
             <Badge data-testid="shadowing-your-turn">{t('screens.shadowing.yourTurn')}</Badge>
@@ -515,10 +520,13 @@ export function ShadowingSession({
                     size="sm"
                     data-testid="shadowing-ipa-toggle"
                     aria-keyshortcuts="I"
+                    aria-label={t('screens.shadowing.ipaHint')}
                     checked={showIpa}
                     onCheckedChange={setShowIpa}
                   />
-                  <label htmlFor="shadowing-ipa">{t('screens.shadowing.ipa')}</label>
+                  <label htmlFor="shadowing-ipa" title={t('screens.shadowing.ipaHint')}>
+                    {t('screens.shadowing.ipa')}
+                  </label>
                   {showIpa && ipa.status === 'loading' && (
                     <span
                       role="status"
@@ -574,12 +582,6 @@ export function ShadowingSession({
                   )}
                 </div>
               )}
-              <Badge variant="secondary" className="tabular-nums" data-testid="shadowing-position">
-                {t('screens.shadowing.segment', {
-                  n: index + 1,
-                  total: segments.length,
-                })}
-              </Badge>
             </div>
             {dictation && entry && (
               <div className="order-4 flex shrink-0 justify-center">

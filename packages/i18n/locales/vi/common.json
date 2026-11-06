@@ -445,7 +445,8 @@
         "shadowing": "Nhại giọng",
         "dictation": "Nghe chép"
       },
-      "ipa": "IPA dưới từng từ",
+      "ipa": "IPA",
+      "ipaHint": "Hiện IPA dưới từng từ",
       "ipaLoading": "Đang tải IPA…",
       "ipaError": "Không tải được IPA.",
       "attempt": {
