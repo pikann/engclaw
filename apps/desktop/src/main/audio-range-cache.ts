@@ -1,4 +1,4 @@
-import { mkdir, readFile, readdir, rm, stat, utimes, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, readdir, rename, rm, stat, utimes, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { AudioRange } from '@engclaw/youtube'
 
@@ -9,6 +9,8 @@ interface Sidecar {
 
 /** Size-capped LRU of audio ranges on disk; recency is the files' mtime. Never leaves the machine. */
 export class AudioRangeCache {
+  private writes = 0
+
   constructor(
     private readonly dir: string,
     private readonly maxBytes: number,
@@ -39,15 +41,19 @@ export class AudioRangeCache {
     await mkdir(this.dir, { recursive: true })
     const base = join(this.dir, this.key(videoId, start, end))
     const side: Sidecar = { mime: range.mime, offsetSec: range.offsetSec }
-    await writeFile(`${base}.json`, JSON.stringify(side))
-    await writeFile(`${base}.audio`, range.bytes)
+    // Written aside and renamed in, audio last, so a concurrent reader never sees a partial entry.
+    const tmp = `${base}.${process.pid}.${++this.writes}.tmp`
+    await writeFile(`${tmp}.json`, JSON.stringify(side))
+    await rename(`${tmp}.json`, `${base}.json`)
+    await writeFile(`${tmp}.audio`, range.bytes)
+    await rename(`${tmp}.audio`, `${base}.audio`)
     await this.evict()
   }
 
   private async evict(): Promise<void> {
     const entries: { base: string; size: number; mtime: number }[] = []
     for (const name of await readdir(this.dir)) {
-      if (!name.endsWith('.audio')) continue
+      if (!name.endsWith('.audio') || name.endsWith('.tmp.audio')) continue
       const s = await stat(join(this.dir, name))
       entries.push({ base: name.slice(0, -'.audio'.length), size: s.size, mtime: s.mtimeMs })
     }

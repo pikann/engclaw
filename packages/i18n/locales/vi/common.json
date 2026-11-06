@@ -494,7 +494,19 @@
       "autoContinue": "Tự chuyển câu",
       "autoContinueHint": "Sau lần phát cuối, chờ theo tỉ lệ phần trăm độ dài câu để bạn nói, rồi chuyển sang câu tiếp theo. Tắt công tắc để vô hiệu hóa.",
       "play": "Lần {{n}}/{{total}}",
-      "yourTurn": "Đến lượt bạn"
+      "yourTurn": "Đến lượt bạn",
+      "prosody": {
+        "toggle": "Hướng dẫn ngữ điệu",
+        "loading": "Đang phân tích ngữ điệu…",
+        "error": "Không phân tích được câu này.",
+        "stressed": "nhấn mạnh",
+        "pause": "Ngắt {{seconds}} giây",
+        "pitch": {
+          "rising": "Lên giọng",
+          "falling": "Xuống giọng",
+          "flat": "Giữ đều giọng"
+        }
+      }
     },
     "dictation": {
       "listen": "Nghe",

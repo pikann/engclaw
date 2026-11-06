@@ -494,7 +494,19 @@
       "autoContinue": "Auto-continue",
       "autoContinueHint": "After the last play, wait this percentage of the sentence length for your turn, then move to the next sentence. Turn the switch off to disable it.",
       "play": "Play {{n}} of {{total}}",
-      "yourTurn": "Your turn"
+      "yourTurn": "Your turn",
+      "prosody": {
+        "toggle": "Prosody guide",
+        "loading": "Analysing prosody…",
+        "error": "Couldn’t analyse this sentence.",
+        "stressed": "stressed",
+        "pause": "Pause {{seconds}} s",
+        "pitch": {
+          "rising": "Pitch rises",
+          "falling": "Pitch falls",
+          "flat": "Pitch stays flat"
+        }
+      }
     },
     "dictation": {
       "listen": "Listen",

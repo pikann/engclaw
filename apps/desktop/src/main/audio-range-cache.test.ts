@@ -57,4 +57,27 @@ describe('AudioRangeCache', () => {
     expect(audioRange).toHaveBeenCalledTimes(1)
     store.db.close()
   })
+
+  it('CachedYouTube shares one fetch between concurrent requests for a range', async () => {
+    const store = openStore(join(dir, 'f.db'))
+    const audioRange = vi.fn(async () => range(10))
+    const adapter = { meta: vi.fn(), transcript: vi.fn(), audioRange } as unknown as YouTubeAdapter
+    const yt = new CachedYouTube(adapter, store.videos, new AudioRangeCache(join(dir, 'b'), 1000))
+    const both = await Promise.all([yt.audioRange(ID, 1, 2), yt.audioRange(ID, 1, 2)])
+    expect(both[1]).toEqual(range(10))
+    expect(audioRange).toHaveBeenCalledTimes(1)
+    store.db.close()
+  })
+
+  it('never serves a half-written entry to a concurrent reader', async () => {
+    const cache = new AudioRangeCache(dir, 10_000_000)
+    const big = range(2_000_000)
+    const writing = cache.put(ID, 5, 6, big)
+    for (let i = 0; i < 50; i++) {
+      const hit = await cache.get(ID, 5, 6)
+      if (hit) expect(hit.bytes.length).toBe(2_000_000)
+    }
+    await writing
+    expect((await cache.get(ID, 5, 6))?.bytes.length).toBe(2_000_000)
+  })
 })

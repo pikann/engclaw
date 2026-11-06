@@ -29,7 +29,20 @@ export class CachedYouTube {
     return cues
   }
 
-  async audioRange(videoId: string, start: number, end: number): Promise<AudioRange> {
+  private readonly pendingRanges = new Map<string, Promise<AudioRange>>()
+
+  /** Concurrent requests for the same range share one fetch. */
+  audioRange(videoId: string, start: number, end: number): Promise<AudioRange> {
+    const key = `${videoId}:${start}:${end}`
+    let pending = this.pendingRanges.get(key)
+    if (!pending) {
+      pending = this.fetchRange(videoId, start, end).finally(() => this.pendingRanges.delete(key))
+      this.pendingRanges.set(key, pending)
+    }
+    return pending
+  }
+
+  private async fetchRange(videoId: string, start: number, end: number): Promise<AudioRange> {
     const hit = await this.audio?.get(videoId, start, end)
     if (hit) return hit
     const range = await this.adapter.audioRange(videoId, start, end)
