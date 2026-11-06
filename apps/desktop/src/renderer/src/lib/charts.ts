@@ -48,3 +48,27 @@ export const detailSeries = (result: PronunciationResult): DetailSeries => ({
   f0: result.prosody.f0,
   energy: result.prosody.energy,
 })
+
+/** Like `linePath` for series with gaps (null = no value, e.g. unvoiced): each run of values is its own sub-path. */
+export function gapPath(
+  values: readonly (number | null)[],
+  width: number,
+  height: number,
+  [lo, hi]: Domain,
+): string {
+  const span = hi - lo || 1
+  const last = Math.max(1, values.length - 1)
+  let d = ''
+  let pen = false
+  values.forEach((v, i) => {
+    if (v === null || !Number.isFinite(v)) {
+      pen = false
+      return
+    }
+    const x = (i / last) * width
+    const y = height - ((v - lo) / span) * height
+    d += `${pen ? 'L' : d ? ' M' : 'M'}${r(x)},${r(y)}`
+    pen = true
+  })
+  return d
+}

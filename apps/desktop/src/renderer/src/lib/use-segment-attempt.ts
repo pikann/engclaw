@@ -1,7 +1,32 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { PronunciationResult } from '@engclaw/ipc-contract'
+import type { HistorySaveRequest, PronunciationResult } from '@engclaw/ipc-contract'
 import { classifyMicError, playPcm, Recorder } from '@/lib/audio'
+import { decodeSegmentAudio } from '@/lib/audio/decode'
+import {
+  checkIntonation,
+  lightResult,
+  lightScore,
+  type IntonationState,
+  type LightResult,
+} from './intonation'
 import type { Segment } from './shadowing'
+
+export type CheckMode = 'full' | 'light'
+const MODE_KEY = 'engclaw.shadowing.checkMode'
+
+/** Full pronunciation vs light check, remembered across sessions. */
+export function useCheckMode(): [CheckMode, (m: CheckMode) => void] {
+  const [mode, setMode] = useState<CheckMode>(() =>
+    localStorage.getItem(MODE_KEY) === 'light' ? 'light' : 'full',
+  )
+  return [
+    mode,
+    (m) => {
+      localStorage.setItem(MODE_KEY, m)
+      setMode(m)
+    },
+  ]
+}
 
 export type AttemptErrorKind = 'mic' | 'model' | 'failed'
 
@@ -10,6 +35,7 @@ export type AttemptState =
   | { phase: 'recording' }
   | { phase: 'analyzing' }
   | { phase: 'result'; result: PronunciationResult; audio: Float32Array }
+  | { phase: 'light'; light: LightResult; audio: Float32Array }
   | { phase: 'error'; kind: AttemptErrorKind; audio: Float32Array | null }
 
 const IDLE: AttemptState = { phase: 'idle' }
@@ -26,8 +52,12 @@ export function useSegmentAttempt(
   index: number,
   /** Called right before the microphone opens so the video stops playing over the learner. */
   onRecordStart: () => void,
+  mode: CheckMode,
 ) {
   const [byIndex, setByIndex] = useState<Record<number, AttemptState>>({})
+  const [intonation, setIntonation] = useState<Record<number, IntonationState>>({})
+  const modeRef = useRef(mode)
+  modeRef.current = mode
   const [best, setBest] = useState<Record<number, number>>({})
   const recording = useRef<{ rec: Recorder; index: number } | null>(null)
   const playing = useRef<{ stop: () => void } | null>(null)
@@ -59,6 +89,7 @@ export function useSegmentAttempt(
 
   useEffect(() => {
     setByIndex({})
+    setIntonation({})
     setBest({})
     requestIds.current = {}
     loadBest()
@@ -70,6 +101,51 @@ export function useSegmentAttempt(
     setIsPlaying(false)
   }, [])
 
+  const runIntonation = useCallback(
+    async (i: number, audio: Float32Array, requestId: string): Promise<IntonationState> => {
+      const segment = segmentsRef.current[i]
+      if (!segment) return { status: 'failed' }
+      setIntonation((prev) => ({ ...prev, [i]: { status: 'loading' } }))
+      const state = await checkIntonation(
+        { api: window.engclaw, decode: decodeSegmentAudio },
+        `${requestId}-fluency`,
+        videoId,
+        segment,
+        audio,
+      )
+      if (requestIds.current[i] === requestId) setIntonation((prev) => ({ ...prev, [i]: state }))
+      return state
+    },
+    [videoId],
+  )
+
+  const save = useCallback(
+    async (
+      segment: Segment,
+      text: string,
+      body: {
+        language: string
+        score: number
+        errors: HistorySaveRequest['errors']
+        audio: Float32Array
+      },
+    ) => {
+      try {
+        await window.engclaw.history.save({
+          mode: 'sentence',
+          text,
+          videoId,
+          segmentIndex: segment.index,
+          ...body,
+        })
+        loadBest()
+      } catch (e) {
+        console.error('[shadowing] attempt save failed', e)
+      }
+    },
+    [videoId, loadBest],
+  )
+
   const analyze = useCallback(
     async (i: number, audio: Float32Array) => {
       const segment = segmentsRef.current[i]
@@ -78,40 +154,51 @@ export function useSegmentAttempt(
       const id = crypto.randomUUID()
       requestIds.current[i] = id
       set(i, { phase: 'analyzing' })
+      const fail = (code?: string) =>
+        set(i, { phase: 'error', kind: code === 'MODEL_MISSING' ? 'model' : 'failed', audio })
       try {
-        const res = await window.engclaw.inference.analyze({ requestId: id, audio, text })
-        if (requestIds.current[i] !== id) return
-        if (!res.ok) {
-          set(i, { phase: 'error', kind: res.code === 'MODEL_MISSING' ? 'model' : 'failed', audio })
+        if (modeRef.current === 'light') {
+          const [res, fluency] = await Promise.all([
+            window.engclaw.inference.transcribe({ requestId: id, audio }),
+            runIntonation(i, audio, id),
+          ])
+          if (requestIds.current[i] !== id) return
+          if (!res.ok) return fail(res.code)
+          const light = lightResult(res.value.text, text)
+          set(i, { phase: 'light', light, audio })
+          await save(segment, text, {
+            language: res.value.language,
+            score: lightScore(
+              light.accuracy,
+              fluency.status === 'done' ? fluency.result.score : null,
+            ),
+            errors: [],
+            audio,
+          })
           return
         }
+        const res = await window.engclaw.inference.analyze({ requestId: id, audio, text })
+        if (requestIds.current[i] !== id) return
+        if (!res.ok) return fail(res.code)
         const result = res.value
         set(i, { phase: 'result', result, audio })
-        try {
-          await window.engclaw.history.save({
-            mode: 'sentence',
-            text,
-            language: result.language,
-            score: result.score,
-            errors: result.differences.errors.map((e) => ({
-              word: e.word,
-              expected: e.expected,
-              actual: e.actual,
-              confidence: e.confidence,
-            })),
-            audio,
-            videoId,
-            segmentIndex: segment.index,
-          })
-          loadBest()
-        } catch (e) {
-          console.error('[shadowing] attempt save failed', e)
-        }
+        void runIntonation(i, audio, id)
+        await save(segment, text, {
+          language: result.language,
+          score: result.score,
+          errors: result.differences.errors.map((e) => ({
+            word: e.word,
+            expected: e.expected,
+            actual: e.actual,
+            confidence: e.confidence,
+          })),
+          audio,
+        })
       } catch {
         if (requestIds.current[i] === id) set(i, { phase: 'error', kind: 'failed', audio })
       }
     },
-    [set, videoId, loadBest],
+    [set, runIntonation, save],
   )
 
   const stop = useCallback(async () => {
@@ -165,7 +252,8 @@ export function useSegmentAttempt(
   const play = useCallback(() => {
     if (playing.current) return stopPlayback()
     const s = byIndex[indexRef.current]
-    const audio = s && (s.phase === 'result' || s.phase === 'error') ? s.audio : null
+    const audio =
+      s && (s.phase === 'result' || s.phase === 'light' || s.phase === 'error') ? s.audio : null
     if (!audio) return
     const h = playPcm(audio, 16000)
     playing.current = h
@@ -186,6 +274,7 @@ export function useSegmentAttempt(
 
   return {
     state,
+    intonation: intonation[index] ?? null,
     best: best[segments[index]?.index ?? -1] ?? null,
     isPlaying,
     toggleRecord: () => (recording.current ? void stop() : void start()),

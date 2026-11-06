@@ -28,7 +28,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { alignIpa } from '@/lib/ipa'
 import { useShowIpa, useTranscriptIpa } from '@/lib/use-ipa'
-import { useSegmentAttempt } from '@/lib/use-segment-attempt'
+import { useCheckMode, useSegmentAttempt } from '@/lib/use-segment-attempt'
 import { useSentenceLoop } from '@/lib/use-sentence-loop'
 import {
   DEFAULT_SETTINGS,
@@ -88,7 +88,8 @@ export function ShadowingSession({
   const pauseForRecording = useCallback(() => {
     if (loop.mode === 'playing' || loop.mode === 'waiting') dispatch({ type: 'toggle' })
   }, [loop.mode, dispatch])
-  const attempt = useSegmentAttempt(videoId, segments, index, pauseForRecording)
+  const [checkMode, setCheckMode] = useCheckMode()
+  const attempt = useSegmentAttempt(videoId, segments, index, pauseForRecording, checkMode)
   const [stageRef, stage] = useContentSize()
   const toggleRecord = useCallback(() => {
     setRailOpen(true)
@@ -490,6 +491,9 @@ export function ShadowingSession({
             <div hidden={sideTab !== 'attempt'} className="min-h-0 flex-1 overflow-auto px-4 pb-4">
               <AttemptPanel
                 state={attempt.state}
+                intonation={attempt.intonation}
+                mode={checkMode}
+                onModeChange={setCheckMode}
                 text={shown?.text ?? ''}
                 best={attempt.best}
                 disabled={blocked}

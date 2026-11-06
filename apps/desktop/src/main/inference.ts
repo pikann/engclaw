@@ -2,6 +2,8 @@ import {
   IPC,
   type InferenceErrorCode,
   type InferenceResult,
+  type IntonationResult,
+  type ContourData,
   type PhonemizeResult,
 } from '@engclaw/ipc-contract'
 import type { ModelManager } from '@engclaw/models'
@@ -37,7 +39,7 @@ export function registerInferenceHandlers(
   async function run<T>(
     event: Electron.IpcMainInvokeEvent,
     requestId: string | null,
-    method: 'analyze' | 'transcribe' | 'phonemize',
+    method: 'analyze' | 'transcribe' | 'phonemize' | 'intonation',
     params: Record<string, unknown>,
   ): Promise<InferenceResult<T>> {
     try {
@@ -90,6 +92,30 @@ export function registerInferenceHandlers(
     if (n.error) return n.error
     return run(event, requestId, 'transcribe', { ...n.params, audio })
   })
+  handle(IPC.inferenceIntonation, async ({ requestId, audio, reference, cacheKey }, event) => {
+    if (audio.length < MIN_SAMPLES) return fail('INVALID_INPUT', 'the recording is too short')
+    let ref: { audio: Float32Array } | { contour: ContourData }
+    if ('audio' in reference) ref = reference
+    else {
+      const cached = cacheKey && videos.getContour(cacheKey.videoId, cacheKey.start, cacheKey.end)
+      if (!cached) return fail('INVALID_INPUT', 'no cached reference contour')
+      ref = { contour: cached }
+    }
+    const out = await run<{ result: IntonationResult; referenceContour: ContourData }>(
+      event,
+      requestId,
+      'intonation',
+      { audio, reference: ref },
+    )
+    if (!out.ok) return out
+    if ('audio' in ref && cacheKey)
+      videos.putContour(cacheKey.videoId, cacheKey.start, cacheKey.end, out.value.referenceContour)
+    return { ok: true, value: out.value.result }
+  })
+  handle(
+    IPC.contoursHas,
+    ({ videoId, start, end }) => videos.getContour(videoId, start, end) !== null,
+  )
   handle(IPC.inferencePhonemize, ({ text, language }, event) => {
     if (!getLanguage(language))
       return fail('UNSUPPORTED_LANGUAGE', `unsupported language: ${language}`)

@@ -135,3 +135,11 @@ export function compareTranscriptions(
     wordsWithErrors,
   }
 }
+
+/** Word error rate of a detected transcript against the expected sentence (case/punctuation-insensitive); 0 = perfect, capped at 1. */
+export function wordErrorRate(detected: string, expected: string): number {
+  const ref = cleanTranscription(expected).split(' ').filter(Boolean)
+  const hyp = cleanTranscription(detected).split(' ').filter(Boolean)
+  if (!ref.length) return hyp.length ? 1 : 0
+  return Math.min(1, levenshtein(ref, hyp) / ref.length)
+}
