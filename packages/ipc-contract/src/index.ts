@@ -269,6 +269,41 @@ export const TranscriptIpaRequest = VideoRef.extend({
   cachedOnly: z.boolean().optional(),
 }).strict()
 
+export const PitchDirection = z.enum(['rising', 'falling', 'flat'])
+/** Prosody of one shadowing segment; times are seconds from the segment's start. */
+export const SegmentProsody = z.object({
+  words: z.array(
+    z.object({
+      text: z.string(),
+      start: z.number(),
+      end: z.number(),
+      stressed: z.boolean(),
+      pitch: z.object({
+        direction: PitchDirection,
+        /** Semitones from the speaker's median at evenly spaced points; empty when the word is unvoiced. */
+        contour: z.array(z.number()),
+      }),
+    }),
+  ),
+  pauses: z.array(z.object({ afterWordIndex: z.number().int().min(0), duration: z.number() })),
+})
+export type SegmentProsody = z.infer<typeof SegmentProsody>
+/**
+ * Prosody of a video segment from its own audio. Results are cached per video, segment and
+ * algorithm version: `audio` is only needed on a cache miss, and `cachedOnly` resolves to null
+ * instead of failing when there is nothing cached.
+ */
+export const SegmentProsodyRequest = VideoRef.extend({
+  start: z.number().min(0),
+  end: z.number().min(0),
+  text: z.string().min(1).max(1000),
+  /** 16 kHz mono PCM of exactly the segment. */
+  audio: Pcm16k.optional(),
+  cachedOnly: z.boolean().optional(),
+})
+  .strict()
+  .refine((r) => r.end > r.start, 'invalid range')
+
 export const LanguageRequest = z.object({ language: z.string().min(2).max(16) }).strict()
 
 export const ModelErrorCode = z.enum([
@@ -418,6 +453,7 @@ export const IPC = {
   youtubeGetSettings: 'youtube:getSettings',
   youtubeSaveSettings: 'youtube:saveSettings',
   youtubeIpa: 'youtube:ipa',
+  youtubeProsody: 'youtube:prosody',
   playerLoad: 'player:load',
   playerBounds: 'player:bounds',
   playerCommand: 'player:command',
@@ -492,6 +528,10 @@ export const invokeChannels = {
   [IPC.youtubeIpa]: {
     request: TranscriptIpaRequest,
     response: inferenceResult(z.array(z.array(IpaWord))),
+  },
+  [IPC.youtubeProsody]: {
+    request: SegmentProsodyRequest,
+    response: inferenceResult(SegmentProsody.nullable()),
   },
   /** Creates (or replaces) the sandboxed player view for a video, hidden until bounds are set. */
   [IPC.playerLoad]: { request: VideoRef, response: z.null() },
@@ -594,6 +634,9 @@ export interface EngclawApi {
     ipa(
       req: z.infer<typeof TranscriptIpaRequest>,
     ): Promise<InferenceResult<z.infer<typeof IpaWord>[][]>>
+    prosody(
+      req: z.infer<typeof SegmentProsodyRequest>,
+    ): Promise<InferenceResult<SegmentProsody | null>>
   }
   player: {
     load(req: z.infer<typeof VideoRef>): Promise<null>

@@ -5,6 +5,7 @@ import {
   type IntonationResult,
   type ContourData,
   type PhonemizeResult,
+  type SegmentProsody,
 } from '@engclaw/ipc-contract'
 import type { ModelManager } from '@engclaw/models'
 import { DEFAULT_LANGUAGE, LANGUAGES, TARGET_SAMPLE_RATE, getLanguage } from '@engclaw/pronounce'
@@ -14,6 +15,8 @@ import { transcriptIpa } from './transcript-ipa'
 import { kokoroLocation, KOKORO_MODEL_ID } from './tts'
 import { RpcFailure, type UtilityClient } from './utility-client'
 
+/** Bump when the prosody heuristics change so stale cache rows are ignored. */
+const PROSODY_VERSION = 1
 const MIN_SAMPLES = Math.round(TARGET_SAMPLE_RATE * 0.2)
 
 const fail = (code: InferenceErrorCode, message: string, modelId?: string) =>
@@ -39,7 +42,7 @@ export function registerInferenceHandlers(
   async function run<T>(
     event: Electron.IpcMainInvokeEvent,
     requestId: string | null,
-    method: 'analyze' | 'transcribe' | 'phonemize' | 'intonation',
+    method: 'analyze' | 'transcribe' | 'phonemize' | 'intonation' | 'prosody',
     params: Record<string, unknown>,
   ): Promise<InferenceResult<T>> {
     try {
@@ -111,6 +114,17 @@ export function registerInferenceHandlers(
     if ('audio' in ref && cacheKey)
       videos.putContour(cacheKey.videoId, cacheKey.start, cacheKey.end, out.value.referenceContour)
     return { ok: true, value: out.value.result }
+  })
+  handle(IPC.youtubeProsody, async ({ videoId, start, end, text, audio, cachedOnly }, event) => {
+    const cached = videos.getProsody(videoId, start, end, text, PROSODY_VERSION)
+    if (cached) return { ok: true, value: cached } as const
+    if (cachedOnly || !audio) return { ok: true, value: null } as const
+    if (audio.length < MIN_SAMPLES) return fail('INVALID_INPUT', 'the segment audio is too short')
+    const n = await needs(undefined, false, false)
+    if (n.error) return n.error
+    const out = await run<SegmentProsody>(event, null, 'prosody', { ...n.params, audio, text })
+    if (out.ok) videos.putProsody(videoId, start, end, text, PROSODY_VERSION, out.value)
+    return out
   })
   handle(
     IPC.contoursHas,

@@ -20,6 +20,13 @@ pip install -e /tmp/OpenPronounce pyarrow huggingface_hub
 python tests/golden/generate.py --openpronounce /tmp/OpenPronounce
 ```
 
+## Logits (forced-alignment / prosody golden test)
+
+`logits/asr-en-<case>.json` holds wav2vec2-large-960h logits (Hugging Face, fp32) for `bundled-harvard` and
+`bundled-developer`, used by `apps/desktop/src/utility/prosody.golden.test.ts`. Regenerate with
+`python tests/golden/logits.py --model facebook/wav2vec2-large-960h --name asr-en --case <case>`
+(needs `torch`, `transformers`, `soundfile`).
+
 ## Caveats
 
 - Upstream's reference voice is gTTS (network, can change over time), while Engclaw uses Kokoro. `score` and

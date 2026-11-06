@@ -70,6 +70,8 @@ async function dispatch(req: RpcRequest, signal: AbortSignal): Promise<unknown> 
       return inference.transcribe(p.audio!, p.language, p.models ?? {}, opts)
     case 'intonation':
       return analyzeIntonation(p.audio!, p.reference!)
+    case 'prosody':
+      return inference.prosody(p.audio!, p.text!, p.language, p.models ?? {}, opts)
     case 'phonemize':
       return inference.phonemize(p.text!, p.language)
     case 'speak': {

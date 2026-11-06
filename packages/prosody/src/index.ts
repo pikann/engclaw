@@ -11,3 +11,11 @@ export {
   type IntonationChart,
   type IntonationResult,
 } from './intonation'
+export {
+  analyzeSegmentProsody,
+  type Pause,
+  type PitchDirection,
+  type SegmentProsody,
+  type TimedWord,
+  type WordProsody,
+} from './words'
