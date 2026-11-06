@@ -95,13 +95,14 @@ export function registerInferenceHandlers(
       return fail('UNSUPPORTED_LANGUAGE', `unsupported language: ${language}`)
     return run(event, null, 'phonemize', { text, language: language ?? DEFAULT_LANGUAGE })
   })
-  handle(IPC.youtubeIpa, ({ videoId, texts }, event) =>
+  handle(IPC.youtubeIpa, ({ videoId, texts, cachedOnly }, event) =>
     transcriptIpa(
       videos,
       (text) =>
         run<PhonemizeResult>(event, null, 'phonemize', { text, language: DEFAULT_LANGUAGE }),
       videoId,
       texts,
+      cachedOnly,
     ),
   )
   handle(IPC.inferenceLanguages, () =>

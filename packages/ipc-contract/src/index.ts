@@ -229,6 +229,8 @@ export type IpaWord = z.infer<typeof IpaWord>
 /** IPA for the sentences of a video's transcript; results are cached per video. */
 export const TranscriptIpaRequest = VideoRef.extend({
   texts: z.array(z.string().min(1).max(1000)).min(1).max(5000),
+  /** Only read the cache: resolves to [] unless every sentence is already cached. */
+  cachedOnly: z.boolean().optional(),
 }).strict()
 
 export const LanguageRequest = z.object({ language: z.string().min(2).max(16) }).strict()

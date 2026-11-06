@@ -90,14 +90,21 @@ export function ShadowingSession({
     stageWidth: stage.width,
     stageHeight: stage.height,
     chromeHeight: CHROME_HEIGHT,
-    sentenceChars: (shown?.text.length ?? 0) * (showIpa && ipa.status === 'ready' ? 2 : 1),
+    sentenceChars: (shown?.text.length ?? 0) * (showIpa ? 2 : 1),
   })
   const ipaWords = (text: string) => {
     if (!showIpa || ipa.status !== 'ready') return null
     const words = ipa.byText.get(text)
     return words ? alignIpa(text, words) : null
   }
-  const shownTokens = shown ? ipaWords(shown.text) : null
+  const shownTokens =
+    shown && showIpa
+      ? (ipaWords(shown.text) ??
+        shown.text
+          .split(/\s+/)
+          .filter(Boolean)
+          .map((text) => ({ text, ipa: null })))
+      : null
   const failed = state.phase === 'error'
   const blocked = state.phase !== 'ready'
 
@@ -363,7 +370,7 @@ export function ShadowingSession({
                   {t('screens.shadowing.autoContinueHint')}
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-sm">
+              <div className="relative flex items-center gap-2 text-sm">
                 <Switch
                   id="shadowing-ipa"
                   size="sm"
@@ -374,12 +381,18 @@ export function ShadowingSession({
                 />
                 <label htmlFor="shadowing-ipa">{t('screens.shadowing.ipa')}</label>
                 {showIpa && ipa.status === 'loading' && (
-                  <span role="status" className="text-muted-foreground">
+                  <span
+                    role="status"
+                    className="text-muted-foreground absolute top-full left-0 mt-1 whitespace-nowrap"
+                  >
                     {t('screens.shadowing.ipaLoading')}
                   </span>
                 )}
                 {showIpa && ipa.status === 'error' && (
-                  <span role="alert" className="flex items-center gap-1">
+                  <span
+                    role="alert"
+                    className="absolute top-full left-0 mt-1 flex items-center gap-1 whitespace-nowrap"
+                  >
                     {t('screens.shadowing.ipaError')}
                     <Button size="sm" variant="outline" onClick={retryIpa}>
                       {t('practice.retry')}
@@ -416,18 +429,18 @@ export function ShadowingSession({
                     <span className="text-muted-foreground w-10 shrink-0 tabular-nums">
                       {formatClock(s.start)}
                     </span>
-                    <span>
+                    <span className="min-w-0 flex-1">
                       {s.text}
-                      {showIpa && ipaWords(s.text) && (
+                      {showIpa && (
                         <span
                           lang="en-fonipa"
-                          className="text-muted-foreground block text-xs font-normal"
+                          className="text-muted-foreground block truncate text-xs font-normal"
                         >
-                          {ipaWords(s.text)!
-                            .map((tok) => tok.ipa)
+                          {ipaWords(s.text)
+                            ?.map((tok) => tok.ipa)
                             .filter(Boolean)
                             .map((v) => `/${v}/`)
-                            .join(' ')}
+                            .join(' ') || '\u00a0'}
                         </span>
                       )}
                     </span>

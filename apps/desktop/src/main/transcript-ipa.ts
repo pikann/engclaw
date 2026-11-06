@@ -9,10 +9,12 @@ export async function transcriptIpa(
   phonemize: Phonemize,
   videoId: string,
   texts: readonly string[],
+  cachedOnly = false,
 ): Promise<InferenceResult<IpaWord[][]>> {
   const out: IpaWord[][] = []
   for (const text of texts) {
     let words = videos.getIpa(videoId, text)
+    if (!words && cachedOnly) return { ok: true, value: [] }
     if (!words) {
       const res = await phonemize(text)
       if (!res.ok) return res
