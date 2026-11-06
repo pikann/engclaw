@@ -21,7 +21,6 @@ jobs:
       matrix:
         include:
           - { name: macos-arm64, os: macos-latest, args: '--mac dmg --arm64' }
-          - { name: macos-x64, os: macos-latest, args: '--mac dmg --x64' }
           - { name: windows-x64, os: windows-latest, args: '--win nsis --x64' }
           - { name: linux-x64, os: ubuntu-latest, args: '--linux AppImage deb --x64' }
     defaults:
