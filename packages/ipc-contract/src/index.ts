@@ -18,7 +18,7 @@ export const TranscriptRequest = VideoRef.extend({ lang: z.string().min(2).max(1
 export const AudioRangeRequest = VideoRef.extend({
   start: z.number().min(0),
   end: z.number().min(0),
-})
+}).refine((r) => r.end > r.start && r.end - r.start <= 120, 'invalid range')
 export const VideoMeta = z.object({
   videoId: z.string(),
   title: z.string(),
