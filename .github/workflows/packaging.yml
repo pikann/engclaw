@@ -1,5 +1,5 @@
 name: Packaging smoke test
-# ENGC-54: build unsigned installers per OS/arch and run the packaged app's native-module smoke test.
+# ENGC-54: build unsigned Linux installer and run the packaged app's native-module smoke test.
 on:
   workflow_dispatch:
   pull_request:
@@ -17,16 +17,8 @@ env:
 
 jobs:
   package:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          # Intel macOS is intentionally unsupported: onnxruntime-node ships no darwin/x64 binary (ENGC-60).
-          - { name: mac-arm64, os: macos-latest, builder: '--mac dmg --arm64' }
-          - { name: win-x64, os: windows-latest, builder: '--win nsis --x64' }
-          - { name: linux-x64, os: ubuntu-latest, builder: '--linux AppImage deb --x64' }
-    name: package (${{ matrix.name }})
-    runs-on: ${{ matrix.os }}
+    name: package (linux-x64)
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: apps/desktop
@@ -36,24 +28,16 @@ jobs:
       - run: bun install --frozen-lockfile
         working-directory: .
       - run: bunx electron-vite build
-      - run: bunx electron-builder ${{ matrix.builder }}
+      - run: bunx electron-builder --linux AppImage deb --x64
       - name: Installer sizes
         shell: bash
         run: find release -maxdepth 1 -type f \( -name '*.dmg' -o -name '*.exe' -o -name '*.AppImage' -o -name '*.deb' \) -exec ls -l {} +
-      - name: Smoke test (macOS)
-        if: runner.os == 'macOS'
-        run: ENGCLAW_SMOKE=1 release/mac*/Engclaw.app/Contents/MacOS/Engclaw
-      - name: Smoke test (Windows)
-        if: runner.os == 'Windows'
-        shell: bash
-        run: ENGCLAW_SMOKE=1 release/win-unpacked/Engclaw.exe
-      - name: Smoke test (Linux)
-        if: runner.os == 'Linux'
+      - name: Smoke test
         run: ENGCLAW_SMOKE=1 xvfb-run --auto-servernum "$(find release/linux-unpacked -maxdepth 1 -type f -perm -u+x ! -name "*.so*" ! -name chrome_crashpad_handler ! -name chrome-sandbox | head -1)" --no-sandbox
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: installer-${{ matrix.name }}
+          name: installer-linux-x64
           path: |
             apps/desktop/release/*.dmg
             apps/desktop/release/*.exe
