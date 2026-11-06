@@ -80,12 +80,16 @@ const api: EngclawApi = {
     close: () => invoke(IPC.playerClose),
     onEvent: (cb) => subscribe(IPC.playerEvent, cb),
   },
+  contours: {
+    has: (req) => invoke(IPC.contoursHas, req),
+  },
   tts: {
     speak: (req) => invoke(IPC.ttsSpeak, req),
   },
   inference: {
     analyze: (req) => invoke(IPC.inferenceAnalyze, req),
     transcribe: (req) => invoke(IPC.inferenceTranscribe, req),
+    intonation: (req) => invoke(IPC.inferenceIntonation, req),
     phonemize: (req) => invoke(IPC.inferencePhonemize, req),
     languages: () => invoke(IPC.inferenceLanguages),
     cancel: (req) => invoke(IPC.inferenceCancel, req),

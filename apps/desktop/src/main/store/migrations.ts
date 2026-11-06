@@ -43,6 +43,20 @@ export const MIGRATIONS: readonly string[] = [
      words     TEXT NOT NULL,
      PRIMARY KEY (video_id, text)
    );`,
+  `ALTER TABLE attempts ADD COLUMN video_id TEXT;
+   ALTER TABLE attempts ADD COLUMN segment_index INTEGER;
+   CREATE INDEX attempts_video ON attempts (video_id, segment_index);`,
+  `CREATE TABLE contours (
+     video_id  TEXT NOT NULL,
+     start_ms  INTEGER NOT NULL,
+     end_ms    INTEGER NOT NULL,
+     f0        TEXT NOT NULL,
+     energy    TEXT NOT NULL,
+     frame_sec REAL NOT NULL,
+     PRIMARY KEY (video_id, start_ms, end_ms)
+   );`,
+  // Contours extracted with the old pitch range can be empty; they are re-extracted on demand.
+  `DELETE FROM contours;`,
 ]
 
 export class FutureSchemaError extends Error {

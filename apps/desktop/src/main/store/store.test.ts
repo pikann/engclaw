@@ -44,6 +44,21 @@ describe('store', () => {
     expect(store.history.audio(saved.id)).toHaveLength(1600)
   })
 
+  it('stores shadowing attempts per video and sentence and filters by video', () => {
+    store.history.save(attempt({ videoId: 'abc', segmentIndex: 3, score: 70 }))
+    store.history.save(attempt({ videoId: 'xyz', segmentIndex: 0 }))
+    store.history.save(attempt())
+    expect(store.history.list(100, 0, 'abc')).toMatchObject([
+      { videoId: 'abc', segmentIndex: 3, score: 70 },
+    ])
+    expect(store.history.count('abc')).toBe(1)
+    expect(store.history.count()).toBe(3)
+    const plain = store.history.list().find((a) => !a.videoId)!
+    expect(plain.segmentIndex).toBeUndefined()
+    const copy = JSON.parse(JSON.stringify(store.history.export()))
+    expect(copy.attempts.filter((a: { videoId?: string }) => a.videoId)).toHaveLength(2)
+  })
+
   it('lists newest first and pages', () => {
     let t = 1000
     const s = openStore(join(dir, 'x', 'a.db'))

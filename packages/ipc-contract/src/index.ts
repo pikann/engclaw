@@ -138,6 +138,42 @@ export const PhonemizeRequest = z
   .strict()
 export const CancelRequest = z.object({ requestId: RequestId }).strict()
 
+/** Per-frame pitch (Hz, 0 = unvoiced) and energy of a speech clip. */
+export interface ContourData {
+  f0: number[]
+  energy: number[]
+  frameSec: number
+}
+/** Segment time range of a YouTube video, the key of its cached reference contour. */
+export const SegmentRange = VideoRef.extend({ start: z.number().min(0), end: z.number().min(0) })
+export const IntonationRequest = z
+  .object({
+    requestId: RequestId,
+    audio: Pcm16k,
+    /** Reference speech to extract a contour from, or `cached` to use the one stored under `cacheKey`. */
+    reference: z.union([
+      z.object({ audio: Pcm16k }).strict(),
+      z.object({ cached: z.literal(true) }).strict(),
+    ]),
+    /** Required for `cached`; when given with reference audio, the extracted contour is stored under it. */
+    cacheKey: SegmentRange.optional(),
+  })
+  .strict()
+export const IntonationResult = z.object({
+  /** Fluency 0-100. */
+  score: z.number(),
+  correlation: z.number(),
+  rangeRatio: z.number(),
+  rhythm: z.number(),
+  pause: z.number(),
+  chart: z.object({
+    frameSec: z.number(),
+    reference: z.array(z.number().nullable()),
+    user: z.array(z.number().nullable()),
+  }),
+})
+export type IntonationResult = z.infer<typeof IntonationResult>
+
 /** Staged loading messages the UI maps to `pronounce.stage.<stage>`. */
 export const InferenceStage = z.enum([
   'loading-phone-model',
@@ -305,6 +341,9 @@ export const HistoryAttempt = z.object({
   score: z.number(),
   errors: z.array(HistoryError).max(500),
   hasAudio: z.boolean(),
+  /** Set for shadowing attempts: the YouTube video and the sentence's index in its transcript. */
+  videoId: z.string().min(1).max(32).nullish(),
+  segmentIndex: z.number().int().nonnegative().nullish(),
 })
 export type HistoryAttempt = z.infer<typeof HistoryAttempt>
 export const HistorySaveRequest = HistoryAttempt.omit({ id: true, createdAt: true, hasAudio: true })
@@ -315,6 +354,7 @@ export const HistoryListRequest = z
   .object({
     limit: z.number().int().min(1).max(500).optional(),
     offset: z.number().int().min(0).optional(),
+    videoId: z.string().min(1).max(32).optional(),
   })
   .strict()
 export const HistoryIdRequest = z.object({ id: z.string().min(1).max(64) }).strict()
@@ -386,6 +426,8 @@ export const IPC = {
   ttsSpeak: 'tts:speak',
   inferenceAnalyze: 'inference:analyze',
   inferenceTranscribe: 'inference:transcribe',
+  inferenceIntonation: 'inference:intonation',
+  contoursHas: 'contours:has',
   inferencePhonemize: 'inference:phonemize',
   inferenceLanguages: 'inference:languages',
   inferenceCancel: 'inference:cancel',
@@ -466,6 +508,12 @@ export const invokeChannels = {
     request: TranscribeRequest,
     response: inferenceResult(TranscribeResult),
   },
+  [IPC.inferenceIntonation]: {
+    request: IntonationRequest,
+    response: inferenceResult(IntonationResult),
+  },
+  /** Whether the reference contour of a video segment is already cached. */
+  [IPC.contoursHas]: { request: SegmentRange, response: z.boolean() },
   [IPC.inferencePhonemize]: {
     request: PhonemizeRequest,
     response: inferenceResult(PhonemizeResult),
@@ -554,6 +602,10 @@ export interface EngclawApi {
     close(): Promise<null>
     onEvent(cb: (e: PlayerEvent) => void): () => void
   }
+  contours: {
+    /** True when the reference contour for the segment is cached, so no audio fetch is needed. */
+    has(req: z.infer<typeof SegmentRange>): Promise<boolean>
+  }
   tts: {
     /** Reference-voice audio (16 kHz mono) for a sentence; repeats are served from a disk cache. */
     speak(req: z.infer<typeof SpeakRequest>): Promise<SpeakResponse>
@@ -565,6 +617,8 @@ export interface EngclawApi {
     transcribe(
       req: z.infer<typeof TranscribeRequest>,
     ): Promise<InferenceResult<z.infer<typeof TranscribeResult>>>
+    /** Fluency: compares the attempt's pitch/energy contour with the reference speech's. */
+    intonation(req: z.infer<typeof IntonationRequest>): Promise<InferenceResult<IntonationResult>>
     /** `/phonemes`. */
     phonemize(
       req: z.infer<typeof PhonemizeRequest>,

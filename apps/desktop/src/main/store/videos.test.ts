@@ -116,6 +116,22 @@ describe('video cache', () => {
     expect(store.videos.getIpa('bbbbbbbbbbb', 'Hi')).toBeNull()
   })
 
+  it('caches reference contours per video segment and drops them with the video and on deleteAll', () => {
+    const c = { f0: [0, 120.5, 130], energy: [0, 100, 250], frameSec: 0.032 }
+    expect(store.videos.getContour('aaaaaaaaaaa', 1.5, 4)).toBeNull()
+    store.videos.putContour('aaaaaaaaaaa', 1.5, 4, c)
+    store.videos.putContour('bbbbbbbbbbb', 1.5, 4, c)
+    expect(store.videos.getContour('aaaaaaaaaaa', 1.5, 4)).toEqual(c)
+    expect(store.videos.getContour('aaaaaaaaaaa', 1.5, 5)).toBeNull()
+    store.db.prepare("UPDATE contours SET f0 = 'oops'").run()
+    expect(store.videos.getContour('aaaaaaaaaaa', 1.5, 4)).toBeNull()
+    store.videos.putContour('aaaaaaaaaaa', 1.5, 4, c)
+    store.videos.remove('aaaaaaaaaaa')
+    expect(store.videos.getContour('aaaaaaaaaaa', 1.5, 4)).toBeNull()
+    store.deleteAll()
+    expect(store.videos.getContour('bbbbbbbbbbb', 1.5, 4)).toBeNull()
+  })
+
   it('deleteAll wipes cached videos too', () => {
     store.videos.putMeta(meta('aaaaaaaaaaa'))
     store.videos.putTranscript('aaaaaaaaaaa', 'en', cues)
