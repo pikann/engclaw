@@ -16,6 +16,7 @@ import { UtilityClient } from './utility-client'
 import { loadLanguage, saveLanguage } from './settings'
 import { InnertubeAdapter, YouTubeError, parseVideoId } from '@engclaw/youtube'
 import { PlayerController } from './player'
+import { AudioRangeCache } from './audio-range-cache'
 import { CachedYouTube } from './youtube-cache'
 
 const rendererDir = join(__dirname, '../renderer')
@@ -152,13 +153,17 @@ void app.whenReady().then(async () => {
   })
   const store = registerStoreHandlers()
   const models = registerModelHandlers()
-  const cachedYoutube = new CachedYouTube(youtube, store.videos)
+  const cachedYoutube = new CachedYouTube(
+    youtube,
+    store.videos,
+    new AudioRangeCache(join(app.getPath('temp'), 'engclaw-audio'), 200 * 1024 * 1024),
+  )
   handle(IPC.youtubeMeta, ({ videoId }) => yt(() => cachedYoutube.meta(parseVideoId(videoId))))
   handle(IPC.youtubeTranscript, ({ videoId, lang }) =>
     yt(() => cachedYoutube.transcript(parseVideoId(videoId), lang)),
   )
   handle(IPC.youtubeAudioRange, ({ videoId, start, end }) =>
-    yt(() => youtube.audioRange(parseVideoId(videoId), start, end)),
+    yt(() => cachedYoutube.audioRange(parseVideoId(videoId), start, end)),
   )
   handle(IPC.youtubeRecent, () => cachedYoutube.recent())
   handle(IPC.youtubeGetSettings, ({ videoId }) => store.videos.getSettings(parseVideoId(videoId)))

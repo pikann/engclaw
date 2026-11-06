@@ -5,10 +5,23 @@ import {
   IPC,
   isEventChannel,
   isInvokeChannel,
+  AudioRangeRequest,
   PingRequest,
 } from './index'
 
 describe('ipc contract', () => {
+  it('rejects inverted, empty, oversized and unknown-key audio ranges', () => {
+    const ok = { videoId: 'dQw4w9WgXcQ', start: 1, end: 5 }
+    expect(AudioRangeRequest.safeParse(ok).success).toBe(true)
+    for (const bad of [
+      { ...ok, start: 5, end: 1 },
+      { ...ok, start: 3, end: 3 },
+      { ...ok, start: 0, end: 121 },
+      { ...ok, url: 'https://evil.example' },
+    ])
+      expect(AudioRangeRequest.safeParse(bad).success).toBe(false)
+  })
+
   it('every IPC channel has a schema (invoke or event)', () => {
     for (const ch of Object.values(IPC))
       expect(isInvokeChannel(ch) || isEventChannel(ch)).toBe(true)

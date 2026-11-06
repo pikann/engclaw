@@ -1,4 +1,5 @@
-import type { TranscriptCue, VideoMeta, YouTubeAdapter } from '@engclaw/youtube'
+import type { AudioRange, TranscriptCue, VideoMeta, YouTubeAdapter } from '@engclaw/youtube'
+import type { AudioRangeCache } from './audio-range-cache'
 import type { RecentVideo, VideoStore } from './store/videos'
 
 /** Cache-first view of the YouTube adapter: a video seen once opens again without the network. */
@@ -6,6 +7,7 @@ export class CachedYouTube {
   constructor(
     private readonly adapter: YouTubeAdapter,
     private readonly videos: VideoStore,
+    private readonly audio?: AudioRangeCache,
   ) {}
 
   async meta(videoId: string): Promise<VideoMeta> {
@@ -25,6 +27,14 @@ export class CachedYouTube {
     }
     this.videos.touch(videoId)
     return cues
+  }
+
+  async audioRange(videoId: string, start: number, end: number): Promise<AudioRange> {
+    const hit = await this.audio?.get(videoId, start, end)
+    if (hit) return hit
+    const range = await this.adapter.audioRange(videoId, start, end)
+    await this.audio?.put(videoId, start, end, range).catch(() => undefined)
+    return range
   }
 
   recent(limit?: number): RecentVideo[] {
