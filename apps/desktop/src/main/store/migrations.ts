@@ -55,6 +55,8 @@ export const MIGRATIONS: readonly string[] = [
      frame_sec REAL NOT NULL,
      PRIMARY KEY (video_id, start_ms, end_ms)
    );`,
+  // Contours extracted with the old pitch range can be empty; they are re-extracted on demand.
+  `DELETE FROM contours;`,
 ]
 
 export class FutureSchemaError extends Error {

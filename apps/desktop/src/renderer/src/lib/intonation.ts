@@ -1,5 +1,4 @@
 import type { IntonationResult } from '@engclaw/ipc-contract'
-import { wordErrorRate } from '@engclaw/pronounce'
 import type { Segment } from './shadowing'
 
 export type IntonationState =
@@ -91,17 +90,6 @@ export async function checkIntonation(
   }
 }
 
-export interface LightResult {
-  /** Detected text vs the sentence, 0-100 (100 = every word right). */
-  accuracy: number
-  transcript: string
-}
-
-export const lightResult = (transcript: string, text: string): LightResult => ({
-  accuracy: Math.round((1 - wordErrorRate(transcript, text)) * 100),
-  transcript,
-})
-
-/** Light-mode headline: Accuracy and Fluency averaged, or Accuracy alone when Fluency is unavailable. */
-export const lightScore = (accuracy: number, fluency: number | null): number =>
-  fluency === null ? accuracy : Math.round((accuracy + fluency) / 2)
+/** Detected text vs the sentence, 0-100 (100 = every word right). */
+export const accuracyScore = (wordErrorRate: number): number =>
+  Math.max(0, Math.min(100, Math.round((1 - wordErrorRate) * 100)))

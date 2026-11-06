@@ -4,29 +4,9 @@ import { classifyMicError, playPcm, Recorder } from '@/lib/audio'
 import { decodeSegmentAudio } from '@/lib/audio/decode'
 import {
   checkIntonation,
-  lightResult,
-  lightScore,
   type IntonationState,
-  type LightResult,
 } from './intonation'
 import type { Segment } from './shadowing'
-
-export type CheckMode = 'full' | 'light'
-const MODE_KEY = 'engclaw.shadowing.checkMode'
-
-/** Full pronunciation vs light check, remembered across sessions. */
-export function useCheckMode(): [CheckMode, (m: CheckMode) => void] {
-  const [mode, setMode] = useState<CheckMode>(() =>
-    localStorage.getItem(MODE_KEY) === 'light' ? 'light' : 'full',
-  )
-  return [
-    mode,
-    (m) => {
-      localStorage.setItem(MODE_KEY, m)
-      setMode(m)
-    },
-  ]
-}
 
 export type AttemptErrorKind = 'mic' | 'model' | 'failed'
 
@@ -35,7 +15,6 @@ export type AttemptState =
   | { phase: 'recording' }
   | { phase: 'analyzing' }
   | { phase: 'result'; result: PronunciationResult; audio: Float32Array }
-  | { phase: 'light'; light: LightResult; audio: Float32Array }
   | { phase: 'error'; kind: AttemptErrorKind; audio: Float32Array | null }
 
 const IDLE: AttemptState = { phase: 'idle' }
@@ -52,12 +31,9 @@ export function useSegmentAttempt(
   index: number,
   /** Called right before the microphone opens so the video stops playing over the learner. */
   onRecordStart: () => void,
-  mode: CheckMode,
 ) {
   const [byIndex, setByIndex] = useState<Record<number, AttemptState>>({})
   const [intonation, setIntonation] = useState<Record<number, IntonationState>>({})
-  const modeRef = useRef(mode)
-  modeRef.current = mode
   const [best, setBest] = useState<Record<number, number>>({})
   const recording = useRef<{ rec: Recorder; index: number } | null>(null)
   const playing = useRef<{ stop: () => void } | null>(null)
@@ -157,26 +133,6 @@ export function useSegmentAttempt(
       const fail = (code?: string) =>
         set(i, { phase: 'error', kind: code === 'MODEL_MISSING' ? 'model' : 'failed', audio })
       try {
-        if (modeRef.current === 'light') {
-          const [res, fluency] = await Promise.all([
-            window.engclaw.inference.transcribe({ requestId: id, audio }),
-            runIntonation(i, audio, id),
-          ])
-          if (requestIds.current[i] !== id) return
-          if (!res.ok) return fail(res.code)
-          const light = lightResult(res.value.text, text)
-          set(i, { phase: 'light', light, audio })
-          await save(segment, text, {
-            language: res.value.language,
-            score: lightScore(
-              light.accuracy,
-              fluency.status === 'done' ? fluency.result.score : null,
-            ),
-            errors: [],
-            audio,
-          })
-          return
-        }
         const res = await window.engclaw.inference.analyze({ requestId: id, audio, text })
         if (requestIds.current[i] !== id) return
         if (!res.ok) return fail(res.code)
@@ -253,7 +209,7 @@ export function useSegmentAttempt(
     if (playing.current) return stopPlayback()
     const s = byIndex[indexRef.current]
     const audio =
-      s && (s.phase === 'result' || s.phase === 'light' || s.phase === 'error') ? s.audio : null
+      s && (s.phase === 'result' || s.phase === 'error') ? s.audio : null
     if (!audio) return
     const h = playPcm(audio, 16000)
     playing.current = h

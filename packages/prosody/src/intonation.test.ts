@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { compareIntonation, toSemitones, type Contour } from './intonation'
+import { compareIntonation, toSemitones, trimSilence, type Contour } from './intonation'
 
 const FRAME = 0.032
 
@@ -94,5 +94,36 @@ describe('compareIntonation', () => {
       make(60, () => 0),
     )
     expect(r.score).toBe(0)
+  })
+})
+
+describe('trimSilence', () => {
+  it('drops silent frames at both ends but keeps pauses inside', () => {
+    const quiet = (i: number) => (i < 10 || (i >= 40 && i < 45) || i >= 90 ? 0 : 200)
+    const c = trimSilence(make(100, () => 150, quiet))
+    expect(c.energy.length).toBe(80)
+    expect(c.f0.length).toBe(80)
+  })
+
+  it('leaves an all-silent contour alone', () => {
+    expect(
+      trimSilence(
+        make(
+          20,
+          () => 0,
+          () => 0,
+        ),
+      ).energy.length,
+    ).toBe(20)
+  })
+
+  it('scores a padded attempt like the unpadded one', () => {
+    const ref = make(100, hill(100))
+    const padded = make(
+      140,
+      (i) => (i < 20 || i >= 120 ? 0 : hill(100)(i - 20)),
+      (i) => (i < 20 || i >= 120 ? 0 : 200),
+    )
+    expect(compareIntonation(ref, padded).score).toBeCloseTo(compareIntonation(ref, ref).score, 0)
   })
 })

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { IntonationResult } from '@engclaw/ipc-contract'
-import { checkIntonation, lightResult, lightScore, type IntonationApi } from './intonation'
+import { accuracyScore, checkIntonation, type IntonationApi } from './intonation'
 
 const result = { score: 80 } as IntonationResult
 const seg = { start: 1, end: 3, text: ' Hello there. ' }
@@ -77,13 +77,10 @@ describe('checkIntonation', () => {
   })
 })
 
-describe('light mode scoring', () => {
-  it('turns word error rate into an accuracy percentage', () => {
-    expect(lightResult('HELLO THERE', 'Hello there.').accuracy).toBe(100)
-    expect(lightResult('HELLO', 'Hello there.').accuracy).toBe(50)
-  })
-  it('averages accuracy and fluency, or uses accuracy alone', () => {
-    expect(lightScore(90, 70)).toBe(80)
-    expect(lightScore(90, null)).toBe(90)
+describe('accuracyScore', () => {
+  it('is 100 minus the word error rate, clamped to 0-100', () => {
+    expect(accuracyScore(0)).toBe(100)
+    expect(accuracyScore(0.5)).toBe(50)
+    expect(accuracyScore(1.4)).toBe(0)
   })
 })

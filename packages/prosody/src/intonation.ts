@@ -1,6 +1,9 @@
 import { ENERGY_MAX, extractEnergy, extractF0 } from './contour'
 
 const HOP = 512
+/** Wider than the pronunciation chart's 50-300 Hz: higher voices and noisy video audio need the headroom. */
+const F0_MIN = 75
+const F0_MAX = 500
 
 export interface Contour {
   /** Hz per frame, 0 where unvoiced. */
@@ -42,11 +45,15 @@ const ENERGY_WEIGHT = 4 / ENERGY_MAX
 
 export function extractContour(audio: Float32Array, sampleRate: number): Contour {
   return {
-    f0: extractF0(audio, { sampleRate }),
+    f0: extractF0(audio, { sampleRate, fmin: F0_MIN, fmax: F0_MAX }),
     energy: extractEnergy(audio),
     frameSec: HOP / sampleRate,
   }
 }
+
+/** True when the contour has enough voiced frames to compare pitch. */
+export const hasPitch = (c: Pick<Contour, 'f0'>): boolean =>
+  Array.from(c.f0).filter((v) => v > 0).length >= MIN_VOICED
 
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x))
 
@@ -193,6 +200,24 @@ function pauses(c: Contour): { count: number; seconds: number } {
   return { count, seconds }
 }
 
+/** Drops the silent frames before the first and after the last speech frame. */
+export function trimSilence(c: Contour): Contour {
+  let first = -1
+  let last = -1
+  for (let i = 0; i < c.energy.length; i++) {
+    if (c.energy[i]! > SILENCE) {
+      if (first === -1) first = i
+      last = i
+    }
+  }
+  if (first === -1 || (first === 0 && last === c.energy.length - 1)) return c
+  return {
+    f0: Array.from(c.f0).slice(first, last + 1),
+    energy: Array.from(c.energy).slice(first, last + 1),
+    frameSec: c.frameSec,
+  }
+}
+
 function pauseScore(ref: Contour, user: Contour): number {
   const r = pauses(ref)
   const u = pauses(user)
@@ -207,7 +232,9 @@ function pauseScore(ref: Contour, user: Contour): number {
  * from each speaker's own median (so voices of different registers compare), smoothed and
  * DTW-aligned; the score blends contour correlation, pitch-range ratio, rhythm and pauses.
  */
-export function compareIntonation(reference: Contour, user: Contour): IntonationResult {
+export function compareIntonation(rawReference: Contour, rawUser: Contour): IntonationResult {
+  const reference = trimSilence(rawReference)
+  const user = trimSilence(rawUser)
   const refSt = smooth(toSemitones(reference.f0))
   const userSt = smooth(toSemitones(user.f0))
   const n = refSt.length

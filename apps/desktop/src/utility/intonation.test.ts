@@ -34,4 +34,11 @@ describe('analyzeIntonation', () => {
       /too short/,
     )
   })
+
+  it('rejects a recording or reference without any pitch instead of scoring 0', () => {
+    const ref = glide(1.5, 110, 200)
+    const silence = new Float32Array(24000)
+    expect(() => analyzeIntonation(silence, { audio: ref })).toThrow(/recording/)
+    expect(() => analyzeIntonation(ref, { audio: silence })).toThrow(/reference/)
+  })
 })

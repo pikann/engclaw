@@ -4,6 +4,7 @@ export { rms } from './energy'
 export { ENERGY_MAX, extractEnergy, extractF0, interpolateF0, type ContourOptions } from './contour'
 export {
   compareIntonation,
+  hasPitch,
   extractContour,
   toSemitones,
   type Contour,

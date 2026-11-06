@@ -1,5 +1,5 @@
 import type { ContourData, IntonationResult } from '@engclaw/ipc-contract'
-import { compareIntonation, extractContour, type Contour } from '@engclaw/prosody'
+import { compareIntonation, extractContour, hasPitch, type Contour } from '@engclaw/prosody'
 import { InferenceError } from './errors'
 
 const SAMPLE_RATE = 16000
@@ -29,7 +29,12 @@ export function analyzeIntonation(
     'contour' in reference
       ? reference.contour
       : toData(extractContour(reference.audio, SAMPLE_RATE))
-  const r = compareIntonation(referenceContour, extractContour(audio, SAMPLE_RATE))
+  if (!hasPitch(referenceContour))
+    throw new InferenceError('INVALID_INPUT', 'no pitch could be found in the reference audio')
+  const attempt = extractContour(audio, SAMPLE_RATE)
+  if (!hasPitch(attempt))
+    throw new InferenceError('INVALID_INPUT', 'no pitch could be found in the recording')
+  const r = compareIntonation(referenceContour, attempt)
   return {
     result: {
       score: r.score,
