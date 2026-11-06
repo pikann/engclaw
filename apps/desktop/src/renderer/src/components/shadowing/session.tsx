@@ -244,12 +244,6 @@ export function ShadowingSession({
         <h2 className="min-w-0 flex-1 truncate font-medium" data-testid="shadowing-title">
           {title}
         </h2>
-        <Badge variant="secondary" className="tabular-nums" data-testid="shadowing-position">
-          {t('screens.shadowing.segment', {
-            n: index + 1,
-            total: segments.length,
-          })}
-        </Badge>
         <div role="status" className="flex shrink-0 items-center">
           {loop.mode === 'waiting' ? (
             <Badge data-testid="shadowing-your-turn">{t('screens.shadowing.yourTurn')}</Badge>
@@ -259,6 +253,12 @@ export function ShadowingSession({
             </Badge>
           ) : null}
         </div>
+        <Badge variant="secondary" className="tabular-nums" data-testid="shadowing-position">
+          {t('screens.shadowing.segment', {
+            n: index + 1,
+            total: segments.length,
+          })}
+        </Badge>
         <div
           role="group"
           aria-label={t('screens.shadowing.modeLabel')}
