@@ -51,12 +51,23 @@ const { words: etymology } = JSON.parse(
   await readFile(resolve(DATA_DIR, 'word-etymology.json'), 'utf8'),
 ) as { words: WordEtymology[] }
 
+// Optional: produced by build-root-families.ts. Without it, only learnthat's example words are linked.
+const familiesFile = resolve(DATA_DIR, 'root-families.json')
+const families = existsSync(familiesFile)
+  ? (
+      JSON.parse(await readFile(familiesFile, 'utf8')) as {
+        families: { rootIndex: number; words: string[] }[]
+      }
+    ).families
+  : undefined
+
 await mkdir(outDir, { recursive: true })
 const manifest = buildDictionary(resolve(outDir, 'dictionary.sqlite'), {
   wordnet,
   pronunciations,
   roots,
   etymology,
+  families,
 })
 await writeFile(
   resolve(outDir, 'dictionary.manifest.json'),
