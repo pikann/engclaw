@@ -1,18 +1,28 @@
 import * as React from 'react'
 import { Dialog as DialogPrimitive } from 'radix-ui'
+import { useRegisterNativeOverlay } from '@/lib/native-overlay'
 import { cn } from '@/lib/utils'
 
 const Dialog = DialogPrimitive.Root
 const DialogTrigger = DialogPrimitive.Trigger
 const DialogClose = DialogPrimitive.Close
 
-function DialogContent({
+function DialogContent(props: React.ComponentProps<typeof DialogPrimitive.Content>) {
+  return (
+    <DialogPrimitive.Portal>
+      <DialogContentInner {...props} />
+    </DialogPrimitive.Portal>
+  )
+}
+
+function DialogContentInner({
   className,
   children,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content>) {
+  useRegisterNativeOverlay()
   return (
-    <DialogPrimitive.Portal>
+    <>
       <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50" />
       <DialogPrimitive.Content
         data-slot="dialog-content"
@@ -24,7 +34,7 @@ function DialogContent({
       >
         {children}
       </DialogPrimitive.Content>
-    </DialogPrimitive.Portal>
+    </>
   )
 }
 
