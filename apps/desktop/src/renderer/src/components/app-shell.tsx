@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Outlet, useLocation } from 'react-router'
 import { PracticeScreen } from '@/components/practice-screen'
+import { WordLookupProvider } from '@/components/word-lookup-dialog'
 import { AppShell, useLayout, type NavKey } from '@/components/screens/shell'
 import { modelCard } from '@/lib/model-download'
 import { useModels } from '@/lib/use-models'
@@ -54,26 +55,28 @@ export function AppLayout() {
   const fullBleed = pathname === '/shadowing' || pathname === '/dictionary'
   const known = pathname in TITLES
   return (
-    <div className="h-screen">
-      <AppShell
-        linked
-        layout={layout}
-        active={active}
-        mic={mic}
-        modelsPercent={modelsPercent}
-        title={known ? t(`screens.shell.${active}`) : t('screens.shell.comingSoon')}
-      >
-        <main className="h-full">
-          <div hidden={!onPractice} className="h-full">
-            <PracticeScreen />
-          </div>
-          {!onPractice && (
-            <div className={fullBleed ? 'h-full' : 'h-full overflow-auto p-6'}>
-              <Outlet />
+    <WordLookupProvider>
+      <div className="h-screen">
+        <AppShell
+          linked
+          layout={layout}
+          active={active}
+          mic={mic}
+          modelsPercent={modelsPercent}
+          title={known ? t(`screens.shell.${active}`) : t('screens.shell.comingSoon')}
+        >
+          <main className="h-full">
+            <div hidden={!onPractice} className="h-full">
+              <PracticeScreen />
             </div>
-          )}
-        </main>
-      </AppShell>
-    </div>
+            {!onPractice && (
+              <div className={fullBleed ? 'h-full' : 'h-full overflow-auto p-6'}>
+                <Outlet />
+              </div>
+            )}
+          </main>
+        </AppShell>
+      </div>
+    </WordLookupProvider>
   )
 }

@@ -18,6 +18,7 @@ import { PlayerSurface } from '@/components/shadowing/player-surface'
 import { SentenceWords } from '@/components/shadowing/sentence-words'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { ClickableText } from '@/components/ui/clickable-text'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -180,6 +181,7 @@ export function ShadowingSession({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement | null)?.closest('[role="dialog"]')) return
       if (dictation) {
         if (!(e.metaKey || e.ctrlKey) || e.altKey) return
         const cmd = DICTATION_SHORTCUTS[e.key.toLowerCase()]
@@ -634,23 +636,33 @@ export function ShadowingSession({
               <ol className="space-y-1 text-sm" data-testid="shadowing-rail">
                 {segments.map((s, i) => (
                   <li key={s.index}>
-                    <button
-                      type="button"
-                      ref={(el) => {
-                        itemRefs.current[i] = el
-                      }}
+                    {/* Words inside are buttons, so the row itself is not one: the clock is the keyboard target. */}
+                    <div
                       aria-current={i === index ? 'true' : undefined}
-                      onClick={() => dispatch({ type: 'start', index: i })}
+                      onClick={(e) => {
+                        if (!(e.target as HTMLElement).closest('[data-slot="clickable-word"]'))
+                          dispatch({ type: 'start', index: i })
+                      }}
                       className={cn(
-                        'focus-visible:ring-ring/50 hover:bg-muted flex w-full gap-2 rounded-md px-2 py-1.5 text-left outline-none focus-visible:ring-[3px]',
+                        'hover:bg-muted flex w-full cursor-pointer gap-2 rounded-md px-2 py-1.5 text-left',
                         i === index && 'bg-primary-soft font-medium',
                       )}
                     >
-                      <span className="text-muted-foreground w-10 shrink-0 tabular-nums">
+                      <button
+                        type="button"
+                        ref={(el) => {
+                          itemRefs.current[i] = el
+                        }}
+                        aria-label={t('screens.shadowing.segment', {
+                          n: i + 1,
+                          total: segments.length,
+                        })}
+                        className="focus-visible:ring-ring/50 text-muted-foreground w-10 shrink-0 rounded text-left tabular-nums outline-none focus-visible:ring-[3px]"
+                      >
                         {formatClock(s.start)}
-                      </span>
+                      </button>
                       <span className="min-w-0 flex-1">
-                        {s.text}
+                        <ClickableText text={s.text} />
                         {showIpa && (
                           <span
                             lang="en-fonipa"
@@ -664,7 +676,7 @@ export function ShadowingSession({
                           </span>
                         )}
                       </span>
-                    </button>
+                    </div>
                   </li>
                 ))}
               </ol>
