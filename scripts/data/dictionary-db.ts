@@ -17,6 +17,8 @@ export interface DictionaryInput {
   pronunciations: Map<string, string[]>
   roots: RootEntry[]
   etymology: WordEtymology[]
+  /** Full word families per root index (root-families.json); merged with each root's examples. */
+  families?: { rootIndex: number; words: string[] }[]
 }
 
 export const SOURCES: Manifest['sources'] = [
@@ -53,11 +55,11 @@ export function buildDictionary(file: string, input: DictionaryInput): Manifest 
   db.exec(SCHEMA_SQL)
 
   const wordsByRoot = new Map<string, number[]>()
-  input.roots.forEach((root, i) => {
-    for (const ex of root.examples) {
-      const key = ex.toLowerCase()
-      wordsByRoot.set(key, [...(wordsByRoot.get(key) ?? []), i])
-    }
+  const wordsOfRoot = input.roots.map((root) => new Set(root.examples.map((e) => e.toLowerCase())))
+  for (const f of input.families ?? [])
+    for (const w of f.words) wordsOfRoot[f.rootIndex]?.add(w.toLowerCase())
+  wordsOfRoot.forEach((words, i) => {
+    for (const key of words) wordsByRoot.set(key, [...(wordsByRoot.get(key) ?? []), i])
   })
 
   const senses = new Map(input.wordnet.entries.map((e) => [e.word, e.senses]))

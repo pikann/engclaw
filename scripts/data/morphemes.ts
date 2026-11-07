@@ -16,7 +16,7 @@ export interface MorphemeLink {
   rootIndex: number
 }
 
-const PREFIXES = new Set(
+export const PREFIXES = new Set(
   (
     'a ab abs ac ad ambi amphi ana ante anti apo auto bene bi cata circum co col com con contra ' +
     'de di dia dis dys e en ex extra hyper hypo il im in inter intra ir mal meta mis mono multi ' +

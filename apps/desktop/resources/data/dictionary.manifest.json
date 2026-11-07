@@ -2,14 +2,14 @@
   "version": "2024.1",
   "schemaVersion": 1,
   "file": "dictionary.sqlite",
-  "bytes": 37175296,
-  "sha256": "0417eea1218e3256bd4770bfa05bed36bbe4cf95d5b2721afe3fa0bd8bbf153f",
+  "bytes": 37363712,
+  "sha256": "57cf56a595e7ba0b933d0ffab5681f7035290569115db374ca4831e0dc145bdb",
   "counts": {
     "entries": 153835,
     "senses": 212478,
     "pronunciations": 40460,
     "roots": 368,
-    "morphemes": 1052,
+    "morphemes": 6725,
     "etymology": 615
   },
   "sources": [
