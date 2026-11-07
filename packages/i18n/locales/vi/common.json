@@ -796,6 +796,9 @@
     "pickWord": "Chọn một từ để xem trang của nó.",
     "loading": "Đang tải…",
     "notFound": "Từ này không có trong từ điển.",
+    "lookup": "Tra từ",
+    "lookupWord": "Tra “{{word}}” trong từ điển",
+    "openInDictionary": "Mở trong từ điển",
     "sections": "Các mục từ điển",
     "section": {
       "search": "Tìm kiếm",

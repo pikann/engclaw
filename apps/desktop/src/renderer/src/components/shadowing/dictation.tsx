@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Pane } from '@/components/screens/shell'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { ClickableText } from '@/components/ui/clickable-text'
 import { Input } from '@/components/ui/input'
 import {
   DropdownMenu,
@@ -59,7 +60,7 @@ export function DictationSheet({
             return (
               <span key={i}>
                 {tok.before}
-                {tok.word}
+                <ClickableText text={tok.word} />
                 {tok.after}
               </span>
             )

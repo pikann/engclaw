@@ -1,6 +1,7 @@
 import { ArrowDownRight, ArrowRight, ArrowUpRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { SegmentProsody } from '@engclaw/ipc-contract'
+import { ClickableText } from '@/components/ui/clickable-text'
 import type { IpaToken } from '@/lib/ipa'
 import { alignProsody } from '@/lib/prosody-guide'
 import type { ProsodyState } from '@/lib/use-prosody'
@@ -64,7 +65,7 @@ export function SentenceWords({
   if (!showIpa && !prosody)
     return (
       <p data-testid="shadowing-sentence" className="leading-snug">
-        {text}
+        <ClickableText text={text} />
       </p>
     )
   const aligned = prosody?.status === 'ready' ? alignProsody(text, prosody.value) : null
@@ -87,7 +88,7 @@ export function SentenceWords({
                 data-stressed={stressed ? 'true' : undefined}
                 className={cn('transition-opacity', tok?.word && !stressed && 'opacity-60')}
               >
-                {piece}
+                <ClickableText text={piece} />
                 {stressed && (
                   <span className="sr-only"> ({t('screens.shadowing.prosody.stressed')})</span>
                 )}

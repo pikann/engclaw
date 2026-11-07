@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
-import { Check, Mic, Play, RotateCcw, Smile, Volume2, X } from 'lucide-react'
+import { BookOpen, Check, Mic, Play, RotateCcw, Smile, Volume2, X } from 'lucide-react'
 import type { PronunciationResult } from '@engclaw/ipc-contract'
 import { Chart } from '@/components/detail-charts'
 import { Mouth } from '@/components/mouth'
 import { Button } from '@/components/ui/button'
+import { useWordLookup } from '@/lib/word-lookup'
+import { normalizeWord } from '@/lib/words'
+import { ClickableText } from '@/components/ui/clickable-text'
 import { ClickableWord } from '@/components/ui/clickable-word'
 import { ScoreRing } from '@/components/ui/score-ring'
 import { playChime } from '@/lib/audio'
@@ -178,6 +181,7 @@ export function ResultSummary({
 function WordDetail({ chip }: { chip: WordChip }) {
   const { t } = useTranslation()
   const e = chip.error
+  const lookup = useWordLookup()
   const [phone, setPhone] = useState<number | null>(null)
   const [playId, setPlayId] = useState(0)
   useEffect(() => setPhone(null), [chip.position])
@@ -198,6 +202,17 @@ function WordDetail({ chip }: { chip: WordChip }) {
           <Volume2 />
           {t('result.hearIt')}
         </Button>
+        {lookup && (
+          <Button
+            variant="outline"
+            size="sm"
+            data-testid="word-lookup"
+            onClick={() => lookup(normalizeWord(chip.word))}
+          >
+            <BookOpen />
+            {t('dict.lookup')}
+          </Button>
+        )}
       </div>
       <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
         <dt className="text-muted-foreground">{t('result.expected')}</dt>
@@ -309,7 +324,9 @@ export function PhonemesDetail({
           <h4 className="text-muted-foreground text-xs font-medium uppercase">
             {t('result.weHeard')}
           </h4>
-          <p data-testid="result-heard-text">{heard}</p>
+          <p data-testid="result-heard-text">
+            <ClickableText text={heard} />
+          </p>
         </section>
       )}
       {sounds.length > 0 && (

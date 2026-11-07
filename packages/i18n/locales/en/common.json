@@ -796,6 +796,9 @@
     "pickWord": "Pick a word to see its page.",
     "loading": "Loading…",
     "notFound": "This word is not in the dictionary.",
+    "lookup": "Look up",
+    "lookupWord": "Look up “{{word}}” in the dictionary",
+    "openInDictionary": "Open in dictionary",
     "sections": "Dictionary sections",
     "section": {
       "search": "Search",
