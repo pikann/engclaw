@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { DictionaryRoot, DictionaryWord } from '@engclaw/ipc-contract'
+import type { DictionaryRoot, DictionaryWord, WordImage } from '@engclaw/ipc-contract'
 
 export type Loadable<T> =
   { status: 'loading' } | { status: 'ready'; value: T } | { status: 'error' }
@@ -28,3 +28,19 @@ export const useDictionaryWord = (id: number | null) =>
 
 export const useDictionaryRoot = (id: number | null) =>
   useLoad<DictionaryRoot | null>(id, (i) => window.engclaw.dictionary.root({ id: i }))
+
+/** Illustration for a word; null while loading, when there is none, or if the lookup failed. */
+export function useWordImage(id: number): WordImage | null {
+  const [state, setState] = useState<{ id: number; image: WordImage | null } | null>(null)
+  useEffect(() => {
+    let live = true
+    window.engclaw.dictionary.image({ id }).then(
+      (image) => live && setState({ id, image }),
+      () => live && setState({ id, image: null }),
+    )
+    return () => {
+      live = false
+    }
+  }, [id])
+  return state?.id === id ? state.image : null
+}

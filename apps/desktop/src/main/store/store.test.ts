@@ -126,6 +126,7 @@ describe('store', () => {
       theme: 'system',
       newCardsPerDay: 20,
       reviewsPerDay: 200,
+      wordImages: true,
     })
     store.settings.update({ silenceAutoStop: false })
     store.db.close()
@@ -136,6 +137,7 @@ describe('store', () => {
       theme: 'system',
       newCardsPerDay: 20,
       reviewsPerDay: 200,
+      wordImages: true,
     })
   })
 

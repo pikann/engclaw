@@ -94,6 +94,20 @@ export const MIGRATIONS: readonly string[] = [
      answered_at  INTEGER NOT NULL,
      correct      INTEGER NOT NULL
    );`,
+  // Wikimedia illustrations: metadata here, thumbnail bytes on disk. `file` is null for a cached "no image".
+  `CREATE TABLE word_image (
+     word        TEXT PRIMARY KEY,
+     file        TEXT,
+     mime        TEXT,
+     author      TEXT,
+     license     TEXT,
+     license_url TEXT,
+     page_url    TEXT,
+     fetched_at  INTEGER NOT NULL,
+     last_used   INTEGER NOT NULL
+   );`,
+  // Earlier builds rejected every thumbnail host and cached "no image" for all words; drop those entries.
+  `DELETE FROM word_image WHERE file IS NULL;`,
 ]
 
 export class FutureSchemaError extends Error {

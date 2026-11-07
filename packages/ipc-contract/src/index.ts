@@ -457,6 +457,16 @@ export const DictionaryWord = z.object({
     })
     .nullable(),
 })
+export const WordImage = z.object({
+  /** `data:` URL of the cached thumbnail; the renderer never fetches from Wikimedia itself. */
+  src: z.string().startsWith('data:image/'),
+  author: z.string(),
+  license: z.string(),
+  licenseUrl: z.string().nullable(),
+  /** Commons file page: the link-back required by most licenses. */
+  pageUrl: z.string(),
+})
+export type WordImage = z.infer<typeof WordImage>
 export const DictionaryRoot = RootSummarySchema.extend({
   sourceUrl: z.string(),
   words: z.array(z.object({ id: z.number().int(), word: z.string() })),
@@ -579,6 +589,8 @@ export const AppSettings = z.object({
   newCardsPerDay: z.number().int().min(0).max(200).default(20),
   /** Flashcards: reviews of already-learned cards per study day. */
   reviewsPerDay: z.number().int().min(0).max(2000).default(200),
+  /** Dictionary: fetch and show a Wikimedia illustration for concrete words. */
+  wordImages: z.boolean().default(true),
 })
 export type AppSettings = z.infer<typeof AppSettings>
 export const AppSettingsPatch = AppSettings.partial().strict()
@@ -625,6 +637,7 @@ export const IPC = {
   dictionaryWord: 'dictionary:word',
   dictionaryRoot: 'dictionary:root',
   dictionaryRoots: 'dictionary:roots',
+  dictionaryImage: 'dictionary:image',
   deckAdd: 'deck:add',
   deckRemove: 'deck:remove',
   deckHas: 'deck:has',
@@ -722,6 +735,8 @@ export const invokeChannels = {
   },
   [IPC.dictionaryWord]: { request: DictionaryIdRequest, response: DictionaryWord.nullable() },
   [IPC.dictionaryRoot]: { request: DictionaryIdRequest, response: DictionaryRoot.nullable() },
+  /** Illustration for a word, or null when there is none, images are off, or the network failed. */
+  [IPC.dictionaryImage]: { request: DictionaryIdRequest, response: WordImage.nullable() },
   [IPC.dictionaryRoots]: {
     request: DictionaryRootsRequest.optional(),
     response: DictionaryRootList,
@@ -854,6 +869,7 @@ export interface EngclawApi {
     word(req: z.infer<typeof DictionaryIdRequest>): Promise<DictionaryWord | null>
     root(req: z.infer<typeof DictionaryIdRequest>): Promise<DictionaryRoot | null>
     roots(req?: z.infer<typeof DictionaryRootsRequest>): Promise<DictionaryRootList>
+    image(req: z.infer<typeof DictionaryIdRequest>): Promise<WordImage | null>
   }
   deck: {
     add(req: z.infer<typeof DeckAddRequest>): Promise<z.infer<typeof DeckAddResult>>
