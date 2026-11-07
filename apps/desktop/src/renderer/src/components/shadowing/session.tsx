@@ -43,6 +43,7 @@ import {
   SPEED_OPTIONS,
   shortcutFor,
 } from '@/lib/sentence-loop'
+import { useWordLookup } from '@/lib/word-lookup'
 import { fitDictation, fitStage, formatClock, type Segment } from '@/lib/shadowing'
 import { cn } from '@/lib/utils'
 
@@ -94,6 +95,7 @@ export function ShadowingSession({
   onBack: () => void
 }) {
   const { t } = useTranslation()
+  const lookup = useWordLookup()
   const [mode, setMode] = useState<'shadowing' | 'dictation'>('shadowing')
   const dictation = mode === 'dictation'
   const { state, retry, loop, settings, setSettings, dispatch, runShortcut } = useSentenceLoop(
@@ -636,12 +638,14 @@ export function ShadowingSession({
               <ol className="space-y-1 text-sm" data-testid="shadowing-rail">
                 {segments.map((s, i) => (
                   <li key={s.index}>
-                    {/* Words inside are buttons, so the row itself is not one: the clock is the keyboard target. */}
+                    {/* Words are inert spans (see ClickableText `light`); the clock button is the keyboard target. */}
                     <div
                       aria-current={i === index ? 'true' : undefined}
                       onClick={(e) => {
-                        if (!(e.target as HTMLElement).closest('[data-slot="clickable-word"]'))
-                          dispatch({ type: 'start', index: i })
+                        const word = (e.target as HTMLElement).closest<HTMLElement>('[data-word]')
+                        if (!word) dispatch({ type: 'start', index: i })
+                        else if (!window.getSelection()?.toString().trim())
+                          lookup?.(word.dataset['word']!)
                       }}
                       className={cn(
                         'hover:bg-muted flex w-full cursor-pointer gap-2 rounded-md px-2 py-1.5 text-left',
@@ -662,7 +666,7 @@ export function ShadowingSession({
                         {formatClock(s.start)}
                       </button>
                       <span className="min-w-0 flex-1">
-                        <ClickableText text={s.text} />
+                        <ClickableText text={s.text} light />
                         {showIpa && (
                           <span
                             lang="en-fonipa"
