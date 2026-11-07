@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { useNativeOverlayOpen } from '@/lib/native-overlay'
 
 const HIDDEN = { x: 0, y: 0, width: 0, height: 0 }
 
@@ -19,13 +20,15 @@ export function PlayerSurface({
   label: string
 }) {
   const ref = useRef<HTMLDivElement>(null)
+  const covered = useNativeOverlayOpen()
+  const shown = visible && !covered
 
   useEffect(() => {
     let raf = 0
     let last = ''
     const sync = () => {
       const el = ref.current
-      const r = visible && el ? el.getBoundingClientRect() : null
+      const r = shown && el ? el.getBoundingClientRect() : null
       const bounds = r
         ? {
             x: Math.max(0, Math.round(r.x)),
@@ -46,7 +49,7 @@ export function PlayerSurface({
       cancelAnimationFrame(raf)
       void window.engclaw.player.setBounds(HIDDEN)
     }
-  }, [visible])
+  }, [shown])
 
   return (
     <div
