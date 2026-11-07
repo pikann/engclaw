@@ -89,6 +89,7 @@ const api: EngclawApi = {
     word: (req) => invoke(IPC.dictionaryWord, req),
     root: (req) => invoke(IPC.dictionaryRoot, req),
     roots: (req) => invoke(IPC.dictionaryRoots, req),
+    image: (req) => invoke(IPC.dictionaryImage, req),
   },
   deck: {
     add: (req) => invoke(IPC.deckAdd, req),

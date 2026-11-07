@@ -6,6 +6,7 @@ import { HistoryStore } from './history'
 import { migrate } from './migrations'
 import { SettingsStore } from './settings-store'
 import { VideoStore } from './videos'
+import { WordImageStore } from './word-images'
 
 export interface Store {
   db: Database.Database
@@ -13,6 +14,7 @@ export interface Store {
   deck: DeckStore
   settings: SettingsStore
   videos: VideoStore
+  wordImages: WordImageStore
   /** Wipes attempts, recordings, flashcards, cached videos and preferences (not downloaded models). */
   deleteAll(): void
 }
@@ -27,17 +29,20 @@ export function openStore(dbPath: string): Store {
   const settings = new SettingsStore(db)
   const deck = new DeckStore(db)
   const videos = new VideoStore(db)
+  const wordImages = new WordImageStore(db, join(dirname(dbPath), 'word-images'), 50 * 1024 * 1024)
   return {
     db,
     history,
     deck,
     settings,
     videos,
+    wordImages,
     deleteAll: () => {
       history.clear()
       deck.clear()
       settings.clear()
       videos.clear()
+      wordImages.clear()
       rmSync(audioDir, { recursive: true, force: true })
     },
   }

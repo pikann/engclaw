@@ -6,7 +6,7 @@ import { HearReference } from '@/components/hear-reference'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { formatIpa, groupSenses } from '@/lib/dictionary'
-import { useDictionaryRoot, type Loadable } from '@/lib/use-dictionary'
+import { useDictionaryRoot, useWordImage, type Loadable } from '@/lib/use-dictionary'
 import { cn } from '@/lib/utils'
 
 const RELATED_LIMIT = 12
@@ -145,6 +145,31 @@ function Etymology({ etymology }: { etymology: NonNullable<DictionaryWord['etymo
   )
 }
 
+function WordIllustration({ word }: { word: DictionaryWord }) {
+  const { t } = useTranslation()
+  const image = useWordImage(word.id)
+  if (!image) return null
+  return (
+    <figure className="w-fit max-w-xs space-y-1" data-testid="word-image">
+      <img
+        src={image.src}
+        alt={t('dict.imageAlt', { word: word.word })}
+        className="max-h-48 rounded-lg border object-contain"
+      />
+      <figcaption className="text-muted-foreground text-xs">
+        <a
+          href={image.pageUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="text-primary underline-offset-4 hover:underline"
+        >
+          {t('dict.imageCredit', { author: image.author, license: image.license })}
+        </a>
+      </figcaption>
+    </figure>
+  )
+}
+
 /** Word page: IPA + audio, definitions, morpheme chips, origin and related words. */
 export function WordPage({
   state,
@@ -215,6 +240,8 @@ export function WordPage({
           <DeckToggle word={word.word} />
         </div>
       </header>
+
+      <WordIllustration word={word} />
 
       <section aria-labelledby="dict-defs" className="space-y-3">
         <h4 id="dict-defs" className="text-sm font-semibold">
