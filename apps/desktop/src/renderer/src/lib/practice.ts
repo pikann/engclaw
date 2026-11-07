@@ -182,7 +182,10 @@ export interface PracticeTabs {
 }
 
 export type TabsEvent =
-  { type: 'switch'; mode: PracticeMode } | { type: 'tab'; mode: PracticeMode; event: PracticeEvent }
+  | { type: 'switch'; mode: PracticeMode }
+  | { type: 'tab'; mode: PracticeMode; event: PracticeEvent }
+  /** Another screen (the dictionary) sends a word to Read aloud. */
+  | { type: 'handoff'; text: string }
 
 export const initialTabs: PracticeTabs = {
   active: 'sentence',
@@ -194,6 +197,17 @@ export const initialTabs: PracticeTabs = {
 
 export function tabsReducer(s: PracticeTabs, e: TabsEvent): PracticeTabs {
   if (e.type === 'switch') return { ...s, active: e.mode }
+  if (e.type === 'handoff') {
+    const running = (m: PracticeMode) => busyPhase(s.tabs[m].phase)
+    if (running(s.active) || running('sentence')) return s
+    return {
+      active: 'sentence',
+      tabs: {
+        ...s.tabs,
+        sentence: { ...initialPractice, mode: 'sentence', text: e.text },
+      },
+    }
+  }
   return { ...s, tabs: { ...s.tabs, [e.mode]: practiceReducer(s.tabs[e.mode], e.event) } }
 }
 

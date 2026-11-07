@@ -265,6 +265,30 @@ describe('practice tabs', () => {
     expect(s.tabs.free.phase).toBe('idle')
   })
 
+  it('hands a word over to Read aloud: switches tab and replaces the old text and take', () => {
+    const s = runTabs([
+      { type: 'tab', mode: 'sentence', event: { type: 'text', text: 'old' } },
+      { type: 'tab', mode: 'sentence', event: { type: 'recorded', audio } },
+      { type: 'switch', mode: 'free' },
+      { type: 'handoff', text: 'inspect' },
+    ])
+    expect(s.active).toBe('sentence')
+    expect(s.tabs.sentence).toMatchObject({ text: 'inspect', phase: 'idle', audio: null })
+  })
+
+  it('does not hand over while a take or analysis is running', () => {
+    const recording = runTabs([
+      { type: 'tab', mode: 'sentence', event: { type: 'text', text: 'old' } },
+      { type: 'tab', mode: 'sentence', event: { type: 'record-requested' } },
+    ])
+    expect(tabsReducer(recording, { type: 'handoff', text: 'inspect' })).toBe(recording)
+    const freeRecording = runTabs([
+      { type: 'switch', mode: 'free' },
+      { type: 'tab', mode: 'free', event: { type: 'record-requested' } },
+    ])
+    expect(tabsReducer(freeRecording, { type: 'handoff', text: 'inspect' })).toBe(freeRecording)
+  })
+
   it('reports unfinished work', () => {
     expect(hasDraft(initialPractice)).toBe(false)
     expect(hasDraft({ ...initialPractice, text: ' x ' })).toBe(true)

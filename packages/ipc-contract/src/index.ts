@@ -411,6 +411,67 @@ export const HistoryFileResult = z.discriminatedUnion('status', [
 ])
 export type HistoryFileResult = z.infer<typeof HistoryFileResult>
 
+const RootSummarySchema = z.object({
+  id: z.number().int(),
+  root: z.string(),
+  forms: z.array(z.string()),
+  meaning: z.string(),
+  origins: z.array(z.string()),
+})
+export const DictionarySearchRequest = z
+  .object({ query: z.string().max(100), limit: z.number().int().min(1).max(50).optional() })
+  .strict()
+export const DictionaryIdRequest = z.object({ id: z.number().int().min(0) }).strict()
+export const DictionaryRootsRequest = z
+  .object({ origin: z.string().max(40).optional(), query: z.string().max(100).optional() })
+  .strict()
+export const DictionarySearchResult = z.object({
+  id: z.number().int(),
+  word: z.string(),
+  match: z.enum(['prefix', 'fuzzy']),
+  distance: z.number().optional(),
+})
+export const DictionaryWord = z.object({
+  id: z.number().int(),
+  word: z.string(),
+  pronunciations: z.array(z.string()),
+  senses: z.array(
+    z.object({ pos: z.string(), definition: z.string(), example: z.string().nullable() }),
+  ),
+  morphemes: z.array(
+    z.object({
+      kind: z.enum(['prefix', 'root', 'suffix']),
+      form: z.string(),
+      root: RootSummarySchema,
+    }),
+  ),
+  etymology: z
+    .object({
+      chain: z.array(
+        z.object({ lang: z.string(), langCode: z.string().optional(), term: z.string() }),
+      ),
+      pieRoot: z.string().nullable(),
+      firstUse: z.string().nullable(),
+      sourceUrl: z.string(),
+      etymonlineUrl: z.string(),
+    })
+    .nullable(),
+})
+export const DictionaryRoot = RootSummarySchema.extend({
+  sourceUrl: z.string(),
+  words: z.array(z.object({ id: z.number().int(), word: z.string() })),
+  total: z.number().int(),
+})
+export const DictionaryRootListItem = RootSummarySchema.extend({ wordCount: z.number().int() })
+export const DictionaryRootList = z.object({
+  roots: z.array(DictionaryRootListItem),
+  origins: z.array(z.string()),
+})
+export type DictionarySearchResult = z.infer<typeof DictionarySearchResult>
+export type DictionaryWord = z.infer<typeof DictionaryWord>
+export type DictionaryRoot = z.infer<typeof DictionaryRoot>
+export type DictionaryRootList = z.infer<typeof DictionaryRootList>
+
 export const AppSettings = z.object({
   /** Stop recording after ~2 s of silence once speech was heard. */
   silenceAutoStop: z.boolean().default(true),
@@ -460,6 +521,10 @@ export const IPC = {
   playerClose: 'player:close',
   playerEvent: 'player:event',
   ttsSpeak: 'tts:speak',
+  dictionarySearch: 'dictionary:search',
+  dictionaryWord: 'dictionary:word',
+  dictionaryRoot: 'dictionary:root',
+  dictionaryRoots: 'dictionary:roots',
   inferenceAnalyze: 'inference:analyze',
   inferenceTranscribe: 'inference:transcribe',
   inferenceIntonation: 'inference:intonation',
@@ -540,6 +605,17 @@ export const invokeChannels = {
   /** Destroys the player view. */
   [IPC.playerClose]: { request: noArgs, response: z.null() },
   [IPC.ttsSpeak]: { request: SpeakRequest, response: SpeakResponse },
+  /** Autocomplete: prefix matches first, then fuzzy (typo-tolerant) ones. */
+  [IPC.dictionarySearch]: {
+    request: DictionarySearchRequest,
+    response: z.array(DictionarySearchResult),
+  },
+  [IPC.dictionaryWord]: { request: DictionaryIdRequest, response: DictionaryWord.nullable() },
+  [IPC.dictionaryRoot]: { request: DictionaryIdRequest, response: DictionaryRoot.nullable() },
+  [IPC.dictionaryRoots]: {
+    request: DictionaryRootsRequest.optional(),
+    response: DictionaryRootList,
+  },
   [IPC.inferenceAnalyze]: {
     request: AnalyzeRequest,
     response: inferenceResult(PronunciationResult),
@@ -648,6 +724,12 @@ export interface EngclawApi {
   contours: {
     /** True when the reference contour for the segment is cached, so no audio fetch is needed. */
     has(req: z.infer<typeof SegmentRange>): Promise<boolean>
+  }
+  dictionary: {
+    search(req: z.infer<typeof DictionarySearchRequest>): Promise<DictionarySearchResult[]>
+    word(req: z.infer<typeof DictionaryIdRequest>): Promise<DictionaryWord | null>
+    root(req: z.infer<typeof DictionaryIdRequest>): Promise<DictionaryRoot | null>
+    roots(req?: z.infer<typeof DictionaryRootsRequest>): Promise<DictionaryRootList>
   }
   tts: {
     /** Reference-voice audio (16 kHz mono) for a sentence; repeats are served from a disk cache. */

@@ -84,6 +84,12 @@ const api: EngclawApi = {
   contours: {
     has: (req) => invoke(IPC.contoursHas, req),
   },
+  dictionary: {
+    search: (req) => invoke(IPC.dictionarySearch, req),
+    word: (req) => invoke(IPC.dictionaryWord, req),
+    root: (req) => invoke(IPC.dictionaryRoot, req),
+    roots: (req) => invoke(IPC.dictionaryRoots, req),
+  },
   tts: {
     speak: (req) => invoke(IPC.ttsSpeak, req),
   },

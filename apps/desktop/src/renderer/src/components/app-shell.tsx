@@ -51,7 +51,7 @@ export function AppLayout() {
   const mic = useMic()
   const active = TITLES[pathname] ?? 'home'
   const onPractice = pathname === '/practice'
-  const fullBleed = pathname === '/shadowing'
+  const fullBleed = pathname === '/shadowing' || pathname === '/dictionary'
   const known = pathname in TITLES
   return (
     <div className="h-screen">
