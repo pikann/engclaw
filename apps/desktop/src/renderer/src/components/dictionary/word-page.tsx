@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { ExternalLink, Mic } from 'lucide-react'
 import type { DictionaryWord } from '@engclaw/ipc-contract'
+import { DeckToggle } from '@/components/dictionary/deck-controls'
 import { HearReference } from '@/components/hear-reference'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -211,6 +212,7 @@ export function WordPage({
             <Mic />
             {t('dict.sendPractice')}
           </Button>
+          <DeckToggle word={word.word} />
         </div>
       </header>
 

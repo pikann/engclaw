@@ -37,6 +37,7 @@ describe('preload bridge', () => {
     expect(Object.keys(api).sort()).toEqual([
       'app',
       'contours',
+      'deck',
       'dictionary',
       'history',
       'inference',

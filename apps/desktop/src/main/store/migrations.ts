@@ -66,6 +66,34 @@ export const MIGRATIONS: readonly string[] = [
      result    TEXT NOT NULL,
      PRIMARY KEY (video_id, start_ms, end_ms, text, version)
    );`,
+  // Flashcard deck. Cards are keyed by dictionary word text (the dictionary ships separately).
+  `CREATE TABLE card (
+     word              TEXT PRIMARY KEY,
+     ease              REAL NOT NULL,
+     interval          INTEGER NOT NULL,
+     repetitions       INTEGER NOT NULL,
+     lapses            INTEGER NOT NULL,
+     due               INTEGER NOT NULL,
+     added_at          INTEGER NOT NULL,
+     last_reviewed_at  INTEGER
+   );
+   CREATE INDEX card_due ON card (due);
+   CREATE TABLE review_log (
+     id             INTEGER PRIMARY KEY AUTOINCREMENT,
+     word           TEXT NOT NULL,
+     reviewed_at    INTEGER NOT NULL,
+     grade          INTEGER NOT NULL CHECK (grade BETWEEN 1 AND 5),
+     prev_interval  INTEGER NOT NULL,
+     is_new         INTEGER NOT NULL,
+     UNIQUE (word, reviewed_at)
+   );
+   CREATE INDEX review_log_time ON review_log (reviewed_at);
+   CREATE TABLE quiz_log (
+     id           INTEGER PRIMARY KEY AUTOINCREMENT,
+     word         TEXT NOT NULL,
+     answered_at  INTEGER NOT NULL,
+     correct      INTEGER NOT NULL
+   );`,
 ]
 
 export class FutureSchemaError extends Error {

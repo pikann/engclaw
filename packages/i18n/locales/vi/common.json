@@ -191,7 +191,11 @@
     "theme": "Giao diện",
     "themeSystem": "Theo hệ thống",
     "themeLight": "Sáng",
-    "themeDark": "Tối"
+    "themeDark": "Tối",
+    "newCardsPerDay": "Thẻ mới mỗi ngày",
+    "newCardsPerDayHint": "Số từ chưa học được giới thiệu mỗi ngày học (một ngày bắt đầu lúc 4 giờ sáng).",
+    "reviewsPerDay": "Lượt ôn thẻ mỗi ngày",
+    "reviewsPerDayHint": "Giới hạn số lượt ôn các từ bạn đã học."
   },
   "ds": {
     "scoreRing": "Điểm {{score}} trên 100",
@@ -795,7 +799,8 @@
     "sections": "Các mục từ điển",
     "section": {
       "search": "Tìm kiếm",
-      "roots": "Gốc từ"
+      "roots": "Gốc từ",
+      "flashcards": "Thẻ ghi nhớ"
     },
     "tabWord": "Từ",
     "tabRoots": "Gốc từ & họ từ",
@@ -844,6 +849,73 @@
     "wordCount_other": "{{count}} từ",
     "openWord": "Mở {{word}}",
     "familyCount_one": "{{count}} từ",
-    "wordCount_one": "{{count}} từ"
+    "wordCount_one": "{{count}} từ",
+    "deck": {
+      "add": "Thêm vào bộ thẻ",
+      "remove": "Xóa khỏi bộ thẻ",
+      "inDeck": "Đã có trong bộ thẻ",
+      "addRoot": "Thêm tất cả từ vào bộ thẻ",
+      "addedRoot": "Đã thêm {{added}} từ mới, {{skipped}} từ đã có.",
+      "drill": "Luyện gốc từ này",
+      "failed": "Không thể cập nhật bộ thẻ.",
+      "title": "Thẻ ghi nhớ",
+      "review": "Ôn tập",
+      "quiz": "Câu đố",
+      "show": "Hiện đáp án",
+      "showHint": "Phím Space hiện đáp án; phím 1–4 để chấm.",
+      "grade": {
+        "again": "Lại",
+        "hard": "Khó",
+        "good": "Tốt",
+        "easy": "Dễ"
+      },
+      "dueCount_one": "{{count}} thẻ đến hạn",
+      "dueCount_other": "{{count}} thẻ đến hạn",
+      "newCount_one": "{{count}} thẻ mới",
+      "newCount_other": "{{count}} thẻ mới",
+      "doneTitle": "Đã xong hết",
+      "doneBody": "Hiện chưa có thẻ nào đến hạn. Hãy quay lại sau, hoặc thêm từ từ một gốc từ.",
+      "empty": "Bộ thẻ trống. Hãy thêm từ từ trang từ hoặc trang gốc từ.",
+      "drilling": "Đang luyện một gốc từ",
+      "drillExit": "Quay lại tất cả thẻ",
+      "parts": "Thành phần của từ",
+      "card": "Thẻ ghi nhớ",
+      "stats": {
+        "title": "Tiến độ",
+        "total": "Thẻ",
+        "dueToday": "Đến hạn hôm nay",
+        "new": "Mới",
+        "learning": "Đang học",
+        "mature": "Đã thuộc",
+        "retention": "Tỷ lệ nhớ",
+        "streak": "Chuỗi ngày",
+        "quizAccuracy": "Độ chính xác câu đố",
+        "heatmap": "Lượt ôn trong 30 ngày qua",
+        "heatmapDay": "{{count}} lượt ôn",
+        "roots": "Mức thuộc theo gốc từ",
+        "rootMastery": "{{mature}}/{{total}} từ đã thuộc",
+        "none": "—"
+      },
+      "quizUi": {
+        "start": "Bắt đầu câu đố",
+        "prompt": "“{{word}}” nghĩa là gì?",
+        "correct": "Chính xác!",
+        "wrong": "Chưa đúng. Đáp án đúng được tô sáng.",
+        "next": "Tiếp",
+        "finish": "Xem kết quả",
+        "score": "Bạn đúng {{score}}/{{total}} câu.",
+        "again": "Câu đố mới",
+        "empty": "Hãy thêm từ vào bộ thẻ để được hỏi.",
+        "hint": "Câu đố không thay đổi lịch ôn tập của bạn.",
+        "progress": "Câu {{n}}/{{total}}"
+      },
+      "file": {
+        "export": "Xuất",
+        "import": "Nhập",
+        "exported": "Đã xuất {{count}} thẻ.",
+        "imported": "Đã nhập {{imported}} thẻ mới, cập nhật {{updated}}, bỏ qua {{skipped}} (không có trong từ điển).",
+        "error": "Không thể dùng tệp này: {{message}}"
+      }
+    }
   }
 }

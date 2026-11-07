@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { ExternalLink } from 'lucide-react'
+import { RootDeckActions } from '@/components/dictionary/deck-controls'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useDictionaryRoot } from '@/lib/use-dictionary'
@@ -9,10 +10,12 @@ export function RootFamily({
   rootId,
   currentWordId,
   onOpenWord,
+  onDrill,
 }: {
   rootId: number | null
   currentWordId?: number
   onOpenWord: (word: { id: number; word: string }) => void
+  onDrill?: (rootId: number) => void
 }) {
   const { t } = useTranslation()
   const root = useDictionaryRoot(rootId)
@@ -89,6 +92,7 @@ export function RootFamily({
           </p>
         )}
       </div>
+      <RootDeckActions rootId={r.id} onDrill={onDrill} />
       <a
         href={r.sourceUrl}
         target="_blank"

@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router'
+import { Flashcards } from '@/components/dictionary/flashcards'
 import { RootFamily } from '@/components/dictionary/root-family'
 import { RootsBrowser } from '@/components/dictionary/roots-browser'
 import { SearchPane } from '@/components/dictionary/search-pane'
@@ -25,7 +26,10 @@ export function DictionaryPage() {
   const [pageTab, setPageTab] = useState('word')
   const [recent, setRecent] = useState(() => loadRecent(localStorage))
 
-  const section = params.get('section') === 'roots' ? 'roots' : 'search'
+  const sectionParam = params.get('section')
+  const section =
+    sectionParam === 'roots' || sectionParam === 'flashcards' ? sectionParam : 'search'
+  const drillRootId = toId(params.get('drill'))
   const wordId = toId(params.get('word'))
   const rootParam = toId(params.get('root'))
   const word = useDictionaryWord(section === 'search' ? wordId : null)
@@ -61,11 +65,17 @@ export function DictionaryPage() {
     setPageTab('roots')
     go({ root: String(id) })
   }
+  const drill = (id: number) => go({ section: 'flashcards', drill: String(id) })
   const practice = (text: string) => navigate('/practice', { state: { practiceText: text } })
 
   const wide = layout === 'wide'
   const family = (
-    <RootFamily rootId={activeRootId} currentWordId={wordId ?? undefined} onOpenWord={openWord} />
+    <RootFamily
+      rootId={activeRootId}
+      currentWordId={wordId ?? undefined}
+      onOpenWord={openWord}
+      onDrill={drill}
+    />
   )
   const wordPage = (
     <WordPage
@@ -81,7 +91,7 @@ export function DictionaryPage() {
     <div className="flex h-full flex-col" data-testid="dictionary-page">
       <Tabs
         value={section}
-        onValueChange={(v) => go({ section: v === 'roots' ? 'roots' : null })}
+        onValueChange={(v) => go({ section: v === 'search' ? null : v, drill: null })}
         className="min-h-0 flex-1 gap-0"
       >
         <div className="border-b px-4 py-2">
@@ -91,6 +101,9 @@ export function DictionaryPage() {
             </TabsTrigger>
             <TabsTrigger value="roots" data-testid="dictionary-tab-roots">
               {t('dict.section.roots')}
+            </TabsTrigger>
+            <TabsTrigger value="flashcards" data-testid="dictionary-tab-flashcards">
+              {t('dict.section.flashcards')}
             </TabsTrigger>
           </TabsList>
         </div>
@@ -139,7 +152,12 @@ export function DictionaryPage() {
             onSelect={openRoot}
             onOpenWord={openWord}
             layout={layout}
+            onDrill={drill}
           />
+        </TabsContent>
+
+        <TabsContent value="flashcards" className="min-h-0 flex-1">
+          <Flashcards drillRootId={drillRootId} onDrillExit={() => go({ drill: null })} />
         </TabsContent>
       </Tabs>
     </div>

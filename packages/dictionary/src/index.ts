@@ -1,3 +1,5 @@
 export * from './schema'
 export * from './search'
 export * from './lookup'
+export * from './sm2'
+export * from './learn'
