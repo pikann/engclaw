@@ -90,6 +90,18 @@ const api: EngclawApi = {
     root: (req) => invoke(IPC.dictionaryRoot, req),
     roots: (req) => invoke(IPC.dictionaryRoots, req),
   },
+  deck: {
+    add: (req) => invoke(IPC.deckAdd, req),
+    remove: (req) => invoke(IPC.deckRemove, req),
+    has: (req) => invoke(IPC.deckHas, req),
+    next: (req) => invoke(IPC.deckNext, req),
+    review: (req) => invoke(IPC.deckReview, req),
+    stats: () => invoke(IPC.deckStats),
+    quiz: (req) => invoke(IPC.deckQuiz, req),
+    quizAnswer: (req) => invoke(IPC.deckQuizAnswer, req),
+    export: () => invoke(IPC.deckExport),
+    import: () => invoke(IPC.deckImport),
+  },
   tts: {
     speak: (req) => invoke(IPC.ttsSpeak, req),
   },

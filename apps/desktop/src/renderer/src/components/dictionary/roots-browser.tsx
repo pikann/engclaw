@@ -13,11 +13,13 @@ export function RootsBrowser({
   onSelect,
   onOpenWord,
   layout,
+  onDrill,
 }: {
   selectedId: number | null
   onSelect: (rootId: number) => void
   onOpenWord: (word: { id: number; word: string }) => void
   layout: Layout
+  onDrill?: (rootId: number) => void
 }) {
   const { t } = useTranslation()
   const [query, setQuery] = useState('')
@@ -118,7 +120,7 @@ export function RootsBrowser({
         </div>
       </Pane>
       <Pane>
-        <RootFamily rootId={selectedId} onOpenWord={onOpenWord} />
+        <RootFamily rootId={selectedId} onOpenWord={onOpenWord} onDrill={onDrill} />
       </Pane>
     </div>
   )

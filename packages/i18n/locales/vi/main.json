@@ -16,6 +16,8 @@
     "later": "Để sau",
     "chooseModelsDir": "Chọn thư mục mô hình",
     "exportHistory": "Xuất lịch sử luyện tập",
-    "importHistory": "Nhập lịch sử luyện tập"
+    "importHistory": "Nhập lịch sử luyện tập",
+    "exportLearning": "Xuất thẻ ghi nhớ và tiến độ",
+    "importLearning": "Nhập thẻ ghi nhớ và tiến độ"
   }
 }

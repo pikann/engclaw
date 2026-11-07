@@ -191,7 +191,11 @@
     "theme": "Theme",
     "themeSystem": "Match system",
     "themeLight": "Light",
-    "themeDark": "Dark"
+    "themeDark": "Dark",
+    "newCardsPerDay": "New flashcards per day",
+    "newCardsPerDayHint": "How many unseen words to introduce each study day (a day starts at 4 am).",
+    "reviewsPerDay": "Flashcard reviews per day",
+    "reviewsPerDayHint": "Upper limit on reviews of words you already know."
   },
   "ds": {
     "scoreRing": "Score {{score}} out of 100",
@@ -795,7 +799,8 @@
     "sections": "Dictionary sections",
     "section": {
       "search": "Search",
-      "roots": "Roots"
+      "roots": "Roots",
+      "flashcards": "Flashcards"
     },
     "tabWord": "Word",
     "tabRoots": "Roots & family",
@@ -844,6 +849,73 @@
     "pickRoot": "Pick a root to see the words built on it.",
     "wordCount_one": "{{count}} word",
     "wordCount_other": "{{count}} words",
-    "openWord": "Open {{word}}"
+    "openWord": "Open {{word}}",
+    "deck": {
+      "add": "Add to deck",
+      "remove": "Remove from deck",
+      "inDeck": "In your deck",
+      "addRoot": "Add all words to deck",
+      "addedRoot": "Added {{added}} new, {{skipped}} already in the deck.",
+      "drill": "Drill this root",
+      "failed": "Could not update the deck.",
+      "title": "Flashcards",
+      "review": "Review",
+      "quiz": "Quiz",
+      "show": "Show answer",
+      "showHint": "Space shows the answer; 1–4 grade it.",
+      "grade": {
+        "again": "Again",
+        "hard": "Hard",
+        "good": "Good",
+        "easy": "Easy"
+      },
+      "dueCount_one": "{{count}} due",
+      "dueCount_other": "{{count}} due",
+      "newCount_one": "{{count}} new",
+      "newCount_other": "{{count}} new",
+      "doneTitle": "All caught up",
+      "doneBody": "Nothing is due right now. Come back later, or add more words from a root.",
+      "empty": "Your deck is empty. Add words from a word page or a root page.",
+      "drilling": "Drilling one root",
+      "drillExit": "Back to all cards",
+      "parts": "Word parts",
+      "card": "Flashcard",
+      "stats": {
+        "title": "Progress",
+        "total": "Cards",
+        "dueToday": "Due today",
+        "new": "New",
+        "learning": "Learning",
+        "mature": "Mature",
+        "retention": "Retention",
+        "streak": "Streak (days)",
+        "quizAccuracy": "Quiz accuracy",
+        "heatmap": "Reviews in the last 30 days",
+        "heatmapDay": "{{count}} reviews",
+        "roots": "Mastery by root",
+        "rootMastery": "{{mature}} of {{total}} words mature",
+        "none": "—"
+      },
+      "quizUi": {
+        "start": "Start quiz",
+        "prompt": "What does “{{word}}” mean?",
+        "correct": "Correct!",
+        "wrong": "Not quite. The right answer is highlighted.",
+        "next": "Next",
+        "finish": "See results",
+        "score": "You got {{score}} of {{total}}.",
+        "again": "New quiz",
+        "empty": "Add words to your deck to be quizzed on them.",
+        "hint": "Quizzes do not change your review schedule.",
+        "progress": "Question {{n}} of {{total}}"
+      },
+      "file": {
+        "export": "Export",
+        "import": "Import",
+        "exported": "Exported {{count}} cards.",
+        "imported": "Imported {{imported}} new, updated {{updated}}, skipped {{skipped}} (not in the dictionary).",
+        "error": "Could not use the file: {{message}}"
+      }
+    }
   }
 }

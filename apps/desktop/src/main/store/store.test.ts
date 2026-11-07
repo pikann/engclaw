@@ -124,6 +124,8 @@ describe('store', () => {
       silenceAutoStop: true,
       checkForUpdates: true,
       theme: 'system',
+      newCardsPerDay: 20,
+      reviewsPerDay: 200,
     })
     store.settings.update({ silenceAutoStop: false })
     store.db.close()
@@ -132,6 +134,8 @@ describe('store', () => {
       silenceAutoStop: false,
       checkForUpdates: true,
       theme: 'system',
+      newCardsPerDay: 20,
+      reviewsPerDay: 200,
     })
   })
 

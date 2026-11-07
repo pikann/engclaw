@@ -472,6 +472,102 @@ export type DictionaryWord = z.infer<typeof DictionaryWord>
 export type DictionaryRoot = z.infer<typeof DictionaryRoot>
 export type DictionaryRootList = z.infer<typeof DictionaryRootList>
 
+export const DeckGrade = z.enum(['again', 'hard', 'good', 'easy'])
+export type DeckGrade = z.infer<typeof DeckGrade>
+const DeckWord = z.string().min(1).max(100)
+export const DeckCard = z.object({
+  word: z.string(),
+  ease: z.number(),
+  interval: z.number().int(),
+  repetitions: z.number().int(),
+  lapses: z.number().int(),
+  due: z.number().int(),
+  addedAt: z.number(),
+  lastReviewedAt: z.number().nullable(),
+})
+export type DeckCard = z.infer<typeof DeckCard>
+export const DeckAddRequest = z.union([
+  z.object({ words: z.array(DeckWord).min(1).max(500) }).strict(),
+  z.object({ rootId: z.number().int().min(0) }).strict(),
+])
+export const DeckAddResult = z.object({ added: z.number().int(), skipped: z.number().int() })
+export const DeckWordRequest = z.object({ word: DeckWord }).strict()
+export const DeckHasRequest = z.object({ words: z.array(DeckWord).max(500) }).strict()
+export const DeckNextRequest = z.object({ rootId: z.number().int().min(0).optional() }).strict()
+export const DeckSession = z
+  .object({
+    card: DeckCard,
+    entry: DictionaryWord,
+    remaining: z.object({ new: z.number().int(), due: z.number().int() }),
+  })
+  .nullable()
+export type DeckSession = z.infer<typeof DeckSession>
+export const DeckReviewRequest = z.object({ word: DeckWord, grade: DeckGrade }).strict()
+export const DeckStats = z.object({
+  total: z.number().int(),
+  dueToday: z.number().int(),
+  newCards: z.number().int(),
+  learning: z.number().int(),
+  mature: z.number().int(),
+  /** Share of reviews graded Good or Easy, 0..1; null before the first review. */
+  retention: z.number().nullable(),
+  streak: z.number().int(),
+  /** Reviews per study day for the last 30 days, oldest first. */
+  heatmap: z.array(z.object({ day: z.number().int(), count: z.number().int() })),
+  quizAccuracy: z.number().nullable(),
+  roots: z.array(
+    z.object({
+      rootId: z.number().int(),
+      root: z.string(),
+      meaning: z.string(),
+      inDeck: z.number().int(),
+      mature: z.number().int(),
+      total: z.number().int(),
+    }),
+  ),
+})
+export type DeckStats = z.infer<typeof DeckStats>
+export const DeckQuizRequest = z
+  .object({ count: z.number().int().min(1).max(50).optional() })
+  .strict()
+export const DeckQuizQuestion = z.object({
+  word: z.string(),
+  ipa: z.string().nullable(),
+  options: z.array(z.string()).min(2).max(6),
+  answer: z.number().int().min(0),
+})
+export type DeckQuizQuestion = z.infer<typeof DeckQuizQuestion>
+export const DeckQuizAnswer = z.object({ word: DeckWord, correct: z.boolean() }).strict()
+/** The on-disk learning export (`engclaw-learning-v1.json`). */
+export const LearningExport = z.object({
+  format: z.literal('engclaw-learning'),
+  version: z.literal(1),
+  exportedAt: z.number(),
+  cards: z.array(DeckCard),
+  reviews: z.array(
+    z.object({
+      word: DeckWord,
+      reviewedAt: z.number(),
+      grade: z.number().int().min(1).max(5),
+      prevInterval: z.number().int(),
+      isNew: z.boolean(),
+    }),
+  ),
+})
+export type LearningExportFile = z.infer<typeof LearningExport>
+export const LearningFileResult = z.discriminatedUnion('status', [
+  z.object({ status: z.literal('cancelled') }),
+  z.object({ status: z.literal('error'), message: z.string() }),
+  z.object({ status: z.literal('exported'), count: z.number(), path: z.string() }),
+  z.object({
+    status: z.literal('imported'),
+    imported: z.number(),
+    updated: z.number(),
+    skipped: z.number(),
+  }),
+])
+export type LearningFileResult = z.infer<typeof LearningFileResult>
+
 export const AppSettings = z.object({
   /** Stop recording after ~2 s of silence once speech was heard. */
   silenceAutoStop: z.boolean().default(true),
@@ -479,6 +575,10 @@ export const AppSettings = z.object({
   checkForUpdates: z.boolean().default(true),
   /** Colour theme: follow the OS, or force light/dark. */
   theme: z.enum(['system', 'light', 'dark']).default('system'),
+  /** Flashcards: new cards introduced per study day. */
+  newCardsPerDay: z.number().int().min(0).max(200).default(20),
+  /** Flashcards: reviews of already-learned cards per study day. */
+  reviewsPerDay: z.number().int().min(0).max(2000).default(200),
 })
 export type AppSettings = z.infer<typeof AppSettings>
 export const AppSettingsPatch = AppSettings.partial().strict()
@@ -525,6 +625,16 @@ export const IPC = {
   dictionaryWord: 'dictionary:word',
   dictionaryRoot: 'dictionary:root',
   dictionaryRoots: 'dictionary:roots',
+  deckAdd: 'deck:add',
+  deckRemove: 'deck:remove',
+  deckHas: 'deck:has',
+  deckNext: 'deck:next',
+  deckReview: 'deck:review',
+  deckStats: 'deck:stats',
+  deckQuiz: 'deck:quiz',
+  deckQuizAnswer: 'deck:quizAnswer',
+  deckExport: 'deck:export',
+  deckImport: 'deck:import',
   inferenceAnalyze: 'inference:analyze',
   inferenceTranscribe: 'inference:transcribe',
   inferenceIntonation: 'inference:intonation',
@@ -616,6 +726,20 @@ export const invokeChannels = {
     request: DictionaryRootsRequest.optional(),
     response: DictionaryRootList,
   },
+  /** Adds words (or a whole root family) to the flashcard deck; words already in it are skipped. */
+  [IPC.deckAdd]: { request: DeckAddRequest, response: DeckAddResult },
+  [IPC.deckRemove]: { request: DeckWordRequest, response: z.boolean() },
+  /** Which of the given words are in the deck. */
+  [IPC.deckHas]: { request: DeckHasRequest, response: z.array(z.string()) },
+  /** Next card to study (due first, then new within the daily limits), optionally for one root only. */
+  [IPC.deckNext]: { request: DeckNextRequest.optional(), response: DeckSession },
+  [IPC.deckReview]: { request: DeckReviewRequest, response: DeckCard },
+  [IPC.deckStats]: { request: noArgs, response: DeckStats },
+  /** Word-to-definition multiple choice over deck words; never changes schedules. */
+  [IPC.deckQuiz]: { request: DeckQuizRequest.optional(), response: z.array(DeckQuizQuestion) },
+  [IPC.deckQuizAnswer]: { request: DeckQuizAnswer, response: z.null() },
+  [IPC.deckExport]: { request: noArgs, response: LearningFileResult },
+  [IPC.deckImport]: { request: noArgs, response: LearningFileResult },
   [IPC.inferenceAnalyze]: {
     request: AnalyzeRequest,
     response: inferenceResult(PronunciationResult),
@@ -730,6 +854,18 @@ export interface EngclawApi {
     word(req: z.infer<typeof DictionaryIdRequest>): Promise<DictionaryWord | null>
     root(req: z.infer<typeof DictionaryIdRequest>): Promise<DictionaryRoot | null>
     roots(req?: z.infer<typeof DictionaryRootsRequest>): Promise<DictionaryRootList>
+  }
+  deck: {
+    add(req: z.infer<typeof DeckAddRequest>): Promise<z.infer<typeof DeckAddResult>>
+    remove(req: z.infer<typeof DeckWordRequest>): Promise<boolean>
+    has(req: z.infer<typeof DeckHasRequest>): Promise<string[]>
+    next(req?: z.infer<typeof DeckNextRequest>): Promise<DeckSession>
+    review(req: z.infer<typeof DeckReviewRequest>): Promise<DeckCard>
+    stats(): Promise<DeckStats>
+    quiz(req?: z.infer<typeof DeckQuizRequest>): Promise<DeckQuizQuestion[]>
+    quizAnswer(req: z.infer<typeof DeckQuizAnswer>): Promise<null>
+    export(): Promise<LearningFileResult>
+    import(): Promise<LearningFileResult>
   }
   tts: {
     /** Reference-voice audio (16 kHz mono) for a sentence; repeats are served from a disk cache. */

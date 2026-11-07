@@ -17,6 +17,7 @@ import {
   DialogFooter,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 
 const THEMES = ['system', 'light', 'dark'] as const satisfies readonly ThemePreference[]
@@ -90,8 +91,16 @@ export function SettingsPanel() {
   const toggle = async (key: keyof AppSettings, value: boolean): Promise<void> =>
     setSettings(await window.engclaw.app.updateSettings({ [key]: value }))
 
+  const setLimit = async (key: 'newCardsPerDay' | 'reviewsPerDay', raw: string): Promise<void> => {
+    const n = Number(raw)
+    if (!Number.isInteger(n) || n < 0) return
+    setSettings(await window.engclaw.app.updateSettings({ [key]: n }))
+  }
+
   const silenceId = useId()
   const updatesId = useId()
+  const newCardsId = useId()
+  const reviewsId = useId()
 
   return (
     <div data-testid="settings-panel" className="space-y-8">
@@ -181,6 +190,40 @@ export function SettingsPanel() {
                       aria-labelledby={updatesId}
                       checked={settings.checkForUpdates}
                       onCheckedChange={(v) => void toggle('checkForUpdates', v)}
+                    />
+                  </SettingRow>
+                  <SettingRow
+                    label={t('settings.newCardsPerDay')}
+                    hint={t('settings.newCardsPerDayHint')}
+                    labelId={newCardsId}
+                  >
+                    <Input
+                      type="number"
+                      min={0}
+                      max={200}
+                      className="w-24"
+                      data-testid="setting-new-cards"
+                      aria-labelledby={newCardsId}
+                      key={settings.newCardsPerDay}
+                      defaultValue={settings.newCardsPerDay}
+                      onBlur={(e) => void setLimit('newCardsPerDay', e.currentTarget.value)}
+                    />
+                  </SettingRow>
+                  <SettingRow
+                    label={t('settings.reviewsPerDay')}
+                    hint={t('settings.reviewsPerDayHint')}
+                    labelId={reviewsId}
+                  >
+                    <Input
+                      type="number"
+                      min={0}
+                      max={2000}
+                      className="w-24"
+                      data-testid="setting-reviews"
+                      aria-labelledby={reviewsId}
+                      key={settings.reviewsPerDay}
+                      defaultValue={settings.reviewsPerDay}
+                      onBlur={(e) => void setLimit('reviewsPerDay', e.currentTarget.value)}
                     />
                   </SettingRow>
                 </>
