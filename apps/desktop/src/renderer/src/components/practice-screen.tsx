@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useLocation } from 'react-router'
 import { AlertDialog as AlertDialogPrimitive } from 'radix-ui'
 import {
   AlertTriangle,
@@ -257,6 +258,12 @@ export function PracticeScreen() {
   const free = mode === 'free'
   const latest = useRef(state)
   latest.current = state
+
+  const location = useLocation()
+  useEffect(() => {
+    const text = (location.state as { practiceText?: unknown } | null)?.practiceText
+    if (typeof text === 'string' && text.trim()) dispatch({ type: 'handoff', text })
+  }, [location.key, location.state])
 
   const [seconds, setSeconds] = useState(0)
   const [level, setLevel] = useState(0)

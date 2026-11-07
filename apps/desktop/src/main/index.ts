@@ -12,6 +12,7 @@ import { registerModelHandlers } from './models'
 import { registerStoreHandlers } from './history'
 import { registerInferenceHandlers } from './inference'
 import { registerTtsHandlers } from './tts'
+import { registerDictionaryHandlers } from './dictionary'
 import { UtilityClient } from './utility-client'
 import { loadLanguage, saveLanguage } from './settings'
 import { InnertubeAdapter, YouTubeError, parseVideoId } from '@engclaw/youtube'
@@ -172,6 +173,7 @@ void app.whenReady().then(async () => {
     return null
   })
   registerPlayerHandlers()
+  registerDictionaryHandlers()
   createWindow()
   if (process.env['ENGCLAW_SMOKE']) runSmoke(startUtility())
   const inference = new UtilityClient(startUtility)

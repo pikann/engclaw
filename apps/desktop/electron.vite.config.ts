@@ -10,6 +10,7 @@ export default defineConfig({
     plugins: [
       externalizeDepsPlugin({
         exclude: [
+          '@engclaw/dictionary',
           '@engclaw/i18n',
           '@engclaw/ipc-contract',
           '@engclaw/models',

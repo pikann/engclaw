@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { createHashRouter, RouterProvider } from 'react-router'
 import { AppLayout } from '@/components/app-shell'
 import { ComingSoon, Home } from '@/routes/home'
+import { DictionaryPage } from '@/routes/dictionary'
 import { HistoryPage } from '@/routes/history'
 import { ShadowingPage } from '@/routes/shadowing'
 import { SettingsPage } from '@/routes/settings'
@@ -22,6 +23,7 @@ const router = createHashRouter([
       { index: true, element: <Home /> },
       { path: 'practice', element: null },
       { path: 'shadowing', element: <ShadowingPage /> },
+      { path: 'dictionary', element: <DictionaryPage /> },
       { path: 'history', element: <HistoryPage /> },
       { path: 'settings', element: <SettingsPage /> },
       { path: '*', element: <ComingSoon /> },
