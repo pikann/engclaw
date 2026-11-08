@@ -48,6 +48,7 @@ linux:
     - deb
   category: Education
   maintainer: Engclaw
+  executableName: engclaw
 deb:
   packageName: engclaw
 afterPack: build/after-pack.cjs

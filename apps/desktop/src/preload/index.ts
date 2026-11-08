@@ -26,7 +26,7 @@ function subscribe<C extends EventChannel>(
   cb: (payload: EventPayload<C>) => void,
 ): () => void {
   const listener = (_e: IpcRendererEvent, raw: unknown): void =>
-    cb(eventChannels[channel].parse(raw))
+    cb(eventChannels[channel].parse(raw) as EventPayload<C>)
   ipcRenderer.on(channel, listener)
   return () => ipcRenderer.removeListener(channel, listener)
 }

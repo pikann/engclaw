@@ -10,6 +10,6 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "youtubei.js": "^16.0.0"
+    "youtubei.js": "^18.3.0"
   }
 }
