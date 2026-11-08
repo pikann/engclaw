@@ -38,8 +38,8 @@ describe('release workflow', () => {
     expect(workflow).toContain('mac.notarize=true')
   })
 
-  it('publishes SHA256SUMS for official releases only', () => {
+  it('publishes SHA256SUMS for every tag, pre-releases included', () => {
     expect(workflow).toContain('SHA256SUMS')
-    expect(workflow).toMatch(/checksums:[\s\S]*if: \$\{\{ !contains\(github\.ref_name, '-'\) \}\}/)
+    expect(workflow).not.toMatch(/checksums:[\s\S]*?if:/)
   })
 })
