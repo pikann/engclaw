@@ -14,6 +14,7 @@ import { registerInferenceHandlers } from './inference'
 import { registerTtsHandlers } from './tts'
 import { registerDeckHandlers } from './deck'
 import { registerDictionaryHandlers } from './dictionary'
+import { registerGameHandlers } from './game'
 import { UtilityClient } from './utility-client'
 import { loadLanguage, saveLanguage } from './settings'
 import { InnertubeAdapter, YouTubeError, parseVideoId } from '@engclaw/youtube'
@@ -175,6 +176,7 @@ void app.whenReady().then(async () => {
     return null
   })
   registerPlayerHandlers()
+  registerGameHandlers()
   registerDeckHandlers(store, registerDictionaryHandlers(store))
   createWindow()
   if (process.env['ENGCLAW_SMOKE']) runSmoke(startUtility())

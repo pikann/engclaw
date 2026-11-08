@@ -421,6 +421,23 @@ const RootSummarySchema = z.object({
 export const DictionarySearchRequest = z
   .object({ query: z.string().max(100), limit: z.number().int().min(1).max(50).optional() })
   .strict()
+export const GameChapterRequest = z.object({ order: z.number().int().min(1) }).strict()
+export const GameChapter = z.object({
+  chapter: z
+    .object({
+      id: z.string(),
+      text: z.string(),
+      type: z.enum(['word', 'phrase', 'idiom']),
+      ipa: z.string(),
+      meaning: z.string(),
+      examples: z.array(z.string()),
+      order: z.number().int(),
+      world: z.number().int(),
+    })
+    .nullable(),
+  total: z.number().int(),
+})
+export type GameChapter = z.infer<typeof GameChapter>
 export const DictionaryIdRequest = z.object({ id: z.number().int().min(0) }).strict()
 export const DictionaryRootsRequest = z
   .object({ origin: z.string().max(40).optional(), query: z.string().max(100).optional() })
@@ -638,6 +655,7 @@ export const IPC = {
   dictionaryRoot: 'dictionary:root',
   dictionaryRoots: 'dictionary:roots',
   dictionaryImage: 'dictionary:image',
+  gameChapter: 'game:chapter',
   deckAdd: 'deck:add',
   deckRemove: 'deck:remove',
   deckHas: 'deck:has',
@@ -737,6 +755,8 @@ export const invokeChannels = {
   [IPC.dictionaryRoot]: { request: DictionaryIdRequest, response: DictionaryRoot.nullable() },
   /** Illustration for a word, or null when there is none, images are off, or the network failed. */
   [IPC.dictionaryImage]: { request: DictionaryIdRequest, response: WordImage.nullable() },
+  /** A chapter by its 1-based global order (null when out of range), plus the catalog size. */
+  [IPC.gameChapter]: { request: GameChapterRequest, response: GameChapter },
   [IPC.dictionaryRoots]: {
     request: DictionaryRootsRequest.optional(),
     response: DictionaryRootList,
@@ -870,6 +890,9 @@ export interface EngclawApi {
     root(req: z.infer<typeof DictionaryIdRequest>): Promise<DictionaryRoot | null>
     roots(req?: z.infer<typeof DictionaryRootsRequest>): Promise<DictionaryRootList>
     image(req: z.infer<typeof DictionaryIdRequest>): Promise<WordImage | null>
+  }
+  game: {
+    chapter(req: z.infer<typeof GameChapterRequest>): Promise<GameChapter>
   }
   deck: {
     add(req: z.infer<typeof DeckAddRequest>): Promise<z.infer<typeof DeckAddResult>>

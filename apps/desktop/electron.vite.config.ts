@@ -11,6 +11,7 @@ export default defineConfig({
       externalizeDepsPlugin({
         exclude: [
           '@engclaw/dictionary',
+          '@engclaw/game',
           '@engclaw/i18n',
           '@engclaw/ipc-contract',
           '@engclaw/models',

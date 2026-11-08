@@ -746,7 +746,7 @@
       "tryAgain": "Try again",
       "lastAttempt": "Last attempt: {{score}}",
       "soundFix": "The “{{sound}}” sound came out like “{{heard}}”.",
-      "wordsToFix": "Words to fix",
+      "result": "Result",
       "attemptLog": "Attempts this run",
       "micExclusive": "Recording is off while you talk to the agent.",
       "askTitle": "Ask the agent",
@@ -781,7 +781,9 @@
       "backToMap": "Back to map",
       "map": "Map",
       "next": "Next chapter",
-      "prevBest": "Previous best"
+      "prevBest": "Previous best",
+      "loadingChapter": "Loading chapter…",
+      "chapterNotFound": "That chapter does not exist."
     }
   },
   "dict": {
