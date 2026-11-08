@@ -68,6 +68,10 @@
       "name": "@engclaw/dictionary",
       "version": "0.0.0",
     },
+    "packages/game": {
+      "name": "@engclaw/game",
+      "version": "0.0.0",
+    },
     "packages/i18n": {
       "name": "@engclaw/i18n",
       "version": "0.0.0",
@@ -178,6 +182,8 @@
     "@engclaw/desktop": ["@engclaw/desktop@workspace:apps/desktop"],
 
     "@engclaw/dictionary": ["@engclaw/dictionary@workspace:packages/dictionary"],
+
+    "@engclaw/game": ["@engclaw/game@workspace:packages/game"],
 
     "@engclaw/i18n": ["@engclaw/i18n@workspace:packages/i18n"],
 
