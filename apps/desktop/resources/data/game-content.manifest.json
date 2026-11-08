@@ -1,0 +1,33 @@
+{
+  "version": "1.1",
+  "schemaVersion": 1,
+  "file": "game-content.sqlite",
+  "bytes": 1019904,
+  "sha256": "f24e3533ec15553da982dbcb5cb2ca85a01cd21db37dddab54a32336c0a16311",
+  "counts": {
+    "total": 3000,
+    "word": 1500,
+    "phrase": 600,
+    "idiom": 900
+  },
+  "sources": [
+    {
+      "name": "Wiktionary (meanings, example sentences)",
+      "version": "via Wiktextract (kaikki.org)",
+      "license": "CC BY-SA 4.0",
+      "url": "https://en.wiktionary.org/"
+    },
+    {
+      "name": "CMUdict (pronunciations)",
+      "version": "cmusphinx/cmudict master",
+      "license": "BSD-2-Clause",
+      "url": "https://github.com/cmusphinx/cmudict"
+    },
+    {
+      "name": "FrequencyWords en_50k (frequency ranking)",
+      "version": "hermitdave/FrequencyWords 2018",
+      "license": "CC BY-SA 4.0",
+      "url": "https://github.com/hermitdave/FrequencyWords"
+    }
+  ]
+}
