@@ -448,8 +448,44 @@ export const GameChapter = z.object({
     })
     .nullable(),
   total: z.number().int(),
+  /** False while the previous chapter is not passed; locked chapters are not playable. */
+  unlocked: z.boolean(),
 })
 export type GameChapter = z.infer<typeof GameChapter>
+export const GameWorldRequest = z.object({ world: z.number().int().min(1) }).strict()
+/** Everything the level map needs to draw one world, without the heavy chapter fields. */
+export const GameWorld = z.object({
+  world: z.number().int(),
+  chapters: z.array(
+    z.object({
+      order: z.number().int(),
+      text: z.string(),
+      type: z.enum(['word', 'phrase', 'idiom']),
+    }),
+  ),
+})
+export type GameWorld = z.infer<typeof GameWorld>
+export const GameWorldSummary = z.object({
+  world: z.number().int(),
+  first: z.number().int(),
+  count: z.number().int(),
+})
+export const GameMap = z.object({
+  worlds: z.array(GameWorldSummary),
+  total: z.number().int(),
+  progress: z.array(GameProgressEntry),
+})
+export type GameMap = z.infer<typeof GameMap>
+export const GameRecordRequest = z
+  .object({
+    order: z.number().int().min(1),
+    stars: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+    avgScore: z.number().min(0).max(100),
+    bestScore: z.number().min(0).max(100),
+    attempts: z.number().int().min(1),
+  })
+  .strict()
+export const GameRecordResult = z.object({ progress: GameProgressEntry, improved: z.boolean() })
 export const DictionaryIdRequest = z.object({ id: z.number().int().min(0) }).strict()
 export const DictionaryRootsRequest = z
   .object({ origin: z.string().max(40).optional(), query: z.string().max(100).optional() })
@@ -668,6 +704,9 @@ export const IPC = {
   dictionaryRoots: 'dictionary:roots',
   dictionaryImage: 'dictionary:image',
   gameChapter: 'game:chapter',
+  gameMap: 'game:map',
+  gameWorld: 'game:world',
+  gameRecord: 'game:record',
   deckAdd: 'deck:add',
   deckRemove: 'deck:remove',
   deckHas: 'deck:has',
@@ -769,6 +808,12 @@ export const invokeChannels = {
   [IPC.dictionaryImage]: { request: DictionaryIdRequest, response: WordImage.nullable() },
   /** A chapter by its 1-based global order (null when out of range), plus the catalog size. */
   [IPC.gameChapter]: { request: GameChapterRequest, response: GameChapter },
+  /** World list, catalog size and every passed chapter: the level map's first paint. */
+  [IPC.gameMap]: { request: noArgs, response: GameMap },
+  /** The chapters of one world (the map loads worlds lazily). */
+  [IPC.gameWorld]: { request: GameWorldRequest, response: GameWorld },
+  /** Stores a passed run; stars and scores only improve. */
+  [IPC.gameRecord]: { request: GameRecordRequest, response: GameRecordResult },
   [IPC.dictionaryRoots]: {
     request: DictionaryRootsRequest.optional(),
     response: DictionaryRootList,
@@ -905,6 +950,9 @@ export interface EngclawApi {
   }
   game: {
     chapter(req: z.infer<typeof GameChapterRequest>): Promise<GameChapter>
+    map(): Promise<GameMap>
+    world(req: z.infer<typeof GameWorldRequest>): Promise<GameWorld>
+    record(req: z.infer<typeof GameRecordRequest>): Promise<z.infer<typeof GameRecordResult>>
   }
   deck: {
     add(req: z.infer<typeof DeckAddRequest>): Promise<z.infer<typeof DeckAddResult>>

@@ -1,16 +1,17 @@
 import { app } from 'electron'
 import Database from 'better-sqlite3'
 import { join } from 'node:path'
-import { countChapters, readChapterByOrder } from '@engclaw/game'
+import { countChapters, readChapterByOrder, readWorldChapters, readWorlds } from '@engclaw/game'
 import { IPC } from '@engclaw/ipc-contract'
 import { handle } from './ipc'
+import type { GameProgressStore } from './store/game-progress'
 
 const contentPath = (): string =>
   app.isPackaged
     ? join(process.resourcesPath, 'game-content.sqlite')
     : join(app.getAppPath(), 'resources', 'data', 'game-content.sqlite')
 
-export function registerGameHandlers(): void {
+export function registerGameHandlers(progress: GameProgressStore): void {
   let db: Database.Database | undefined
   const open = (): Database.Database =>
     (db ??= new Database(contentPath(), { readonly: true, fileMustExist: true }))
@@ -29,7 +30,19 @@ export function registerGameHandlers(): void {
         world: chapter.world,
       },
       total: countChapters(open()),
+      unlocked: progress.isUnlocked(order),
     }
+  })
+
+  handle(IPC.gameMap, () => ({
+    worlds: readWorlds(open()),
+    total: countChapters(open()),
+    progress: progress.list(),
+  }))
+  handle(IPC.gameWorld, ({ world }) => ({ world, chapters: readWorldChapters(open(), world) }))
+  handle(IPC.gameRecord, ({ order, ...result }) => {
+    if (!progress.isUnlocked(order)) throw new Error('Chapter is locked')
+    return progress.record(order, result)
   })
   app.on('will-quit', () => db?.close())
 }

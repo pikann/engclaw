@@ -10,6 +10,7 @@ import {
   evaluateAttempt,
   isPassed,
   newRun,
+  runResult,
   REQUIRED_CORRECT,
   totalAttempts,
   type Attempt,
@@ -56,7 +57,7 @@ export function GameChapterPage() {
     setData(null)
     if (Number.isInteger(order) && order >= 1)
       void window.engclaw.game.chapter({ order }).then(setData)
-    else setData({ chapter: null, total: 0 })
+    else setData({ chapter: null, total: 0, unlocked: false })
   }, [order])
 
   if (!data) return <p role="status">{t('screens.game.loadingChapter')}</p>
@@ -65,7 +66,16 @@ export function GameChapterPage() {
       <section className="mx-auto max-w-2xl space-y-3" data-testid="game-not-found">
         <p>{t('screens.game.chapterNotFound')}</p>
         <Button asChild variant="outline">
-          <Link to="/game/chapter/1">{t('screens.game.play')}</Link>
+          <Link to="/game">{t('screens.game.backMap')}</Link>
+        </Button>
+      </section>
+    )
+  if (!data.unlocked)
+    return (
+      <section className="mx-auto max-w-2xl space-y-3 p-6" data-testid="game-locked">
+        <p>{t('screens.game.chapterLocked', { n: data.chapter.order - 1 })}</p>
+        <Button asChild variant="outline">
+          <Link to="/game">{t('screens.game.backMap')}</Link>
         </Button>
       </section>
     )
@@ -90,6 +100,11 @@ function ChapterPlay({ chapter, total }: { chapter: Chapter; total: number }) {
   const pending = useRef<Float32Array | null>(null)
   const passed = isPassed(run)
   const correct = correctCount(run)
+
+  useEffect(() => {
+    const result = runResult(run)
+    if (result) void window.engclaw.game.record({ order: chapter.order, ...result })
+  }, [passed]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const blocker = useBlocker(() => totalAttempts(run) > 0 && !passed)
 
@@ -207,7 +222,7 @@ function ChapterPlay({ chapter, total }: { chapter: Chapter; total: number }) {
           variant="ghost"
           size="icon"
           aria-label={t('screens.game.leave')}
-          onClick={() => void navigate('/')}
+          onClick={() => void navigate('/game')}
         >
           <X />
         </Button>

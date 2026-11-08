@@ -208,3 +208,29 @@ export function readChapterByOrder(db: ContentDb, order: number): Chapter | null
 export function countChapters(db: ContentDb): number {
   return (db.prepare('SELECT COUNT(*) AS n FROM chapters').all()[0] as { n: number }).n
 }
+
+export interface WorldSummary {
+  world: number
+  first: number
+  count: number
+}
+
+export function readWorlds(db: ContentDb): WorldSummary[] {
+  return db
+    .prepare(
+      'SELECT world, MIN(ord) AS first, COUNT(*) AS count FROM chapters GROUP BY world ORDER BY world',
+    )
+    .all() as WorldSummary[]
+}
+
+export interface WorldChapter {
+  order: number
+  text: string
+  type: ChapterType
+}
+
+export function readWorldChapters(db: ContentDb, world: number): WorldChapter[] {
+  return db
+    .prepare('SELECT ord AS "order", text, type FROM chapters WHERE world = ? ORDER BY ord')
+    .all(world) as WorldChapter[]
+}

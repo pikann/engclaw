@@ -1,10 +1,11 @@
 import { StrictMode, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
-import { createHashRouter, Navigate, RouterProvider } from 'react-router'
+import { createHashRouter, RouterProvider } from 'react-router'
 import { AppLayout } from '@/components/app-shell'
 import { ComingSoon, Home } from '@/routes/home'
 import { DictionaryPage } from '@/routes/dictionary'
 import { GameChapterPage } from '@/routes/game-chapter'
+import { GameMapPage } from '@/routes/game-map'
 import { HistoryPage } from '@/routes/history'
 import { ShadowingPage } from '@/routes/shadowing'
 import { SettingsPage } from '@/routes/settings'
@@ -25,7 +26,7 @@ const router = createHashRouter([
       { path: 'practice', element: null },
       { path: 'shadowing', element: <ShadowingPage /> },
       { path: 'dictionary', element: <DictionaryPage /> },
-      { path: 'game', element: <Navigate to="/game/chapter/1" replace /> },
+      { path: 'game', element: <GameMapPage /> },
       { path: 'game/chapter/:order', element: <GameChapterPage /> },
       { path: 'history', element: <HistoryPage /> },
       { path: 'settings', element: <SettingsPage /> },

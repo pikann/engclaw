@@ -176,7 +176,7 @@ void app.whenReady().then(async () => {
     return null
   })
   registerPlayerHandlers()
-  registerGameHandlers()
+  registerGameHandlers(store.game)
   registerDeckHandlers(store, registerDictionaryHandlers(store))
   createWindow()
   if (process.env['ENGCLAW_SMOKE']) runSmoke(startUtility())
