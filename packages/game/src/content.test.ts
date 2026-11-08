@@ -15,6 +15,7 @@ import {
   type ContentDb,
   type ContentManifest,
 } from './content'
+import { WORLD_SIZE, maxNeighbourJump, rankChapters } from './difficulty'
 
 const dataDir = new URL('../../../apps/desktop/resources/data/', import.meta.url)
 const require = createRequire(new URL('../../../apps/desktop/package.json', import.meta.url))
@@ -36,6 +37,12 @@ const manifest = JSON.parse(
   readFileSync(new URL('game-content.manifest.json', dataDir), 'utf8'),
 ) as ContentManifest
 
+function sizes(all: Chapter[]): Map<number, Chapter[]> {
+  const byWorld = new Map<number, Chapter[]>()
+  for (const c of all) byWorld.set(c.world, [...(byWorld.get(c.world) ?? []), c])
+  return byWorld
+}
+
 const good: Chapter = {
   id: 'kick-the-bucket',
   text: 'kick the bucket',
@@ -44,6 +51,9 @@ const good: Chapter = {
   meaning: 'To die.',
   examples: ['He may kick the bucket before the year is out.'],
   frequencyRank: 1245,
+  difficulty: 49,
+  order: 1,
+  world: 1,
   source: 'Wiktionary',
   license: 'CC BY-SA 4.0',
   sourceUrl: 'https://en.wiktionary.org/wiki/kick_the_bucket',
@@ -67,6 +77,15 @@ describe('validateChapters', () => {
 
   it('accepts a valid chapter', () => {
     expect(check({})).toEqual([])
+  })
+
+  it('reports a bad ranking', () => {
+    expect(check({ difficulty: 101 }).join()).toMatch(/difficulty out of range/)
+    expect(check({ order: 2 }).join()).toMatch(/invalid order/)
+    expect(check({ world: 0 }).join()).toMatch(/invalid world/)
+    expect(validateChapters([good, { ...good, id: 'x', text: 'let it be' }], 1).join()).toMatch(
+      /duplicate order 1/,
+    )
   })
 
   it('reports duplicates and variants', () => {
@@ -121,6 +140,40 @@ describe('shipped game content database', () => {
   it('covers words, phrases and idioms', () => {
     for (const type of ['word', 'phrase', 'idiom'] as const)
       expect(chapters.filter((c) => c.type === type).length).toBeGreaterThan(0)
+  })
+
+  it('is ordered easy to hard with a unique order and contiguous worlds of 50-100 chapters', () => {
+    expect(chapters.map((c) => c.order)).toEqual(chapters.map((_, i) => i + 1))
+    for (let i = 1; i < chapters.length; i++) {
+      expect(chapters[i]!.difficulty).toBeGreaterThanOrEqual(chapters[i - 1]!.difficulty)
+      expect(chapters[i]!.world - chapters[i - 1]!.world).toBeGreaterThanOrEqual(0)
+      expect(chapters[i]!.world - chapters[i - 1]!.world).toBeLessThanOrEqual(1)
+    }
+    expect(chapters[0]!.world).toBe(1)
+    const sizes = new Map<number, number>()
+    for (const c of chapters) sizes.set(c.world, (sizes.get(c.world) ?? 0) + 1)
+    for (const n of sizes.values()) {
+      expect(n).toBeGreaterThanOrEqual(WORLD_SIZE.min)
+      expect(n).toBeLessThanOrEqual(WORLD_SIZE.max)
+    }
+  })
+
+  it('has no sharp difficulty jumps between neighbouring chapters', () => {
+    const jumps = chapters.slice(1).map((c, i) => c.difficulty - chapters[i]!.difficulty)
+    expect(maxNeighbourJump(chapters)).toBeLessThanOrEqual(5)
+    expect([...jumps].sort((a, b) => a - b)[Math.floor(jumps.length * 0.99)]).toBeLessThan(0.5)
+    const means = [...sizes(chapters)].map(
+      ([, cs]) => cs.reduce((s, c) => s + c.difficulty, 0) / cs.length,
+    )
+    for (let i = 1; i < means.length; i++) expect(means[i]! - means[i - 1]!).toBeLessThan(10)
+  })
+
+  it('stores exactly what the documented rule computes', () => {
+    const ranking = rankChapters(chapters)
+    for (const c of chapters)
+      expect({ difficulty: c.difficulty, order: c.order, world: c.world }).toEqual(
+        ranking.get(c.id),
+      )
   })
 
   it('matches its manifest (checksum, size, counts, version)', () => {
