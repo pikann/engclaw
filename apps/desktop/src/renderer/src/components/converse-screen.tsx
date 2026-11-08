@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
-import { AlertTriangle, MicOff, Plus, X } from 'lucide-react'
+import { AlertTriangle, Hand, MicOff, Plus, X } from 'lucide-react'
 import type { AgentConversation } from '@engclaw/ipc-contract'
 import { ModelDownloadDialog } from '@/components/model-download-dialog'
 import { RecordButton } from '@/components/record-button'
@@ -210,49 +210,51 @@ export function ConverseScreen() {
         </div>
 
         <footer className="flex flex-col items-center gap-3 border-t p-4">
-          {state.turn !== 'idle' ? (
-            <TurnStateIndicator state={state.turn} />
-          ) : (
+          {state.turn === 'idle' ? (
             <p className="text-muted-foreground text-sm">
               {c.notice ? t(`converse.${c.notice}`) : t('converse.idle')}
             </p>
+          ) : (
+            !listening && <TurnStateIndicator state={state.turn} />
           )}
-          <div className="flex items-center gap-3">
-            <RecordButton
-              recording={listening}
-              level={c.level}
-              timer={t('ds.turn.listening')}
-              disabled={busy || configured === false}
-              startTestId="converse-mic"
-              stopTestId="converse-stop"
-              onStart={() => void c.startListening()}
-              onStop={() => void c.finishListening()}
-            />
-            <div className="flex flex-col gap-2">
-              {speaking && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  data-testid="converse-interrupt"
-                  onClick={() => {
-                    c.interrupt()
-                    void c.startListening()
-                  }}
-                >
-                  {t('converse.interrupt')}
-                </Button>
-              )}
-              {(busy || listening) && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  data-testid="converse-cancel"
-                  onClick={c.cancel}
-                >
-                  {t('converse.cancel')}
-                </Button>
-              )}
-            </div>
+          <RecordButton
+            recording={listening}
+            level={c.level}
+            timer={t('ds.turn.listening')}
+            disabled={busy || configured === false}
+            startTestId="converse-mic"
+            stopTestId="converse-stop"
+            onStart={() => void c.startListening()}
+            onStop={() => void c.finishListening()}
+          />
+          <div className="flex h-9 items-center justify-center">
+            {speaking && (
+              <Button
+                variant="secondary"
+                size="sm"
+                className="rounded-full px-4"
+                data-testid="converse-interrupt"
+                onClick={() => {
+                  c.interrupt()
+                  void c.startListening()
+                }}
+              >
+                <Hand aria-hidden="true" />
+                {t('converse.interrupt')}
+              </Button>
+            )}
+            {(busy || listening) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-full px-4"
+                data-testid="converse-cancel"
+                onClick={c.cancel}
+              >
+                <X aria-hidden="true" />
+                {t('converse.cancel')}
+              </Button>
+            )}
           </div>
         </footer>
       </section>

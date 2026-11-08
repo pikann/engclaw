@@ -984,7 +984,7 @@
     "captionsHidden": "Captions hidden",
     "captionsShortcut": "Show or hide captions (Alt+C)",
     "idle": "Press the microphone and speak.",
-    "interrupt": "Interrupt and answer",
+    "interrupt": "Interrupt",
     "cancel": "Cancel",
     "interrupted": "Interrupted — the rest of the reply was not spoken.",
     "noSpeech": "I didn't catch that. Try again.",

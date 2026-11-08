@@ -984,7 +984,7 @@
     "captionsHidden": "Đã ẩn phụ đề",
     "captionsShortcut": "Hiện hoặc ẩn phụ đề (Alt+C)",
     "idle": "Nhấn micro và nói.",
-    "interrupt": "Ngắt lời và trả lời",
+    "interrupt": "Ngắt lời",
     "cancel": "Hủy",
     "interrupted": "Đã ngắt — phần còn lại của câu trả lời không được đọc.",
     "noSpeech": "Mình chưa nghe rõ. Hãy thử lại.",
