@@ -599,11 +599,66 @@ export const AgentErrorCode = z.enum([
 ])
 export type AgentErrorCode = z.infer<typeof AgentErrorCode>
 
+/**
+ * Compact, versioned pronunciation and fluency summary of one spoken turn. This is the only
+ * speech-derived data that leaves the device (as text, with the transcript); audio, pitch and
+ * energy contours never do. Bounded so a turn adds only a few hundred tokens.
+ */
+export const SPEECH_SUMMARY_VERSION = 1
+export const SPEECH_SUMMARY_MAX_WORDS = 5
+export const SpeechSummary = z
+  .object({
+    v: z.literal(SPEECH_SUMMARY_VERSION),
+    /** Overall pronunciation score, 0-100. */
+    score: z.number().min(0).max(100),
+    /** Word and phoneme error rates, 0-1. */
+    wer: z.number().min(0).max(1),
+    per: z.number().min(0).max(1),
+    /** Words flagged before truncation to the worst `words`. */
+    flaggedWords: z.number().int().min(0).max(1000),
+    /** Worst words first (lowest-confidence phones mispronounced), at most SPEECH_SUMMARY_MAX_WORDS. */
+    words: z
+      .array(
+        z
+          .object({
+            word: z.string().min(1).max(40),
+            /** Expected and heard phones for the word, as IPA-like strings. */
+            expected: z.string().max(40),
+            heard: z.string().max(40),
+            /** 0-1; higher = more clearly wrong. */
+            confidence: z.number().min(0).max(1),
+          })
+          .strict(),
+      )
+      .max(SPEECH_SUMMARY_MAX_WORDS),
+    pace: z
+      .object({
+        /** Words per minute of speaking time (leading and trailing silence excluded). */
+        wpm: z.number().int().min(0).max(400),
+        /** Silent gaps of at least 0.3 s inside the utterance. */
+        pauses: z.number().int().min(0).max(100),
+        longestPauseSec: z.number().min(0).max(60),
+      })
+      .strict(),
+    intonation: z
+      .object({
+        /** Pitch change from the first to the last third of the voiced speech. */
+        ending: z.enum(['rising', 'falling', 'flat']),
+        /** Spread of pitch (10th-90th percentile) in semitones; under ~3 sounds monotone. */
+        rangeSemitones: z.number().min(0).max(48),
+      })
+      .strict(),
+  })
+  .strict()
+export type SpeechSummary = z.infer<typeof SpeechSummary>
+
 export const AgentSendRequest = z
   .object({
     /** Omitted = start a new conversation. */
     conversationId: z.string().min(1).max(64).optional(),
     text: z.string().trim().min(1).max(4000),
+    /** Local analysis of the audio that produced `text`; absent for typed messages. */
+    speech: SpeechSummary.optional(),
   })
   .strict()
 export type AgentSendRequest = z.infer<typeof AgentSendRequest>

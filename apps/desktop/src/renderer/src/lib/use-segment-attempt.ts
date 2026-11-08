@@ -2,10 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { HistorySaveRequest, PronunciationResult } from '@engclaw/ipc-contract'
 import { classifyMicError, playPcm, Recorder } from '@/lib/audio'
 import { decodeSegmentAudio } from '@/lib/audio/decode'
-import {
-  checkIntonation,
-  type IntonationState,
-} from './intonation'
+import { checkIntonation, type IntonationState } from './intonation'
 import type { Segment } from './shadowing'
 
 export type AttemptErrorKind = 'mic' | 'model' | 'failed'
@@ -208,8 +205,7 @@ export function useSegmentAttempt(
   const play = useCallback(() => {
     if (playing.current) return stopPlayback()
     const s = byIndex[indexRef.current]
-    const audio =
-      s && (s.phase === 'result' || s.phase === 'error') ? s.audio : null
+    const audio = s && (s.phase === 'result' || s.phase === 'error') ? s.audio : null
     if (!audio) return
     const h = playPcm(audio, 16000)
     playing.current = h

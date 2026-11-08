@@ -627,8 +627,8 @@
       "active": "Active provider",
       "providerName": "Provider",
       "sentTitle": "What is sent",
-      "sent": "Your transcribed words and a short pronunciation summary are sent to the provider.",
-      "notSent": "Your audio is never sent."
+      "sent": "Your transcribed words and, for spoken turns, a short text summary of your pronunciation and pace: score, word and sound error rates, up to 5 mispronounced words with expected and heard sounds, words per minute, pause count, and pitch ending and range. Your conversation history is sent with each message.",
+      "notSent": "Your audio, recordings and pitch or energy curves are never sent."
     },
     "converse": {
       "viewLabel": "View",
