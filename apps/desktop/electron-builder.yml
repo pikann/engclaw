@@ -60,4 +60,6 @@ publish:
   provider: github
   owner: pikann
   repo: engclaw
-  releaseType: draft
+  # Upload into the release the maintainer created for the tag, whatever its state (a draft, a published
+  # release or a pre-release). The default 'draft' skips every release that is already published.
+  releaseType: release
