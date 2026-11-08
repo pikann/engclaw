@@ -12,6 +12,9 @@ extraResources:
     to: models.json
   - from: resources/data/dictionary.sqlite
     to: dictionary.sqlite
+  # espeak-ng binary + data, built by scripts/espeak/build.sh (GPL-3.0-or-later, separate executable).
+  - from: resources/espeak-ng
+    to: espeak-ng
 npmRebuild: false # better-sqlite3 ships N-API prebuilds; node-gyp rebuild is unnecessary and fails on CI runners
 artifactName: Engclaw-${version}-${arch}.${ext}
 asar: true

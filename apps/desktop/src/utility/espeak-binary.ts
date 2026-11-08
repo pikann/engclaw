@@ -1,25 +1,35 @@
 import { existsSync } from 'node:fs'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 
 const exe = process.platform === 'win32' ? 'espeak-ng.exe' : 'espeak-ng'
 
+export interface EspeakLocation {
+  binary: string
+  /** Folder that contains `espeak-ng-data` (espeak-ng's `--path`), when it is not the default. */
+  dataPath?: string
+}
+
 /**
- * Where to find `espeak-ng`. A packaged app launched from Finder/the Dock does not inherit the
- * shell PATH, so a bare `espeak-ng` is not found even when Homebrew has it installed; try the usual
- * install locations before falling back to PATH.
+ * Where to find `espeak-ng`: `ESPEAK_NG`, the copy bundled in the app (`resources/espeak-ng/`, built
+ * by scripts/espeak/build.sh), then the usual install locations, then PATH. A packaged app launched
+ * from Finder does not inherit the shell PATH, so a bare name is not enough for a Homebrew install.
  */
-export function resolveEspeakBinary(
+export function resolveEspeak(
   env: NodeJS.ProcessEnv = process.env,
   resourcesPath: string | undefined = process.resourcesPath,
   exists: (p: string) => boolean = existsSync,
-): string {
-  if (env['ESPEAK_NG']) return env['ESPEAK_NG']
-  const candidates = [
-    ...(resourcesPath ? [join(resourcesPath, 'espeak-ng', exe)] : []),
+): EspeakLocation {
+  const dataPath = env['ESPEAK_DATA_PATH'] || undefined
+  if (env['ESPEAK_NG']) return { binary: env['ESPEAK_NG'], dataPath }
+  if (resourcesPath) {
+    const bundled = join(resourcesPath, 'espeak-ng', exe)
+    if (exists(bundled)) return { binary: bundled, dataPath: dataPath ?? dirname(bundled) }
+  }
+  const system = [
     ...(process.platform === 'darwin'
       ? ['/opt/homebrew/bin/espeak-ng', '/usr/local/bin/espeak-ng']
       : []),
     ...(process.platform === 'linux' ? ['/usr/bin/espeak-ng', '/usr/local/bin/espeak-ng'] : []),
-  ]
-  return candidates.find((p) => exists(p)) ?? 'espeak-ng'
+  ].find((p) => exists(p))
+  return { binary: system ?? 'espeak-ng', dataPath }
 }

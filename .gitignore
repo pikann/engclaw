@@ -6,3 +6,6 @@ test-results
 *.log
 .DS_Store
 .cache
+
+# built by scripts/espeak/build.sh
+apps/desktop/resources/espeak-ng/
