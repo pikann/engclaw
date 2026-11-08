@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { median, wordCount } from './reply-length'
 import { EVAL_USER_TURNS, PERSONA_VERSION, SYSTEM_PROMPT } from './persona'
-import { runAgentTurn } from './loop'
-import { openAiChatProvider } from './openai'
-import type { ChatMessage } from './types'
+import type { ModelMessage } from 'ai'
+import { createModel } from './model'
+import { runAgentTurn } from './turn'
 
 describe('reply length helpers', () => {
   it('counts words and takes the median', () => {
@@ -27,7 +27,7 @@ describe('persona', () => {
 const live = process.env['ENGCLAW_EVAL_BASE_URL'] && process.env['ENGCLAW_EVAL_MODEL']
 describe.skipIf(!live)(`scripted conversation eval (persona v${PERSONA_VERSION})`, () => {
   it('keeps the median reply under 30 words', { timeout: 120_000 }, async () => {
-    const provider = openAiChatProvider(
+    const { model } = createModel(
       {
         baseUrl: process.env['ENGCLAW_EVAL_BASE_URL']!,
         model: process.env['ENGCLAW_EVAL_MODEL']!,
@@ -36,14 +36,15 @@ describe.skipIf(!live)(`scripted conversation eval (persona v${PERSONA_VERSION})
       },
       (url, init) => fetch(url, init),
     )
-    const messages: ChatMessage[] = [{ role: 'system', content: SYSTEM_PROMPT }]
+    const messages: ModelMessage[] = []
     const counts: number[] = []
     for (const turn of EVAL_USER_TURNS) {
       messages.push({ role: 'user', content: turn })
       const reply = await runAgentTurn({
-        provider,
-        messages,
-        tools: [],
+        model,
+        system: SYSTEM_PROMPT,
+        messages: [...messages],
+        tools: {},
         signal: new AbortController().signal,
       })
       messages.push({ role: 'assistant', content: reply })

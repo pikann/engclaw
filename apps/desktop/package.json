@@ -17,7 +17,9 @@
     "test:e2e:headed": "E2E_HEADED=1 playwright test"
   },
   "dependencies": {
+    "@ai-sdk/openai-compatible": "^3.0.87",
     "@fontsource-variable/inter": "^5.3.0",
+    "ai": "^7.0.165",
     "better-sqlite3": "^13.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
