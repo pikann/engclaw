@@ -38,7 +38,7 @@ export function registerStoreHandlers(): Store {
       : await dialog.showSaveDialog(options)
     if (res.canceled || !res.filePath) return { status: 'cancelled' }
     try {
-      const file = store.history.export()
+      const file = store.exportData()
       await writeFile(res.filePath, JSON.stringify(file))
       return { status: 'exported', count: file.attempts.length, path: res.filePath }
     } catch (e) {
@@ -60,7 +60,7 @@ export function registerStoreHandlers(): Store {
     if (res.canceled || !picked) return { status: 'cancelled' }
     try {
       const raw: unknown = JSON.parse(await readFile(picked, 'utf8'))
-      return { status: 'imported', ...store.history.import(raw) }
+      return { status: 'imported', ...store.importData(raw) }
     } catch (e) {
       return { status: 'error', message: e instanceof Error ? e.message : String(e) }
     }
