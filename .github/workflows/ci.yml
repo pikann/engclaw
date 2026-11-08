@@ -17,6 +17,8 @@ jobs:
         run: bun run license:check
       - run: bun run typecheck
       - run: bun run test
+      - name: Build bundled espeak-ng
+        run: ./scripts/espeak/build.sh
       - name: Package (CI artifact only; releases are built in packaging.yml)
         run: bun run package
       - uses: actions/upload-artifact@v7

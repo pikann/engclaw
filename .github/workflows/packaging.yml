@@ -8,6 +8,7 @@ on:
       - 'apps/desktop/build/**'
       - 'apps/desktop/package.json'
       - 'apps/desktop/src/utility/**'
+      - 'scripts/espeak/**'
       - '.github/workflows/packaging.yml'
 
 env:
@@ -28,6 +29,9 @@ jobs:
       - run: bun install --frozen-lockfile
         working-directory: .
       - run: bunx electron-vite build
+      - name: Build bundled espeak-ng
+        working-directory: .
+        run: ./scripts/espeak/build.sh
       - run: bunx electron-builder --linux AppImage deb --x64
       - name: Installer sizes
         shell: bash

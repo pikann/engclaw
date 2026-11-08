@@ -41,6 +41,23 @@ jobs:
       - run: bun install --frozen-lockfile
         working-directory: .
       - run: bunx electron-vite build
+      - name: Set up MSYS2 (Windows espeak-ng build)
+        if: matrix.name == 'windows-x64'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          path-type: inherit
+          install: >-
+            mingw-w64-x86_64-toolchain mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja curl
+      - name: Build bundled espeak-ng (macOS, Linux)
+        if: matrix.name != 'windows-x64'
+        working-directory: .
+        run: ./scripts/espeak/build.sh
+      - name: Build bundled espeak-ng (Windows)
+        if: matrix.name == 'windows-x64'
+        shell: msys2 {0}
+        working-directory: .
+        run: ./scripts/espeak/build.sh
       - name: Write App Store Connect API key (macOS notarization)
         if: matrix.name == 'macos-arm64'
         env:
