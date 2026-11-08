@@ -99,6 +99,7 @@ export function SettingsPanel() {
 
   const silenceId = useId()
   const updatesId = useId()
+  const imagesId = useId()
   const newCardsId = useId()
   const reviewsId = useId()
 
@@ -190,6 +191,18 @@ export function SettingsPanel() {
                       aria-labelledby={updatesId}
                       checked={settings.checkForUpdates}
                       onCheckedChange={(v) => void toggle('checkForUpdates', v)}
+                    />
+                  </SettingRow>
+                  <SettingRow
+                    label={t('settings.wordImages')}
+                    hint={t('settings.wordImagesHint')}
+                    labelId={imagesId}
+                  >
+                    <Switch
+                      data-testid="setting-word-images"
+                      aria-labelledby={imagesId}
+                      checked={settings.wordImages}
+                      onCheckedChange={(v) => void toggle('wordImages', v)}
                     />
                   </SettingRow>
                   <SettingRow

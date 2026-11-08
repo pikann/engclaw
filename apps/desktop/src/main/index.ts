@@ -174,7 +174,7 @@ void app.whenReady().then(async () => {
     return null
   })
   registerPlayerHandlers()
-  registerDeckHandlers(store, registerDictionaryHandlers())
+  registerDeckHandlers(store, registerDictionaryHandlers(store))
   createWindow()
   if (process.env['ENGCLAW_SMOKE']) runSmoke(startUtility())
   const inference = new UtilityClient(startUtility)

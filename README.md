@@ -6,7 +6,7 @@ Engclaw is an open-source desktop app (macOS, Windows, Linux) for practising Eng
 
 - **No server, no account, no telemetry.** Everything runs on your machine.
 - Your recordings, history and settings are stored locally in the app data directory.
-- The app only makes network requests when you ask it to: downloading models from Hugging Face on first use of a feature, and fetching a YouTube video you choose.
+- The app only makes network requests when you ask it to: downloading models from Hugging Face on first use of a feature, fetching a YouTube video you choose, and looking up a free illustration for dictionary words on Wikipedia and Wikimedia Commons (`en.wikipedia.org`, `commons.wikimedia.org`, `upload.wikimedia.org`). Only the word itself is sent, with a generic Engclaw user agent. Pictures are cached locally and the lookup can be turned off in Settings → Dictionary illustrations.
 
 ## Build and run
 
