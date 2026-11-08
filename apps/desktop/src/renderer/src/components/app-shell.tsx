@@ -50,10 +50,12 @@ export function AppLayout() {
   const layout = useLayout()
   const modelsPercent = useModelsPercent()
   const mic = useMic()
-  const active = TITLES[pathname] ?? 'home'
+  const section = pathname.startsWith('/game/') ? '/game' : pathname
+  const active = TITLES[section] ?? 'home'
   const onPractice = pathname === '/practice'
-  const fullBleed = pathname === '/shadowing' || pathname === '/dictionary'
-  const known = pathname in TITLES
+  const fullBleed =
+    pathname === '/shadowing' || pathname === '/dictionary' || pathname.startsWith('/game/chapter/')
+  const known = section in TITLES
   return (
     <WordLookupProvider>
       <div className="h-screen">

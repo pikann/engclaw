@@ -187,3 +187,24 @@ export function validateChapters(chapters: Chapter[], minChapters = MIN_CHAPTERS
   }
   return errors
 }
+
+const CHAPTER_COLUMNS = `c.id, c.text, c.type, c.ipa, c.meaning, c.frequency_rank AS frequencyRank, c.difficulty,
+  c.ord AS "order", c.world, c.source, c.license, c.source_url AS sourceUrl`
+
+export function readChapterByOrder(db: ContentDb, order: number): Chapter | null {
+  const row = (
+    db.prepare(`SELECT ${CHAPTER_COLUMNS} FROM chapters c WHERE c.ord = ?`).all(order) as Omit<
+      Chapter,
+      'examples'
+    >[]
+  )[0]
+  if (!row) return null
+  const examples = db
+    .prepare('SELECT text FROM examples WHERE chapter_id = ? ORDER BY ordinal')
+    .all(row.id) as { text: string }[]
+  return { ...row, examples: examples.map((e) => e.text) }
+}
+
+export function countChapters(db: ContentDb): number {
+  return (db.prepare('SELECT COUNT(*) AS n FROM chapters').all()[0] as { n: number }).n
+}

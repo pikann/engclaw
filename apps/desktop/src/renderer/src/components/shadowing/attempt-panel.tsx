@@ -1,30 +1,13 @@
 import { Loader2, Mic, Square } from 'lucide-react'
-import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { PronunciationResult } from '@engclaw/ipc-contract'
-import {
-  PhonemesDetail,
-  PitchDetail,
-  ResultSummary,
-  useResultView,
-  WordsDetail,
-} from '@/components/practice-result'
+import { PronunciationResultSections, ResultSection } from '@/components/result-sidebar'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { firstFlagged } from '@/lib/result'
 import { cn } from '@/lib/utils'
 import { accuracyScore, type IntonationState } from '@/lib/intonation'
 import type { AttemptState } from '@/lib/use-segment-attempt'
 import { IntonationBody } from './intonation-section'
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="bg-card space-y-3 rounded-xl border border-input p-4">
-      <h3 className="text-base font-semibold">{title}</h3>
-      {children}
-    </section>
-  )
-}
 
 function FullResult({
   result,
@@ -40,48 +23,33 @@ function FullResult({
   onRetry: () => void
 }) {
   const { t } = useTranslation()
-  const view = useResultView(result, text)
-  const [selected, setSelected] = useState<number | null>(() => firstFlagged(view.chips))
-  useEffect(() => {
-    setSelected(firstFlagged(view.chips))
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset only when a new result arrives
-  }, [result])
   return (
-    <div className="space-y-4" data-testid="shadowing-attempt-result">
-      <ResultSummary
-        result={result}
-        view={view}
-        selected={selected}
-        saved={false}
-        onSelect={setSelected}
-        onTryAgain={onRetry}
-        onReplay={onPlay}
-      />
-      <Section title={t('screens.shadowing.attempt.accuracy')}>
-        <p className="text-2xl font-semibold tabular-nums" data-testid="shadowing-accuracy-score">
-          {accuracyScore(result.differences.word_error_rate)}
-          <span className="text-muted-foreground text-sm font-normal"> / 100</span>
-        </p>
-        <p className="text-muted-foreground text-sm">
-          {t('screens.shadowing.attempt.detected')}{' '}
-          <span className="text-foreground" data-testid="shadowing-detected">
-            {result.differences.transcribe.toLowerCase() || '…'}
-          </span>
-        </p>
-      </Section>
-      <Section title={t('screens.practice.tabWords')}>
-        <WordsDetail view={view} selected={selected} onSelect={setSelected} />
-      </Section>
-      <Section title={t('screens.practice.tabPhonemes')}>
-        <PhonemesDetail result={result} view={view} />
-      </Section>
-      <Section title={t('screens.shadowing.attempt.fluency')}>
-        <IntonationBody state={intonation} />
-      </Section>
-      <Section title={t('screens.practice.tabPitch')}>
-        <PitchDetail result={result} />
-      </Section>
-    </div>
+    <PronunciationResultSections
+      result={result}
+      text={text}
+      onPlay={onPlay}
+      onRetry={onRetry}
+      testId="shadowing-attempt-result"
+      afterSummary={
+        <ResultSection title={t('screens.shadowing.attempt.accuracy')}>
+          <p className="text-2xl font-semibold tabular-nums" data-testid="shadowing-accuracy-score">
+            {accuracyScore(result.differences.word_error_rate)}
+            <span className="text-muted-foreground text-sm font-normal"> / 100</span>
+          </p>
+          <p className="text-muted-foreground text-sm">
+            {t('screens.shadowing.attempt.detected')}{' '}
+            <span className="text-foreground" data-testid="shadowing-detected">
+              {result.differences.transcribe.toLowerCase() || '…'}
+            </span>
+          </p>
+        </ResultSection>
+      }
+      beforePitch={
+        <ResultSection title={t('screens.shadowing.attempt.fluency')}>
+          <IntonationBody state={intonation} />
+        </ResultSection>
+      }
+    />
   )
 }
 

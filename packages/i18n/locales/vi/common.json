@@ -746,7 +746,7 @@
       "tryAgain": "Thử lại",
       "lastAttempt": "Lần thử gần nhất: {{score}}",
       "soundFix": "Âm “{{sound}}” nghe giống âm “{{heard}}”.",
-      "wordsToFix": "Từ cần sửa",
+      "result": "Kết quả",
       "attemptLog": "Các lần thử trong lượt này",
       "micExclusive": "Việc ghi âm bị tắt khi bạn đang trò chuyện với trợ lý.",
       "askTitle": "Hỏi trợ lý",
@@ -781,7 +781,9 @@
       "backToMap": "Về bản đồ",
       "map": "Bản đồ",
       "next": "Chương tiếp",
-      "prevBest": "Tốt nhất trước đó"
+      "prevBest": "Tốt nhất trước đó",
+      "loadingChapter": "Đang tải chương…",
+      "chapterNotFound": "Chương này không tồn tại."
     }
   },
   "dict": {

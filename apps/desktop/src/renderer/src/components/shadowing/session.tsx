@@ -13,6 +13,7 @@ import {
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DictationActions, DictationRail, DictationSheet } from '@/components/shadowing/dictation'
+import { ResultSidebar, ResultSidebarBody } from '@/components/result-sidebar'
 import { AttemptPanel } from '@/components/shadowing/attempt-panel'
 import { PlayerSurface } from '@/components/shadowing/player-surface'
 import { SentenceWords } from '@/components/shadowing/sentence-words'
@@ -612,29 +613,27 @@ export function ShadowingSession({
           />
         )}
         {!dictation && railOpen && (
-          <aside
-            aria-label={t('screens.shadowing.transcript')}
-            data-testid="shadowing-sidebar"
-            className="flex min-h-0 min-w-0 flex-col border-l"
+          <ResultSidebar
+            label={t('screens.shadowing.transcript')}
+            testId="shadowing-sidebar"
+            header={
+              <Tabs
+                value={sideTab}
+                onValueChange={(v) => setSideTab(v as 'transcript' | 'attempt')}
+                className="shrink-0 items-center p-2"
+              >
+                <TabsList>
+                  <TabsTrigger value="attempt" data-testid="shadowing-tab-attempt">
+                    {t('screens.shadowing.attemptTab')}
+                  </TabsTrigger>
+                  <TabsTrigger value="transcript" data-testid="shadowing-tab-transcript">
+                    {t('screens.shadowing.transcript')}
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            }
           >
-            <Tabs
-              value={sideTab}
-              onValueChange={(v) => setSideTab(v as 'transcript' | 'attempt')}
-              className="shrink-0 items-center p-2"
-            >
-              <TabsList>
-                <TabsTrigger value="attempt" data-testid="shadowing-tab-attempt">
-                  {t('screens.shadowing.attemptTab')}
-                </TabsTrigger>
-                <TabsTrigger value="transcript" data-testid="shadowing-tab-transcript">
-                  {t('screens.shadowing.transcript')}
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-            <div
-              hidden={sideTab !== 'transcript'}
-              className="min-h-0 flex-1 overflow-auto px-4 pb-4"
-            >
+            <ResultSidebarBody hidden={sideTab !== 'transcript'}>
               <ol className="space-y-1 text-sm" data-testid="shadowing-rail">
                 {segments.map((s, i) => (
                   <li key={s.index}>
@@ -684,8 +683,8 @@ export function ShadowingSession({
                   </li>
                 ))}
               </ol>
-            </div>
-            <div hidden={sideTab !== 'attempt'} className="min-h-0 flex-1 overflow-auto px-4 pb-4">
+            </ResultSidebarBody>
+            <ResultSidebarBody hidden={sideTab !== 'attempt'}>
               <AttemptPanel
                 state={attempt.state}
                 intonation={attempt.intonation}
@@ -696,8 +695,8 @@ export function ShadowingSession({
                 onPlay={attempt.play}
                 onRetry={attempt.retry}
               />
-            </div>
-          </aside>
+            </ResultSidebarBody>
+          </ResultSidebar>
         )}
       </div>
     </div>

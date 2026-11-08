@@ -42,6 +42,7 @@
       "devDependencies": {
         "@electron/fuses": "^2.1.3",
         "@engclaw/dictionary": "workspace:*",
+        "@engclaw/game": "workspace:*",
         "@engclaw/i18n": "workspace:*",
         "@engclaw/ipc-contract": "workspace:*",
         "@engclaw/models": "workspace:*",

@@ -12,6 +12,8 @@ extraResources:
     to: models.json
   - from: resources/data/dictionary.sqlite
     to: dictionary.sqlite
+  - from: resources/data/game-content.sqlite
+    to: game-content.sqlite
   # espeak-ng binary + data, built by scripts/espeak/build.sh (GPL-3.0-or-later, separate executable).
   - from: resources/espeak-ng
     to: espeak-ng

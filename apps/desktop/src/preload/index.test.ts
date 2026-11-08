@@ -39,6 +39,7 @@ describe('preload bridge', () => {
       'contours',
       'deck',
       'dictionary',
+      'game',
       'history',
       'inference',
       'models',
