@@ -4,6 +4,7 @@ import { I18nextProvider, initReactI18next } from 'react-i18next'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { i18nOptions } from '@engclaw/i18n'
 import type { AgentCard } from '@engclaw/ipc-contract'
+import { WordLookupContext } from '@/lib/word-lookup'
 import { AgentCardList, AgentCardView } from './agent-card-view'
 
 const cards: AgentCard[] = [
@@ -41,6 +42,26 @@ describe('AgentCardView', () => {
 
   it('shows the Vietnamese label on the Hear it button', () => {
     expect(render(<AgentCardView card={cards[1]!} />, 'vi')).toContain('Nghe thử')
+  })
+
+  it('shows the IPA once, even if the model already wrapped it in slashes', () => {
+    const html = render(
+      <AgentCardView card={{ type: 'pronunciation', word: 'thought', ipa: '/θɔːt/' }} />,
+    )
+    expect(html).toContain('>/θɔːt/<')
+    expect(html).not.toContain('//θ')
+  })
+
+  it('offers the dictionary only when a lookup is available', () => {
+    const card = cards[1]!
+    expect(render(<AgentCardView card={card} />)).not.toContain('open-dictionary')
+    const html = render(
+      <WordLookupContext.Provider value={() => undefined}>
+        <AgentCardView card={card} />
+      </WordLookupContext.Provider>,
+    )
+    expect(html).toContain('open-dictionary')
+    expect(html).toContain('Dictionary')
   })
 
   it('renders model text as text, never as markup', () => {

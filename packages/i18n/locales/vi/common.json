@@ -275,6 +275,8 @@
       "grammar": "Mẹo ngữ pháp",
       "correction": "Sửa lỗi",
       "hearIt": "Nghe thử",
+      "dictionary": "Từ điển",
+      "ipa": "IPA",
       "said": "Bạn nói",
       "better": "Tốt hơn"
     },
@@ -332,6 +334,7 @@
       "modelsDownloading": "Đang tải mô hình…",
       "micMissing": "Không tìm thấy micro",
       "providerNone": "Chưa có nhà cung cấp AI",
+      "providerName": "AI: {{name}}",
       "comingSoon": "Sắp ra mắt",
       "comingSoonBody": "Phần này của Engclaw chưa sẵn sàng.",
       "dev": "Công cụ phát triển"

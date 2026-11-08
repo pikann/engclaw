@@ -1,3 +1,4 @@
+import { notifyLlmChanged } from '@/lib/llm-events'
 import { useEffect, useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Eye, EyeOff } from 'lucide-react'
@@ -124,6 +125,7 @@ export function LlmProviderPanel() {
       return
     }
     setStatus(res.status)
+    notifyLlmChanged()
     setBaseUrl(res.status.baseUrl ?? '')
     setApiKey('')
     setHeadersText('')
@@ -134,6 +136,7 @@ export function LlmProviderPanel() {
 
   const remove = async (): Promise<void> => {
     setStatus(await window.engclaw.llm.remove())
+    notifyLlmChanged()
     setBaseUrl('')
     setModel('')
     setApiKey('')
