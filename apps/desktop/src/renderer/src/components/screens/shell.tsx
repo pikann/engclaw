@@ -140,12 +140,15 @@ export function AppShell({
   modelsPercent,
   linked,
   mic = 'ready',
+  provider = null,
   children,
 }: {
   layout: Layout
   /** Real routing: items become links and the router marks the active one. */
   linked?: boolean
   mic?: 'ready' | 'missing'
+  /** Model name of the configured AI provider, or null when none is set up. */
+  provider?: string | null
   active: NavKey
   title: React.ReactNode
   actions?: React.ReactNode
@@ -241,7 +244,11 @@ export function AppShell({
                 : 'screens.shell.modelsReady',
             )}
           </span>
-          <span>{t('screens.shell.providerNone')}</span>
+          <span data-testid="footer-provider">
+            {provider
+              ? t('screens.shell.providerName', { name: provider })
+              : t('screens.shell.providerNone')}
+          </span>
         </footer>
       </SidebarInset>
     </SidebarProvider>

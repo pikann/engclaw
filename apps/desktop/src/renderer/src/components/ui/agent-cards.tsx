@@ -77,11 +77,19 @@ export function VocabularyCard({
   )
 }
 
+/** Model output sometimes carries its own slashes or brackets; the card adds the slashes itself. */
+export const cleanIpa = (ipa?: string) =>
+  ipa
+    ?.trim()
+    .replace(/^[/[]+|[/\]]+$/g, '')
+    .trim() || undefined
+
 export function PronunciationCard({
   word,
   ipa,
   tip,
   onHear,
+  onLookup,
   mouth,
   className,
 }: {
@@ -89,11 +97,14 @@ export function PronunciationCard({
   ipa?: string
   tip?: string
   onHear: () => void
+  /** Opens the dictionary dialog for the word; the button is hidden when omitted. */
+  onLookup?: () => void
   /** The mouth-view slot (e.g. `<Mouth />`); omitted when the card is compact. */
   mouth?: ReactNode
   className?: string
 }) {
   const { t } = useTranslation()
+  const symbols = cleanIpa(ipa)
   return (
     <AgentCard
       icon={<Mic2 className="size-4" />}
@@ -101,19 +112,44 @@ export function PronunciationCard({
       tone="success"
       className={className}
     >
-      <div className="flex items-start gap-4">
-        <div className="min-w-0 flex-1 space-y-2">
-          <p className="text-base font-semibold">
-            {word} {ipa && <span className="text-muted-foreground font-normal">/{ipa}/</span>}
-          </p>
-          {tip && <p className="text-sm">{tip}</p>}
-          <Button variant="outline" size="sm" onClick={onHear} data-testid="hear-it">
-            <Volume2 /> {t('ds.card.hearIt')}
-            <span className="sr-only"> {word}</span>
-          </Button>
+      <div className="flex items-center gap-3">
+        <Button
+          variant="outline"
+          size="icon"
+          className="size-11 shrink-0 rounded-full"
+          onClick={onHear}
+          data-testid="hear-it"
+          aria-label={`${t('ds.card.hearIt')}: ${word}`}
+        >
+          <Volume2 />
+        </Button>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-xl leading-tight font-semibold">{word}</p>
+          {symbols && (
+            <p
+              className="text-success-soft-foreground bg-success-soft mt-1 inline-block rounded-md px-2 py-0.5 font-mono text-sm"
+              data-testid="pronunciation-ipa"
+              lang="en-fonipa"
+              aria-label={`${t('ds.card.ipa')}: ${symbols}`}
+            >
+              /{symbols}/
+            </p>
+          )}
         </div>
         {mouth && <div className="shrink-0">{mouth}</div>}
       </div>
+      {tip && (
+        <p className="bg-muted/60 flex items-start gap-2 rounded-md px-3 py-2 text-sm">
+          <Lightbulb aria-hidden="true" className="text-muted-foreground mt-0.5 size-4 shrink-0" />
+          <span>{tip}</span>
+        </p>
+      )}
+      {onLookup && (
+        <Button variant="ghost" size="sm" onClick={onLookup} data-testid="open-dictionary">
+          <BookOpen /> {t('ds.card.dictionary')}
+          <span className="sr-only"> {word}</span>
+        </Button>
+      )}
     </AgentCard>
   )
 }

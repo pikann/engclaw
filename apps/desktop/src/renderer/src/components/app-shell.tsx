@@ -5,6 +5,7 @@ import { PracticeScreen } from '@/components/practice-screen'
 import { WordLookupProvider } from '@/components/word-lookup-dialog'
 import { AppShell, useLayout, type NavKey } from '@/components/screens/shell'
 import { modelCard } from '@/lib/model-download'
+import { LLM_CHANGED_EVENT } from '@/lib/llm-events'
 import { useModels } from '@/lib/use-models'
 
 const TITLES: Record<string, NavKey> = {
@@ -40,6 +41,26 @@ function useMic(): 'ready' | 'missing' {
   return mic
 }
 
+/** Model of the configured AI provider (null if none); re-read on navigation and after settings change it. */
+function useProvider(refreshKey: string): string | null {
+  const [provider, setProvider] = useState<string | null>(null)
+  useEffect(() => {
+    let live = true
+    const load = () =>
+      void window.engclaw.llm
+        .status()
+        .then((s) => live && setProvider(s.kind === 'none' ? null : (s.model ?? s.baseUrl)))
+        .catch(() => undefined)
+    load()
+    window.addEventListener(LLM_CHANGED_EVENT, load)
+    return () => {
+      live = false
+      window.removeEventListener(LLM_CHANGED_EVENT, load)
+    }
+  }, [refreshKey])
+  return provider
+}
+
 /**
  * The real app chrome. Practice is rendered here rather than as a route element so it stays
  * mounted (and an in-flight recording or analysis survives) while the user visits other pages.
@@ -50,6 +71,7 @@ export function AppLayout() {
   const layout = useLayout()
   const modelsPercent = useModelsPercent()
   const mic = useMic()
+  const provider = useProvider(pathname)
   const section = pathname.startsWith('/game/') ? '/game' : pathname
   const active = TITLES[section] ?? 'home'
   const onPractice = pathname === '/practice'
@@ -67,6 +89,7 @@ export function AppLayout() {
           layout={layout}
           active={active}
           mic={mic}
+          provider={provider}
           modelsPercent={modelsPercent}
           title={known ? t(`screens.shell.${active}`) : t('screens.shell.comingSoon')}
         >

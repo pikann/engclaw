@@ -1,5 +1,5 @@
 import { resolve } from 'node:path'
-import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
+import { defineConfig } from 'electron-vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
@@ -7,8 +7,8 @@ const alias = { '@': resolve(__dirname, 'src/renderer/src') }
 
 export default defineConfig({
   main: {
-    plugins: [
-      externalizeDepsPlugin({
+    build: {
+      externalizeDeps: {
         exclude: [
           '@engclaw/dictionary',
           '@engclaw/game',
@@ -19,9 +19,7 @@ export default defineConfig({
           '@engclaw/prosody',
           '@engclaw/youtube',
         ],
-      }),
-    ],
-    build: {
+      },
       rollupOptions: {
         input: {
           index: resolve(__dirname, 'src/main/index.ts'),
@@ -31,8 +29,9 @@ export default defineConfig({
     },
   },
   preload: {
-    plugins: [externalizeDepsPlugin({ exclude: ['@engclaw/ipc-contract'] })],
     build: {
+      // The preload is sandboxed and can only require('electron'), so zod must be bundled into it.
+      externalizeDeps: { exclude: ['@engclaw/ipc-contract', 'zod'] },
       rollupOptions: {
         input: {
           index: resolve(__dirname, 'src/preload/index.ts'),

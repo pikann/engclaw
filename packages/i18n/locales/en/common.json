@@ -275,6 +275,8 @@
       "grammar": "Grammar tip",
       "correction": "Correction",
       "hearIt": "Hear it",
+      "dictionary": "Dictionary",
+      "ipa": "IPA",
       "said": "You said",
       "better": "Better"
     },
@@ -332,6 +334,7 @@
       "modelsDownloading": "Downloading models…",
       "micMissing": "No microphone found",
       "providerNone": "No AI provider",
+      "providerName": "AI: {{name}}",
       "comingSoon": "Coming soon",
       "comingSoonBody": "This part of Engclaw is not available yet.",
       "dev": "Developer tools"
