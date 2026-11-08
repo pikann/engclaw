@@ -159,7 +159,8 @@ void app.whenReady().then(async () => {
   })
   const llmConfig = registerLlmHandlers()
   const store = registerStoreHandlers(() => llmConfig.clear())
-  registerAgentHandlers(llmConfig, store)
+  const openDictionary = registerDictionaryHandlers(store)
+  registerAgentHandlers(llmConfig, store, openDictionary)
   const models = registerModelHandlers()
   const cachedYoutube = new CachedYouTube(
     youtube,
@@ -181,7 +182,7 @@ void app.whenReady().then(async () => {
   })
   registerPlayerHandlers()
   registerGameHandlers(store.game)
-  registerDeckHandlers(store, registerDictionaryHandlers(store))
+  registerDeckHandlers(store, openDictionary)
   createWindow()
   if (process.env['ENGCLAW_SMOKE']) runSmoke(startUtility())
   const inference = new UtilityClient(startUtility)

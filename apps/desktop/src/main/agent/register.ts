@@ -1,11 +1,40 @@
 import { BrowserWindow, net } from 'electron'
+import type Database from 'better-sqlite3'
+import { getWord, searchWords } from '@engclaw/dictionary'
 import { IPC, type AgentEvent } from '@engclaw/ipc-contract'
 import { handle } from '../ipc'
 import type { LlmConfigStore } from '../llm/config-store'
 import type { Store } from '../store'
 import { AgentService } from './service'
+import { lookupDictionaryTool, practiceHistoryTool, type DictionarySource } from './info-tools'
 
-export function registerAgentHandlers(llm: LlmConfigStore, store: Store): AgentService {
+const dictionarySource = (open: () => Database.Database): DictionarySource => ({
+  lookup(word) {
+    const db = open()
+    const hit = searchWords(db, word, 1)[0]
+    if (!hit || hit.match !== 'prefix' || hit.word.toLowerCase() !== word.trim().toLowerCase())
+      return null
+    const entry = getWord(db, hit.id)
+    return (
+      entry && {
+        word: entry.word,
+        ipa: entry.pronunciations,
+        senses: entry.senses,
+        morphemes: entry.morphemes.map((m) => ({
+          kind: m.kind,
+          form: m.form,
+          meaning: m.root.meaning,
+        })),
+      }
+    )
+  },
+})
+
+export function registerAgentHandlers(
+  llm: LlmConfigStore,
+  store: Store,
+  openDictionary: () => Database.Database,
+): AgentService {
   const emit = (e: AgentEvent): void => {
     for (const w of BrowserWindow.getAllWindows()) w.webContents.send(IPC.agentEvent, e)
   }
@@ -14,6 +43,10 @@ export function registerAgentHandlers(llm: LlmConfigStore, store: Store): AgentS
     config: () => llm.load(),
     fetchFn: (url, init) => net.fetch(url, init),
     emit,
+    tools: {
+      lookup_dictionary: lookupDictionaryTool(dictionarySource(openDictionary)),
+      get_practice_history: practiceHistoryTool({ recent: (n) => store.history.list(n) }),
+    },
   })
   handle(IPC.agentSend, (req) => service.send(req))
   handle(IPC.agentCancel, ({ requestId }) => {
