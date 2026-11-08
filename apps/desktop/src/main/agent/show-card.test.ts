@@ -39,6 +39,7 @@ describe('show_card tool', () => {
     tool.execute!(input as never, {
       toolCallId: 'c',
       messages: [],
+      context: {},
       abortSignal: new AbortController().signal,
     })
 

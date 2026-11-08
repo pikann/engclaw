@@ -1,12 +1,9 @@
 import { MockLanguageModelV4 } from 'ai/test'
 
-type LanguageModelV4StreamPart = typeof MockLanguageModelV4.prototype.doStream extends (
-  ...a: never[]
-) => Promise<infer R>
-  ? R extends { stream: ReadableStream<infer P> }
+type LanguageModelV4StreamPart =
+  Awaited<ReturnType<MockLanguageModelV4['doStream']>>['stream'] extends ReadableStream<infer P>
     ? P
     : never
-  : never
 type LanguageModelV4CallOptions = MockLanguageModelV4['doStreamCalls'][number]
 
 export type Step = LanguageModelV4StreamPart[]
