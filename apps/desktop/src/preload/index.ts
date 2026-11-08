@@ -90,6 +90,12 @@ const api: EngclawApi = {
     test: (req) => invoke(IPC.llmTest, req),
     remove: () => invoke(IPC.llmRemove),
   },
+  agent: {
+    send: (req) => invoke(IPC.agentSend, req),
+    cancel: (req) => invoke(IPC.agentCancel, req),
+    messages: (req) => invoke(IPC.agentMessages, req),
+    onEvent: (cb) => subscribe(IPC.agentEvent, cb),
+  },
   game: {
     chapter: (req) => invoke(IPC.gameChapter, req),
     map: () => invoke(IPC.gameMap),

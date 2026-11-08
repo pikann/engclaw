@@ -2,6 +2,7 @@ import Database from 'better-sqlite3'
 import { mkdirSync, rmSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { HistoryExport, type HistoryExportFile } from '@engclaw/ipc-contract'
+import { AgentStore } from './agent'
 import { DeckStore } from './deck'
 import { GameProgressStore } from './game-progress'
 import { HistoryStore } from './history'
@@ -18,6 +19,7 @@ export interface Store {
   settings: SettingsStore
   videos: VideoStore
   wordImages: WordImageStore
+  agent: AgentStore
   /** History plus game progress, as written to the export file. */
   exportData(): HistoryExportFile
   /** Validates the whole file first, then imports attempts and merges game progress (best of both). */
@@ -37,6 +39,7 @@ export function openStore(dbPath: string): Store {
   const settings = new SettingsStore(db)
   const deck = new DeckStore(db)
   const videos = new VideoStore(db)
+  const agent = new AgentStore(db)
   const wordImages = new WordImageStore(db, join(dirname(dbPath), 'word-images'), 50 * 1024 * 1024)
   return {
     db,
@@ -46,6 +49,7 @@ export function openStore(dbPath: string): Store {
     settings,
     videos,
     wordImages,
+    agent,
     exportData: () => ({ ...history.export(), gameProgress: game.list() }),
     importData: (raw) => {
       const file = HistoryExport.parse(raw)
@@ -62,6 +66,7 @@ export function openStore(dbPath: string): Store {
       settings.clear()
       videos.clear()
       wordImages.clear()
+      agent.clear()
       rmSync(audioDir, { recursive: true, force: true })
     },
   }

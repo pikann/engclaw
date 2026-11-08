@@ -1,5 +1,8 @@
 import { z } from 'zod'
 
+/** Re-exported so the main process validates tool arguments with the same zod instance. */
+export { z }
+
 export const PingRequest = z.object({ message: z.string().max(200) }).strict()
 export const PingResponse = z.object({ echo: z.string(), platform: z.string() })
 
@@ -582,6 +585,58 @@ export const LlmSaveResult = z.discriminatedUnion('ok', [
 ])
 export type LlmSaveResult = z.infer<typeof LlmSaveResult>
 
+export const AgentErrorCode = z.enum([
+  'NO_PROVIDER',
+  'AUTH_EXPIRED',
+  'RATE_LIMIT',
+  'NETWORK',
+  'TIMEOUT',
+  'SERVER',
+  'BAD_RESPONSE',
+  'TOOL_ROUND_LIMIT',
+  'BUSY',
+  'NOT_FOUND',
+])
+export type AgentErrorCode = z.infer<typeof AgentErrorCode>
+
+export const AgentSendRequest = z
+  .object({
+    /** Omitted = start a new conversation. */
+    conversationId: z.string().min(1).max(64).optional(),
+    text: z.string().trim().min(1).max(4000),
+  })
+  .strict()
+export type AgentSendRequest = z.infer<typeof AgentSendRequest>
+export const AgentSendResult = z.discriminatedUnion('ok', [
+  z.object({ ok: z.literal(true), conversationId: z.string(), requestId: z.string() }),
+  z.object({ ok: z.literal(false), code: AgentErrorCode }),
+])
+export type AgentSendResult = z.infer<typeof AgentSendResult>
+export const AgentCancelRequest = z.object({ requestId: z.string().min(1).max(64) }).strict()
+export const AgentMessagesRequest = z.object({ conversationId: z.string().min(1).max(64) }).strict()
+export const AgentMessage = z.object({
+  id: z.number().int(),
+  role: z.enum(['user', 'assistant']),
+  text: z.string(),
+  createdAt: z.number().int(),
+})
+export type AgentMessage = z.infer<typeof AgentMessage>
+
+/** Pushed from main while a reply streams; every event carries the request it belongs to. */
+export const AgentEvent = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('delta'), requestId: z.string(), text: z.string() }),
+  z.object({ type: z.literal('tool'), requestId: z.string(), name: z.string(), ok: z.boolean() }),
+  z.object({
+    type: z.literal('done'),
+    requestId: z.string(),
+    conversationId: z.string(),
+    text: z.string(),
+  }),
+  z.object({ type: z.literal('cancelled'), requestId: z.string() }),
+  z.object({ type: z.literal('error'), requestId: z.string(), code: AgentErrorCode }),
+])
+export type AgentEvent = z.infer<typeof AgentEvent>
+
 export const GameRecordResult = z.object({
   progress: GameProgressEntry,
   /** The stored best before this run, or null on the first pass. */
@@ -813,6 +868,10 @@ export const IPC = {
   llmSave: 'llm:save',
   llmTest: 'llm:test',
   llmRemove: 'llm:remove',
+  agentSend: 'agent:send',
+  agentCancel: 'agent:cancel',
+  agentMessages: 'agent:messages',
+  agentEvent: 'agent:event',
   deckAdd: 'deck:add',
   deckRemove: 'deck:remove',
   deckHas: 'deck:has',
@@ -925,6 +984,10 @@ export const invokeChannels = {
   /** Lists `/models` on the draft settings; secrets stay in main. */
   [IPC.llmTest]: { request: LlmProviderTestRequest, response: LlmTestResult },
   [IPC.llmRemove]: { request: noArgs, response: LlmProviderStatus },
+  /** Starts a streamed reply; deltas arrive on `agent:event`. Refuses (BUSY) while one is running. */
+  [IPC.agentSend]: { request: AgentSendRequest, response: AgentSendResult },
+  [IPC.agentCancel]: { request: AgentCancelRequest, response: z.null() },
+  [IPC.agentMessages]: { request: AgentMessagesRequest, response: z.array(AgentMessage) },
   [IPC.dictionaryRoots]: {
     request: DictionaryRootsRequest.optional(),
     response: DictionaryRootList,
@@ -971,6 +1034,7 @@ export const eventChannels = {
   [IPC.modelsProgress]: ModelProgress,
   [IPC.inferenceProgress]: InferenceProgress,
   [IPC.playerEvent]: PlayerEvent,
+  [IPC.agentEvent]: AgentEvent,
 } as const
 
 export type InvokeChannel = keyof typeof invokeChannels
@@ -1064,6 +1128,12 @@ export interface EngclawApi {
     save(req: LlmProviderSaveRequest): Promise<LlmSaveResult>
     test(req: LlmProviderTestRequest): Promise<LlmTestResult>
     remove(): Promise<LlmProviderStatus>
+  }
+  agent: {
+    send(req: AgentSendRequest): Promise<AgentSendResult>
+    cancel(req: z.infer<typeof AgentCancelRequest>): Promise<null>
+    messages(req: z.infer<typeof AgentMessagesRequest>): Promise<AgentMessage[]>
+    onEvent(cb: (e: AgentEvent) => void): () => void
   }
   game: {
     chapter(req: z.infer<typeof GameChapterRequest>): Promise<GameChapter>
