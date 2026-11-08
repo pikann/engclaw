@@ -3,6 +3,7 @@ import { join } from 'node:path'
 import type { ContourData } from '@engclaw/ipc-contract'
 import { CachedPhonemizer, TTS_MODEL_ID } from '@engclaw/pronounce'
 import { EspeakProcess } from './espeak'
+import { resolveEspeakBinary } from './espeak-binary'
 import { DEFAULT_KOKORO_FILES, loadKokoro } from './kokoro'
 import { InferenceError, toInferenceError } from './errors'
 import { InferenceService, type ModelDirs } from './inference'
@@ -12,9 +13,8 @@ import type { RpcCancel, RpcRequest, RpcResult } from './rpc'
 import { runSmoke } from './smoke'
 import { SpeechService } from './speech'
 
-// Bundled binary resolution (extraResources) lands with packaging, ENGC-54.
 const espeak = new EspeakProcess({
-  binary: process.env.ESPEAK_NG ?? 'espeak-ng',
+  binary: resolveEspeakBinary(),
   dataPath: process.env.ESPEAK_DATA_PATH,
 })
 const phonemizer = new CachedPhonemizer(espeak)
