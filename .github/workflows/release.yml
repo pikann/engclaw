@@ -84,6 +84,8 @@ jobs:
           xcrun stapler validate "$app"
 
   checksums:
+    # Pre-releases (tags with a hyphen, e.g. v1.2.3-rc.1) get no SHA256SUMS; only official releases do.
+    if: ${{ !contains(github.ref_name, '-') }}
     needs: build
     runs-on: ubuntu-latest
     steps:
