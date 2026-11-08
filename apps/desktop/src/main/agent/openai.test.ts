@@ -53,6 +53,44 @@ describe('openAiChatProvider', () => {
     ])
   })
 
+  it('keeps Gemini extra_content on tool calls and echoes it back', async () => {
+    const extra = { google: { thought_signature: 'sig' } }
+    const fetchFn = vi.fn<FetchLike>(() =>
+      Promise.resolve(
+        sse(
+          chunk({
+            tool_calls: [
+              { id: 'c1', extra_content: extra, function: { name: 'look', arguments: '{}' } },
+            ],
+          }),
+          '[DONE]',
+        ),
+      ),
+    )
+    const out = await collect(fetchFn)
+    expect(out).toEqual([
+      {
+        type: 'toolCalls',
+        calls: [{ id: 'c1', name: 'look', arguments: '{}', extraContent: extra }],
+      },
+    ])
+    const provider = openAiChatProvider(cfg, fetchFn)
+    for await (const _ of provider.stream({
+      messages: [
+        {
+          role: 'assistant',
+          content: '',
+          toolCalls: [{ id: 'c1', name: 'look', arguments: '{}', extraContent: extra }],
+        },
+      ],
+      tools: [],
+      signal: new AbortController().signal,
+    }))
+      void _
+    const body = JSON.parse(fetchFn.mock.calls[1]![1].body as string)
+    expect(body.messages[0].tool_calls[0].extra_content).toEqual(extra)
+  })
+
   it.each([
     [401, 'AUTH_EXPIRED'],
     [429, 'RATE_LIMIT'],

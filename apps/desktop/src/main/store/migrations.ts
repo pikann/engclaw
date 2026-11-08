@@ -132,6 +132,8 @@ export const MIGRATIONS: readonly string[] = [
      created_at       INTEGER NOT NULL
    );
    CREATE INDEX agent_message_conv ON agent_message (conversation_id, id);`,
+  // Explanation cards shown with an assistant reply, stored as validated JSON.
+  `ALTER TABLE agent_message ADD COLUMN cards TEXT NOT NULL DEFAULT '[]';`,
 ]
 
 export class FutureSchemaError extends Error {

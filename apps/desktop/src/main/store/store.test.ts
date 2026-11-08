@@ -258,7 +258,7 @@ describe('game progress', () => {
 describe('migrations', () => {
   it('adds game_progress when upgrading a database from before the game', () => {
     const db = new Database(':memory:')
-    migrate(db, MIGRATIONS.slice(0, MIGRATIONS.length - 2))
+    migrate(db, MIGRATIONS.slice(0, MIGRATIONS.length - 3))
     db.prepare("INSERT INTO settings VALUES ('k', '1')").run()
     expect(
       db.prepare("SELECT name FROM sqlite_master WHERE name='game_progress'").get(),
@@ -266,6 +266,31 @@ describe('migrations', () => {
     migrate(db)
     expect(db.prepare('SELECT COUNT(*) AS n FROM game_progress').get()).toEqual({ n: 0 })
     expect(db.prepare('SELECT value FROM settings').get()).toEqual({ value: '1' })
+  })
+
+  it('stores cards with a message and drops stored cards that fail validation on read', () => {
+    const store = openStore(':memory:')
+    store.agent.create('c', 1)
+    const card = { type: 'correction', said: 'I go', better: 'I went' } as const
+    store.agent.append('c', 'assistant', 'ok', 2, [card])
+    store.db
+      .prepare(
+        'INSERT INTO agent_message (conversation_id, role, text, created_at, cards) VALUES (?, ?, ?, ?, ?)',
+      )
+      .run(
+        'c',
+        'assistant',
+        'x',
+        3,
+        JSON.stringify([{ type: 'vocabulary', word: '<i>x</i>' }, card]),
+      )
+    store.db
+      .prepare(
+        "INSERT INTO agent_message (conversation_id, role, text, created_at, cards) VALUES ('c', 'assistant', 'y', 4, 'not json')",
+      )
+      .run()
+    expect(store.agent.messages('c').map((m) => m.cards)).toEqual([[card], [card], []])
+    store.db.close()
   })
 
   it('adds agent conversation tables and deleteAll wipes them', () => {

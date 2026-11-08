@@ -676,11 +676,59 @@ export const AgentConversation = z.object({
   updatedAt: z.number().int(),
 })
 export type AgentConversation = z.infer<typeof AgentConversation>
+
+/** Plain text only: the renderer shows these as text nodes, and markup-looking input is refused outright. */
+const cardText = (max: number) =>
+  z
+    .string()
+    .trim()
+    .min(1)
+    .max(max)
+    .refine((v) => !/<\/?[a-z!][^>]*>/i.test(v), 'must be plain text without HTML tags')
+export const AGENT_CARDS_PER_TURN = 4
+/** Explanation cards the model may show inline (via `show_card`); the same shape is persisted with the message. */
+export const AgentCard = z.discriminatedUnion('type', [
+  z
+    .object({
+      type: z.literal('vocabulary'),
+      word: cardText(60),
+      meaning: cardText(240),
+      example: cardText(240).optional(),
+      ipa: cardText(60).optional(),
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal('pronunciation'),
+      word: cardText(60),
+      ipa: cardText(60).optional(),
+      tip: cardText(240).optional(),
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal('grammar'),
+      title: cardText(80),
+      body: cardText(400),
+      example: cardText(240).optional(),
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal('correction'),
+      said: cardText(240),
+      better: cardText(240),
+      why: cardText(240).optional(),
+    })
+    .strict(),
+])
+export type AgentCard = z.infer<typeof AgentCard>
 export const AgentMessage = z.object({
   id: z.number().int(),
   role: z.enum(['user', 'assistant']),
   text: z.string(),
   createdAt: z.number().int(),
+  cards: z.array(AgentCard).max(AGENT_CARDS_PER_TURN),
 })
 export type AgentMessage = z.infer<typeof AgentMessage>
 
@@ -693,6 +741,7 @@ export const AgentEvent = z.discriminatedUnion('type', [
     requestId: z.string(),
     conversationId: z.string(),
     text: z.string(),
+    cards: z.array(AgentCard).max(AGENT_CARDS_PER_TURN),
   }),
   z.object({ type: z.literal('cancelled'), requestId: z.string() }),
   z.object({

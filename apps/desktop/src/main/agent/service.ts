@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import type {
+  AgentCard,
   AgentConversation,
   AgentEvent,
   AgentMessage,
@@ -12,6 +13,7 @@ import { runAgentTurn } from './loop'
 import { openAiChatProvider } from './openai'
 import { SYSTEM_PROMPT } from './persona'
 import { formatSpeechContext } from './speech-context'
+import { showCardTool } from './show-card'
 import type { AgentTool } from './tools'
 import { AgentError, type ChatMessage, type ChatProvider } from './types'
 
@@ -92,18 +94,19 @@ export class AgentService {
     const last = history.at(-1)
     if (speechContext && last?.role === 'user') last.content += `\n\n${speechContext}`
     const provider = this.deps.providerFor?.(cfg) ?? openAiChatProvider(cfg, this.deps.fetchFn)
+    const cards: AgentCard[] = []
     try {
       const text = await runAgentTurn({
         provider,
         messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...history],
-        tools: this.deps.tools ?? [],
+        tools: [...(this.deps.tools ?? []), showCardTool(cards)],
         signal: ctrl.signal,
         onDelta: (t) => emit({ type: 'delta', requestId, text: t }),
         onTool: (name, ok) => emit({ type: 'tool', requestId, name, ok }),
       })
       if (text.trim() === '') throw new AgentError('BAD_RESPONSE')
-      store.append(conversationId, 'assistant', text, (this.deps.now ?? Date.now)())
-      emit({ type: 'done', requestId, conversationId, text })
+      store.append(conversationId, 'assistant', text, (this.deps.now ?? Date.now)(), cards)
+      emit({ type: 'done', requestId, conversationId, text, cards })
     } catch (e) {
       if (ctrl.signal.aborted) emit({ type: 'cancelled', requestId })
       else
