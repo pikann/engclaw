@@ -190,6 +190,17 @@ describe('game progress', () => {
     expect(store.game.get(1)).toMatchObject({ stars: 3, avgScore: 92 })
   })
 
+  it('returns the previous best and flags a higher average at equal stars', () => {
+    expect(store.game.record(1, res({ avgScore: 70 })).previous).toBeNull()
+    const better = store.game.record(1, res({ avgScore: 76 }))
+    expect(better.improved).toBe(true)
+    expect(better.previous).toMatchObject({ stars: 2, avgScore: 70 })
+    expect(better.progress.avgScore).toBe(76)
+    const same = store.game.record(1, res({ avgScore: 76 }))
+    expect(same.improved).toBe(false)
+    expect(same.previous).toMatchObject({ avgScore: 76 })
+  })
+
   it('reports an improvement and unlocks sequentially', () => {
     expect(store.game.isUnlocked(1)).toBe(true)
     expect(store.game.isUnlocked(2)).toBe(false)

@@ -83,10 +83,17 @@ async function attempt(page: Page): Promise<void> {
   await expect(page.getByTestId('game-record')).toBeEnabled()
 }
 
+async function finalAttempt(page: Page): Promise<void> {
+  await page.getByTestId('game-record').click()
+  await expect(page.getByTestId('game-stop')).toBeVisible()
+  await page.waitForTimeout(800)
+  await page.getByTestId('game-stop').click()
+}
+
 test('plays a chapter to completion: only correct attempts advance the tracker', async () => {
   const app = await launch([
     { score: 90 },
-    { score: 60 },
+    { score: 40 },
     { score: 95, flagged: true },
     { score: 85 },
     { score: 92 },
@@ -103,7 +110,7 @@ test('plays a chapter to completion: only correct attempts advance the tracker',
   await expect(page.getByTestId('game-count')).toHaveText('1/5')
   await attempt(page)
   await expect(page.getByTestId('game-count')).toHaveText('1/5')
-  await expect(page.getByTestId('game-last-score')).toContainText('60')
+  await expect(page.getByTestId('game-last-score')).toContainText('40')
   await attempt(page)
   await expect(page.getByTestId('game-count')).toHaveText('1/5')
 
@@ -128,6 +135,54 @@ test('plays a chapter to completion: only correct attempts advance the tracker',
   await expect(page.getByTestId('game-passed')).toBeVisible({ timeout: 15_000 })
   await expect(page.getByTestId('game-count')).toHaveText('5/5')
   await expect(page.getByTestId('game-passed')).toContainText('7')
+  await app.close()
+})
+
+test('pass -> result -> replay -> better result upgrades the stored best', async () => {
+  const app = await launch([
+    ...Array.from({ length: 5 }, () => ({ score: 70 })),
+    ...Array.from({ length: 5 }, () => ({ score: 95 })),
+  ])
+  const page = await app.firstWindow()
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.evaluate(() => (location.hash = '#/game/chapter/1'))
+  await expect(page.getByTestId('game-target')).toBeVisible()
+  await expect(page.getByTestId('game-best')).toHaveCount(0)
+
+  for (let i = 0; i < 4; i++) await attempt(page)
+  await finalAttempt(page)
+  const first = page.getByTestId('game-passed')
+  await expect(first).toBeVisible({ timeout: 15_000 })
+  await expect(first.getByTestId('game-new-best')).toBeVisible()
+  await expect(first.getByRole('img', { name: '2 of 3 stars' })).toBeVisible()
+  await expect(first.getByTestId('game-compare')).toHaveCount(0)
+  await expect(first.getByTestId('game-back-map')).toBeVisible()
+
+  await first.getByTestId('game-replay').click()
+  await expect(page.getByTestId('game-count')).toHaveText('0/5')
+  await expect(
+    page.getByTestId('game-best').getByRole('img', { name: '2 of 3 stars' }),
+  ).toBeVisible()
+
+  for (let i = 0; i < 4; i++) await attempt(page)
+  await finalAttempt(page)
+  const second = page.getByTestId('game-passed')
+  await expect(second).toBeVisible({ timeout: 15_000 })
+  await expect(second.getByTestId('game-new-best')).toBeVisible()
+  await expect(second.getByTestId('game-compare-this')).toHaveText('95')
+  await expect(second.getByTestId('game-compare-prev')).toHaveText('70')
+  await expect(second.getByRole('img', { name: '3 of 3 stars' }).first()).toBeVisible()
+  await expect(
+    page.getByTestId('game-best').getByRole('img', { name: '3 of 3 stars' }),
+  ).toBeVisible()
+
+  const stored = await page.evaluate(() =>
+    (
+      window as unknown as { engclaw: { game: { map(): Promise<{ progress: unknown[] }> } } }
+    ).engclaw.game.map(),
+  )
+  expect(stored.progress).toHaveLength(1)
+  expect(stored.progress[0]).toMatchObject({ order: 1, stars: 3, avgScore: 95, attempts: 10 })
   await app.close()
 })
 

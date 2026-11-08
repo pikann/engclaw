@@ -450,6 +450,8 @@ export const GameChapter = z.object({
   total: z.number().int(),
   /** False while the previous chapter is not passed; locked chapters are not playable. */
   unlocked: z.boolean(),
+  /** Stored best for this chapter, or null when it has not been passed yet. */
+  best: GameProgressEntry.nullable(),
 })
 export type GameChapter = z.infer<typeof GameChapter>
 export const GameWorldRequest = z.object({ world: z.number().int().min(1) }).strict()
@@ -485,7 +487,12 @@ export const GameRecordRequest = z
     attempts: z.number().int().min(1),
   })
   .strict()
-export const GameRecordResult = z.object({ progress: GameProgressEntry, improved: z.boolean() })
+export const GameRecordResult = z.object({
+  progress: GameProgressEntry,
+  /** The stored best before this run, or null on the first pass. */
+  previous: GameProgressEntry.nullable(),
+  improved: z.boolean(),
+})
 export const DictionaryIdRequest = z.object({ id: z.number().int().min(0) }).strict()
 export const DictionaryRootsRequest = z
   .object({ origin: z.string().max(40).optional(), query: z.string().max(100).optional() })
