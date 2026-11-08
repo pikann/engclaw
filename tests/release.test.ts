@@ -9,9 +9,9 @@ const builder = read('apps/desktop/electron-builder.yml')
 const workflow = read('.github/workflows/release.yml')
 
 describe('electron-builder config', () => {
-  it('publishes to GitHub Releases as drafts so the updater feed exists', () => {
+  it('uploads into the maintainer-created release even when it is already published', () => {
     expect(builder).toMatch(/publish:\n\s+provider: github/)
-    expect(builder).toMatch(/releaseType: draft/)
+    expect(builder).toMatch(/releaseType: release/)
   })
 
   it('builds the macOS zip that electron-updater needs', () => {
@@ -29,6 +29,7 @@ describe('release workflow', () => {
   it('is tag-driven and leaves creating the release to the maintainer', () => {
     expect(workflow).toMatch(/tags:\s*\n\s*- 'v\*/)
     expect(workflow).not.toContain('gh release create')
+    expect(workflow).toContain('Require a GitHub release for this tag')
   })
 
   it('signs and notarizes macOS from encrypted secrets only', () => {

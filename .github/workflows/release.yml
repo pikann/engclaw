@@ -1,8 +1,8 @@
 name: Release
 # Tag vX.Y.Z -> signed + notarized builds on mac/win/linux -> installers, latest*.yml (electron-updater
 # feed) and SHA256SUMS (official releases only) uploaded to the GitHub Release for that tag.
-# Create the release yourself (GitHub UI: new tag + notes). This workflow never creates one; if none
-# exists when a build finishes, electron-builder falls back to creating a draft (releaseType: draft).
+# Create the release yourself first (GitHub UI: new tag + notes, draft or published). This workflow never
+# creates one and fails fast if there is none.
 on:
   push:
     tags:
@@ -37,6 +37,14 @@ jobs:
         working-directory: apps/desktop
     steps:
       - uses: actions/checkout@v7
+      - name: Require a GitHub release for this tag
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Drafts are only visible through the API list, which also covers published releases.
+          found=$(gh api "repos/$GITHUB_REPOSITORY/releases" --paginate --jq ".[] | select(.tag_name == \"$TAG\") | .id" | head -1)
+          [[ -n "$found" ]] || { echo "::error::No GitHub release exists for $TAG. Create it first (GitHub UI: tag + notes), then re-run this workflow."; exit 1; }
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
         working-directory: .
@@ -65,9 +73,11 @@ jobs:
         run: |
           printf '%s' "$APPLE_API_KEY_P8" > "$RUNNER_TEMP/AuthKey.p8"
           echo "APPLE_API_KEY=$RUNNER_TEMP/AuthKey.p8" >> "$GITHUB_ENV"
-      - name: Package, sign and upload to the draft release
+      - name: Package, sign and upload to the release
         env:
           GH_TOKEN: ${{ github.token }}
+          # Allow uploading into a release that was published a while ago (e.g. on a re-run).
+          EP_GH_IGNORE_TIME: 'true'
           # macOS: Developer ID Application cert (base64 .p12) + notarytool API key.
           CSC_LINK: ${{ matrix.name == 'macos-arm64' && secrets.CSC_LINK || '' }}
           CSC_KEY_PASSWORD: ${{ matrix.name == 'macos-arm64' && secrets.CSC_KEY_PASSWORD || '' }}
