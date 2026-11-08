@@ -20,6 +20,7 @@ import { InnertubeAdapter, YouTubeError, parseVideoId } from '@engclaw/youtube'
 import { PlayerController } from './player'
 import { AudioRangeCache } from './audio-range-cache'
 import { CachedYouTube } from './youtube-cache'
+import { startAutoUpdate } from './updater'
 
 const rendererDir = join(__dirname, '../renderer')
 
@@ -180,6 +181,7 @@ void app.whenReady().then(async () => {
   const inference = new UtilityClient(startUtility)
   registerTtsHandlers(inference, models)
   registerInferenceHandlers(inference, models, store.videos)
+  if (!process.env['ENGCLAW_SMOKE']) startAutoUpdate(() => store.settings.get().checkForUpdates)
 })
 
 app.on('window-all-closed', () => app.quit())

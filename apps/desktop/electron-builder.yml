@@ -24,7 +24,9 @@ mac:
   files:
     - '!**/node_modules/onnxruntime-node/bin/napi-v6/{linux,win32}/**'
     - '!**/node_modules/better-sqlite3/prebuilds/{linux*,win32*}'
-  target: dmg
+  target:
+    - dmg
+    - zip # electron-updater updates macOS from the zip, not the dmg
   entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist
   hardenedRuntime: true
@@ -49,3 +51,9 @@ linux:
 deb:
   packageName: engclaw
 afterPack: build/after-pack.cjs
+# Auto-update feed: GitHub Releases (latest*.yml). Releases are created by the release workflow.
+publish:
+  provider: github
+  owner: pikann
+  repo: engclaw
+  releaseType: draft
