@@ -40,7 +40,7 @@ describe('chapter run', () => {
     expect(isPassed(play([[90], [90], [90], [90], [90]]))).toBe(true)
   })
   it('does not advance on incorrect attempts but counts them', () => {
-    const run = play([[90], [50], [85, 1], [90]])
+    const run = play([[90], [49], [85, 1], [90]])
     expect(correctCount(run)).toBe(2)
     expect(totalAttempts(run)).toBe(4)
   })

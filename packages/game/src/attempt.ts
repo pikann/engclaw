@@ -1,5 +1,5 @@
 /** Score an attempt must reach to count as correct. Calibration: see the game spec, "Attempt threshold". */
-export const CORRECT_SCORE_THRESHOLD = 80
+export const CORRECT_SCORE_THRESHOLD = 50
 
 /** Correct attempts (not necessarily consecutive) that pass a chapter. */
 export const REQUIRED_CORRECT = 5
