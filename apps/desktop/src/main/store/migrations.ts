@@ -108,6 +108,16 @@ export const MIGRATIONS: readonly string[] = [
    );`,
   // Earlier builds rejected every thumbnail host and cached "no image" for all words; drop those entries.
   `DELETE FROM word_image WHERE file IS NULL;`,
+  // Pronunciation game: one row per passed chapter (by its 1-based global order). Stars and scores only improve.
+  `CREATE TABLE game_progress (
+     chapter_order    INTEGER PRIMARY KEY CHECK (chapter_order >= 1),
+     stars            INTEGER NOT NULL CHECK (stars BETWEEN 1 AND 3),
+     avg_score        REAL NOT NULL,
+     best_score       REAL NOT NULL,
+     attempts         INTEGER NOT NULL,
+     first_passed_at  INTEGER NOT NULL,
+     last_passed_at   INTEGER NOT NULL
+   );`,
 ]
 
 export class FutureSchemaError extends Error {

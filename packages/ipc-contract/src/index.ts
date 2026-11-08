@@ -393,6 +393,16 @@ export const HistoryListRequest = z
   })
   .strict()
 export const HistoryIdRequest = z.object({ id: z.string().min(1).max(64) }).strict()
+export const GameProgressEntry = z.object({
+  order: z.number().int().min(1),
+  stars: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+  avgScore: z.number().min(0).max(100),
+  bestScore: z.number().min(0).max(100),
+  attempts: z.number().int().min(1),
+  firstPassedAt: z.number().int().nonnegative(),
+  lastPassedAt: z.number().int().nonnegative(),
+})
+export type GameProgressEntry = z.infer<typeof GameProgressEntry>
 /** The on-disk export format. `audio` is a base64 16 kHz mono WAV, or null. */
 export const HistoryExport = z.object({
   format: z.literal('engclaw-history'),
@@ -401,6 +411,8 @@ export const HistoryExport = z.object({
   attempts: z.array(
     HistoryAttempt.omit({ hasAudio: true }).extend({ audio: z.string().nullable() }),
   ),
+  /** Pronunciation game progress; absent in files exported before the game existed. */
+  gameProgress: z.array(GameProgressEntry).optional(),
 })
 export type HistoryExportFile = z.infer<typeof HistoryExport>
 export const HistoryFileResult = z.discriminatedUnion('status', [

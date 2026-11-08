@@ -152,7 +152,109 @@ describe('store', () => {
   })
 })
 
+describe('game progress', () => {
+  let dir: string
+  let store: Store
+  const dbPath = () => join(dir, 'engclaw.db')
+  const res = (over = {}) => ({
+    stars: 2 as const,
+    avgScore: 70,
+    bestScore: 80,
+    attempts: 9,
+    ...over,
+  })
+  beforeEach(() => {
+    dir = mkdtempSync(join(tmpdir(), 'engclaw-game-'))
+    store = openStore(dbPath())
+  })
+  afterEach(() => {
+    store.db.close()
+    rmSync(dir, { recursive: true, force: true })
+  })
+
+  it('persists across restarts', () => {
+    store.game.record(1, res())
+    store.db.close()
+    store = openStore(dbPath())
+    expect(store.game.get(1)).toMatchObject({ order: 1, stars: 2, avgScore: 70, attempts: 9 })
+  })
+
+  it('a worse replay keeps the best result', () => {
+    store.game.record(1, res({ stars: 3, avgScore: 92, bestScore: 99, attempts: 6 }))
+    const { progress, improved } = store.game.record(
+      1,
+      res({ stars: 1, avgScore: 55, bestScore: 60 }),
+    )
+    expect(improved).toBe(false)
+    expect(progress).toMatchObject({ stars: 3, avgScore: 92, bestScore: 99, attempts: 15 })
+    expect(store.game.get(1)).toMatchObject({ stars: 3, avgScore: 92 })
+  })
+
+  it('reports an improvement and unlocks sequentially', () => {
+    expect(store.game.isUnlocked(1)).toBe(true)
+    expect(store.game.isUnlocked(2)).toBe(false)
+    expect(store.game.record(1, res({ stars: 1 })).improved).toBe(true)
+    expect(store.game.record(1, res({ stars: 3 })).improved).toBe(true)
+    expect(store.game.isUnlocked(2)).toBe(true)
+    expect(store.game.isUnlocked(3)).toBe(false)
+  })
+
+  it('export then import round-trips and merges best-of-both', () => {
+    store.game.record(1, res({ stars: 3, avgScore: 90 }))
+    store.game.record(2, res())
+    const json = JSON.parse(JSON.stringify(store.exportData()))
+    expect(json.gameProgress).toHaveLength(2)
+
+    const other = openStore(join(dir, 'other', 'engclaw.db'))
+    other.game.record(2, res({ stars: 3, avgScore: 88 }))
+    other.importData(json)
+    expect(other.game.list().map((e) => [e.order, e.stars])).toEqual([
+      [1, 3],
+      [2, 3],
+    ])
+    expect(other.game.get(2)!.avgScore).toBe(88)
+    const before = other.game.list()
+    other.importData(json)
+    expect(other.game.list()).toEqual(before)
+    other.db.close()
+  })
+
+  it('imports files exported before the game existed', () => {
+    const json = JSON.parse(JSON.stringify(store.exportData()))
+    delete json.gameProgress
+    expect(() => store.importData(json)).not.toThrow()
+  })
+
+  it('rejects invalid progress without partial writes', () => {
+    store.game.record(1, res())
+    const json = JSON.parse(JSON.stringify(store.exportData()))
+    json.gameProgress.push({ ...json.gameProgress[0], order: 2, stars: 9 })
+    const fresh = openStore(join(dir, 'f', 'engclaw.db'))
+    expect(() => fresh.importData(json)).toThrow()
+    expect(fresh.game.list()).toEqual([])
+    fresh.db.close()
+  })
+
+  it('deleteAll wipes progress', () => {
+    store.game.record(1, res())
+    store.deleteAll()
+    expect(store.game.list()).toEqual([])
+  })
+})
+
 describe('migrations', () => {
+  it('adds game_progress when upgrading a database from before the game', () => {
+    const db = new Database(':memory:')
+    migrate(db, MIGRATIONS.slice(0, MIGRATIONS.length - 1))
+    db.prepare("INSERT INTO settings VALUES ('k', '1')").run()
+    expect(
+      db.prepare("SELECT name FROM sqlite_master WHERE name='game_progress'").get(),
+    ).toBeUndefined()
+    migrate(db)
+    expect(db.prepare('SELECT COUNT(*) AS n FROM game_progress').get()).toEqual({ n: 0 })
+    expect(db.prepare('SELECT value FROM settings').get()).toEqual({ value: '1' })
+  })
+
   it('apply once, set user_version, and are idempotent', () => {
     const db = new Database(':memory:')
     expect(currentVersion(db)).toBe(0)
