@@ -1,7 +1,7 @@
+import { asSchema } from 'ai'
 import { describe, expect, it } from 'vitest'
 import { AGENT_CARDS_PER_TURN, AgentCard } from '@engclaw/ipc-contract'
 import { showCardTool } from './show-card'
-import { toolSpecs } from './tools'
 
 const ok = [
   { type: 'vocabulary', word: 'market', meaning: 'a place to buy things', example: 'I went.' },
@@ -35,21 +35,28 @@ describe('AgentCard', () => {
 })
 
 describe('show_card tool', () => {
+  const exec = (tool: ReturnType<typeof showCardTool>, input: unknown) =>
+    tool.execute!(input as never, {
+      toolCallId: 'c',
+      messages: [],
+      context: {},
+      abortSignal: new AbortController().signal,
+    })
+
   it('collects cards and limits them per reply', async () => {
     const sink: AgentCard[] = []
     const tool = showCardTool(sink)
-    const signal = new AbortController().signal
     for (let i = 0; i < AGENT_CARDS_PER_TURN; i++)
-      await expect(tool.run(AgentCard.parse(ok[0]), signal)).resolves.toEqual({ shown: true })
-    await expect(tool.run(AgentCard.parse(ok[0]), signal)).rejects.toThrow(/at most/)
+      await expect(exec(tool, AgentCard.parse(ok[0]))).resolves.toBe('{"shown":true}')
+    await expect(exec(tool, AgentCard.parse(ok[0]))).rejects.toThrow(/at most/)
     expect(sink).toHaveLength(AGENT_CARDS_PER_TURN)
   })
 
-  it('advertises a JSON schema that lists every card type', () => {
-    const [spec] = toolSpecs([showCardTool([])])
-    expect(spec!.name).toBe('show_card')
-    const types = JSON.stringify(spec!.parameters)
+  it('advertises a JSON schema that lists every card type', async () => {
+    const schema = await asSchema(showCardTool([]).inputSchema).jsonSchema
+    const types = JSON.stringify(schema)
     for (const t of ['vocabulary', 'pronunciation', 'grammar', 'correction'])
       expect(types).toContain(t)
+    expect(types).not.toContain('additionalProperties')
   })
 })

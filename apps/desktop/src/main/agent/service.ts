@@ -9,13 +9,13 @@ import type {
 } from '@engclaw/ipc-contract'
 import type { AgentStore } from '../store/agent'
 import type { FetchLike, ProviderConfig } from '../llm/provider'
-import { runAgentTurn } from './loop'
-import { openAiChatProvider } from './openai'
+import type { LanguageModel, ModelMessage, ToolSet } from 'ai'
+import { createModel } from './model'
+import { runAgentTurn } from './turn'
 import { SYSTEM_PROMPT } from './persona'
 import { formatSpeechContext } from './speech-context'
 import { showCardTool } from './show-card'
-import type { AgentTool } from './tools'
-import { AgentError, type ChatMessage, type ChatProvider } from './types'
+import { AgentError } from './types'
 
 const HISTORY_LIMIT = 40
 
@@ -24,9 +24,9 @@ export interface AgentDeps {
   config: () => ProviderConfig | null
   fetchFn: FetchLike
   emit: (e: AgentEvent) => void
-  tools?: readonly AgentTool[]
-  /** Overrides the network adapter (tests). */
-  providerFor?: (cfg: ProviderConfig) => ChatProvider
+  tools?: ToolSet
+  /** Overrides the network model (tests). */
+  modelFor?: (cfg: ProviderConfig) => LanguageModel
   now?: () => number
   newId?: () => string
 }
@@ -86,20 +86,24 @@ export class AgentService {
     speechContext?: string,
   ): Promise<void> {
     const { store, emit } = this.deps
-    const history: ChatMessage[] = store
+    const history: ModelMessage[] = store
       .messages(conversationId)
       .slice(-HISTORY_LIMIT)
       .map((m) => ({ role: m.role, content: m.text }))
     // Only the latest turn carries its analysis; it is not stored, so older turns stay plain text.
     const last = history.at(-1)
     if (speechContext && last?.role === 'user') last.content += `\n\n${speechContext}`
-    const provider = this.deps.providerFor?.(cfg) ?? openAiChatProvider(cfg, this.deps.fetchFn)
     const cards: AgentCard[] = []
     try {
+      const { model, timedOut } = this.deps.modelFor
+        ? { model: this.deps.modelFor(cfg), timedOut: () => false }
+        : createModel(cfg, this.deps.fetchFn)
       const text = await runAgentTurn({
-        provider,
-        messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...history],
-        tools: [...(this.deps.tools ?? []), showCardTool(cards)],
+        model,
+        timedOut,
+        system: SYSTEM_PROMPT,
+        messages: history,
+        tools: { ...this.deps.tools, show_card: showCardTool(cards) },
         signal: ctrl.signal,
         onDelta: (t) => emit({ type: 'delta', requestId, text: t }),
         onTool: (name, ok) => emit({ type: 'tool', requestId, name, ok }),

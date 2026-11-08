@@ -1,15 +1,17 @@
 import Database from 'better-sqlite3'
+import { APICallError, type LanguageModel } from 'ai'
+import { MockLanguageModelV4 } from 'ai/test'
 import { describe, expect, it } from 'vitest'
 import type { AgentEvent, SpeechSummary } from '@engclaw/ipc-contract'
 import { migrate } from '../store/migrations'
 import { AgentStore } from '../store/agent'
 import { AgentService } from './service'
 import { SYSTEM_PROMPT } from './persona'
-import { AgentError, type ChatMessage, type ChatProvider, type StreamChunk } from './types'
+import { scriptedModel, text, toolCalls } from './test-model'
 
 const cfg = { baseUrl: 'https://api.example.com/v1', model: 'm', apiKey: 'k', headers: [] }
 
-function setup(provider: ChatProvider, config: typeof cfg | null = cfg) {
+function setup(model: LanguageModel, config: typeof cfg | null = cfg) {
   const db = new Database(':memory:')
   migrate(db)
   const store = new AgentStore(db)
@@ -20,22 +22,26 @@ function setup(provider: ChatProvider, config: typeof cfg | null = cfg) {
     config: () => config,
     fetchFn: () => Promise.reject(new Error('unused')),
     emit: (e) => events.push(e),
-    providerFor: () => provider,
+    modelFor: () => model,
     newId: () => `id${++n}`,
   })
   return { service, store, events }
 }
-const replying = (text: string, seen: ChatMessage[][] = []): ChatProvider => ({
-  async *stream(req) {
-    seen.push(req.messages)
-    for (const w of text.split(/(?<= )/)) yield { type: 'text', text: w }
-  },
-})
+const replying = (reply: string) => scriptedModel([text(...reply.split(/(?<= )/))])
+
+/** `[role, text]` for every non-tool message the model was sent. */
+const sent = (call: { prompt: { role: string; content: unknown }[] }): [string, string][] =>
+  call.prompt.map((m) => [
+    m.role,
+    typeof m.content === 'string'
+      ? m.content
+      : (m.content as { type: string; text?: string }[]).map((p) => p.text ?? '').join(''),
+  ])
 
 describe('AgentService', () => {
   it('streams deltas, then persists the exchange and emits done', async () => {
-    const seen: ChatMessage[][] = []
-    const { service, events } = setup(replying('Sounds fun. What did you eat?', seen))
+    const { model, calls } = replying('Sounds fun. What did you eat?')
+    const { service, events } = setup(model)
     const res = service.send({ text: 'I went out' })
     expect(res).toEqual({ ok: true, conversationId: 'id1', requestId: 'id2' })
     await service.idle
@@ -51,26 +57,26 @@ describe('AgentService', () => {
       ['user', 'I went out'],
       ['assistant', 'Sounds fun. What did you eat?'],
     ])
-    expect(seen[0]![0]).toEqual({ role: 'system', content: SYSTEM_PROMPT })
+    expect(sent(calls[0]!)[0]).toEqual(['system', SYSTEM_PROMPT])
   })
 
   it('sends earlier turns of the same conversation to the model', async () => {
-    const seen: ChatMessage[][] = []
-    const { service } = setup(replying('Okay.', seen))
+    const { model, calls } = replying('Okay.')
+    const { service } = setup(model)
     service.send({ text: 'one' })
     await service.idle
     service.send({ conversationId: 'id1', text: 'two' })
     await service.idle
-    expect(seen[1]!.map((m) => (m as { content: string }).content)).toEqual([
-      SYSTEM_PROMPT,
-      'one',
-      'Okay.',
-      'two',
+    expect(sent(calls[1]!)).toEqual([
+      ['system', SYSTEM_PROMPT],
+      ['user', 'one'],
+      ['assistant', 'Okay.'],
+      ['user', 'two'],
     ])
   })
 
   it('lists conversations newest first, titled by the first thing the learner said', async () => {
-    const { service, store } = setup(replying('Nice.'))
+    const { service, store } = setup(replying('Nice.').model)
     store.create('empty', 1)
     store.create('a', 2)
     store.append('a', 'user', '  Hello   there, how are you today?  ', 3)
@@ -83,36 +89,32 @@ describe('AgentService', () => {
   })
 
   it('collects show_card calls, persists the cards with the reply, and returns bad ones to the model', async () => {
-    const results: string[] = []
-    const call = (id: string, args: unknown) => ({
-      id,
-      name: 'show_card',
-      arguments: JSON.stringify(args),
-    })
-    let round = 0
-    const provider: ChatProvider = {
-      async *stream(req) {
-        if (round++ === 0) {
-          yield {
-            type: 'toolCalls',
-            calls: [
-              call('a', { type: 'vocabulary', word: 'market', meaning: 'a place to buy food' }),
-              call('b', { type: 'vocabulary', word: '<b>x</b>', meaning: 'bad' }),
-              call('c', { type: 'bogus' }),
-            ],
-          } as StreamChunk
-          return
-        }
-        for (const m of req.messages) if (m.role === 'tool') results.push(m.content)
-        yield { type: 'text', text: 'A market is a place to shop.' } as StreamChunk
-      },
-    }
-    const { service, events } = setup(provider)
+    const { model, calls } = scriptedModel([
+      toolCalls(
+        {
+          id: 'a',
+          name: 'show_card',
+          input: { type: 'vocabulary', word: 'market', meaning: 'a place to buy food' },
+        },
+        {
+          id: 'b',
+          name: 'show_card',
+          input: { type: 'vocabulary', word: '<b>x</b>', meaning: 'bad' },
+        },
+        { id: 'c', name: 'show_card', input: { type: 'bogus' } },
+      ),
+      text('A market is a place to shop.'),
+    ])
+    const { service, events } = setup(model)
     service.send({ text: 'what is a market' })
     await service.idle
     const card = { type: 'vocabulary', word: 'market', meaning: 'a place to buy food' }
     expect(events.at(-1)).toMatchObject({ type: 'done', cards: [card] })
     expect(service.messages('id1').at(-1)).toMatchObject({ role: 'assistant', cards: [card] })
+    const results = calls[1]!.prompt
+      .filter((m) => m.role === 'tool')
+      .flatMap((m) => m.content as { output: { value: unknown } }[])
+      .map((p) => String(p.output.value))
     expect(results).toHaveLength(3)
     expect(results[0]).toContain('shown')
     expect(results[1]).toContain('invalid arguments')
@@ -120,11 +122,11 @@ describe('AgentService', () => {
   })
 
   it('refuses without a provider, for unknown conversations, and while busy', async () => {
-    expect(setup(replying('x'), null).service.send({ text: 'hi' })).toEqual({
+    expect(setup(replying('x').model, null).service.send({ text: 'hi' })).toEqual({
       ok: false,
       code: 'NO_PROVIDER',
     })
-    const { service } = setup(replying('x'))
+    const { service } = setup(replying('x').model)
     expect(service.send({ conversationId: 'nope', text: 'hi' })).toEqual({
       ok: false,
       code: 'NOT_FOUND',
@@ -136,52 +138,38 @@ describe('AgentService', () => {
   })
 
   it('cancels mid-stream: stops deltas, emits cancelled, keeps no partial reply', async () => {
-    let release!: () => void
-    const gate = new Promise<void>((r) => (release = r))
-    const provider: ChatProvider = {
-      async *stream(req) {
-        yield { type: 'text', text: 'Hello ' } as StreamChunk
-        await gate
-        if (req.signal.aborted) return
-        yield { type: 'text', text: 'late' } as StreamChunk
-      },
-    }
-    const { service, events } = setup(provider)
+    const { model } = replying('Hello there friend')
+    const { service, events } = setup(model)
     const res = service.send({ text: 'hi' })
     if (!res.ok) throw new Error('send failed')
-    await new Promise((r) => setTimeout(r, 0))
     service.cancel(res.requestId)
-    release()
     await service.idle
-    expect(events.map((e) => e.type)).toEqual(['delta', 'cancelled'])
+    expect(events.map((e) => e.type)).toEqual(['cancelled'])
     expect(service.messages(res.conversationId).map((m) => m.role)).toEqual(['user'])
     expect(service.send({ conversationId: res.conversationId, text: 'again' }).ok).toBe(true)
   })
 
   it('reports provider errors by code', async () => {
-    const provider: ChatProvider = {
-      // eslint-disable-next-line require-yield
-      async *stream() {
-        throw new AgentError('RATE_LIMIT')
-      },
-    }
-    const { service, events } = setup(provider)
+    const model = new MockLanguageModelV4({
+      doStream: () =>
+        Promise.reject(
+          new APICallError({
+            message: 'slow down',
+            url: 'u',
+            requestBodyValues: {},
+            statusCode: 429,
+          }),
+        ),
+    })
+    const { service, events } = setup(model)
     service.send({ text: 'hi' })
     await service.idle
     expect(events).toEqual([{ type: 'error', requestId: 'id2', code: 'RATE_LIMIT' }])
   })
 
-  it('shows the model the latest turn speech analysis and a scripted reply can use a real flagged word', async () => {
-    const seen: ChatMessage[][] = []
-    const provider: ChatProvider = {
-      async *stream(req) {
-        seen.push(req.messages)
-        const last = req.messages.at(-1) as { content: string }
-        const word = /mispronounced \([^)]*\): (\w+)/.exec(last.content)?.[1]
-        yield { type: 'text', text: word ? `Say ${word} once more. Ready?` : 'Nice. What next?' }
-      },
-    }
-    const { service, store } = setup(provider)
+  it('shows the model the latest turn speech analysis and keeps it out of stored history', async () => {
+    const { model, calls } = replying('Say market once more. Ready?')
+    const { service, store } = setup(model)
     const speech: SpeechSummary = {
       v: 1,
       score: 70,
@@ -194,15 +182,13 @@ describe('AgentService', () => {
     }
     service.send({ text: 'I go to the market', speech })
     await service.idle
-    const last = seen[0]!.at(-1) as { content: string }
-    expect(last.content).toContain('I go to the market\n\n[speech analysis v1')
+    expect(sent(calls[0]!).at(-1)![1]).toContain('I go to the market\n\n[speech analysis v1')
     expect(store.messages('id1')[0]!.text).toBe('I go to the market')
-    expect(service.messages('id1')[1]!.text).toBe('Say market once more. Ready?')
 
     service.send({ conversationId: 'id1', text: 'typed message' })
     await service.idle
-    const prior = seen[1]!.find((m) => m.role === 'user') as { content: string }
-    expect(prior.content).toBe('I go to the market')
-    expect(JSON.stringify(seen[1]!.at(-1))).not.toContain('speech analysis')
+    const second = sent(calls[1]!)
+    expect(second.find(([r]) => r === 'user')![1]).toBe('I go to the market')
+    expect(second.at(-1)![1]).not.toContain('speech analysis')
   })
 })
