@@ -42,6 +42,7 @@ describe('preload bridge', () => {
       'game',
       'history',
       'inference',
+      'llm',
       'models',
       'ping',
       'player',

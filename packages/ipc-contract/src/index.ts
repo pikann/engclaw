@@ -489,6 +489,99 @@ export const GameRecordRequest = z
     attempts: z.number().int().min(1),
   })
   .strict()
+/** Request headers are token-named and single-line; names that would override transport or auth are rejected. */
+export const LlmHeader = z
+  .object({
+    name: z
+      .string()
+      .regex(/^[A-Za-z0-9-]{1,64}$/)
+      .refine(
+        (n) =>
+          ![
+            'authorization',
+            'host',
+            'content-length',
+            'content-type',
+            'cookie',
+            'connection',
+          ].includes(n.toLowerCase()),
+        'reserved header',
+      ),
+    value: z
+      .string()
+      .max(1000)
+      .regex(/^[^\r\n\0]*$/),
+  })
+  .strict()
+export type LlmHeader = z.infer<typeof LlmHeader>
+
+/** What the renderer may know about the configured provider: never the key or header values. */
+export const LlmProviderStatus = z
+  .object({
+    kind: z.enum(['none', 'openai-compatible']),
+    baseUrl: z.string().nullable(),
+    model: z.string().nullable(),
+    hasApiKey: z.boolean(),
+    headerNames: z.array(z.string()),
+    /** False when the OS cannot encrypt secrets; saving a key is then refused. */
+    secureStorage: z.boolean(),
+  })
+  .strict()
+export type LlmProviderStatus = z.infer<typeof LlmProviderStatus>
+
+const llmDraft = {
+  baseUrl: z.string().min(1).max(500),
+  /** Omitted = keep the stored key (only reused for the same origin); empty string = no key. */
+  apiKey: z.string().max(2000).optional(),
+  /** Omitted = keep the stored headers; an empty list clears them. */
+  headers: z.array(LlmHeader).max(10).optional(),
+}
+export const LlmProviderSaveRequest = z
+  .object({ ...llmDraft, model: z.string().trim().min(1).max(200) })
+  .strict()
+export type LlmProviderSaveRequest = z.infer<typeof LlmProviderSaveRequest>
+export const LlmProviderTestRequest = z
+  .object({ ...llmDraft, model: z.string().trim().max(200).optional() })
+  .strict()
+export type LlmProviderTestRequest = z.infer<typeof LlmProviderTestRequest>
+
+/** On-disk shape of the encrypted provider config (main only; never sent over IPC). */
+export const LlmStoredConfig = z.object({
+  baseUrl: z.string(),
+  model: z.string(),
+  apiKey: z.string(),
+  headers: z.array(LlmHeader),
+})
+
+export const LlmErrorCode = z.enum([
+  'INVALID_URL',
+  'INSECURE_URL',
+  'NETWORK',
+  'TIMEOUT',
+  'UNAUTHORIZED',
+  'NOT_FOUND',
+  'SERVER',
+  'BAD_RESPONSE',
+  'SECURE_STORAGE_UNAVAILABLE',
+])
+export type LlmErrorCode = z.infer<typeof LlmErrorCode>
+export const LlmTestResult = z.discriminatedUnion('ok', [
+  z.object({
+    ok: z.literal(true),
+    /** Model ids from `/models` (capped); empty when the server lists none. */
+    models: z.array(z.string()),
+    /** Whether the requested model is in the list; null if it was not asked for or the list is empty. */
+    modelFound: z.boolean().nullable(),
+  }),
+  z.object({ ok: z.literal(false), code: LlmErrorCode, status: z.number().int().optional() }),
+])
+export type LlmTestResult = z.infer<typeof LlmTestResult>
+export const LlmSaveResult = z.discriminatedUnion('ok', [
+  z.object({ ok: z.literal(true), status: LlmProviderStatus }),
+  z.object({ ok: z.literal(false), code: LlmErrorCode }),
+])
+export type LlmSaveResult = z.infer<typeof LlmSaveResult>
+
 export const GameRecordResult = z.object({
   progress: GameProgressEntry,
   /** The stored best before this run, or null on the first pass. */
@@ -716,6 +809,10 @@ export const IPC = {
   gameMap: 'game:map',
   gameWorld: 'game:world',
   gameRecord: 'game:record',
+  llmStatus: 'llm:status',
+  llmSave: 'llm:save',
+  llmTest: 'llm:test',
+  llmRemove: 'llm:remove',
   deckAdd: 'deck:add',
   deckRemove: 'deck:remove',
   deckHas: 'deck:has',
@@ -823,6 +920,11 @@ export const invokeChannels = {
   [IPC.gameWorld]: { request: GameWorldRequest, response: GameWorld },
   /** Stores a passed run; stars and scores only improve. */
   [IPC.gameRecord]: { request: GameRecordRequest, response: GameRecordResult },
+  [IPC.llmStatus]: { request: noArgs, response: LlmProviderStatus },
+  [IPC.llmSave]: { request: LlmProviderSaveRequest, response: LlmSaveResult },
+  /** Lists `/models` on the draft settings; secrets stay in main. */
+  [IPC.llmTest]: { request: LlmProviderTestRequest, response: LlmTestResult },
+  [IPC.llmRemove]: { request: noArgs, response: LlmProviderStatus },
   [IPC.dictionaryRoots]: {
     request: DictionaryRootsRequest.optional(),
     response: DictionaryRootList,
@@ -956,6 +1058,12 @@ export interface EngclawApi {
     root(req: z.infer<typeof DictionaryIdRequest>): Promise<DictionaryRoot | null>
     roots(req?: z.infer<typeof DictionaryRootsRequest>): Promise<DictionaryRootList>
     image(req: z.infer<typeof DictionaryIdRequest>): Promise<WordImage | null>
+  }
+  llm: {
+    status(): Promise<LlmProviderStatus>
+    save(req: LlmProviderSaveRequest): Promise<LlmSaveResult>
+    test(req: LlmProviderTestRequest): Promise<LlmTestResult>
+    remove(): Promise<LlmProviderStatus>
   }
   game: {
     chapter(req: z.infer<typeof GameChapterRequest>): Promise<GameChapter>

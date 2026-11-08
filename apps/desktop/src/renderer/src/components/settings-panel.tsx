@@ -2,11 +2,12 @@ import { useEffect, useId, useState, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router'
 import { Tabs as TabsPrimitive } from 'radix-ui'
 import { useTranslation } from 'react-i18next'
-import { CheckCircle2, Database, Mic, SlidersHorizontal, Trash2 } from 'lucide-react'
+import { Bot, CheckCircle2, Database, Mic, SlidersHorizontal, Trash2 } from 'lucide-react'
 import type { AppSettings } from '@engclaw/ipc-contract'
 import { setThemePreference, useThemePreference, type ThemePreference } from '@/lib/theme'
 import { cn } from '@/lib/utils'
 import { LanguageSwitcher } from '@/components/language-switcher'
+import { LlmProviderPanel } from '@/components/llm-provider-panel'
 import { ModelsPanel } from '@/components/models-panel'
 import { Button } from '@/components/ui/button'
 import {
@@ -25,6 +26,7 @@ const THEMES = ['system', 'light', 'dark'] as const satisfies readonly ThemePref
 const SECTIONS = [
   { id: 'general', icon: SlidersHorizontal, label: 'settings.general' },
   { id: 'models', icon: Mic, label: 'models.title' },
+  { id: 'agent', icon: Bot, label: 'settings.llm.title' },
   { id: 'data', icon: Database, label: 'settings.data' },
 ] as const
 
@@ -249,6 +251,12 @@ export function SettingsPanel() {
             <ModelsPanel />
           </Section>
         </TabsPrimitive.Content>
+        <TabsPrimitive.Content value="agent" className="min-w-0 outline-none">
+          <Section title={t('settings.llm.title')}>
+            <LlmProviderPanel />
+          </Section>
+        </TabsPrimitive.Content>
+
         <TabsPrimitive.Content value="data" className="min-w-0 outline-none">
           <Section title={t('settings.data')}>
             <div className={cn(rows, 'border-destructive/40')}>

@@ -15,6 +15,7 @@ import { registerTtsHandlers } from './tts'
 import { registerDeckHandlers } from './deck'
 import { registerDictionaryHandlers } from './dictionary'
 import { registerGameHandlers } from './game'
+import { registerLlmHandlers } from './llm/register'
 import { UtilityClient } from './utility-client'
 import { loadLanguage, saveLanguage } from './settings'
 import { InnertubeAdapter, YouTubeError, parseVideoId } from '@engclaw/youtube'
@@ -155,7 +156,8 @@ void app.whenReady().then(async () => {
     if (isLocale(next)) await setLanguage(next)
     return language
   })
-  const store = registerStoreHandlers()
+  const llmConfig = registerLlmHandlers()
+  const store = registerStoreHandlers(() => llmConfig.clear())
   const models = registerModelHandlers()
   const cachedYoutube = new CachedYouTube(
     youtube,
