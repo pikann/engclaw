@@ -1,6 +1,6 @@
 name: Release
 # Tag vX.Y.Z -> signed + notarized builds on mac/win/linux -> installers, latest*.yml (electron-updater
-# feed) and SHA256SUMS (official releases only) uploaded to the GitHub Release for that tag.
+# feed) and SHA256SUMS uploaded to the GitHub Release for that tag.
 # Create the release yourself first (GitHub UI: new tag + notes, draft or published). This workflow never
 # creates one and fails fast if there is none.
 on:
@@ -96,8 +96,6 @@ jobs:
           xcrun stapler validate "$app"
 
   checksums:
-    # Pre-releases (tags with a hyphen, e.g. v1.2.3-rc.1) get no SHA256SUMS; only official releases do.
-    if: ${{ !contains(github.ref_name, '-') }}
     needs: build
     runs-on: ubuntu-latest
     steps:
