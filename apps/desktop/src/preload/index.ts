@@ -84,6 +84,12 @@ const api: EngclawApi = {
   contours: {
     has: (req) => invoke(IPC.contoursHas, req),
   },
+  llm: {
+    status: () => invoke(IPC.llmStatus),
+    save: (req) => invoke(IPC.llmSave, req),
+    test: (req) => invoke(IPC.llmTest, req),
+    remove: () => invoke(IPC.llmRemove),
+  },
   game: {
     chapter: (req) => invoke(IPC.gameChapter, req),
     map: () => invoke(IPC.gameMap),

@@ -14,7 +14,7 @@ const MIC_SETTINGS_URL: Partial<Record<NodeJS.Platform, string>> = {
 const filters = (): Electron.FileFilter[] => [{ name: 'JSON', extensions: ['json'] }]
 
 /** Opens the SQLite store in `userData` and registers history + app-settings channels. */
-export function registerStoreHandlers(): Store {
+export function registerStoreHandlers(onDeleteAll: () => void = () => {}): Store {
   const store = openStore(join(app.getPath('userData'), 'engclaw.db'))
   const parent = (e: Electron.IpcMainInvokeEvent) => BrowserWindow.fromWebContents(e.sender)
 
@@ -70,6 +70,7 @@ export function registerStoreHandlers(): Store {
   handle(IPC.appUpdateSettings, (patch) => store.settings.update(patch))
   handle(IPC.appDeleteAllData, () => {
     store.deleteAll()
+    onDeleteAll()
     return null
   })
   handle(IPC.appOpenMicSettings, async () => {
