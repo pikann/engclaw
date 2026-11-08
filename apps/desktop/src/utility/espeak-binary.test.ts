@@ -1,17 +1,23 @@
 import { describe, expect, it } from 'vitest'
-import { resolveEspeakBinary } from './espeak-binary'
+import { resolveEspeak } from './espeak-binary'
 
-describe('resolveEspeakBinary', () => {
-  it('prefers ESPEAK_NG', () => {
-    expect(resolveEspeakBinary({ ESPEAK_NG: '/x/espeak-ng' }, '/res', () => true)).toBe(
-      '/x/espeak-ng',
-    )
+const posix = (p: string | undefined): string | undefined => p?.replace(/\\/g, '/')
+
+describe('resolveEspeak', () => {
+  it('prefers ESPEAK_NG and ESPEAK_DATA_PATH', () => {
+    expect(
+      resolveEspeak({ ESPEAK_NG: '/x/espeak-ng', ESPEAK_DATA_PATH: '/x/d' }, '/res', () => true),
+    ).toEqual({ binary: '/x/espeak-ng', dataPath: '/x/d' })
   })
-  it('uses a bundled binary when present', () => {
-    const got = resolveEspeakBinary({}, '/res', (p) => p.startsWith('/res/espeak-ng/'))
-    expect(got.replace(/\\/g, '/')).toMatch(/^\/res\/espeak-ng\/espeak-ng(\.exe)?$/)
+  it('uses the bundled binary and its data folder when present', () => {
+    const got = resolveEspeak({}, '/res', (p) => posix(p)!.startsWith('/res/espeak-ng/'))
+    expect(posix(got.binary)).toMatch(/^\/res\/espeak-ng\/espeak-ng(\.exe)?$/)
+    expect(posix(got.dataPath)).toBe('/res/espeak-ng')
   })
   it('falls back to PATH when nothing is found', () => {
-    expect(resolveEspeakBinary({}, '/res', () => false)).toBe('espeak-ng')
+    expect(resolveEspeak({}, '/res', () => false)).toEqual({
+      binary: 'espeak-ng',
+      dataPath: undefined,
+    })
   })
 })

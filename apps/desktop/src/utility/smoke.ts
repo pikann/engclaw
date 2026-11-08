@@ -2,12 +2,15 @@
 // and a tiny ONNX model runs in the utility process. Triggered by ENGCLAW_SMOKE=1.
 import { join } from 'node:path'
 import { createRequire } from 'node:module'
+import { EspeakProcess } from './espeak'
+import { resolveEspeak } from './espeak-binary'
 
 export interface SmokeReport {
   arch: string
   platform: string
   sqlite: { ok: boolean; detail: string }
   ort: { ok: boolean; detail: string; cpu: boolean; webgpu: string }
+  espeak: { ok: boolean; detail: string }
 }
 
 export async function runSmoke(modelPath: string): Promise<SmokeReport> {
@@ -17,6 +20,7 @@ export async function runSmoke(modelPath: string): Promise<SmokeReport> {
     platform: process.platform,
     sqlite: { ok: false, detail: '' },
     ort: { ok: false, detail: '', cpu: false, webgpu: 'not attempted' },
+    espeak: { ok: false, detail: '' },
   }
   try {
     const Database = req('better-sqlite3')
@@ -58,6 +62,18 @@ export async function runSmoke(modelPath: string): Promise<SmokeReport> {
     report.ort.ok = report.ort.cpu
   } catch (e) {
     report.ort.detail = String(e)
+  }
+  const espeak = new EspeakProcess(resolveEspeak())
+  try {
+    const [ipa] = await Promise.race([
+      espeak.phonemize(['hello']),
+      new Promise<never>((_, rej) => setTimeout(() => rej(new Error('timeout 20s')), 20_000)),
+    ])
+    report.espeak = { ok: Boolean(ipa && /h.*l/.test(ipa)), detail: `hello -> ${ipa}` }
+  } catch (e) {
+    report.espeak.detail = String(e)
+  } finally {
+    espeak.dispose()
   }
   return report
 }

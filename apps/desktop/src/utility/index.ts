@@ -3,7 +3,7 @@ import { join } from 'node:path'
 import type { ContourData } from '@engclaw/ipc-contract'
 import { CachedPhonemizer, TTS_MODEL_ID } from '@engclaw/pronounce'
 import { EspeakProcess } from './espeak'
-import { resolveEspeakBinary } from './espeak-binary'
+import { resolveEspeak } from './espeak-binary'
 import { DEFAULT_KOKORO_FILES, loadKokoro } from './kokoro'
 import { InferenceError, toInferenceError } from './errors'
 import { InferenceService, type ModelDirs } from './inference'
@@ -13,10 +13,7 @@ import type { RpcCancel, RpcRequest, RpcResult } from './rpc'
 import { runSmoke } from './smoke'
 import { SpeechService } from './speech'
 
-const espeak = new EspeakProcess({
-  binary: resolveEspeakBinary(),
-  dataPath: process.env.ESPEAK_DATA_PATH,
-})
+const espeak = new EspeakProcess(resolveEspeak())
 const phonemizer = new CachedPhonemizer(espeak)
 
 // Kokoro loads lazily on the first `speak` and stays warm; one service per installed model folder.

@@ -80,9 +80,9 @@ function runSmoke(child: Electron.UtilityProcess): void {
         : 'n/a'
     const report = { ...(m.report as object), microphoneStatus: mic, packaged: app.isPackaged }
     console.log('SMOKE_RESULT ' + JSON.stringify(report))
-    const r = m.report as { sqlite: { ok: boolean }; ort: { ok: boolean } }
+    const r = m.report as { sqlite: { ok: boolean }; ort: { ok: boolean }; espeak: { ok: boolean } }
     child.removeAllListeners('exit')
-    app.exit(r.sqlite.ok && r.ort.ok ? 0 : 1)
+    app.exit(r.sqlite.ok && r.ort.ok && r.espeak.ok ? 0 : 1)
   })
   child.on('exit', (code) => {
     console.log('SMOKE_RESULT utility exited early code=' + code)
