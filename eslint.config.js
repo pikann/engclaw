@@ -11,6 +11,11 @@ export default tseslint.config(
     files: ['**/*.{ts,tsx}'],
     languageOptions: { globals: { ...globals.node, ...globals.browser } },
     plugins: { 'react-hooks': reactHooks },
-    rules: { ...reactHooks.configs.recommended.rules },
+    // Only the classic hooks rules. The React Compiler rules added to `recommended` in v6/v7
+    // (set-state-in-effect, refs, purity, immutability) flag existing patterns and are not enabled yet.
+    rules: {
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+    },
   },
 )

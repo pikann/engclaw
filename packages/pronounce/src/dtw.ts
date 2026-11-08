@@ -62,7 +62,7 @@ function windowedDtw(
   for (let i = 0; i < n; i++) {
     for (let j = w.lo[i]!; j <= w.hi[i]!; j++) {
       const d = euclid(x, i, y, j, dim)
-      let best = 0
+      let best: number
       let from = 0
       if (i === 0 && j === 0) {
         best = 0
