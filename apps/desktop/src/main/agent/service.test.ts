@@ -1,6 +1,6 @@
 import Database from 'better-sqlite3'
 import { describe, expect, it } from 'vitest'
-import type { AgentEvent } from '@engclaw/ipc-contract'
+import type { AgentEvent, SpeechSummary } from '@engclaw/ipc-contract'
 import { migrate } from '../store/migrations'
 import { AgentStore } from '../store/agent'
 import { AgentService } from './service'
@@ -131,5 +131,40 @@ describe('AgentService', () => {
     service.send({ text: 'hi' })
     await service.idle
     expect(events).toEqual([{ type: 'error', requestId: 'id2', code: 'RATE_LIMIT' }])
+  })
+
+  it('shows the model the latest turn speech analysis and a scripted reply can use a real flagged word', async () => {
+    const seen: ChatMessage[][] = []
+    const provider: ChatProvider = {
+      async *stream(req) {
+        seen.push(req.messages)
+        const last = req.messages.at(-1) as { content: string }
+        const word = /mispronounced \([^)]*\): (\w+)/.exec(last.content)?.[1]
+        yield { type: 'text', text: word ? `Say ${word} once more. Ready?` : 'Nice. What next?' }
+      },
+    }
+    const { service, store } = setup(provider)
+    const speech: SpeechSummary = {
+      v: 1,
+      score: 70,
+      wer: 0.1,
+      per: 0.2,
+      flaggedWords: 1,
+      words: [{ word: 'market', expected: 'mɑːkɪt', heard: 'mækɪt', confidence: 0.9 }],
+      pace: { wpm: 120, pauses: 1, longestPauseSec: 0.5 },
+      intonation: { ending: 'falling', rangeSemitones: 5 },
+    }
+    service.send({ text: 'I go to the market', speech })
+    await service.idle
+    const last = seen[0]!.at(-1) as { content: string }
+    expect(last.content).toContain('I go to the market\n\n[speech analysis v1')
+    expect(store.messages('id1')[0]!.text).toBe('I go to the market')
+    expect(service.messages('id1')[1]!.text).toBe('Say market once more. Ready?')
+
+    service.send({ conversationId: 'id1', text: 'typed message' })
+    await service.idle
+    const prior = seen[1]!.find((m) => m.role === 'user') as { content: string }
+    expect(prior.content).toBe('I go to the market')
+    expect(JSON.stringify(seen[1]!.at(-1))).not.toContain('speech analysis')
   })
 })

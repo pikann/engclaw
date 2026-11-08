@@ -11,6 +11,7 @@ import type { FetchLike, ProviderConfig } from '../llm/provider'
 import { runAgentTurn } from './loop'
 import { openAiChatProvider } from './openai'
 import { SYSTEM_PROMPT } from './persona'
+import { formatSpeechContext } from './speech-context'
 import type { AgentTool } from './tools'
 import { AgentError, type ChatMessage, type ChatProvider } from './types'
 
@@ -53,7 +54,13 @@ export class AgentService {
     const requestId = newId()
     const ctrl = new AbortController()
     this.active = { requestId, ctrl }
-    this.idle = this.run(cfg, conversationId, requestId, ctrl)
+    this.idle = this.run(
+      cfg,
+      conversationId,
+      requestId,
+      ctrl,
+      req.speech ? formatSpeechContext(req.speech) : undefined,
+    )
     return { ok: true, conversationId, requestId }
   }
 
@@ -74,12 +81,16 @@ export class AgentService {
     conversationId: string,
     requestId: string,
     ctrl: AbortController,
+    speechContext?: string,
   ): Promise<void> {
     const { store, emit } = this.deps
     const history: ChatMessage[] = store
       .messages(conversationId)
       .slice(-HISTORY_LIMIT)
       .map((m) => ({ role: m.role, content: m.text }))
+    // Only the latest turn carries its analysis; it is not stored, so older turns stay plain text.
+    const last = history.at(-1)
+    if (speechContext && last?.role === 'user') last.content += `\n\n${speechContext}`
     const provider = this.deps.providerFor?.(cfg) ?? openAiChatProvider(cfg, this.deps.fetchFn)
     try {
       const text = await runAgentTurn({

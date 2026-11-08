@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
-import type { AgentConversation, AgentEvent } from '@engclaw/ipc-contract'
+import type { AgentConversation, AgentEvent, SpeechSummary } from '@engclaw/ipc-contract'
 import { classifyMicError, micGuidance, playPcm, Recorder, type MicErrorReason } from '@/lib/audio'
 import { converseReducer, initialConverse } from '@/lib/converse'
+import { buildSpeechSummary } from '@/lib/speech-summary'
 
 const MIN_SPEECH_SECONDS = 0.4
 const MAX_SPOKEN_CHARS = 1000
@@ -90,7 +91,7 @@ export function useConverse(platform: string) {
   }, [refreshList, stopSpeaking])
 
   const submit = useCallback(
-    async (text: string) => {
+    async (text: string, speech?: SpeechSummary) => {
       dispatch({ type: 'heard', text })
       sending.current = true
       early.current = []
@@ -99,6 +100,7 @@ export function useConverse(platform: string) {
           ? { conversationId: stateRef.current.conversationId }
           : {}),
         text,
+        ...(speech ? { speech } : {}),
       })
       if (!res.ok) {
         sending.current = false
@@ -130,17 +132,25 @@ export function useConverse(platform: string) {
       .transcribe({ requestId: id, audio: clip.samples })
       .catch(() => null)
     if (asrId.current !== id) return
-    asrId.current = null
     if (!res || !res.ok) {
+      asrId.current = null
       if (res && res.code === 'MODEL_MISSING') setNeedsModels(true)
       return dispatch({ type: 'send-failed', code: 'FAILED' })
     }
     const text = res.value.text.trim()
     if (text === '') {
+      asrId.current = null
       setNotice('noSpeech')
       return dispatch({ type: 'stop-listening' })
     }
-    await submit(text)
+    // The analysis is best-effort: if it fails or is cancelled the turn goes out as plain text.
+    const speech = await window.engclaw.inference
+      .analyze({ requestId: id, audio: clip.samples, text })
+      .then((r) => (r.ok ? buildSpeechSummary(r.value) : undefined))
+      .catch(() => undefined)
+    if (asrId.current !== id) return
+    asrId.current = null
+    await submit(text, speech)
   }, [submit])
 
   const startListening = useCallback(async () => {

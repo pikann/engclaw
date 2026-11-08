@@ -627,8 +627,8 @@
       "active": "Nhà cung cấp đang dùng",
       "providerName": "Nhà cung cấp",
       "sentTitle": "Dữ liệu được gửi đi",
-      "sent": "Lời nói đã chép và bản tóm tắt phát âm ngắn được gửi tới nhà cung cấp.",
-      "notSent": "Âm thanh của bạn không bao giờ được gửi."
+      "sent": "Lời nói đã chép và, với lượt nói, một bản tóm tắt phát âm và tốc độ dạng văn bản: điểm số, tỉ lệ lỗi từ và âm, tối đa 5 từ phát âm sai kèm âm cần có và âm nghe được, số từ mỗi phút, số lần ngừng, hướng và độ rộng của cao độ. Lịch sử hội thoại được gửi cùng mỗi tin nhắn.",
+      "notSent": "Âm thanh, bản ghi âm và đường cong cao độ hay năng lượng không bao giờ được gửi."
     },
     "converse": {
       "viewLabel": "Chế độ xem",
