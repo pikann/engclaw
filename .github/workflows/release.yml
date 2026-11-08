@@ -63,12 +63,30 @@ jobs:
         run: |
           printf '%s' "$APPLE_API_KEY_P8" > "$RUNNER_TEMP/AuthKey.p8"
           echo "APPLE_API_KEY=$RUNNER_TEMP/AuthKey.p8" >> "$GITHUB_ENV"
+      - name: Import macOS signing certificate into a keychain
+        # electron-builder 25 creates its keychain with a random password but then passes the .p12 password to
+        # `security set-key-partition-list`, which macOS 26 runners reject. Build the keychain ourselves and
+        # hand it over via CSC_KEYCHAIN (CSC_LINK must stay unset so electron-builder uses it as is).
+        if: matrix.name == 'macos-arm64'
+        env:
+          CSC_LINK_B64: ${{ secrets.CSC_LINK }}
+          P12_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+        run: |
+          KC="$RUNNER_TEMP/build.keychain-db"
+          KCPW="$(uuidgen)"
+          printf '%s' "$CSC_LINK_B64" | base64 -d > "$RUNNER_TEMP/cert.p12"
+          security create-keychain -p "$KCPW" "$KC"
+          security set-keychain-settings -lut 21600 "$KC"
+          security unlock-keychain -p "$KCPW" "$KC"
+          security import "$RUNNER_TEMP/cert.p12" -k "$KC" -P "$P12_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KCPW" "$KC"
+          security list-keychains -d user -s "$KC" login.keychain
+          rm -f "$RUNNER_TEMP/cert.p12"
+          echo "CSC_KEYCHAIN=$KC" >> "$GITHUB_ENV"
       - name: Package, sign and upload to the draft release
         env:
           GH_TOKEN: ${{ github.token }}
-          # macOS: Developer ID Application cert (base64 .p12) + notarytool API key.
-          CSC_LINK: ${{ matrix.name == 'macos-arm64' && secrets.CSC_LINK || '' }}
-          CSC_KEY_PASSWORD: ${{ matrix.name == 'macos-arm64' && secrets.CSC_KEY_PASSWORD || '' }}
+          # macOS: signs with the keychain from the import step (CSC_KEYCHAIN) + notarytool API key.
           APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
           APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
           # Windows: code-signing certificate (base64 .pfx). Swap for SignPath / Trusted Signing if chosen.
