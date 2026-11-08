@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import { AlertTriangle, Hand, MicOff, Plus, X } from 'lucide-react'
 import type { AgentConversation } from '@engclaw/ipc-contract'
+import { AgentCardList } from '@/components/agent-card-view'
 import { ModelDownloadDialog } from '@/components/model-download-dialog'
 import { RecordButton } from '@/components/record-button'
 import { Alert } from '@/components/ui/alert'
@@ -41,6 +42,7 @@ function Transcript({ messages }: { messages: ConverseMessage[] }) {
             <MessageBubble role={m.role === 'user' ? 'user' : 'agent'} streaming={m.streaming}>
               {m.text}
             </MessageBubble>
+            {m.cards && <AgentCardList cards={m.cards} />}
             {m.interrupted && (
               <p className="text-muted-foreground flex items-center gap-1.5 text-xs">
                 <X aria-hidden="true" className="size-3" />
@@ -205,7 +207,10 @@ export function ConverseScreen() {
           {captions ? (
             <Transcript messages={state.messages} />
           ) : (
-            <HiddenCaptions onShow={() => setCaptionsVisible(true)} />
+            <div className="space-y-3">
+              <HiddenCaptions onShow={() => setCaptionsVisible(true)} />
+              {state.messages.map((m) => m.cards && <AgentCardList key={m.id} cards={m.cards} />)}
+            </div>
           )}
         </div>
 

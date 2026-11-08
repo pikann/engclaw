@@ -11,6 +11,8 @@ import {
 const run = (events: ConverseEvent[], from: ConverseState = initialConverse) =>
   events.reduce(converseReducer, from)
 
+const card = { type: 'vocabulary', word: 'market', meaning: 'a place to buy things' } as const
+
 describe('converse turn', () => {
   it('goes listening -> thinking -> speaking -> idle with both messages kept', () => {
     let s = run([{ type: 'listen' }])
@@ -27,7 +29,18 @@ describe('converse turn', () => {
       text: 'Hi! How are you?',
       streaming: true,
     })
-    s = run([{ type: 'done', requestId: 'r1', conversationId: 'c1', text: 'Hi! How are you?' }], s)
+    s = run(
+      [
+        {
+          type: 'done',
+          requestId: 'r1',
+          conversationId: 'c1',
+          text: 'Hi! How are you?',
+          cards: [],
+        },
+      ],
+      s,
+    )
     expect(s.turn).toBe('speaking')
     expect(s.messages.at(-1)?.streaming).toBeUndefined()
     s = run([{ type: 'spoken' }], s)
@@ -44,7 +57,7 @@ describe('converse turn', () => {
       { type: 'heard', text: 'a' },
       { type: 'sent', conversationId: 'c', requestId: 'r1' },
       { type: 'delta', requestId: 'old', text: 'zzz' },
-      { type: 'done', requestId: 'old', conversationId: 'c', text: 'zzz' },
+      { type: 'done', requestId: 'old', conversationId: 'c', text: 'zzz', cards: [] },
     ])
     expect(s.turn).toBe('thinking')
     expect(s.messages.map((m) => m.text)).toEqual(['a', ''])
@@ -54,7 +67,7 @@ describe('converse turn', () => {
     const s = run([
       { type: 'heard', text: 'a' },
       { type: 'sent', conversationId: 'c', requestId: 'r' },
-      { type: 'done', requestId: 'r', conversationId: 'c', text: 'Long reply' },
+      { type: 'done', requestId: 'r', conversationId: 'c', text: 'Long reply', cards: [] },
       { type: 'interrupt' },
       { type: 'listen' },
     ])
@@ -83,16 +96,31 @@ describe('converse turn', () => {
     expect(s.messages).toHaveLength(1)
   })
 
+  it('keeps the cards of a finished reply on its message', () => {
+    const s = run([
+      { type: 'heard', text: 'a' },
+      { type: 'sent', conversationId: 'c', requestId: 'r' },
+      { type: 'done', requestId: 'r', conversationId: 'c', text: 'ok', cards: [card] },
+    ])
+    expect(s.messages.at(-1)).toMatchObject({ role: 'assistant', text: 'ok', cards: [card] })
+  })
+
   it('loading a conversation replaces the transcript and new starts empty', () => {
     const s = run([
       {
         type: 'load',
         conversationId: 'c9',
-        messages: [{ id: 1, role: 'user', text: 'hi', createdAt: 1 }],
+        messages: [
+          { id: 1, role: 'user', text: 'hi', createdAt: 1, cards: [] },
+          { id: 2, role: 'assistant', text: 'yo', createdAt: 2, cards: [card] },
+        ],
       },
     ])
     expect(s.conversationId).toBe('c9')
-    expect(s.messages).toEqual([{ id: 'm1', role: 'user', text: 'hi' }])
+    expect(s.messages).toEqual([
+      { id: 'm1', role: 'user', text: 'hi', cards: [] },
+      { id: 'm2', role: 'assistant', text: 'yo', cards: [card] },
+    ])
     expect(run([{ type: 'reset' }], s)).toEqual(initialConverse)
   })
 })

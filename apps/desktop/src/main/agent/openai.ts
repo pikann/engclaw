@@ -27,6 +27,7 @@ const wireMessage = (m: ChatMessage): Record<string, unknown> => {
         id: c.id,
         type: 'function',
         function: { name: c.name, arguments: c.arguments },
+        ...(c.extraContent !== undefined && { extra_content: c.extraContent }),
       })),
     }
   return { role: m.role, content: m.content }
@@ -55,7 +56,12 @@ function statusError(status: number, detail?: string): AgentError {
 
 interface Delta {
   content?: string | null
-  tool_calls?: { index?: number; id?: string; function?: { name?: string; arguments?: string } }[]
+  tool_calls?: {
+    index?: number
+    id?: string
+    extra_content?: unknown
+    function?: { name?: string; arguments?: string }
+  }[]
 }
 
 /** Yields the `data:` payloads of a server-sent-event stream. */
@@ -147,6 +153,7 @@ export function openAiChatProvider(cfg: ProviderConfig, fetchFn: FetchLike): Cha
             const i = tc.index ?? (tc.id || pending.size === 0 ? pending.size : pending.size - 1)
             const cur = pending.get(i) ?? { id: '', name: '', arguments: '' }
             if (tc.id) cur.id = tc.id
+            if (tc.extra_content !== undefined) cur.extraContent = tc.extra_content
             if (tc.function?.name) cur.name += tc.function.name
             if (tc.function?.arguments) cur.arguments += tc.function.arguments
             pending.set(i, cur)

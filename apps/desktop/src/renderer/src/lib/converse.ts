@@ -1,4 +1,4 @@
-import type { AgentErrorCode, AgentMessage } from '@engclaw/ipc-contract'
+import type { AgentCard, AgentErrorCode, AgentMessage } from '@engclaw/ipc-contract'
 
 export type ConverseError = AgentErrorCode | 'FAILED'
 
@@ -8,6 +8,7 @@ export interface ConverseMessage {
   id: string
   role: 'user' | 'assistant'
   text: string
+  cards?: AgentCard[]
   streaming?: boolean
   interrupted?: boolean
 }
@@ -37,7 +38,13 @@ export type ConverseEvent =
   | { type: 'heard'; text: string }
   | { type: 'sent'; conversationId: string; requestId: string }
   | { type: 'delta'; requestId: string; text: string }
-  | { type: 'done'; requestId: string; conversationId: string; text: string }
+  | {
+      type: 'done'
+      requestId: string
+      conversationId: string
+      text: string
+      cards: AgentCard[]
+    }
   | { type: 'cancelled'; requestId: string }
   | { type: 'error'; requestId: string; code: AgentErrorCode; detail?: string }
   | { type: 'send-failed'; code: ConverseError }
@@ -94,7 +101,10 @@ export function converseReducer(s: ConverseState, e: ConverseEvent): ConverseSta
         turn: 'speaking',
         requestId: null,
         conversationId: e.conversationId,
-        messages: [...rest, { id: draft?.id ?? localId(), role: 'assistant', text: e.text }],
+        messages: [
+          ...rest,
+          { id: draft?.id ?? localId(), role: 'assistant', text: e.text, cards: e.cards },
+        ],
       }
     }
     case 'cancelled':
@@ -130,7 +140,12 @@ export function converseReducer(s: ConverseState, e: ConverseEvent): ConverseSta
       return {
         ...initialConverse,
         conversationId: e.conversationId,
-        messages: e.messages.map((m) => ({ id: `m${m.id}`, role: m.role, text: m.text })),
+        messages: e.messages.map((m) => ({
+          id: `m${m.id}`,
+          role: m.role,
+          text: m.text,
+          cards: m.cards,
+        })),
       }
     case 'reset':
       return initialConverse

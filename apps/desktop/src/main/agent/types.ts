@@ -5,6 +5,8 @@ export interface ToolCall {
   name: string
   /** Raw JSON text exactly as the model produced it; validated before use. */
   arguments: string
+  /** Provider-specific metadata (Gemini `thought_signature`) that must be echoed back verbatim. */
+  extraContent?: unknown
 }
 
 export type ChatMessage =

@@ -45,6 +45,7 @@ describe('AgentService', () => {
       requestId: 'id2',
       conversationId: 'id1',
       text: 'Sounds fun. What did you eat?',
+      cards: [],
     })
     expect(service.messages('id1').map((m) => [m.role, m.text])).toEqual([
       ['user', 'I went out'],
@@ -79,6 +80,43 @@ describe('AgentService', () => {
       { id: 'b', title: 'I like mangoes', updatedAt: 5 },
       { id: 'a', title: 'Hello there, how are you today?', updatedAt: 3 },
     ])
+  })
+
+  it('collects show_card calls, persists the cards with the reply, and returns bad ones to the model', async () => {
+    const results: string[] = []
+    const call = (id: string, args: unknown) => ({
+      id,
+      name: 'show_card',
+      arguments: JSON.stringify(args),
+    })
+    let round = 0
+    const provider: ChatProvider = {
+      async *stream(req) {
+        if (round++ === 0) {
+          yield {
+            type: 'toolCalls',
+            calls: [
+              call('a', { type: 'vocabulary', word: 'market', meaning: 'a place to buy food' }),
+              call('b', { type: 'vocabulary', word: '<b>x</b>', meaning: 'bad' }),
+              call('c', { type: 'bogus' }),
+            ],
+          } as StreamChunk
+          return
+        }
+        for (const m of req.messages) if (m.role === 'tool') results.push(m.content)
+        yield { type: 'text', text: 'A market is a place to shop.' } as StreamChunk
+      },
+    }
+    const { service, events } = setup(provider)
+    service.send({ text: 'what is a market' })
+    await service.idle
+    const card = { type: 'vocabulary', word: 'market', meaning: 'a place to buy food' }
+    expect(events.at(-1)).toMatchObject({ type: 'done', cards: [card] })
+    expect(service.messages('id1').at(-1)).toMatchObject({ role: 'assistant', cards: [card] })
+    expect(results).toHaveLength(3)
+    expect(results[0]).toContain('shown')
+    expect(results[1]).toContain('invalid arguments')
+    expect(results[2]).toContain('invalid arguments')
   })
 
   it('refuses without a provider, for unknown conversations, and while busy', async () => {
