@@ -1,10 +1,11 @@
 import { useTranslation } from 'react-i18next'
-import { ExternalLink, Mic } from 'lucide-react'
+import { ExternalLink, Mic, Sparkles } from 'lucide-react'
 import type { DictionaryWord } from '@engclaw/ipc-contract'
 import { DeckToggle } from '@/components/dictionary/deck-controls'
 import { HearReference } from '@/components/hear-reference'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ASK_KINDS, type AskKind } from '@/lib/ask-agent'
 import { formatIpa, groupSenses } from '@/lib/dictionary'
 import { useDictionaryRoot, useWordImage, type Loadable } from '@/lib/use-dictionary'
 import { cn } from '@/lib/utils'
@@ -170,6 +171,48 @@ function WordIllustration({ word }: { word: DictionaryWord }) {
   )
 }
 
+export interface AskAgentProps {
+  /** False while no AI provider is configured: the actions are disabled and point to setup. */
+  available: boolean
+  onAsk: (kind: AskKind) => void
+  onSetup: () => void
+}
+
+export function AskAgent({ available, onAsk, onSetup }: AskAgentProps) {
+  const { t } = useTranslation()
+  return (
+    <section aria-labelledby="dict-ask" className="space-y-2" data-testid="ask-agent">
+      <h4 id="dict-ask" className="flex items-center gap-1.5 text-sm font-semibold">
+        <Sparkles aria-hidden="true" className="size-4" />
+        {t('dict.ask')}
+      </h4>
+      <ul aria-label={t('dict.askPrompts')} className="flex flex-wrap gap-2">
+        {ASK_KINDS.map((kind) => (
+          <li key={kind}>
+            <Button
+              variant="outline"
+              size="xs"
+              disabled={!available}
+              data-testid={`ask-${kind}`}
+              onClick={() => onAsk(kind)}
+            >
+              {t(`dict.askPrompt.${kind}`)}
+            </Button>
+          </li>
+        ))}
+      </ul>
+      {!available && (
+        <p className="text-muted-foreground text-xs" data-testid="ask-setup-hint">
+          {t('dict.askSetupHint')}{' '}
+          <Button variant="link" size="xs" className="h-auto p-0" onClick={onSetup}>
+            {t('dict.askSetupAction')}
+          </Button>
+        </p>
+      )}
+    </section>
+  )
+}
+
 /** Word page: IPA + audio, definitions, morpheme chips, origin and related words. */
 export function WordPage({
   state,
@@ -177,12 +220,14 @@ export function WordPage({
   onOpenWord,
   onOpenRoot,
   onPractice,
+  ask,
 }: {
   state: Loadable<DictionaryWord | null> | null
   activeRootId: number | null
   onOpenWord: (word: { id: number; word: string }) => void
   onOpenRoot: (rootId: number) => void
   onPractice: (word: string) => void
+  ask?: AskAgentProps
 }) {
   const { t } = useTranslation()
   if (!state)
@@ -272,6 +317,8 @@ export function WordPage({
         </h4>
         <MorphemeChips word={word} activeRootId={activeRootId} onOpenRoot={onOpenRoot} />
       </section>
+
+      {ask && <AskAgent {...ask} />}
 
       {word.etymology && <Etymology etymology={word.etymology} />}
       <Related word={word} onOpenWord={onOpenWord} />

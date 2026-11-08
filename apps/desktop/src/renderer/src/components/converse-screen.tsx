@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 import { AlertTriangle, Hand, MicOff, Plus, X } from 'lucide-react'
 import type { AgentConversation } from '@engclaw/ipc-contract'
 import { AgentCardList } from '@/components/agent-card-view'
@@ -17,6 +17,7 @@ import {
 import { LiveRegion } from '@/components/ui/live-region'
 import { captionsAnnouncement, isCaptionsShortcut, type ConverseMessage } from '@/lib/converse'
 import { useConverse } from '@/lib/use-converse'
+import type { AskNavigationState } from '@/lib/use-ask-agent'
 import { cn } from '@/lib/utils'
 
 const platformOf = (p: string): string =>
@@ -98,6 +99,17 @@ export function ConverseScreen() {
   const [announce, setAnnounce] = useState('')
   const [modelsOpen, setModelsOpen] = useState(false)
   const [configured, setConfigured] = useState<boolean | null>(null)
+  const location = useLocation()
+  const seeded = useRef(false)
+  const seed = (location.state as Partial<AskNavigationState> | null)?.askAgent
+
+  useEffect(() => {
+    if (!seed || configured !== true || seeded.current) return
+    seeded.current = true
+    void navigate(location.pathname, { replace: true, state: null })
+    void c.sendText(seed)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once per navigation
+  }, [seed, configured])
 
   useEffect(() => {
     void window.engclaw.app.getSettings().then((s) => setCaptions(s.captionsVisible))

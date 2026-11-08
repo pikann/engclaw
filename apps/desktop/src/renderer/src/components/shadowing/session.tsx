@@ -644,7 +644,7 @@ export function ShadowingSession({
                         const word = (e.target as HTMLElement).closest<HTMLElement>('[data-word]')
                         if (!word) dispatch({ type: 'start', index: i })
                         else if (!window.getSelection()?.toString().trim())
-                          lookup?.(word.dataset['word']!)
+                          lookup?.(word.dataset['word']!, s.text)
                       }}
                       className={cn(
                         'hover:bg-muted flex w-full cursor-pointer gap-2 rounded-md px-2 py-1.5 text-left',

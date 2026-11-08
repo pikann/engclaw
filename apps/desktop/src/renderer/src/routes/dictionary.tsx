@@ -9,6 +9,7 @@ import { primaryRootId, WordPage } from '@/components/dictionary/word-page'
 import { Pane, useLayout } from '@/components/screens/shell'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { loadRecent, pushRecent, saveRecent, type RecentWord } from '@/lib/dictionary'
+import { useAskAgent } from '@/lib/use-ask-agent'
 import { useDictionaryWord } from '@/lib/use-dictionary'
 import { cn } from '@/lib/utils'
 
@@ -68,6 +69,11 @@ export function DictionaryPage() {
   const drill = (id: number) => go({ section: 'flashcards', drill: String(id) })
   const practice = (text: string) => navigate('/practice', { state: { practiceText: text } })
 
+  const ask = useAskAgent(
+    word?.status === 'ready' && word.value ? word.value.word : null,
+    undefined,
+  )
+
   const wide = layout === 'wide'
   const family = (
     <RootFamily
@@ -84,6 +90,7 @@ export function DictionaryPage() {
       onOpenWord={openWord}
       onOpenRoot={openRoot}
       onPractice={practice}
+      ask={ask}
     />
   )
 

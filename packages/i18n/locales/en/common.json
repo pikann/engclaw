@@ -889,6 +889,16 @@
     "relatedHint": "Words built on the same root as “{{word}}”.",
     "noRelated": "No related words.",
     "sendPractice": "Send to Practice",
+    "ask": "Ask the agent",
+    "askPrompts": "Quick questions",
+    "askPrompt": {
+      "explain": "Explain it simply",
+      "sentence": "Use it in a sentence",
+      "pronounce": "How do I pronounce it?",
+      "mistakes": "Common mistakes"
+    },
+    "askSetupHint": "Set up an AI provider to ask the agent.",
+    "askSetupAction": "Open provider settings",
     "family": "Family",
     "familyTitle": "Roots & family",
     "familyCount_one": "{{count}} word",

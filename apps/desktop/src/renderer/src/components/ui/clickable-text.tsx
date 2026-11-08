@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { ClickableWord } from '@/components/ui/clickable-word'
 import { useWordLookup } from '@/lib/word-lookup'
 import { cn } from '@/lib/utils'
+import { sentenceAround } from '@/lib/ask-agent'
 import { segmentText } from '@/lib/words'
 
 const LIGHT_WORD =
@@ -31,7 +32,14 @@ export function ClickableText({
 }) {
   const { t } = useTranslation()
   const lookup = useWordLookup()
-  const parts = useMemo(() => segmentText(text), [text])
+  const parts = useMemo(() => {
+    let offset = 0
+    return segmentText(text).map((p) => {
+      const part = { ...p, offset }
+      offset += p.text.length
+      return part
+    })
+  }, [text])
   if (!lookup || disabled) return <>{text}</>
   if (light)
     return (
@@ -61,7 +69,7 @@ export function ClickableText({
             data-word={p.word}
             onClick={() => {
               if (window.getSelection()?.toString().trim()) return
-              lookup(p.word!)
+              lookup(p.word!, sentenceAround(text, p.offset))
             }}
           >
             {p.text}

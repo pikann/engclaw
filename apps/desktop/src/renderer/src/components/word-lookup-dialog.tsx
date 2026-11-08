@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router'
 import { primaryRootId, WordPage } from '@/components/dictionary/word-page'
 import { Button } from '@/components/ui/button'
 import { DictionaryDialog } from '@/components/ui/dictionary'
+import { useAskAgent } from '@/lib/use-ask-agent'
 import { useDictionaryWord } from '@/lib/use-dictionary'
 import { WordLookupContext } from '@/lib/word-lookup'
 import { resolveWord } from '@/lib/words'
@@ -22,10 +23,12 @@ export function WordLookupProvider({ children }: { children: ReactNode }) {
   const [word, setWord] = useState<string | null>(null)
   const [resolved, setResolved] = useState<Resolved>(null)
   const [override, setOverride] = useState<{ id: number; word: string } | null>(null)
+  const [context, setContext] = useState<string | undefined>()
 
-  const lookup = useCallback((w: string) => {
+  const lookup = useCallback((w: string, sentence?: string) => {
     setOverride(null)
     setResolved(null)
+    setContext(sentence)
     setWord(w)
   }, [])
 
@@ -52,6 +55,13 @@ export function WordLookupProvider({ children }: { children: ReactNode }) {
     [searching, entry],
   )
   const root = entry?.status === 'ready' && entry.value ? primaryRootId(entry.value) : null
+
+  const close = useCallback(() => setWord(null), [])
+  const ask = useAskAgent(
+    entry?.status === 'ready' && entry.value ? entry.value.word : null,
+    override ? undefined : context,
+    close,
+  )
 
   const openInDictionary = () => {
     if (id === null) return
@@ -86,6 +96,7 @@ export function WordLookupProvider({ children }: { children: ReactNode }) {
           state={state}
           activeRootId={root}
           onOpenWord={setOverride}
+          ask={ask}
           onOpenRoot={(rootId) => {
             setWord(null)
             navigate(
