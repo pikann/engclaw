@@ -68,6 +68,19 @@ describe('AgentService', () => {
     ])
   })
 
+  it('lists conversations newest first, titled by the first thing the learner said', async () => {
+    const { service, store } = setup(replying('Nice.'))
+    store.create('empty', 1)
+    store.create('a', 2)
+    store.append('a', 'user', '  Hello   there, how are you today?  ', 3)
+    store.create('b', 4)
+    store.append('b', 'user', 'I like mangoes', 5)
+    expect(service.conversations()).toEqual([
+      { id: 'b', title: 'I like mangoes', updatedAt: 5 },
+      { id: 'a', title: 'Hello there, how are you today?', updatedAt: 3 },
+    ])
+  })
+
   it('refuses without a provider, for unknown conversations, and while busy', async () => {
     expect(setup(replying('x'), null).service.send({ text: 'hi' })).toEqual({
       ok: false,

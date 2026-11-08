@@ -1,5 +1,5 @@
 import type Database from 'better-sqlite3'
-import type { AgentMessage } from '@engclaw/ipc-contract'
+import type { AgentConversation, AgentMessage } from '@engclaw/ipc-contract'
 
 interface Row {
   id: number
@@ -43,6 +43,24 @@ export class AgentStore {
         )
         .all(conversationId) as Row[]
     ).map((r) => ({ id: r.id, role: r.role, text: r.text, createdAt: r.created_at }))
+  }
+
+  list(): AgentConversation[] {
+    return (
+      this.db
+        .prepare(
+          `SELECT c.id, c.updated_at,
+                  (SELECT text FROM agent_message m WHERE m.conversation_id = c.id AND m.role = 'user' ORDER BY m.id LIMIT 1) AS first
+           FROM agent_conversation c
+           WHERE EXISTS (SELECT 1 FROM agent_message m WHERE m.conversation_id = c.id)
+           ORDER BY c.updated_at DESC, c.rowid DESC`,
+        )
+        .all() as { id: string; updated_at: number; first: string | null }[]
+    ).map((r) => ({
+      id: r.id,
+      title: (r.first ?? '').replace(/\s+/g, ' ').trim().slice(0, 60),
+      updatedAt: r.updated_at,
+    }))
   }
 
   clear(): void {

@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import type {
+  AgentConversation,
   AgentEvent,
   AgentMessage,
   AgentSendRequest,
@@ -64,6 +65,10 @@ export class AgentService {
     return this.deps.store.messages(conversationId)
   }
 
+  conversations(): AgentConversation[] {
+    return this.deps.store.list()
+  }
+
   private async run(
     cfg: ProviderConfig,
     conversationId: string,
@@ -90,7 +95,13 @@ export class AgentService {
       emit({ type: 'done', requestId, conversationId, text })
     } catch (e) {
       if (ctrl.signal.aborted) emit({ type: 'cancelled', requestId })
-      else emit({ type: 'error', requestId, code: e instanceof AgentError ? e.code : 'NETWORK' })
+      else
+        emit({
+          type: 'error',
+          requestId,
+          code: e instanceof AgentError ? e.code : 'NETWORK',
+          detail: e instanceof AgentError ? e.detail : undefined,
+        })
     } finally {
       this.active = null
     }

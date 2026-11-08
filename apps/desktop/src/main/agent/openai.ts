@@ -14,7 +14,8 @@ import {
   type ToolCall,
 } from './types'
 
-const CONNECT_TIMEOUT_MS = 20_000
+/** Time to first response headers; reasoning models can think for a long while before streaming. */
+const CONNECT_TIMEOUT_MS = 120_000
 
 const wireMessage = (m: ChatMessage): Record<string, unknown> => {
   if (m.role === 'tool') return { role: 'tool', tool_call_id: m.toolCallId, content: m.content }
@@ -31,11 +32,25 @@ const wireMessage = (m: ChatMessage): Record<string, unknown> => {
   return { role: m.role, content: m.content }
 }
 
-function statusError(status: number): AgentError {
-  if (status === 401 || status === 403) return new AgentError('AUTH_EXPIRED')
-  if (status === 429) return new AgentError('RATE_LIMIT')
-  if (status >= 500) return new AgentError('SERVER')
-  return new AgentError('BAD_RESPONSE')
+/** Pulls `error.message` out of an OpenAI- or Gemini-style error body (Gemini wraps it in an array). */
+export function providerMessage(body: string): string | undefined {
+  let text = body.trim()
+  try {
+    const json = JSON.parse(body) as unknown
+    const first = Array.isArray(json) ? json[0] : json
+    const msg = (first as { error?: { message?: unknown } } | null)?.error?.message
+    if (typeof msg === 'string') text = msg
+  } catch {
+    // not JSON: fall back to the raw text
+  }
+  return text === '' ? undefined : text.slice(0, 300)
+}
+
+function statusError(status: number, detail?: string): AgentError {
+  if (status === 401 || status === 403) return new AgentError('AUTH_EXPIRED', detail)
+  if (status === 429) return new AgentError('RATE_LIMIT', detail)
+  if (status >= 500) return new AgentError('SERVER', detail)
+  return new AgentError('BAD_RESPONSE', detail)
 }
 
 interface Delta {
@@ -76,11 +91,12 @@ export function openAiChatProvider(cfg: ProviderConfig, fetchFn: FetchLike): Cha
     async *stream(req: ChatRequest): AsyncGenerator<StreamChunk> {
       const parsed = parseBaseUrl(cfg.baseUrl)
       if (!parsed.ok) throw new AgentError('NO_PROVIDER')
+      const url = endpoint(parsed.url, '/chat/completions')
       const connect = new AbortController()
       const timer = setTimeout(() => connect.abort(), CONNECT_TIMEOUT_MS)
       let res: Response
       try {
-        res = await fetchFn(endpoint(parsed.url, '/chat/completions'), {
+        res = await fetchFn(url, {
           method: 'POST',
           headers: {
             ...requestHeaders(cfg),
@@ -107,7 +123,10 @@ export function openAiChatProvider(cfg: ProviderConfig, fetchFn: FetchLike): Cha
       } finally {
         clearTimeout(timer)
       }
-      if (!res.ok) throw statusError(res.status)
+      if (!res.ok) {
+        const detail = await res.text().catch(() => '')
+        throw statusError(res.status, providerMessage(detail))
+      }
       if (!res.body) throw new AgentError('BAD_RESPONSE')
 
       const pending = new Map<number, ToolCall>()
@@ -124,7 +143,8 @@ export function openAiChatProvider(cfg: ProviderConfig, fetchFn: FetchLike): Cha
           if (!delta) continue
           if (delta.content) yield { type: 'text', text: delta.content }
           for (const tc of delta.tool_calls ?? []) {
-            const i = tc.index ?? 0
+            // Gemini omits `index`: a fresh id starts a new call, otherwise continue the last one.
+            const i = tc.index ?? (tc.id || pending.size === 0 ? pending.size : pending.size - 1)
             const cur = pending.get(i) ?? { id: '', name: '', arguments: '' }
             if (tc.id) cur.id = tc.id
             if (tc.function?.name) cur.name += tc.function.name

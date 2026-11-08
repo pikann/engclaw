@@ -21,5 +21,6 @@ export function registerAgentHandlers(llm: LlmConfigStore, store: Store): AgentS
     return null
   })
   handle(IPC.agentMessages, ({ conversationId }) => service.messages(conversationId))
+  handle(IPC.agentList, () => service.conversations())
   return service
 }

@@ -54,7 +54,10 @@ export function AppLayout() {
   const active = TITLES[section] ?? 'home'
   const onPractice = pathname === '/practice'
   const fullBleed =
-    pathname === '/shadowing' || pathname === '/dictionary' || pathname.startsWith('/game/chapter/')
+    pathname === '/shadowing' ||
+    pathname === '/converse' ||
+    pathname === '/dictionary' ||
+    pathname.startsWith('/game/chapter/')
   const known = section in TITLES
   return (
     <WordLookupProvider>

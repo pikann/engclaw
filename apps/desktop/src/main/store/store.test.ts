@@ -127,8 +127,9 @@ describe('store', () => {
       newCardsPerDay: 20,
       reviewsPerDay: 200,
       wordImages: true,
+      captionsVisible: true,
     })
-    store.settings.update({ silenceAutoStop: false })
+    store.settings.update({ silenceAutoStop: false, captionsVisible: false })
     store.db.close()
     store = openStore(dbPath())
     expect(store.settings.get()).toEqual({
@@ -138,6 +139,7 @@ describe('store', () => {
       newCardsPerDay: 20,
       reviewsPerDay: 200,
       wordImages: true,
+      captionsVisible: false,
     })
   })
 

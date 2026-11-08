@@ -202,7 +202,7 @@
       "title": "AI provider",
       "intro": "The speaking-practice agent runs on a provider you choose. Only your transcribed words and a short pronunciation summary are sent; your audio never leaves this device.",
       "advancedTitle": "OpenAI-compatible API",
-      "advancedHint": "Works with OpenAI, OpenRouter, or a local server such as Ollama or LM Studio.",
+      "advancedHint": "Works with OpenAI, Gemini, OpenRouter, or a local server such as Ollama or LM Studio.",
       "presets": "Quick fill",
       "baseUrl": "Base URL",
       "baseUrlHint": "Must be HTTPS, except for a server on this computer (localhost).",
@@ -970,6 +970,43 @@
         "imported": "Imported {{imported}} new, updated {{updated}}, skipped {{skipped}} (not in the dictionary).",
         "error": "Could not use the file: {{message}}"
       }
+    }
+  },
+  "converse": {
+    "title": "Converse",
+    "conversations": "Conversations",
+    "new": "New conversation",
+    "emptyList": "Your conversations will appear here.",
+    "untitled": "Conversation",
+    "transcript": "Conversation transcript",
+    "emptyTranscript": "Press the microphone and say hello to start.",
+    "captionsShown": "Captions shown",
+    "captionsHidden": "Captions hidden",
+    "captionsShortcut": "Show or hide captions (Alt+C)",
+    "idle": "Press the microphone and speak.",
+    "interrupt": "Interrupt",
+    "cancel": "Cancel",
+    "interrupted": "Interrupted — the rest of the reply was not spoken.",
+    "noSpeech": "I didn't catch that. Try again.",
+    "speakFailed": "The reply couldn't be spoken. Turn captions on to read it.",
+    "setupTitle": "Set up your AI partner first",
+    "setupBody": "Converse needs an AI provider. Your audio never leaves your device; only the text of what you say is sent.",
+    "setupAction": "Open provider settings",
+    "modelsTitle": "Speech models needed",
+    "modelsBody": "Converse listens and speaks on your device. Download the speech models once to continue.",
+    "modelsAction": "Download models",
+    "error": {
+      "NO_PROVIDER": "No AI provider is set up.",
+      "AUTH_EXPIRED": "The provider rejected your sign-in. Check it in settings.",
+      "RATE_LIMIT": "The provider is rate limiting requests. Wait a moment and try again.",
+      "NETWORK": "Couldn't reach the provider. Check your connection.",
+      "TIMEOUT": "The provider took too long to answer.",
+      "SERVER": "The provider had a problem. Try again.",
+      "BAD_RESPONSE": "The provider sent an unreadable answer.",
+      "TOOL_ROUND_LIMIT": "The assistant got stuck. Try again.",
+      "BUSY": "Still answering the last message.",
+      "NOT_FOUND": "That conversation no longer exists.",
+      "FAILED": "Something went wrong. Try again."
     }
   }
 }
