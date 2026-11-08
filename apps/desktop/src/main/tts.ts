@@ -27,6 +27,7 @@ interface Spoke {
 /** `tts:speak` -> utility process (Kokoro + disk cache under userData/tts-cache). */
 export function registerTtsHandlers(client: UtilityClient, models: ModelManager): void {
   handle(IPC.ttsSpeak, async ({ text }): Promise<SpeakResponse> => {
+    const started = performance.now()
     const kokoro = await kokoroLocation(models)
     if (!kokoro)
       return {
@@ -36,7 +37,9 @@ export function registerTtsHandlers(client: UtilityClient, models: ModelManager)
       }
     try {
       const r = await client.call<Spoke>('speak', { text, kokoro }).result
-      return { ok: true, samples: r.samples, sampleRate: r.sampleRate, cached: r.cached }
+      const ms = Math.round(performance.now() - started)
+      console.info(`[tts] speak cached=${r.cached} ${ms}ms (${text.length} chars)`)
+      return { ok: true, samples: r.samples, sampleRate: r.sampleRate, cached: r.cached, ms }
     } catch (e) {
       return { ok: false, code: 'FAILED', message: e instanceof Error ? e.message : String(e) }
     }

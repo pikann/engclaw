@@ -104,6 +104,8 @@ export const SpeakResponse = z.discriminatedUnion('ok', [
     samples: z.custom<Float32Array>((v) => v instanceof Float32Array),
     sampleRate: z.number(),
     cached: z.boolean(),
+    /** Main-process wall time for this request: cache read or synthesis, excluding IPC to the renderer. */
+    ms: z.number(),
   }),
   z.object({ ok: z.literal(false), code: SpeakErrorCode, message: z.string() }),
 ])

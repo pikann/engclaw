@@ -3,7 +3,9 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { ChevronDown, ChevronUp, List, Map as MapIcon, Play } from 'lucide-react'
 import type { GameChapter, GameMap, GameProgressEntry, GameWorld } from '@engclaw/ipc-contract'
+import { ExamplesPanel, TargetAudioActions } from '@/components/game-learning-aids'
 import { Button } from '@/components/ui/button'
+import { ClickableText } from '@/components/ui/clickable-text'
 import { ProgressSummary, StarRating } from '@/components/ui/game'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { MAX_STARS, clampStars, type NodeState } from '@/lib/game'
@@ -479,7 +481,9 @@ function Preview({
           </p>
         ) : chapter ? (
           <>
-            <p className="text-2xl font-semibold wrap-break-word">{chapter.text}</p>
+            <p className="text-2xl font-semibold wrap-break-word">
+              <ClickableText text={chapter.text} />
+            </p>
             <p className="text-muted-foreground" lang="en-fonipa">
               /{chapter.ipa}/
             </p>
@@ -494,9 +498,8 @@ function Preview({
             <dt className="text-muted-foreground">{t('screens.game.attempts')}</dt>
             <dd className="tabular-nums">{entry?.attempts ?? 0}</dd>
           </dl>
-          <p className="text-muted-foreground text-sm">
-            {t('screens.game.examplesCount', { count: chapter.examples.length })}
-          </p>
+          <TargetAudioActions text={chapter.text} />
+          <ExamplesPanel examples={chapter.examples} />
           <div className="space-y-2">
             <Button asChild data-testid="preview-play">
               <Link to={`/game/chapter/${order}`}>
