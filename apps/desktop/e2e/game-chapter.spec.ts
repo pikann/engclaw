@@ -253,3 +253,49 @@ test('chapter screen passes axe in en and vi', async () => {
   }
   await app.close()
 })
+
+test('learning aids: word lookup keeps the run, example audio plays, ask slot reserves space', async () => {
+  const app = await launch([{ score: 90 }])
+  await app.evaluate(({ ipcMain }) => {
+    const seen: { text: string; speed?: string }[] = []
+    ;(globalThis as unknown as { __speak: typeof seen }).__speak = seen
+    ipcMain.removeHandler('tts:speak')
+    ipcMain.handle('tts:speak', (_e, req: { text: string; speed?: string }) => {
+      seen.push(req)
+      return {
+        ok: true,
+        samples: new Float32Array(1600),
+        sampleRate: 16000,
+        cached: seen.length > 1,
+        ms: 5,
+      }
+    })
+  })
+  const page = await app.firstWindow()
+  await page.evaluate(() => (location.hash = '#/game/chapter/1'))
+  await attempt(page)
+  await expect(page.getByTestId('game-count')).toHaveText('1/5')
+
+  const slot = page.getByTestId('ask-slot')
+  const before = await slot.boundingBox()
+  await page.getByTestId('game-target').locator('[data-word]').first().click()
+  await expect(page.getByTestId('dictionary-dialog')).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(page.getByTestId('dictionary-dialog')).toHaveCount(0)
+  await expect(page.getByTestId('game-count')).toHaveText('1/5')
+
+  await page.getByTestId('example-play').first().click()
+  await expect
+    .poll(() =>
+      app.evaluate(() => (globalThis as unknown as { __speak: unknown[] }).__speak.length),
+    )
+    .toBeGreaterThanOrEqual(1)
+
+  await page.evaluate(() => {
+    const el = document.querySelector('[data-testid="ask-slot"]')!
+    el.innerHTML = '<button style="height:32px;width:140px">Ask the agent</button>'
+  })
+  const after = await slot.boundingBox()
+  expect(after).toEqual(before)
+  await app.close()
+})

@@ -84,7 +84,6 @@ const CHAPTERS: Ch[] = [
   ['word-5', 'word', 'correct', 5, 'closed', 'none', 'none', 'idle'],
   ['examples-loading', 'phrase', 'idle', 1, 'closed', 'none', 'none', 'loading'],
   ['examples-playing', 'phrase', 'idle', 1, 'closed', 'none', 'none', 'playing'],
-  ['examples-slow', 'phrase', 'idle', 1, 'closed', 'none', 'none', 'playingSlow'],
   ['dictionary', 'idiom', 'idle', 2, 'closed', 'none', 'dict', 'idle'],
   ['leave', 'word', 'fix', 3, 'closed', 'none', 'leave', 'idle'],
   ['ask-word', 'word', 'fix', 3, 'open', 'none', 'none', 'idle'],

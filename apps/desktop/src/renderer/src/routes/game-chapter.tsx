@@ -17,10 +17,11 @@ import {
   type ChapterRun,
 } from '@engclaw/game'
 import type { GameChapter, GameProgressEntry, PronunciationResult } from '@engclaw/ipc-contract'
-import { HearReference } from '@/components/hear-reference'
+import { ExamplesPanel, TargetAudioActions } from '@/components/game-learning-aids'
 import { ModelDownloadDialog } from '@/components/model-download-dialog'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { ClickableText } from '@/components/ui/clickable-text'
 import { ChapterResultCard } from '@/components/game-result-card'
 import { AttemptFeedbackChip, AttemptTracker, StarRating } from '@/components/ui/game'
 import { RecordButton } from '@/components/record-button'
@@ -37,6 +38,7 @@ import {
   type MicErrorReason,
 } from '@/lib/audio'
 import { formatTimer } from '@/lib/practice'
+import { prefetchSpeech } from '@/lib/speech'
 
 type Chapter = NonNullable<GameChapter['chapter']>
 type Phase = 'idle' | 'recording' | 'analyzing'
@@ -153,6 +155,24 @@ function ChapterPlay({
       })
       .catch((e: unknown) => console.error('[game] record failed', e))
   }, [passed]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    let live = true
+    const timer = setTimeout(() => {
+      void window.engclaw.game.chapter({ order: chapter.order + 1 }).then((next) => {
+        if (!live || !next.chapter) return
+        void prefetchSpeech(
+          [next.chapter.text, ...next.chapter.examples],
+          window.engclaw.tts,
+          () => live,
+        )
+      })
+    }, 3000)
+    return () => {
+      live = false
+      clearTimeout(timer)
+    }
+  }, [chapter.order])
 
   const blocker = useBlocker(() => totalAttempts(run) > 0 && !passed)
 
@@ -295,7 +315,7 @@ function ChapterPlay({
               className="text-4xl leading-snug font-semibold wrap-break-word"
               data-testid="game-target"
             >
-              {chapter.text}
+              <ClickableText text={chapter.text} />
             </p>
             <p className="text-muted-foreground text-lg" lang="en-fonipa">
               /{chapter.ipa}/
@@ -304,7 +324,13 @@ function ChapterPlay({
               <span className="text-muted-foreground">{t('screens.game.meaning')}: </span>
               {chapter.meaning}
             </p>
-            <HearReference text={chapter.text} variant="outline" />
+            {chapter.type !== 'word' && (
+              <p className="text-muted-foreground text-xs">{t('screens.game.tapWord')}</p>
+            )}
+            <TargetAudioActions text={chapter.text} silenced={phase === 'recording'} />
+          </div>
+          <div className="bg-card rounded-xl border border-input p-5">
+            <ExamplesPanel examples={chapter.examples} silenced={phase === 'recording'} />
           </div>
 
           {!passed && (

@@ -8,7 +8,6 @@ import {
   MicOff,
   Play,
   Send,
-  Turtle,
   Volume2,
   WifiOff,
   X,
@@ -31,7 +30,7 @@ export type ChapterPhase = 'idle' | 'recording' | 'analyzing' | 'correct' | 'fix
 export type AskPanel = 'closed' | 'open' | 'noProvider'
 export type ChapterError = 'none' | 'mic' | 'analysis' | 'offlineAudio'
 export type ChapterOverlay = 'none' | 'dict' | 'leave' | 'modelMissing'
-export type ExamplesState = 'idle' | 'loading' | 'playing' | 'playingSlow'
+export type ExamplesState = 'idle' | 'loading' | 'playing'
 
 interface Target {
   text: string
@@ -133,7 +132,6 @@ function Examples({
           const first = i === 0
           const loading = first && state === 'loading'
           const playing = first && state === 'playing'
-          const slow = first && state === 'playingSlow'
           return (
             <li key={ex} className="flex items-start gap-2 text-sm">
               <Button
@@ -144,26 +142,7 @@ function Examples({
               >
                 {loading ? <Loader2 className="animate-spin" /> : <Play />}
               </Button>
-              <Button
-                size="icon-sm"
-                variant={slow ? 'default' : 'outline'}
-                disabled={offline}
-                aria-label={t('screens.game.slowExample', { n: i + 1 })}
-              >
-                <Turtle />
-              </Button>
               <span className="min-w-0 flex-1 pt-1">{ex}</span>
-              {(loading || playing || slow) && (
-                <span role="status" className="text-muted-foreground pt-1 text-xs">
-                  {t(
-                    loading
-                      ? 'screens.game.loadingVoice'
-                      : slow
-                        ? 'screens.game.playingSlow'
-                        : 'screens.game.playing',
-                  )}
-                </span>
-              )}
             </li>
           )
         })}
