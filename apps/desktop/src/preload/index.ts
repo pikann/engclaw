@@ -86,6 +86,9 @@ const api: EngclawApi = {
   },
   game: {
     chapter: (req) => invoke(IPC.gameChapter, req),
+    map: () => invoke(IPC.gameMap),
+    world: (req) => invoke(IPC.gameWorld, req),
+    record: (req) => invoke(IPC.gameRecord, req),
   },
   dictionary: {
     search: (req) => invoke(IPC.dictionarySearch, req),

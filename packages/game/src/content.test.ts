@@ -12,6 +12,8 @@ import {
   type Chapter,
   CONTENT_SCHEMA_SQL,
   readChapters,
+  readWorldChapters,
+  readWorlds,
   type ContentDb,
   type ContentManifest,
 } from './content'
@@ -131,6 +133,16 @@ describe('content schema', () => {
 })
 
 describe('shipped game content database', () => {
+  it('summarises worlds and lists one world without the heavy fields', () => {
+    const worlds = readWorlds(db)
+    expect(worlds.reduce((n, w) => n + w.count, 0)).toBe(chapters.length)
+    const w = worlds[1]!
+    const list = readWorldChapters(db, w.world)
+    expect(list).toHaveLength(w.count)
+    expect(list[0]!.order).toBe(w.first)
+    expect(Object.keys(list[0]!).sort()).toEqual(['order', 'text', 'type'])
+  })
+
   it('has no validation errors and at least 2,000 chapters', () => {
     expect(Number(dbSchema)).toBe(CONTENT_SCHEMA_VERSION)
     expect(chapters.length).toBeGreaterThanOrEqual(MIN_CHAPTERS)
