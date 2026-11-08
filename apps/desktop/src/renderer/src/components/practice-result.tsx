@@ -36,7 +36,7 @@ function speak(word: string): void {
 export function useResultView(result: PronunciationResult, text: string) {
   return useMemo(() => {
     const chips = wordChips(result, text)
-    return { chips, verdict: verdictOf(chips), scores: subScores(result) }
+    return { text, chips, verdict: verdictOf(chips), scores: subScores(result) }
   }, [result, text])
 }
 export type ResultView = ReturnType<typeof useResultView>
@@ -178,7 +178,7 @@ export function ResultSummary({
   )
 }
 
-function WordDetail({ chip }: { chip: WordChip }) {
+function WordDetail({ chip, text }: { chip: WordChip; text: string }) {
   const { t } = useTranslation()
   const e = chip.error
   const lookup = useWordLookup()
@@ -207,7 +207,7 @@ function WordDetail({ chip }: { chip: WordChip }) {
             variant="outline"
             size="sm"
             data-testid="word-lookup"
-            onClick={() => lookup(normalizeWord(chip.word))}
+            onClick={() => lookup(normalizeWord(chip.word), text)}
           >
             <BookOpen />
             {t('dict.lookup')}
@@ -408,7 +408,7 @@ export function WordsDetail({
   return (
     <div className="space-y-3">
       {current ? (
-        <WordDetail chip={current} />
+        <WordDetail chip={current} text={view.text} />
       ) : (
         view.verdict.flagged > 0 && (
           <p className="text-muted-foreground text-sm">{t('screens.practice.pickWord')}</p>

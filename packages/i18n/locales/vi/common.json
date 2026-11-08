@@ -889,6 +889,16 @@
     "relatedHint": "Các từ cùng gốc với “{{word}}”.",
     "noRelated": "Không có từ liên quan.",
     "sendPractice": "Gửi sang Luyện tập",
+    "ask": "Hỏi trợ lý",
+    "askPrompts": "Câu hỏi nhanh",
+    "askPrompt": {
+      "explain": "Giải thích đơn giản",
+      "sentence": "Đặt câu với từ này",
+      "pronounce": "Phát âm thế nào?",
+      "mistakes": "Lỗi thường gặp"
+    },
+    "askSetupHint": "Hãy thiết lập nhà cung cấp AI để hỏi trợ lý.",
+    "askSetupAction": "Mở cài đặt nhà cung cấp",
     "family": "Họ từ",
     "familyTitle": "Gốc từ & họ từ",
     "familyCount_other": "{{count}} từ",

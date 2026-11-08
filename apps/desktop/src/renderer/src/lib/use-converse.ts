@@ -219,6 +219,7 @@ export function useConverse(platform: string) {
     needsModels,
     setNeedsModels,
     conversations,
+    sendText: submit,
     startListening,
     finishListening,
     cancel,
