@@ -1,4 +1,5 @@
 import { _electron as electron, expect, test, type ElectronApplication } from '@playwright/test'
+import type { EngclawApi } from '@engclaw/ipc-contract'
 import { cpSync, mkdtempSync } from 'node:fs'
 import { createServer, type Server } from 'node:http'
 import type { AddressInfo } from 'node:net'
@@ -63,18 +64,31 @@ test('hiding captions removes the transcript, showing restores it, and the choic
   let app = await launch(userData)
   let page = await app.firstWindow()
   await page.evaluate(async (url) => {
-    await window.engclaw.llm.save({ baseUrl: url, model: 'mock' })
-    const sent = await window.engclaw.agent.send({ text: 'Hello, I am a developer' })
+    await (window as unknown as { engclaw: EngclawApi }).engclaw.llm.save({
+      baseUrl: url,
+      model: 'mock',
+    })
+    const sent = await (window as unknown as { engclaw: EngclawApi }).engclaw.agent.send({
+      text: 'Hello, I am a developer',
+    })
     if (!sent.ok) throw new Error(sent.code)
   }, baseUrl)
   await expect
-    .poll(() => page.evaluate(() => window.engclaw.agent.list().then((l) => l.length)))
+    .poll(() =>
+      page.evaluate(() =>
+        (window as unknown as { engclaw: EngclawApi }).engclaw.agent.list().then((l) => l.length),
+      ),
+    )
     .toBe(1)
   await expect
     .poll(() =>
       page.evaluate(async () => {
-        const [c] = await window.engclaw.agent.list()
-        return (await window.engclaw.agent.messages({ conversationId: c!.id })).length
+        const [c] = await (window as unknown as { engclaw: EngclawApi }).engclaw.agent.list()
+        return (
+          await (window as unknown as { engclaw: EngclawApi }).engclaw.agent.messages({
+            conversationId: c!.id,
+          })
+        ).length
       }),
     )
     .toBe(2)
@@ -114,7 +128,14 @@ test('hiding captions removes the transcript, showing restores it, and the choic
 test('a spoken turn goes mic -> ASR -> mocked provider -> captions', async () => {
   const app = await launch(freshUserData())
   const page = await app.firstWindow()
-  await page.evaluate((url) => window.engclaw.llm.save({ baseUrl: url, model: 'mock' }), baseUrl)
+  await page.evaluate(
+    (url) =>
+      (window as unknown as { engclaw: EngclawApi }).engclaw.llm.save({
+        baseUrl: url,
+        model: 'mock',
+      }),
+    baseUrl,
+  )
   await page.getByTestId('nav-converse').click()
   await page.getByTestId('converse-mic').click()
   await expect(page.getByTestId('converse-stop')).toBeVisible()
