@@ -26,9 +26,9 @@ describe('electron-builder config', () => {
 })
 
 describe('release workflow', () => {
-  it('is tag-driven and creates a draft release', () => {
+  it('is tag-driven and leaves creating the release to the maintainer', () => {
     expect(workflow).toMatch(/tags:\s*\n\s*- 'v\*/)
-    expect(workflow).toContain('--draft')
+    expect(workflow).not.toContain('gh release create')
   })
 
   it('signs and notarizes macOS from encrypted secrets only', () => {
@@ -37,8 +37,8 @@ describe('release workflow', () => {
     expect(workflow).toContain('mac.notarize=true')
   })
 
-  it('publishes SHA256SUMS and generated notes', () => {
+  it('publishes SHA256SUMS for official releases only', () => {
     expect(workflow).toContain('SHA256SUMS')
-    expect(workflow).toContain('scripts/changelog/notes.ts')
+    expect(workflow).toMatch(/checksums:[\s\S]*if: \$\{\{ !contains\(github\.ref_name, '-'\) \}\}/)
   })
 })
