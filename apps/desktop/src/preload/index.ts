@@ -94,6 +94,7 @@ const api: EngclawApi = {
     send: (req) => invoke(IPC.agentSend, req),
     cancel: (req) => invoke(IPC.agentCancel, req),
     messages: (req) => invoke(IPC.agentMessages, req),
+    list: () => invoke(IPC.agentList),
     onEvent: (cb) => subscribe(IPC.agentEvent, cb),
   },
   game: {

@@ -17,7 +17,7 @@ describe('reply length helpers', () => {
 describe('persona', () => {
   it('is versioned and states the short-reply contract', () => {
     expect(PERSONA_VERSION).toBeGreaterThanOrEqual(1)
-    expect(SYSTEM_PROMPT).toMatch(/1-2 short sentences/)
+    expect(SYSTEM_PROMPT).toMatch(/Keep replies short: 1-2 sentences/)
     expect(SYSTEM_PROMPT).toMatch(/follow-up question/)
     expect(EVAL_USER_TURNS.length).toBeGreaterThanOrEqual(8)
   })

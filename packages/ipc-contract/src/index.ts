@@ -614,6 +614,13 @@ export const AgentSendResult = z.discriminatedUnion('ok', [
 export type AgentSendResult = z.infer<typeof AgentSendResult>
 export const AgentCancelRequest = z.object({ requestId: z.string().min(1).max(64) }).strict()
 export const AgentMessagesRequest = z.object({ conversationId: z.string().min(1).max(64) }).strict()
+export const AgentConversation = z.object({
+  id: z.string(),
+  /** The first thing the learner said, trimmed for a list row. */
+  title: z.string(),
+  updatedAt: z.number().int(),
+})
+export type AgentConversation = z.infer<typeof AgentConversation>
 export const AgentMessage = z.object({
   id: z.number().int(),
   role: z.enum(['user', 'assistant']),
@@ -633,7 +640,13 @@ export const AgentEvent = z.discriminatedUnion('type', [
     text: z.string(),
   }),
   z.object({ type: z.literal('cancelled'), requestId: z.string() }),
-  z.object({ type: z.literal('error'), requestId: z.string(), code: AgentErrorCode }),
+  z.object({
+    type: z.literal('error'),
+    requestId: z.string(),
+    code: AgentErrorCode,
+    /** The provider's own error message, when it sent one. */
+    detail: z.string().optional(),
+  }),
 ])
 export type AgentEvent = z.infer<typeof AgentEvent>
 
@@ -813,6 +826,8 @@ export const AppSettings = z.object({
   reviewsPerDay: z.number().int().min(0).max(2000).default(200),
   /** Dictionary: fetch and show a Wikimedia illustration for concrete words. */
   wordImages: z.boolean().default(true),
+  /** Converse: show the live transcript of the conversation while it is spoken. */
+  captionsVisible: z.boolean().default(true),
 })
 export type AppSettings = z.infer<typeof AppSettings>
 export const AppSettingsPatch = AppSettings.partial().strict()
@@ -871,6 +886,7 @@ export const IPC = {
   agentSend: 'agent:send',
   agentCancel: 'agent:cancel',
   agentMessages: 'agent:messages',
+  agentList: 'agent:list',
   agentEvent: 'agent:event',
   deckAdd: 'deck:add',
   deckRemove: 'deck:remove',
@@ -988,6 +1004,8 @@ export const invokeChannels = {
   [IPC.agentSend]: { request: AgentSendRequest, response: AgentSendResult },
   [IPC.agentCancel]: { request: AgentCancelRequest, response: z.null() },
   [IPC.agentMessages]: { request: AgentMessagesRequest, response: z.array(AgentMessage) },
+  /** Conversations that have at least one message, newest first. */
+  [IPC.agentList]: { request: noArgs, response: z.array(AgentConversation) },
   [IPC.dictionaryRoots]: {
     request: DictionaryRootsRequest.optional(),
     response: DictionaryRootList,
@@ -1133,6 +1151,7 @@ export interface EngclawApi {
     send(req: AgentSendRequest): Promise<AgentSendResult>
     cancel(req: z.infer<typeof AgentCancelRequest>): Promise<null>
     messages(req: z.infer<typeof AgentMessagesRequest>): Promise<AgentMessage[]>
+    list(): Promise<AgentConversation[]>
     onEvent(cb: (e: AgentEvent) => void): () => void
   }
   game: {

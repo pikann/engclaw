@@ -14,6 +14,7 @@ import {
 
 const PRESETS = [
   { name: 'OpenAI', baseUrl: 'https://api.openai.com/v1' },
+  { name: 'Gemini', baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai' },
   { name: 'OpenRouter', baseUrl: 'https://openrouter.ai/api/v1' },
   { name: 'Ollama', baseUrl: 'http://localhost:11434/v1' },
   { name: 'LM Studio', baseUrl: 'http://localhost:1234/v1' },

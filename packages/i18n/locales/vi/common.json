@@ -202,7 +202,7 @@
       "title": "Nhà cung cấp AI",
       "intro": "Trợ lý luyện nói chạy trên nhà cung cấp do bạn chọn. Chỉ văn bản đã nhận dạng và một bản tóm tắt phát âm ngắn được gửi đi; âm thanh không bao giờ rời khỏi thiết bị.",
       "advancedTitle": "API tương thích OpenAI",
-      "advancedHint": "Dùng được với OpenAI, OpenRouter hoặc máy chủ cục bộ như Ollama, LM Studio.",
+      "advancedHint": "Dùng được với OpenAI, Gemini, OpenRouter hoặc máy chủ cục bộ như Ollama, LM Studio.",
       "presets": "Điền nhanh",
       "baseUrl": "URL gốc",
       "baseUrlHint": "Phải là HTTPS, trừ máy chủ chạy trên chính máy này (localhost).",
@@ -970,6 +970,43 @@
         "imported": "Đã nhập {{imported}} thẻ mới, cập nhật {{updated}}, bỏ qua {{skipped}} (không có trong từ điển).",
         "error": "Không thể dùng tệp này: {{message}}"
       }
+    }
+  },
+  "converse": {
+    "title": "Hội thoại",
+    "conversations": "Cuộc trò chuyện",
+    "new": "Cuộc trò chuyện mới",
+    "emptyList": "Các cuộc trò chuyện của bạn sẽ hiện ở đây.",
+    "untitled": "Cuộc trò chuyện",
+    "transcript": "Nội dung cuộc trò chuyện",
+    "emptyTranscript": "Nhấn micro và chào để bắt đầu.",
+    "captionsShown": "Đã hiện phụ đề",
+    "captionsHidden": "Đã ẩn phụ đề",
+    "captionsShortcut": "Hiện hoặc ẩn phụ đề (Alt+C)",
+    "idle": "Nhấn micro và nói.",
+    "interrupt": "Ngắt lời và trả lời",
+    "cancel": "Hủy",
+    "interrupted": "Đã ngắt — phần còn lại của câu trả lời không được đọc.",
+    "noSpeech": "Mình chưa nghe rõ. Hãy thử lại.",
+    "speakFailed": "Không đọc được câu trả lời. Bật phụ đề để đọc.",
+    "setupTitle": "Hãy thiết lập trợ lý AI trước",
+    "setupBody": "Hội thoại cần một nhà cung cấp AI. Âm thanh không rời khỏi máy; chỉ văn bản bạn nói được gửi đi.",
+    "setupAction": "Mở cài đặt nhà cung cấp",
+    "modelsTitle": "Cần mô hình giọng nói",
+    "modelsBody": "Hội thoại nghe và nói ngay trên máy bạn. Hãy tải mô hình giọng nói một lần để tiếp tục.",
+    "modelsAction": "Tải mô hình",
+    "error": {
+      "NO_PROVIDER": "Chưa thiết lập nhà cung cấp AI.",
+      "AUTH_EXPIRED": "Nhà cung cấp từ chối đăng nhập của bạn. Hãy kiểm tra trong cài đặt.",
+      "RATE_LIMIT": "Nhà cung cấp đang giới hạn yêu cầu. Chờ một lát rồi thử lại.",
+      "NETWORK": "Không kết nối được nhà cung cấp. Hãy kiểm tra mạng.",
+      "TIMEOUT": "Nhà cung cấp trả lời quá lâu.",
+      "SERVER": "Nhà cung cấp gặp sự cố. Hãy thử lại.",
+      "BAD_RESPONSE": "Nhà cung cấp trả về nội dung không đọc được.",
+      "TOOL_ROUND_LIMIT": "Trợ lý bị kẹt. Hãy thử lại.",
+      "BUSY": "Vẫn đang trả lời tin nhắn trước.",
+      "NOT_FOUND": "Cuộc trò chuyện này không còn nữa.",
+      "FAILED": "Đã xảy ra lỗi. Hãy thử lại."
     }
   }
 }
