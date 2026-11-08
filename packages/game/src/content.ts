@@ -1,4 +1,4 @@
-export const CONTENT_SCHEMA_VERSION = 1
+export const CONTENT_SCHEMA_VERSION = 2
 
 export type ChapterType = 'word' | 'phrase' | 'idiom'
 
@@ -11,6 +11,12 @@ export interface Chapter {
   examples: string[]
   /** Rank (1 = most common) of the rarest word in `text` in the frequency list. */
   frequencyRank: number
+  /** 0 (easiest) to 100 (hardest); see `difficultyOf`. */
+  difficulty: number
+  /** 1-based position in the global easy-to-hard order (unique). */
+  order: number
+  /** 1-based world; worlds are contiguous runs of `order`. */
+  world: number
   source: string
   license: string
   sourceUrl: string
@@ -35,6 +41,9 @@ CREATE TABLE chapters (
   ipa TEXT NOT NULL,
   meaning TEXT NOT NULL,
   frequency_rank INTEGER NOT NULL,
+  difficulty REAL NOT NULL,
+  ord INTEGER NOT NULL,
+  world INTEGER NOT NULL,
   source TEXT NOT NULL,
   license TEXT NOT NULL,
   source_url TEXT NOT NULL
@@ -46,6 +55,8 @@ CREATE TABLE examples (
   PRIMARY KEY (chapter_id, ordinal)
 ) WITHOUT ROWID;
 CREATE INDEX chapters_type_rank ON chapters (type, frequency_rank);
+CREATE UNIQUE INDEX chapters_order ON chapters (ord);
+CREATE INDEX chapters_world ON chapters (world, ord);
 `
 
 export interface ContentDb {
@@ -55,8 +66,9 @@ export interface ContentDb {
 export function readChapters(db: ContentDb): Chapter[] {
   const rows = db
     .prepare(
-      `SELECT id, text, type, ipa, meaning, frequency_rank AS frequencyRank, source, license,
-              source_url AS sourceUrl FROM chapters ORDER BY frequency_rank, id`,
+      `SELECT id, text, type, ipa, meaning, frequency_rank AS frequencyRank, difficulty,
+              ord AS "order", world, source, license, source_url AS sourceUrl
+       FROM chapters ORDER BY ord`,
     )
     .all() as Omit<Chapter, 'examples'>[]
   const examples = new Map<string, string[]>()
@@ -114,6 +126,7 @@ export function validateChapters(chapters: Chapter[], minChapters = MIN_CHAPTERS
   const errors: string[] = []
   const ids = new Set<string>()
   const keys = new Set<string>()
+  const orders = new Set<number>()
   const lim = CONTENT_LIMITS
 
   if (chapters.length < minChapters)
@@ -148,6 +161,14 @@ export function validateChapters(chapters: Chapter[], minChapters = MIN_CHAPTERS
       errors.push(`${at}: meaning longer than ${lim.meaningMax}`)
     if (!Number.isInteger(c.frequencyRank) || c.frequencyRank < 1)
       errors.push(`${at}: invalid frequencyRank`)
+
+    if (!Number.isFinite(c.difficulty) || c.difficulty < 0 || c.difficulty > 100)
+      errors.push(`${at}: difficulty out of range`)
+    if (!Number.isInteger(c.order) || c.order < 1 || c.order > chapters.length)
+      errors.push(`${at}: invalid order`)
+    else if (orders.has(c.order)) errors.push(`${at}: duplicate order ${c.order}`)
+    orders.add(c.order)
+    if (!Number.isInteger(c.world) || c.world < 1) errors.push(`${at}: invalid world`)
 
     if (!c.examples?.length) errors.push(`${at}: no examples`)
     else if (c.examples.length > lim.examplesMax)

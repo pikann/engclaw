@@ -29,3 +29,12 @@ archaic, obsolete, dialectal or tied to a single region, or restricts it to a te
 built-in blocklist removes profanity, sexual, violent and other sensitive vocabulary from texts,
 meanings and examples. Duplicates and variants (for example a leading "to") are merged. Example
 sentences must contain the target text as whole words.
+
+## Difficulty, order and world
+
+Each chapter has `difficulty` (0-100), a unique `ord` (easy-to-hard position) and a `world`
+(contiguous runs of 75 chapters). They are computed from the catalog itself (frequency rank, IPA,
+type) by `packages/game/src/difficulty.ts`; the per-phoneme error rates it uses are aggregates of
+human ratings from speechocean762 (`scripts/data/extract-so762-errors.py`). CI recomputes the
+ranking and compares it with the stored values. `scripts/data/rank-game-content.ts` re-ranks this
+database without the Wiktextract dump.

@@ -1,9 +1,9 @@
 {
-  "version": "1.1",
-  "schemaVersion": 1,
+  "version": "2.2",
+  "schemaVersion": 2,
   "file": "game-content.sqlite",
-  "bytes": 1019904,
-  "sha256": "f24e3533ec15553da982dbcb5cb2ca85a01cd21db37dddab54a32336c0a16311",
+  "bytes": 1175552,
+  "sha256": "419305b3968e6254432fd5e3f455a33f975daf8e39ee73d246e5ca30e147173a",
   "counts": {
     "total": 3000,
     "word": 1500,
