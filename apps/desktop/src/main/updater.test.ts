@@ -1,4 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
+vi.mock('electron', () => ({ app: {}, dialog: {} }))
+vi.mock('electron-updater', () => ({ default: { autoUpdater: {} } }))
+
 import { checkForUpdatesOnLaunch, type UpdateDeps, type UpdaterLike } from './updater'
 
 function fake() {
