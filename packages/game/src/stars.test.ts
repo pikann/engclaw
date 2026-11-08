@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { addAttempt, evaluateAttempt, newRun, type ChapterRun } from './attempt'
 import {
   STAR_RULES,
+  isNewBest,
   isUnlocked,
   mergeProgress,
   recordResult,
@@ -152,5 +153,34 @@ describe('isUnlocked', () => {
   })
   it('keeps a passed chapter open even if its predecessor is missing', () => {
     expect(isUnlocked(5, new Set([5]))).toBe(true)
+  })
+})
+
+describe('isNewBest', () => {
+  const prev: ChapterProgress = {
+    stars: 2,
+    avgScore: 80,
+    bestScore: 90,
+    attempts: 9,
+    firstPassedAt: 1,
+    lastPassedAt: 1,
+  }
+  const res = (stars: 1 | 2 | 3, avgScore: number) => ({
+    stars,
+    avgScore,
+    bestScore: 95,
+    attempts: 6,
+  })
+
+  it('is always a best on the first pass', () => {
+    expect(isNewBest(null, res(1, 50))).toBe(true)
+  })
+  it('counts more stars or a higher average as better', () => {
+    expect(isNewBest(prev, res(3, 70))).toBe(true)
+    expect(isNewBest(prev, res(2, 81))).toBe(true)
+  })
+  it('does not count an equal or worse run', () => {
+    expect(isNewBest(prev, res(2, 80))).toBe(false)
+    expect(isNewBest(prev, res(1, 79))).toBe(false)
   })
 })

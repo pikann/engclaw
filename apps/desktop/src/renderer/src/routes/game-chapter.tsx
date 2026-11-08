@@ -2,26 +2,27 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useBlocker, useNavigate, useParams } from 'react-router'
 import { AlertDialog as AlertDialogPrimitive } from 'radix-ui'
-import { AlertTriangle, MicOff, RotateCcw, X } from 'lucide-react'
+import { AlertTriangle, MicOff, X } from 'lucide-react'
 import {
   addAttempt,
-  averageCorrectScore,
   correctCount,
   evaluateAttempt,
   isPassed,
   newRun,
   runResult,
+  isNewBest,
   REQUIRED_CORRECT,
   totalAttempts,
   type Attempt,
   type ChapterRun,
 } from '@engclaw/game'
-import type { GameChapter, PronunciationResult } from '@engclaw/ipc-contract'
+import type { GameChapter, GameProgressEntry, PronunciationResult } from '@engclaw/ipc-contract'
 import { HearReference } from '@/components/hear-reference'
 import { ModelDownloadDialog } from '@/components/model-download-dialog'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { AttemptFeedbackChip, AttemptTracker } from '@/components/ui/game'
+import { ChapterResultCard } from '@/components/game-result-card'
+import { AttemptFeedbackChip, AttemptTracker, StarRating } from '@/components/ui/game'
 import { RecordButton } from '@/components/record-button'
 import {
   PronunciationResultSections,
@@ -57,7 +58,7 @@ export function GameChapterPage() {
     setData(null)
     if (Number.isInteger(order) && order >= 1)
       void window.engclaw.game.chapter({ order }).then(setData)
-    else setData({ chapter: null, total: 0, unlocked: false })
+    else setData({ chapter: null, total: 0, unlocked: false, best: null })
   }, [order])
 
   if (!data) return <p role="status">{t('screens.game.loadingChapter')}</p>
@@ -79,10 +80,47 @@ export function GameChapterPage() {
         </Button>
       </section>
     )
-  return <ChapterPlay key={data.chapter.id} chapter={data.chapter} total={data.total} />
+  return (
+    <ChapterPlay key={data.chapter.id} chapter={data.chapter} total={data.total} best={data.best} />
+  )
 }
 
-function ChapterPlay({ chapter, total }: { chapter: Chapter; total: number }) {
+/** Records a finished analysis in the practice history; a storage failure never blocks the run. */
+async function saveToHistory(text: string, r: PronunciationResult, samples: Float32Array) {
+  try {
+    await window.engclaw.history.save({
+      mode: 'sentence',
+      text,
+      language: r.language,
+      score: r.score,
+      errors: r.differences.errors.map((e) => ({
+        word: e.word,
+        expected: e.expected,
+        actual: e.actual,
+        confidence: e.confidence,
+      })),
+      audio: samples,
+    })
+  } catch (e) {
+    console.error('[history] save failed', e)
+  }
+}
+
+interface Outcome {
+  previous: GameProgressEntry | null
+  progress: GameProgressEntry
+  improved: boolean
+}
+
+function ChapterPlay({
+  chapter,
+  total,
+  best: storedBest,
+}: {
+  chapter: Chapter
+  total: number
+  best: GameProgressEntry | null
+}) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [run, setRun] = useState<ChapterRun>(newRun)
@@ -92,6 +130,8 @@ function ChapterPlay({ chapter, total }: { chapter: Chapter; total: number }) {
   const [level, setLevel] = useState(0)
   const [mic, setMic] = useState<{ reason: MicErrorReason; message: string } | null>(null)
   const [failed, setFailed] = useState(false)
+  const [best, setBest] = useState(storedBest)
+  const [outcome, setOutcome] = useState<Outcome | null>(null)
   const [downloadOpen, setDownloadOpen] = useState(false)
   const playing = useRef<{ stop: () => void } | null>(null)
   const recorder = useRef<MicRecorder | null>(null)
@@ -100,10 +140,18 @@ function ChapterPlay({ chapter, total }: { chapter: Chapter; total: number }) {
   const pending = useRef<Float32Array | null>(null)
   const passed = isPassed(run)
   const correct = correctCount(run)
+  const result = runResult(run)
 
   useEffect(() => {
     const result = runResult(run)
-    if (result) void window.engclaw.game.record({ order: chapter.order, ...result })
+    if (!result) return
+    void window.engclaw.game
+      .record({ order: chapter.order, ...result })
+      .then((o) => {
+        setOutcome(o)
+        setBest(o.progress)
+      })
+      .catch((e: unknown) => console.error('[game] record failed', e))
   }, [passed]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const blocker = useBlocker(() => totalAttempts(run) > 0 && !passed)
@@ -144,6 +192,7 @@ function ChapterPlay({ chapter, total }: { chapter: Chapter; total: number }) {
           const attempt = evaluateAttempt(res.value)
           setLast({ attempt, result: res.value, samples })
           setRun((r) => addAttempt(r, attempt))
+          void saveToHistory(chapter.text, res.value, samples)
         } else if (res.code === 'MODEL_MISSING') setDownloadOpen(true)
         else if (res.code !== 'CANCELLED') setFailed(true)
       } catch {
@@ -201,6 +250,7 @@ function ChapterPlay({ chapter, total }: { chapter: Chapter; total: number }) {
   const replay = (): void => {
     playing.current?.stop()
     setRun(newRun())
+    setOutcome(null)
     setLast(null)
     setFailed(false)
   }
@@ -214,6 +264,16 @@ function ChapterPlay({ chapter, total }: { chapter: Chapter; total: number }) {
             type: t(`screens.game.type.${chapter.type}`),
           })}
         </h2>
+        {best && (
+          <span
+            className="text-muted-foreground flex items-center gap-1.5 text-sm"
+            data-testid="game-best"
+          >
+            {t('screens.game.best')}
+            <StarRating stars={best.stars} size="sm" />
+            <span className="tabular-nums">{Math.round(best.avgScore)}</span>
+          </span>
+        )}
         <AttemptTracker correct={correct} active={!passed} />
         <span className="text-sm tabular-nums" aria-hidden="true" data-testid="game-count">
           {correct}/{REQUIRED_CORRECT}
@@ -337,29 +397,15 @@ function ChapterPlay({ chapter, total }: { chapter: Chapter; total: number }) {
         >
           <ResultSidebarBody>
             <div className="space-y-4 pt-4">
-              {passed && (
-                <div className="bg-card space-y-4 rounded-xl border p-5" data-testid="game-passed">
-                  <h3 className="text-lg font-semibold" role="status">
-                    {t('screens.game.complete', { n: chapter.order })}
-                  </h3>
-                  <p className="text-sm tabular-nums">
-                    {t('screens.game.avgScore')}: {Math.round(averageCorrectScore(run))} ·{' '}
-                    {t('screens.game.attempts')}: {totalAttempts(run)}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {chapter.order < total && (
-                      <Button asChild>
-                        <Link to={`/game/chapter/${chapter.order + 1}`}>
-                          {t('screens.game.next')}
-                        </Link>
-                      </Button>
-                    )}
-                    <Button variant="outline" onClick={replay} data-testid="game-replay">
-                      <RotateCcw />
-                      {t('screens.game.replay')}
-                    </Button>
-                  </div>
-                </div>
+              {passed && result && (
+                <ChapterResultCard
+                  order={chapter.order}
+                  hasNext={chapter.order < total}
+                  run={result}
+                  previous={outcome ? outcome.previous : best}
+                  newBest={outcome ? outcome.improved : isNewBest(best, result)}
+                  onReplay={replay}
+                />
               )}
               {!last && !passed && phase === 'idle' && !mic && (
                 <p className="text-muted-foreground rounded-xl border border-dashed p-8 text-center text-sm">

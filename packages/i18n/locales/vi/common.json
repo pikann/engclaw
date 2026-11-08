@@ -789,6 +789,7 @@
       "backToMap": "Về bản đồ",
       "map": "Bản đồ",
       "next": "Chương tiếp",
+      "noNextChapter": "Đây là chương cuối cùng.",
       "prevBest": "Tốt nhất trước đó",
       "loadingChapter": "Đang tải chương…",
       "chapterNotFound": "Chương này không tồn tại."

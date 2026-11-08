@@ -789,6 +789,7 @@
       "backToMap": "Back to map",
       "map": "Map",
       "next": "Next chapter",
+      "noNextChapter": "This is the last chapter.",
       "prevBest": "Previous best",
       "loadingChapter": "Loading chapter…",
       "chapterNotFound": "That chapter does not exist."

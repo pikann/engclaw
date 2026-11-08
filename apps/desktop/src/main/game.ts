@@ -31,6 +31,7 @@ export function registerGameHandlers(progress: GameProgressStore): void {
       },
       total: countChapters(open()),
       unlocked: progress.isUnlocked(order),
+      best: progress.get(order),
     }
   })
 

@@ -76,6 +76,12 @@ export function recordResult(
   }
 }
 
+/** Whether a run beats the stored best on stars or average score (a first pass always does). */
+export const isNewBest = (
+  prev: Pick<ChapterProgress, 'stars' | 'avgScore'> | null,
+  res: Pick<RunResult, 'stars' | 'avgScore'>,
+): boolean => !prev || res.stars > prev.stars || res.avgScore > prev.avgScore
+
 /** Combines two records of the same chapter (import); commutative and idempotent. */
 export function mergeProgress(a: ChapterProgress, b: ChapterProgress): ChapterProgress {
   return {

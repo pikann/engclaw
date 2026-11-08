@@ -1,6 +1,7 @@
 import type Database from 'better-sqlite3'
 import type { GameProgressEntry } from '@engclaw/ipc-contract'
 import {
+  isNewBest,
   isUnlocked,
   mergeProgress,
   recordResult,
@@ -70,15 +71,19 @@ export class GameProgressStore {
     ).map(toEntry)
   }
 
-  /** Stores a passed run, keeping the best stars and scores. Returns the new record and whether stars improved. */
-  record(order: number, result: RunResult): { progress: GameProgressEntry; improved: boolean } {
+  /** Stores a passed run, keeping the best stars and scores. Returns the new and previous records and whether the run beat the previous best. */
+  record(
+    order: number,
+    result: RunResult,
+  ): { progress: GameProgressEntry; previous: GameProgressEntry | null; improved: boolean } {
     return this.db.transaction(() => {
       const prev = this.get(order)
       const next = recordResult(prev ? toProgress(prev) : null, result, this.now())
       this.write(order, next)
       return {
         progress: { order, ...next },
-        improved: !prev || next.stars > prev.stars,
+        previous: prev,
+        improved: isNewBest(prev, result),
       }
     })()
   }
