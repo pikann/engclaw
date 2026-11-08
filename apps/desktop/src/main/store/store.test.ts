@@ -256,7 +256,7 @@ describe('game progress', () => {
 describe('migrations', () => {
   it('adds game_progress when upgrading a database from before the game', () => {
     const db = new Database(':memory:')
-    migrate(db, MIGRATIONS.slice(0, MIGRATIONS.length - 1))
+    migrate(db, MIGRATIONS.slice(0, MIGRATIONS.length - 2))
     db.prepare("INSERT INTO settings VALUES ('k', '1')").run()
     expect(
       db.prepare("SELECT name FROM sqlite_master WHERE name='game_progress'").get(),
@@ -264,6 +264,16 @@ describe('migrations', () => {
     migrate(db)
     expect(db.prepare('SELECT COUNT(*) AS n FROM game_progress').get()).toEqual({ n: 0 })
     expect(db.prepare('SELECT value FROM settings').get()).toEqual({ value: '1' })
+  })
+
+  it('adds agent conversation tables and deleteAll wipes them', () => {
+    const store = openStore(':memory:')
+    store.agent.create('c', 1)
+    store.agent.append('c', 'user', 'hi', 2)
+    expect(store.agent.messages('c')).toMatchObject([{ role: 'user', text: 'hi' }])
+    store.deleteAll()
+    expect(store.agent.exists('c')).toBe(false)
+    store.db.close()
   })
 
   it('apply once, set user_version, and are idempotent', () => {

@@ -16,6 +16,7 @@ import { registerDeckHandlers } from './deck'
 import { registerDictionaryHandlers } from './dictionary'
 import { registerGameHandlers } from './game'
 import { registerLlmHandlers } from './llm/register'
+import { registerAgentHandlers } from './agent/register'
 import { UtilityClient } from './utility-client'
 import { loadLanguage, saveLanguage } from './settings'
 import { InnertubeAdapter, YouTubeError, parseVideoId } from '@engclaw/youtube'
@@ -158,6 +159,7 @@ void app.whenReady().then(async () => {
   })
   const llmConfig = registerLlmHandlers()
   const store = registerStoreHandlers(() => llmConfig.clear())
+  registerAgentHandlers(llmConfig, store)
   const models = registerModelHandlers()
   const cachedYoutube = new CachedYouTube(
     youtube,

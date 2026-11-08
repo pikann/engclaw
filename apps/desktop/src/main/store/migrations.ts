@@ -118,6 +118,20 @@ export const MIGRATIONS: readonly string[] = [
      first_passed_at  INTEGER NOT NULL,
      last_passed_at   INTEGER NOT NULL
    );`,
+  // AI agent conversations: user and assistant turns only; tool traffic is not persisted.
+  `CREATE TABLE agent_conversation (
+     id          TEXT PRIMARY KEY,
+     created_at  INTEGER NOT NULL,
+     updated_at  INTEGER NOT NULL
+   );
+   CREATE TABLE agent_message (
+     id               INTEGER PRIMARY KEY AUTOINCREMENT,
+     conversation_id  TEXT NOT NULL REFERENCES agent_conversation(id) ON DELETE CASCADE,
+     role             TEXT NOT NULL CHECK (role IN ('user','assistant')),
+     text             TEXT NOT NULL,
+     created_at       INTEGER NOT NULL
+   );
+   CREATE INDEX agent_message_conv ON agent_message (conversation_id, id);`,
 ]
 
 export class FutureSchemaError extends Error {
