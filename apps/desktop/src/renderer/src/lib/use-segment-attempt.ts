@@ -12,7 +12,7 @@ export type AttemptState =
   | { phase: 'recording' }
   | { phase: 'analyzing' }
   | { phase: 'result'; result: PronunciationResult; audio: Float32Array }
-  | { phase: 'error'; kind: AttemptErrorKind; audio: Float32Array | null }
+  | { phase: 'error'; kind: AttemptErrorKind; audio: Float32Array | null; detail?: string }
 
 const IDLE: AttemptState = { phase: 'idle' }
 const HISTORY_FETCH = 500
@@ -127,12 +127,17 @@ export function useSegmentAttempt(
       const id = crypto.randomUUID()
       requestIds.current[i] = id
       set(i, { phase: 'analyzing' })
-      const fail = (code?: string) =>
-        set(i, { phase: 'error', kind: code === 'MODEL_MISSING' ? 'model' : 'failed', audio })
+      const fail = (code?: string, detail?: string) =>
+        set(i, {
+          phase: 'error',
+          kind: code === 'MODEL_MISSING' ? 'model' : 'failed',
+          audio,
+          ...(detail ? { detail } : {}),
+        })
       try {
         const res = await window.engclaw.inference.analyze({ requestId: id, audio, text })
         if (requestIds.current[i] !== id) return
-        if (!res.ok) return fail(res.code)
+        if (!res.ok) return fail(res.code, res.message)
         const result = res.value
         set(i, { phase: 'result', result, audio })
         void runIntonation(i, audio, id)
