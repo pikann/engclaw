@@ -1,3 +1,4 @@
+import { freemem } from 'node:os'
 import type { InferenceProgress, PhonemizeResult } from '@engclaw/ipc-contract'
 import { forcedAlignWords, getLanguage, logSoftmax, type Phonemizer } from '@engclaw/pronounce'
 import { analyzeSegmentProsody, type SegmentProsody } from '@engclaw/prosody'
@@ -15,7 +16,12 @@ export interface ServiceDeps {
   speak(text: string): Promise<Float32Array>
   /** Models stay warm this long after the last request, then are released (default 5 min). */
   idleMs?: number
+  /** Free system memory in bytes (defaults to `os.freemem`); injectable for tests. */
+  freeMemoryBytes?: () => number
 }
+
+/** Below this much free memory, models the current request does not need are unloaded first. */
+const LOW_MEMORY_BYTES = 2 ** 30
 
 export interface ModelDirs {
   phone?: string
@@ -30,6 +36,14 @@ export interface CallOptions {
 interface Slot {
   dir: string
   adapter: Promise<ModelAdapter>
+}
+
+/** Longest recording `analyze` / `transcribe` accept (seconds of 16 kHz audio). */
+export const MAX_CLIP_SECONDS = 900
+
+const assertClipLength = (audio: Float32Array) => {
+  if (audio.length > MAX_CLIP_SECONDS * 16000)
+    throw new InferenceError('CLIP_TOO_LONG', `recordings are limited to ${MAX_CLIP_SECONDS} s`)
 }
 
 const STAGE_FOR: Record<Kind, InferenceProgress['stage']> = {
@@ -57,10 +71,11 @@ export class InferenceService {
     opts: CallOptions,
   ) {
     return this.exclusive(opts, async (ctl) => {
+      assertClipLength(audio)
       const lang = this.language(languageCode)
       const [phone, asr] = [
-        await this.adapter('phone', dirs.phone, lang.phoneModelId, ctl),
-        await this.adapter('asr', dirs.asr, lang.asrModelId, ctl),
+        await this.adapter('phone', dirs.phone, lang.phoneModelId, ctl, ['phone', 'asr']),
+        await this.adapter('asr', dirs.asr, lang.asrModelId, ctl, ['phone', 'asr']),
       ]
       return analyzeRecording(
         { phone, asr, phonemizer: this.deps.phonemizer, reference: this.deps.speak },
@@ -79,8 +94,9 @@ export class InferenceService {
     opts: CallOptions,
   ) {
     return this.exclusive(opts, async (ctl) => {
+      assertClipLength(audio)
       const lang = this.language(languageCode)
-      const asr = await this.adapter('asr', dirs.asr, lang.asrModelId, ctl)
+      const asr = await this.adapter('asr', dirs.asr, lang.asrModelId, ctl, ['asr'])
       ctl.stage('transcribing')
       return { text: (await transcribeAudio(asr, audio)).text, language: lang.code }
     })
@@ -96,7 +112,7 @@ export class InferenceService {
   ): Promise<SegmentProsody> {
     return this.exclusive(opts, async (ctl) => {
       const lang = this.language(languageCode)
-      const asr = await this.adapter('asr', dirs.asr, lang.asrModelId, ctl)
+      const asr = await this.adapter('asr', dirs.asr, lang.asrModelId, ctl, ['asr'])
       ctl.stage('transcribing')
       const out = await asr.run(audio)
       const logProbs = logSoftmax(out.logits, out.frames, out.vocabSize)
@@ -144,8 +160,10 @@ export class InferenceService {
     dir: string | undefined,
     modelId: string,
     ctl: Control,
+    needed: readonly Kind[],
   ): Promise<ModelAdapter> {
     if (!dir) throw new InferenceError('MODEL_MISSING', `model not installed: ${modelId}`, modelId)
+    await this.relieveMemoryPressure(needed)
     let slot = this.slots.get(kind)
     if (slot && slot.dir !== dir) {
       // A new revision was installed: drop the old one before loading the next.
@@ -167,6 +185,18 @@ export class InferenceService {
     const adapter = await slot.adapter
     ctl.check()
     return adapter
+  }
+
+  private async relieveMemoryPressure(needed: readonly Kind[]): Promise<void> {
+    if ((this.deps.freeMemoryBytes ?? freemem)() >= LOW_MEMORY_BYTES) return
+    for (const [kind, slot] of [...this.slots]) {
+      if (needed.includes(kind)) continue
+      this.slots.delete(kind)
+      await slot.adapter.then(
+        (a) => a.dispose(),
+        () => undefined,
+      )
+    }
   }
 
   private exclusive<T>(opts: CallOptions, fn: (ctl: Control) => Promise<T>): Promise<T> {

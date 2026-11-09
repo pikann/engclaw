@@ -106,7 +106,10 @@
     "review": "Play your recording ({{time}})",
     "analyze": "Analyze",
     "retry": "Try again",
+    "restartEngine": "Restart engine and try again",
     "error": {
+      "clipTooLong": "This recording is longer than 15 minutes. Record a shorter clip and try again.",
+      "engineStopped": "The analysis engine stopped unexpectedly. Restart it and try again.",
       "modelMissing": "The pronunciation models are not downloaded yet. Download them in AI models, then try again.",
       "failed": "The analysis failed. Try again."
     },

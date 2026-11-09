@@ -477,6 +477,8 @@ export function PracticeScreen() {
   const modeName = (m: PracticeMode): string =>
     t(`screens.practice.mode.${m === 'free' ? 'free' : 'read'}`)
   const missing = s.phase === 'error' && s.error?.code === 'MODEL_MISSING'
+  const tooLong = s.phase === 'error' && s.error?.code === 'CLIP_TOO_LONG'
+  const engineStopped = s.phase === 'error' && s.error?.code === 'PROCESS_CRASHED'
   const canOpenMicSettings =
     mic?.reason === 'denied' && ['darwin', 'win32'].includes(platformOf(window.navigator.platform))
   const recent = history.filter((a) => a.mode === mode && !a.videoId).slice(0, HISTORY_SHOWN)
@@ -563,7 +565,7 @@ export function PracticeScreen() {
               data-testid="practice-mic-retry"
               onClick={() => void startRecording()}
             >
-              {t('practice.retry')}
+              {engineStopped ? t('practice.restartEngine') : t('practice.retry')}
             </Button>
           </div>
         </Alert>
@@ -580,7 +582,13 @@ export function PracticeScreen() {
         >
           <p className="flex items-center gap-2 font-medium">
             <AlertTriangle className="size-4" />
-            {missing ? t('practice.error.modelMissing') : t('practice.error.failed')}
+            {missing
+              ? t('practice.error.modelMissing')
+              : tooLong
+                ? t('practice.error.clipTooLong')
+                : engineStopped
+                  ? t('practice.error.engineStopped')
+                  : t('practice.error.failed')}
           </p>
           {!missing && <p className="text-muted-foreground">{t('screens.practice.keptAudio')}</p>}
           {missing ? (

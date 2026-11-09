@@ -195,6 +195,7 @@ export type InferenceProgress = z.infer<typeof InferenceProgress>
 export const InferenceErrorCode = z.enum([
   'MODEL_MISSING',
   'INVALID_INPUT',
+  'CLIP_TOO_LONG',
   'UNSUPPORTED_LANGUAGE',
   'CANCELLED',
   'PROCESS_CRASHED',

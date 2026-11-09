@@ -10,7 +10,7 @@ const phonemizer: Phonemizer = {
 }
 const textVocab = { tokens: ['<pad>', 'H', 'I'], blankId: 0 }
 
-function setup(idleMs = 1000) {
+function setup(idleMs = 1000, freeMemoryBytes = () => 8 * 2 ** 30) {
   const loads: string[] = []
   const disposed: string[] = []
   const loadAdapter = vi.fn(async (dir: string): Promise<ModelAdapter> => {
@@ -23,6 +23,8 @@ function setup(idleMs = 1000) {
         logits: Float32Array.from([-5, 5, -5, -5, -5, 5]),
         frames: 2,
         vocabSize: 3,
+        hidden: new Float32Array(4),
+        hiddenSize: 2,
       }),
       dispose: async () => void disposed.push(dir),
     }
@@ -32,6 +34,7 @@ function setup(idleMs = 1000) {
     phonemizer,
     speak: async () => new Float32Array(10),
     idleMs,
+    freeMemoryBytes,
   })
   const stages: string[] = []
   const opts = (signal = new AbortController().signal): CallOptions => ({
@@ -136,6 +139,50 @@ describe('InferenceService', () => {
     await vi.advanceTimersByTimeAsync(50)
     await Promise.all(p)
     expect(peak).toBe(1)
+  })
+
+  it('rejects analyze and transcribe clips longer than 15 min before loading any model', async () => {
+    const s = setup()
+    const long = new Float32Array(900 * 16000 + 1)
+    await expect(s.service.transcribe(long, 'en', { asr: '/m' }, s.opts())).rejects.toMatchObject({
+      code: 'CLIP_TOO_LONG',
+    })
+    await expect(
+      s.service.analyze(long, 'hi', 'en', { phone: '/p', asr: '/m' }, s.opts()),
+    ).rejects.toMatchObject({ code: 'CLIP_TOO_LONG' })
+    expect(s.loads).toEqual([])
+    await expect(
+      s.service.transcribe(new Float32Array(900 * 16000), 'en', { asr: '/m' }, s.opts()),
+    ).resolves.toBeTruthy()
+  })
+
+  describe('memory pressure', () => {
+    const GB = 2 ** 30
+    const dirs = { phone: '/m/phone', asr: '/m/asr' }
+
+    it('keeps models the last request used warm while memory is plentiful', async () => {
+      const s = setup(1000, () => 8 * GB)
+      await s.service.analyze(audio, 'hi', 'en', dirs, s.opts())
+      await s.service.transcribe(audio, 'en', dirs, s.opts())
+      expect(s.disposed).toEqual([])
+    })
+
+    it('unloads models the request does not need when free memory is under 1 GB at load time', async () => {
+      let free = 8 * GB
+      const s = setup(1000, () => free)
+      await s.service.analyze(audio, 'hi', 'en', dirs, s.opts())
+      await vi.advanceTimersByTimeAsync(0)
+      free = GB - 1
+      await s.service.transcribe(audio, 'en', dirs, s.opts())
+      expect(s.disposed).toEqual(['/m/phone'])
+    })
+
+    it('never unloads a model the current request needs', async () => {
+      const s = setup(1000, () => GB / 2)
+      await s.service.analyze(audio, 'hi', 'en', dirs, s.opts())
+      expect(s.disposed).toEqual([])
+      expect(s.loads).toEqual(['/m/phone', '/m/asr'])
+    })
   })
 
   it('phonemizes through the shared phonemizer', async () => {
