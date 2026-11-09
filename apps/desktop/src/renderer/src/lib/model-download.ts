@@ -53,3 +53,10 @@ export function modelCard(
   if (missing.length > 0) return { status: 'missing', aggregate: aggregateProgress(missing, {}) }
   return { status: 'ready', aggregate: aggregateProgress(models, {}) }
 }
+
+/** The app footer's model status. Unknown (list not loaded yet) reads as ready to avoid a flash of "missing". */
+export function footerModelsStatus(
+  models: Pick<ModelStatus, 'id' | 'sizeBytes' | 'state'>[] | null,
+): ModelCard['status'] {
+  return models ? modelCard(models, {}).status : 'ready'
+}

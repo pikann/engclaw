@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { accuracyScore, type IntonationState } from '@/lib/intonation'
 import type { AttemptState } from '@/lib/use-segment-attempt'
+import { DownloadModelsButton } from '@/components/download-models'
 import { IntonationBody } from './intonation-section'
 
 function FullResult({
@@ -63,6 +64,7 @@ export function AttemptPanel({
   onToggleRecord,
   onPlay,
   onRetry,
+  onDownloadModels,
 }: {
   state: AttemptState
   intonation: IntonationState | null
@@ -72,6 +74,7 @@ export function AttemptPanel({
   onToggleRecord: () => void
   onPlay: () => void
   onRetry: () => void
+  onDownloadModels: () => void
 }) {
   const { t } = useTranslation()
   const recording = state.phase === 'recording'
@@ -121,7 +124,12 @@ export function AttemptPanel({
         </div>
       )}
       {state.phase === 'error' && (
-        <Alert className="border-destructive space-y-2">
+        <Alert
+          className={cn(
+            'space-y-2',
+            state.kind === 'model' ? 'border-warning' : 'border-destructive',
+          )}
+        >
           <p role="alert" data-testid="shadowing-attempt-error" className="font-medium">
             {t(
               state.kind === 'mic'
@@ -131,9 +139,13 @@ export function AttemptPanel({
                   : 'screens.shadowing.attempt.failed',
             )}
           </p>
-          <Button size="sm" variant="outline" onClick={onRetry}>
-            {t('practice.retry')}
-          </Button>
+          {state.kind === 'model' ? (
+            <DownloadModelsButton testId="shadowing-download-models" onClick={onDownloadModels} />
+          ) : (
+            <Button size="sm" variant="outline" onClick={onRetry}>
+              {t('practice.retry')}
+            </Button>
+          )}
         </Alert>
       )}
       {state.phase === 'result' && (

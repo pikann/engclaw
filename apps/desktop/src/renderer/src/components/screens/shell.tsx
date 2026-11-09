@@ -138,6 +138,7 @@ export function AppShell({
   title,
   actions,
   modelsPercent,
+  modelsMissing = false,
   linked,
   mic = 'ready',
   provider = null,
@@ -154,6 +155,8 @@ export function AppShell({
   actions?: React.ReactNode
   /** Sidebar Models badge: download progress, or null when nothing is downloading. */
   modelsPercent?: number | null
+  /** Footer: some model is not installed (and none is downloading). */
+  modelsMissing?: boolean
   children: React.ReactNode
 }) {
   const { t } = useTranslation()
@@ -237,13 +240,26 @@ export function AppShell({
             />
             {t(mic === 'ready' ? 'screens.shell.micReady' : 'screens.shell.micMissing')}
           </span>
-          <span>
-            {t(
-              modelsPercent != null
-                ? 'screens.shell.modelsDownloading'
-                : 'screens.shell.modelsReady',
-            )}
-          </span>
+          {modelsPercent == null && modelsMissing ? (
+            <span className="flex items-center gap-1.5" data-testid="footer-models">
+              <span aria-hidden="true" className="bg-warning size-2 rounded-full" />
+              {linked ? (
+                <Link to="/settings" className="underline-offset-2 hover:underline">
+                  {t('screens.shell.modelsMissing')}
+                </Link>
+              ) : (
+                t('screens.shell.modelsMissing')
+              )}
+            </span>
+          ) : (
+            <span data-testid="footer-models">
+              {t(
+                modelsPercent != null
+                  ? 'screens.shell.modelsDownloading'
+                  : 'screens.shell.modelsReady',
+              )}
+            </span>
+          )}
           <span data-testid="footer-provider">
             {provider
               ? t('screens.shell.providerName', { name: provider })

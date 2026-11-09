@@ -3,15 +3,27 @@ import { useTranslation } from 'react-i18next'
 import { Loader2, Play, Volume2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ClickableText } from '@/components/ui/clickable-text'
+import { DownloadModelsButton, useModelDownload } from '@/components/download-models'
 import { useSpeech } from '@/lib/use-speech'
 
-function SpeechError({ error }: { error: 'modelMissing' | 'failed' | null }) {
+function SpeechError({
+  error,
+  onDownload,
+}: {
+  error: 'modelMissing' | 'failed' | null
+  onDownload: () => void
+}) {
   const { t } = useTranslation()
   if (!error) return null
   return (
-    <p role="alert" className="text-destructive text-sm" data-testid="speech-error">
-      {t(error === 'modelMissing' ? 'reference.modelMissing' : 'reference.failed')}
-    </p>
+    <div className="space-y-1">
+      <p role="alert" className="text-destructive text-sm" data-testid="speech-error">
+        {t(error === 'modelMissing' ? 'reference.modelMissing' : 'reference.failed')}
+      </p>
+      {error === 'modelMissing' && (
+        <DownloadModelsButton testId="speech-download-models" onClick={onDownload} />
+      )}
+    </div>
   )
 }
 
@@ -30,7 +42,8 @@ export function TargetAudioActions({
   ask?: ReactNode
 }) {
   const { t } = useTranslation()
-  const { active, error, play, stop } = useSpeech()
+  const { active, error, play, stop, replay } = useSpeech()
+  const download = useModelDownload(replay)
   useEffect(() => {
     if (silenced) stop()
   }, [silenced, stop])
@@ -56,7 +69,8 @@ export function TargetAudioActions({
           {ask}
         </div>
       </div>
-      <SpeechError error={error} />
+      <SpeechError error={error} onDownload={download.open} />
+      {download.dialog}
     </div>
   )
 }
@@ -70,7 +84,8 @@ export function ExamplesPanel({
   silenced?: boolean
 }) {
   const { t } = useTranslation()
-  const { active, error, play, stop } = useSpeech()
+  const { active, error, play, stop, replay } = useSpeech()
+  const download = useModelDownload(replay)
   useEffect(() => {
     if (silenced) stop()
   }, [silenced, stop])
@@ -109,7 +124,8 @@ export function ExamplesPanel({
           )
         })}
       </ul>
-      <SpeechError error={error} />
+      <SpeechError error={error} onDownload={download.open} />
+      {download.dialog}
     </section>
   )
 }

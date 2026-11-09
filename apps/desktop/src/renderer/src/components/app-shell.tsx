@@ -4,7 +4,7 @@ import { Outlet, useLocation } from 'react-router'
 import { PracticeScreen } from '@/components/practice-screen'
 import { WordLookupProvider } from '@/components/word-lookup-dialog'
 import { AppShell, useLayout, type NavKey } from '@/components/screens/shell'
-import { modelCard } from '@/lib/model-download'
+import { footerModelsStatus, modelCard } from '@/lib/model-download'
 import { LLM_CHANGED_EVENT } from '@/lib/llm-events'
 import { useModels } from '@/lib/use-models'
 
@@ -20,10 +20,13 @@ const TITLES: Record<string, NavKey> = {
 }
 
 /** Download percent while any model is downloading, otherwise null. */
-function useModelsPercent(): number | null {
+function useModelsStatus(): { percent: number | null; missing: boolean } {
   const { models, progress } = useModels()
   const card = modelCard(models ?? [], progress)
-  return card.status === 'downloading' ? card.aggregate.percent : null
+  return {
+    percent: card.status === 'downloading' ? card.aggregate.percent : null,
+    missing: footerModelsStatus(models) === 'missing',
+  }
 }
 
 function useMic(): 'ready' | 'missing' {
@@ -69,7 +72,7 @@ export function AppLayout() {
   const { t } = useTranslation()
   const { pathname } = useLocation()
   const layout = useLayout()
-  const modelsPercent = useModelsPercent()
+  const models = useModelsStatus()
   const mic = useMic()
   const provider = useProvider(pathname)
   const section = pathname.startsWith('/game/') ? '/game' : pathname
@@ -100,7 +103,8 @@ export function AppLayout() {
           active={active}
           mic={mic}
           provider={provider}
-          modelsPercent={modelsPercent}
+          modelsPercent={models.percent}
+          modelsMissing={models.missing}
           title={known ? t(`screens.shell.${active}`) : t('screens.shell.comingSoon')}
         >
           <main id="main-content" tabIndex={-1} className="h-full outline-none">

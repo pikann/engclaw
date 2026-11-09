@@ -13,6 +13,7 @@ export function useSpeech() {
   const [error, setError] = useState<SpeechError | null>(null)
   const handle = useRef<{ stop: () => void } | null>(null)
   const token = useRef(0)
+  const last = useRef<{ key: string; text: string } | null>(null)
 
   const stop = useCallback(() => {
     token.current++
@@ -25,6 +26,7 @@ export function useSpeech() {
     async (key: string, text: string) => {
       if (handle.current && active?.key === key) return stop()
       stop()
+      last.current = { key, text }
       const mine = token.current
       setError(null)
       setActive({ key, phase: 'loading' })
@@ -51,6 +53,12 @@ export function useSpeech() {
     [active?.key, stop],
   )
 
+  /** Plays the last requested clip again, e.g. once a missing model has been installed. */
+  const replay = useCallback(() => {
+    const l = last.current
+    if (l) void play(l.key, l.text)
+  }, [play])
+
   useEffect(() => stop, [stop])
-  return { active, error, play, stop }
+  return { active, error, play, stop, replay }
 }

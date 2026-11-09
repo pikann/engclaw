@@ -361,6 +361,7 @@
       "micReady": "Microphone ready",
       "modelsReady": "Models ready",
       "modelsDownloading": "Downloading models…",
+      "modelsMissing": "Models missing",
       "micMissing": "No microphone found",
       "providerNone": "No AI provider",
       "providerName": "AI: {{name}}",

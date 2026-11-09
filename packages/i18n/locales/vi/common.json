@@ -361,6 +361,7 @@
       "micReady": "Micro sẵn sàng",
       "modelsReady": "Mô hình sẵn sàng",
       "modelsDownloading": "Đang tải mô hình…",
+      "modelsMissing": "Thiếu mô hình",
       "micMissing": "Không tìm thấy micro",
       "providerNone": "Chưa có nhà cung cấp AI",
       "providerName": "AI: {{name}}",
