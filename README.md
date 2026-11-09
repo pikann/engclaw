@@ -5,7 +5,7 @@
 <h1 align="center">Engclaw</h1>
 
 <p align="center">
-  <em>Couldn't afford an English course, so I built one. Free, open source, and it never sighs at my "th".</em>
+  <em>Couldn't afford an English course, so I built one. Free, open source, and it never sighs at my "th". Fair warning: it's a tough grader.</em>
 </p>
 
 <p align="center">
