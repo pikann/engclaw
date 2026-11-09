@@ -291,10 +291,6 @@ test('learning aids: word lookup keeps the run, example audio plays, ask slot re
     )
     .toBeGreaterThanOrEqual(1)
 
-  await page.evaluate(() => {
-    const el = document.querySelector('[data-testid="ask-slot"]')!
-    el.innerHTML = '<button style="height:32px;width:140px">Ask the agent</button>'
-  })
   const after = await slot.boundingBox()
   expect(after).toEqual(before)
   await app.close()

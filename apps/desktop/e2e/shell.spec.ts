@@ -24,7 +24,7 @@ test('opens on Home and navigates with aria-current and keyboard', async () => {
     await expect(page.getByTestId('nav-home')).not.toHaveAttribute('aria-current', 'page')
   }
   await page.getByTestId('nav-game').click()
-  await expect(page.getByTestId('coming-soon')).toBeVisible()
+  await expect(page.getByTestId('nav-game')).toHaveAttribute('aria-current', 'page')
   await page.getByTestId('nav-home').focus()
   await page.keyboard.press('Tab')
   await expect(page.getByTestId('nav-practice')).toBeFocused()
