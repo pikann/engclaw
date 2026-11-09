@@ -94,7 +94,12 @@ test('selected world and scroll position are remembered', async () => {
   await page.waitForTimeout(500)
   await open()
   await expect(page.getByTestId('world-title')).toContainText('12')
-  await expect.poll(async () => Math.abs((await fromBottom()) - saved) <= 2).toBe(true)
+  await expect
+    .poll(async () => {
+      const now = await fromBottom()
+      return Math.abs(now - saved) <= 2 ? 'restored' : `saved=${saved} now=${now}`
+    })
+    .toBe('restored')
 })
 
 test('keyboard navigation and the list view are an accessible alternative', async () => {
