@@ -109,3 +109,11 @@ jobs:
           sha256sum * > SHA256SUMS
           cat SHA256SUMS
           gh release upload "$TAG" SHA256SUMS --clobber --repo "$GITHUB_REPOSITORY"
+          # Version-less copies so the README download buttons can use
+          # https://github.com/<repo>/releases/latest/download/<name> and always get the newest build.
+          mkdir stable
+          cp -- *.dmg stable/Engclaw-macOS-arm64.dmg
+          cp -- *.exe stable/Engclaw-Windows-x64.exe
+          cp -- *.AppImage stable/Engclaw-Linux-x64.AppImage
+          cp -- *.deb stable/Engclaw-Linux-x64.deb
+          gh release upload "$TAG" stable/* --clobber --repo "$GITHUB_REPOSITORY"

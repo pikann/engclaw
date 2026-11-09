@@ -1,26 +1,93 @@
 # Contributing to Engclaw
 
-Thanks for helping out. Please read the [Code of Conduct](CODE_OF_CONDUCT.md) first.
+Thanks for helping out. Please read the [Code of Conduct](CODE_OF_CONDUCT.md) first. Questions and ideas are welcome in [GitHub Discussions](https://github.com/pikann/engclaw/discussions).
 
-## Getting started
+## Set up
+
+You need:
+
+- [Bun](https://bun.sh) (installs dependencies and runs scripts).
+- Git.
+- `espeak-ng` for running scoring locally: either install it with your package manager (`brew install espeak-ng`, `apt install espeak-ng`) or build the exact pinned copy the installers ship (needs CMake and a C compiler; on Windows use an MSYS2 MINGW64 shell):
 
 ```bash
+./scripts/espeak/build.sh
+```
+
+This stages `apps/desktop/resources/espeak-ng/`. The app looks for `ESPEAK_NG`, then that folder, then common install locations, then `PATH`. You only need it to run real scoring; the unit tests do not need it.
+
+Supported development machines are macOS on Apple Silicon, Windows x64 and Linux x64 (the `onnxruntime-node` binaries limit this).
+
+```bash
+git clone https://github.com/pikann/engclaw.git
+cd engclaw
 bun install
 bun run dev
 ```
 
-Before opening a PR, make sure these pass:
+The first time you record, the app asks to download about 2.6 GB of models from Hugging Face. They are stored in the Electron user data folder (change it in Settings → AI models).
+
+## Build, run and test
 
 ```bash
-bun run lint
-bun run typecheck
-bun run test
+bun run dev          # run the app with hot reload
+bun run lint         # ESLint
+bun run typecheck    # tsc for every workspace
+bun run test         # Vitest unit and golden tests (no models or network needed)
+bun run build        # production build into apps/desktop/out
+bun run package      # unpacked app in apps/desktop/release (needs espeak-ng staged)
+bun run test:e2e     # Playwright end-to-end tests (see below)
+bun run license:check
 ```
 
-## Commits
+Before opening a PR, `lint`, `typecheck` and `test` must pass. CI also runs `license:check` and a package build.
+
+### End-to-end tests
+
+The e2e tests drive the built app with Playwright and a fake microphone. They use the dev-only design-system route, so build with that flag first:
+
+```bash
+VITE_DESIGN_SYSTEM=1 bun run build
+bun run test:e2e          # headless
+bun run test:e2e:headed   # watch it run
+```
+
+On Linux without a display use `xvfb-run --auto-servernum bun run test:e2e`. CI runs this manually from the Actions tab.
+
+## How the code is organised
+
+Read the [architecture overview](docs/architecture.md) first. In short:
+
+- `apps/desktop/src/main`: privileged services (models, YouTube, SQLite, AI provider, updates).
+- `apps/desktop/src/utility`: ML inference, phonemizer and the scoring pipeline.
+- `apps/desktop/src/renderer`: React UI.
+- `packages/pronounce` (and `prosody`): pure TypeScript scoring, tested in plain Node.
+- `packages/ipc-contract`: zod schemas for every IPC call. Add a method here first; main, preload and renderer all depend on it.
+
+Rules that are checked by tests or review: no Node APIs in the renderer, every IPC payload is validated, and no generic fs/shell access is exposed to the UI (see `tests/security.test.ts`).
+
+## Regenerate the golden data
+
+The scoring port is tested against outputs from the Python [OpenPronounce](https://github.com/Halleck45/OpenPronounce) reference, stored in `tests/golden`. Regenerate only when you change the algorithm on purpose or move to a newer upstream commit. The steps (Python 3.10+, `espeak-ng`, `ffmpeg`, network on first run) are in [tests/golden/README.md](tests/golden/README.md). Record the new upstream commit there and explain the diff in your PR.
+
+The dictionary and game content databases in `apps/desktop/resources/data` are built by the scripts in `scripts/data` (for example `bun scripts/data/build-dictionary.ts`). Crawlers cache under the git-ignored `.cache/`; never commit raw crawled pages. Read the `*_SOURCES.md` files next to the databases for licensing rules first.
+
+## Export or update models
+
+Users cannot choose models; a model change is an app release that pins a new revision in `apps/desktop/resources/models.json`. The full procedure (ONNX export, verification, publishing, checksums) is in the [model export guide](docs/model-export.md).
+
+## Add a locale
+
+1. Copy `packages/i18n/locales/en` to `packages/i18n/locales/<code>` (for example `fr`) and translate every value in `common.json` and `main.json`. Keep the keys and `{{placeholders}}` unchanged; plural keys (`_one`, `_other`) follow the target language's plural forms.
+2. Register it in `packages/i18n/src/index.ts`: import the two JSON files and add `<code>: { common, main }` to `resources`.
+3. Add the new language's name under the `language` key (`"<code>": "Name"`) in every locale's `common.json`; the language switcher lists locales from `SUPPORTED_LOCALES` and reads these names.
+4. Run `bun run test`. `tests/i18n-parity.test.ts` fails if any key is missing or empty.
+
+## Commits and pull requests
 
 - Use [Conventional Commits](https://www.conventionalcommits.org/), e.g. `feat(i18n): add Vietnamese strings`.
-- Keep PRs focused; one change per PR.
+- Keep PRs focused; one change per PR. Fill in the PR template.
+- Add or update tests with behavior changes.
 
 ## Developer Certificate of Origin (DCO)
 
@@ -41,10 +108,10 @@ By contributing, you agree your contribution is licensed under `GPL-3.0-or-later
 - Model weights, benchmark audio, or crawled copyrighted content (for example etymonline or learnthat text).
 - API tokens, signing certificates or other secrets.
 
-## Adding a locale
-
-Add a folder under `packages/i18n` mirroring the English keys. `tests/i18n-parity.test.ts` checks that every locale has the same keys.
-
 ## Dependencies
 
-New dependencies must have a license compatible with GPL-3.0-or-later. CI runs `bun run license:check` and fails on disallowed licenses.
+New dependencies must have a license compatible with GPL-3.0-or-later. CI runs `bun run license:check` and fails on disallowed licenses. After adding one, run `bun run license:generate` to refresh `THIRD_PARTY_LICENSES.md`.
+
+## Security
+
+Report vulnerabilities privately, as described in [SECURITY.md](SECURITY.md).
