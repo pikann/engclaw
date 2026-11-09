@@ -6,7 +6,7 @@
 
 <p align="center">
   <em>I couldn't afford an English course, so I built one that listens to me instead.<br>
-  Turns out a very patient robot is cheaper than a tutor, and never sighs at my "th".</em>
+  Turns out a very patient robot never sighs at my "th". It is totally free and open source, so it won't sigh at your wallet either.</em>
 </p>
 
 <p align="center">
