@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { InnertubeAdapter, parseSidx } from './adapter'
+import { YouTubeError } from './types'
 
 describe('InnertubeAdapter', () => {
   it('rejects non-id input before any network call', async () => {
@@ -33,5 +34,81 @@ describe('parseSidx', () => {
       { start: 0, dur: 2, offset: 710, size: 1000 },
       { start: 2, dur: 3, offset: 1710, size: 500 },
     ])
+  })
+})
+
+describe('InnertubeAdapter retries', () => {
+  const okInfo = {
+    playability_status: { status: 'OK' },
+    basic_info: { title: 'T', duration: 5 },
+    captions: { caption_tracks: [] },
+  }
+  function setup(outcomes: (unknown | Error)[]) {
+    const sessions: number[] = []
+    const logs: string[] = []
+    const sleeps: number[] = []
+    let calls = 0
+    const adapter = new InnertubeAdapter({
+      clients: ['WEB'],
+      createInnertube: async () => {
+        const id = sessions.push(sessions.length) - 1
+        return {
+          getBasicInfo: async () => {
+            const o = outcomes[Math.min(calls++, outcomes.length - 1)]
+            if (o instanceof Error) throw o
+            void id
+            return o
+          },
+        } as never
+      },
+      sleep: async (ms) => void sleeps.push(ms),
+      log: (m) => logs.push(m),
+    })
+    return { adapter, sessions, logs, sleeps, calls: () => calls }
+  }
+
+  it('retries a transient network failure and then succeeds', async () => {
+    const t = setup([new Error('fetch failed'), okInfo])
+    await expect(t.adapter.meta('jNQXAC9IVRw')).resolves.toMatchObject({ title: 'T' })
+    expect(t.calls()).toBe(2)
+    expect(t.sleeps).toEqual([500])
+  })
+
+  it('retries an extractor failure and logs each attempt', async () => {
+    const t = setup([new Error('boom'), new Error('boom'), okInfo])
+    await expect(t.adapter.meta('jNQXAC9IVRw')).resolves.toBeDefined()
+    expect(t.sleeps).toEqual([500, 1500])
+    expect(t.logs).toHaveLength(2)
+    expect(t.logs[0]).toContain('EXTRACTOR_BROKEN')
+    expect(t.logs[0]).toContain('boom')
+  })
+
+  it('gives up with the last error after two retries', async () => {
+    const t = setup([new Error('fetch failed')])
+    await expect(t.adapter.meta('jNQXAC9IVRw')).rejects.toMatchObject({ code: 'NETWORK' })
+    expect(t.calls()).toBe(3)
+  })
+
+  it('does not retry rate limits or missing videos', async () => {
+    const rl = setup([new Error('status code 429')])
+    await expect(rl.adapter.meta('jNQXAC9IVRw')).rejects.toMatchObject({ code: 'RATE_LIMITED' })
+    expect(rl.calls()).toBe(1)
+    const nf = setup([{ playability_status: { status: 'ERROR', reason: 'gone' } }])
+    await expect(nf.adapter.meta('jNQXAC9IVRw')).rejects.toBeInstanceOf(YouTubeError)
+    expect(nf.calls()).toBe(1)
+  })
+
+  it('starts each retry from a fresh Innertube session', async () => {
+    const t = setup([new Error('fetch failed'), okInfo])
+    await t.adapter.meta('jNQXAC9IVRw')
+    expect(t.sessions).toHaveLength(2)
+  })
+
+  it('retries transcript lookups too, but not a missing track', async () => {
+    const t = setup([new Error('fetch failed'), okInfo])
+    await expect(t.adapter.transcript('jNQXAC9IVRw', 'en')).rejects.toMatchObject({
+      code: 'NO_CAPTIONS',
+    })
+    expect(t.calls()).toBe(2)
   })
 })
