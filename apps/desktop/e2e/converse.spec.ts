@@ -24,6 +24,7 @@ test.beforeAll(async () => {
     res.writeHead(200, { 'Content-Type': 'text/event-stream' })
     for (const w of REPLY.split(/(?<= )/))
       res.write(`data: ${JSON.stringify({ choices: [{ delta: { content: w } }] })}\n\n`)
+    res.write(`data: ${JSON.stringify({ choices: [{ delta: {}, finish_reason: 'stop' }] })}\n\n`)
     res.end('data: [DONE]\n\n')
   })
   await new Promise<void>((r) => server.listen(0, '127.0.0.1', r))

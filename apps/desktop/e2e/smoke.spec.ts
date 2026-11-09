@@ -60,9 +60,15 @@ test('renderer is isolated: no node, no raw ipc, only the typed bridge', async (
   expect(probe.process).toBe('undefined')
   expect(probe.ipcRenderer).toBe('undefined')
   expect(probe.keys).toEqual([
+    'agent',
     'app',
+    'contours',
+    'deck',
+    'dictionary',
+    'game',
     'history',
     'inference',
+    'llm',
     'models',
     'ping',
     'player',
