@@ -718,7 +718,7 @@ export function PracticeScreen() {
       </div>
       {s.audio.truncated && (
         <p className="text-muted-foreground text-xs">
-          {t('audio.truncated', { seconds: MAX_CLIP_SECONDS })}
+          {t('audio.truncated', { minutes: MAX_CLIP_SECONDS / 60 })}
         </p>
       )}
       {free && !s.transcribed ? (

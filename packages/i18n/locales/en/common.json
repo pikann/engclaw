@@ -79,7 +79,7 @@
     "import": "Import audio file",
     "drop": "Drop an audio file here",
     "decodeError": "This file could not be read as audio.",
-    "truncated": "Clip trimmed to the first {{seconds}} seconds."
+    "truncated": "Clip trimmed to the first {{minutes}} minutes."
   },
   "pronounce": {
     "feedback": {

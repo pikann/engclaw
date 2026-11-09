@@ -2,7 +2,7 @@ import { expect, it } from 'vitest'
 import { capClip, chunkWithOverlap, MAX_CLIP_SECONDS } from './clip'
 
 const sr = 16000
-it('default cap is 60 s', () => expect(MAX_CLIP_SECONDS).toBe(60))
+it('default cap is 15 min', () => expect(MAX_CLIP_SECONDS).toBe(900))
 
 it('capClip leaves short clips and truncates long ones', () => {
   const short = new Float32Array(sr * 3)
