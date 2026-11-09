@@ -17,6 +17,13 @@ export class RpcFailure extends Error {
   }
 }
 
+/** Exit code as shown to the user: Windows NTSTATUS crash codes (0xC0000005) in hex, others decimal. */
+export function describeExit(code: unknown): string {
+  if (typeof code !== 'number') return 'unknown exit code'
+  if (code < 0 || code > 255) return `exit code 0x${(code >>> 0).toString(16).toUpperCase()}`
+  return `exit code ${code}`
+}
+
 /** Methods that can safely run twice, so a crash mid-request may be retried on a fresh process. */
 const RETRYABLE: ReadonlySet<RpcRequest['method']> = new Set([
   'analyze',
@@ -101,7 +108,7 @@ export class UtilityClient {
         else entry.reject(new RpcFailure(r.code, r.message, r.modelId))
       }
     })
-    child.on('exit', () => {
+    child.on('exit', (code: unknown) => {
       if (this.child === child) this.child = null
       const crashed = [...this.pending].filter(([, entry]) => entry.child === child)
       const mayRetry = this.now() - this.lastRetryAt >= RETRY_WINDOW_MS
@@ -122,7 +129,10 @@ export class UtilityClient {
         } else {
           this.pending.delete(id)
           entry.reject(
-            new RpcFailure('PROCESS_CRASHED', 'the inference process exited unexpectedly'),
+            new RpcFailure(
+              'PROCESS_CRASHED',
+              `the inference process exited unexpectedly (${describeExit(code)})`,
+            ),
           )
         }
       }

@@ -591,6 +591,14 @@ export function PracticeScreen() {
                   : t('practice.error.failed')}
           </p>
           {!missing && <p className="text-muted-foreground">{t('screens.practice.keptAudio')}</p>}
+          {engineStopped && s.error.message && (
+            <p
+              data-testid="practice-error-detail"
+              className="text-muted-foreground text-sm break-words"
+            >
+              {s.error.message}
+            </p>
+          )}
           {missing ? (
             <Button
               size="sm"

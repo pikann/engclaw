@@ -24,6 +24,7 @@ import { PlayerController } from './player'
 import { AudioRangeCache } from './audio-range-cache'
 import { CachedYouTube } from './youtube-cache'
 import { startAutoUpdate } from './updater'
+import { appendInferenceLog } from './inference-log'
 
 const rendererDir = join(__dirname, '../renderer')
 
@@ -74,7 +75,16 @@ function createWindow(): BrowserWindow {
 }
 
 function startUtility(): Electron.UtilityProcess {
-  const child = utilityProcess.fork(join(__dirname, 'utility.js'))
+  // stdio is piped so a native crash leaves its last output in the log file (inference.log).
+  const child = utilityProcess.fork(join(__dirname, 'utility.js'), [], {
+    serviceName: 'engclaw-inference',
+    stdio: 'pipe',
+  })
+  const log = (chunk: Buffer | string): void => appendInferenceLog(String(chunk))
+  child.stdout?.on('data', log)
+  child.stderr?.on('data', log)
+  child.on('spawn', () => log(`spawned pid=${child.pid} ${process.platform}-${process.arch}\n`))
+  child.on('exit', (code) => log(`exited code=${code}\n`))
   child.on('message', (m) => console.log('[utility]', m))
   child.postMessage({ type: 'hello' })
   return child
