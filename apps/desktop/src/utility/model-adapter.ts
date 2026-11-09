@@ -138,19 +138,51 @@ export async function loadModelAdapter(
   }
 }
 
-/** onnxruntime-node backend built from the shared session factory. */
-export async function ortBackend(onnxPath: string): Promise<Backend> {
-  const { ort, session } = await createSession(onnxPath)
+type SessionFactory = typeof createSession
+
+/**
+ * onnxruntime-node backend built from the shared session factory. The preferred providers
+ * (WebGPU first) can fail on some machines at create or run time; both fall back to CPU.
+ */
+export async function ortBackend(
+  onnxPath: string,
+  make: SessionFactory = createSession,
+): Promise<Backend> {
+  let usingCpu = false
+  let current: Awaited<ReturnType<SessionFactory>>
+  try {
+    current = await make(onnxPath)
+  } catch {
+    current = await make(onnxPath, ['cpu'])
+    usingCpu = true
+  }
+
+  const runOn = async (
+    { ort, session }: typeof current,
+    input: Float32Array,
+  ): Promise<Record<string, NamedTensor>> => {
+    const out = await session.run({
+      input_values: new ort.Tensor('float32', input, [1, input.length]),
+    })
+    const named: Record<string, NamedTensor> = {}
+    for (const [name, t] of Object.entries(out))
+      named[name] = { data: t.data as Float32Array, dims: t.dims }
+    return named
+  }
+
   return {
     async run(input) {
-      const out = await session.run({
-        input_values: new ort.Tensor('float32', input, [1, input.length]),
-      })
-      const named: Record<string, NamedTensor> = {}
-      for (const [name, t] of Object.entries(out))
-        named[name] = { data: t.data as Float32Array, dims: t.dims }
-      return named
+      try {
+        return await runOn(current, input)
+      } catch (err) {
+        if (usingCpu) throw err
+        const failed = current
+        current = await make(onnxPath, ['cpu'])
+        usingCpu = true
+        await failed.session.release().catch(() => undefined)
+        return runOn(current, input)
+      }
     },
-    dispose: () => session.release(),
+    dispose: () => current.session.release(),
   }
 }

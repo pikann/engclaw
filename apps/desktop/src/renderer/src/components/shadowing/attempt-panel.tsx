@@ -139,6 +139,14 @@ export function AttemptPanel({
                   : 'screens.shadowing.attempt.failed',
             )}
           </p>
+          {state.detail && (
+            <p
+              data-testid="shadowing-attempt-error-detail"
+              className="text-muted-foreground text-sm break-words"
+            >
+              {state.detail}
+            </p>
+          )}
           {state.kind === 'model' ? (
             <DownloadModelsButton testId="shadowing-download-models" onClick={onDownloadModels} />
           ) : (

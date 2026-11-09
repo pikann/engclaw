@@ -73,6 +73,19 @@ describe('UtilityClient', () => {
     await expect(second.result).resolves.toBe(1)
   })
 
+  it('puts the exit code in the crash message (Windows codes in hex)', async () => {
+    const { client, children } = setup()
+    const a = client.call('intonation', {})
+    children[0]!.emit('exit', 3221225477)
+    await expect(a.result).rejects.toMatchObject({
+      code: 'PROCESS_CRASHED',
+      message: expect.stringContaining('0xC0000005'),
+    })
+    const b = client.call('intonation', {})
+    children[1]!.emit('exit', 139)
+    await expect(b.result).rejects.toMatchObject({ message: expect.stringContaining('139') })
+  })
+
   it('a late exit of an old process does not fail calls on the new one', async () => {
     const { client, children } = setup()
     client.call('intonation', {}).result.catch(() => undefined)
