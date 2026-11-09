@@ -52,7 +52,7 @@ export function TargetAudioActions({
           )}
           {t('reference.hear')}
         </Button>
-        <div className="ml-auto min-h-8 min-w-36 text-right" data-testid="ask-slot">
+        <div className="min-h-8" data-testid="ask-slot">
           {ask}
         </div>
       </div>
