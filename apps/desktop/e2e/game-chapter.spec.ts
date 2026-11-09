@@ -1,10 +1,5 @@
-import {
-  _electron as electron,
-  expect,
-  test,
-  type ElectronApplication,
-  type Page,
-} from '@playwright/test'
+import { expect, test, type ElectronApplication, type Page } from '@playwright/test'
+import { electron } from './electron'
 import axe from 'axe-core'
 import { mkdtempSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'

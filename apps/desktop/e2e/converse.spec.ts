@@ -1,4 +1,5 @@
-import { _electron as electron, expect, test, type ElectronApplication } from '@playwright/test'
+import { expect, test, type ElectronApplication } from '@playwright/test'
+import { electron } from './electron'
 import type { EngclawApi } from '@engclaw/ipc-contract'
 import { cpSync, mkdtempSync } from 'node:fs'
 import { createServer, type Server } from 'node:http'
@@ -39,19 +40,6 @@ function freshUserData(): string {
 }
 
 async function launch(userData: string): Promise<ElectronApplication> {
-  // The Electron binary is occasionally still locked by the previous run (ETXTBSY / "used by
-  // another process"); retry the spawn a few times.
-  for (let attempt = 1; ; attempt++) {
-    try {
-      return await launchOnce(userData)
-    } catch (e) {
-      if (attempt >= 4 || !/ETXTBSY|used by another process/.test(String(e))) throw e
-      await new Promise((r) => setTimeout(r, 1000 * attempt))
-    }
-  }
-}
-
-function launchOnce(userData: string): Promise<ElectronApplication> {
   return electron.launch({
     args: [
       join(__dirname, '..'),

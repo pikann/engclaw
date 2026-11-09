@@ -1,4 +1,5 @@
-import { _electron as electron, expect, test } from '@playwright/test'
+import { expect, test } from '@playwright/test'
+import { electron } from './electron'
 import axe from 'axe-core'
 import { join } from 'node:path'
 import { mkdtempSync } from 'node:fs'

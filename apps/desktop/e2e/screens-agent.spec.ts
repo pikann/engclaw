@@ -1,4 +1,5 @@
-import { _electron as electron, expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
+import { electron } from './electron'
 import axe from 'axe-core'
 import { join } from 'node:path'
 

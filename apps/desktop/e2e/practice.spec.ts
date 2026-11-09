@@ -1,4 +1,5 @@
-import { _electron as electron, expect, test, type ElectronApplication } from '@playwright/test'
+import { expect, test, type ElectronApplication } from '@playwright/test'
+import { electron } from './electron'
 import { cpSync, mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
