@@ -15,7 +15,17 @@ export interface InnertubeAdapterOptions {
   clients?: Client[]
   /** Injectable for tests. */
   fetch?: typeof fetch
+  /** Injectable for tests. */
+  createInnertube?: () => Promise<Innertube>
+  /** Injectable for tests. */
+  sleep?: (ms: number) => Promise<void>
+  /** Receives one line per failed lookup attempt (code and message), so a bad network can be diagnosed. */
+  log?: (line: string) => void
 }
+
+/** Waits before the 1st and 2nd retry of a lookup that failed for a transient reason. */
+const RETRY_DELAYS_MS = [500, 1500]
+const RETRYABLE = new Set(['NETWORK', 'EXTRACTOR_BROKEN'])
 
 function classify(e: unknown): YouTubeError {
   if (e instanceof YouTubeError) return e
@@ -35,15 +45,44 @@ export class InnertubeAdapter implements YouTubeAdapter {
   private readonly streams = new Map<string, { at: number; stream: Promise<AudioStream> }>()
   private readonly clients: Client[]
   private readonly fetchFn: typeof fetch
+  private readonly create: () => Promise<Innertube>
+  private readonly sleep: (ms: number) => Promise<void>
+  private readonly log: (line: string) => void
 
   constructor(opts: InnertubeAdapterOptions = {}) {
     this.clients = opts.clients ?? ['MWEB', 'IOS', 'WEB']
     this.fetchFn = opts.fetch ?? fetch
+    this.create = opts.createInnertube ?? (() => Innertube.create({ cache: new UniversalCache(false) }))
+    this.sleep = opts.sleep ?? ((ms) => new Promise((r) => setTimeout(r, ms)))
+    this.log = opts.log ?? (() => undefined)
   }
 
   private innertube(): Promise<Innertube> {
-    this.yt ??= Innertube.create({ cache: new UniversalCache(false) })
+    this.yt ??= this.create()
     return this.yt
+  }
+
+  /**
+   * Runs a lookup, retrying transient failures with a fresh Innertube session each time (a failed or
+   * stale session is never reused). Rate limits and "no such video/captions" are reported at once.
+   */
+  private async withRetry<T>(what: string, fn: () => Promise<T>): Promise<T> {
+    for (let attempt = 0; ; attempt++) {
+      try {
+        return await fn()
+      } catch (e) {
+        const err = classify(e)
+        this.yt = null
+        const delay = RETRY_DELAYS_MS[attempt]
+        this.log(
+          `youtube ${what} attempt ${attempt + 1} failed: ${err.code}: ${err.message}${
+            delay === undefined || !RETRYABLE.has(err.code) ? '' : ` (retrying in ${delay} ms)`
+          }\n`,
+        )
+        if (delay === undefined || !RETRYABLE.has(err.code)) throw err
+        await this.sleep(delay)
+      }
+    }
   }
 
   private async info(
@@ -69,7 +108,11 @@ export class InnertubeAdapter implements YouTubeAdapter {
     throw classify(last)
   }
 
-  async meta(videoId: string): Promise<VideoMeta> {
+  meta(videoId: string): Promise<VideoMeta> {
+    return this.withRetry('meta', () => this.fetchMeta(videoId))
+  }
+
+  private async fetchMeta(videoId: string): Promise<VideoMeta> {
     const info = await this.info(videoId)
     return {
       videoId,
@@ -82,7 +125,11 @@ export class InnertubeAdapter implements YouTubeAdapter {
     }
   }
 
-  async transcript(videoId: string, lang: string): Promise<TranscriptCue[]> {
+  transcript(videoId: string, lang: string): Promise<TranscriptCue[]> {
+    return this.withRetry('transcript', () => this.fetchTranscript(videoId, lang))
+  }
+
+  private async fetchTranscript(videoId: string, lang: string): Promise<TranscriptCue[]> {
     const info = await this.info(videoId)
     const track = info.captions?.caption_tracks?.find((t) => t.language_code === lang)
     if (!track) throw new YouTubeError('NO_CAPTIONS', `No ${lang} captions`)

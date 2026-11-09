@@ -113,7 +113,7 @@ function runSmoke(child: Electron.UtilityProcess): void {
   setTimeout(() => app.exit(3), 90_000)
 }
 
-const youtube = new InnertubeAdapter()
+const youtube = new InnertubeAdapter({ log: appendInferenceLog })
 
 async function yt<T>(fn: () => Promise<T>): Promise<YouTubeResult<T>> {
   try {
