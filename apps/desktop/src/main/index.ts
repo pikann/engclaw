@@ -59,6 +59,10 @@ function createWindow(): BrowserWindow {
     },
   })
   if (!headless) win.once('ready-to-show', () => win.show())
+  if (process.env['ENGCLAW_PERF'])
+    win.once('ready-to-show', () =>
+      console.log(`PERF cold-start-ms=${Math.round(process.uptime() * 1000)}`),
+    )
   hardenWindow(win)
   if (process.env['ELECTRON_RENDERER_URL']) void win.loadURL(process.env['ELECTRON_RENDERER_URL'])
   else void win.loadURL(`${APP_ORIGIN}/`)

@@ -71,4 +71,58 @@ describe('loadModelAdapter', () => {
     write('preprocessor_config.json', {})
     await expect(loadModelAdapter(dir, fakeBackend().create)).rejects.toThrow(/vocab/)
   })
+
+  describe('long audio', () => {
+    const SR = 16000
+    const ramp = (seconds: number) => Float32Array.from({ length: seconds * SR }, (_, i) => i)
+    // One logit/hidden value per frame = the frame's global index, so a correct merge is 0..N-1.
+    function framewise() {
+      const calls: number[] = []
+      const backend: Backend = {
+        async run(input) {
+          calls.push(input.length)
+          const start = input[0]! / 320
+          const n = Math.floor(input.length / 320)
+          const logits = new Float32Array(n * 3)
+          const hidden = new Float32Array(n * 2)
+          for (let f = 0; f < n; f++) {
+            logits[f * 3] = start + f
+            hidden[f * 2] = start + f
+          }
+          return {
+            logits: { data: logits, dims: [1, n, 3] },
+            hidden_states: { data: hidden, dims: [1, n, 2] },
+          }
+        },
+        dispose: async () => undefined,
+      }
+      return { calls, create: async () => backend }
+    }
+    const adapter = async (f: ReturnType<typeof framewise>) => {
+      write('preprocessor_config.json', { do_normalize: false, sampling_rate: SR })
+      write('vocab.json', { '<pad>': 0, a: 1, b: 2 })
+      return loadModelAdapter(dir, f.create)
+    }
+
+    it('runs clips of up to 30 s in a single pass', async () => {
+      const f = framewise()
+      const out = await (await adapter(f)).run(ramp(30))
+      expect(f.calls).toEqual([30 * SR])
+      expect(out.frames).toBe(1500)
+    })
+
+    it('splits longer clips into 30 s windows with 2 s overlap and merges them without gaps or repeats', async () => {
+      const f = framewise()
+      const out = await (await adapter(f)).run(ramp(60))
+      expect(f.calls).toEqual([30 * SR, 30 * SR, 4 * SR])
+      expect(out.frames).toBe(Math.floor((60 * SR) / 320))
+      expect(Array.from({ length: out.frames }, (_, i) => out.logits[i * 3])).toEqual(
+        Array.from({ length: out.frames }, (_, i) => i),
+      )
+      expect(Array.from({ length: out.frames }, (_, i) => out.hidden![i * 2])).toEqual(
+        Array.from({ length: out.frames }, (_, i) => i),
+      )
+      expect(out.hiddenSize).toBe(2)
+    })
+  })
 })

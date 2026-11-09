@@ -1,0 +1,6 @@
+{
+  "installerMaxMB": 250,
+  "coldStartMaxMs": 3000,
+  "utilityIdleRssMaxMB": 300,
+  "clip5sEndToEndMaxMs": 3000
+}

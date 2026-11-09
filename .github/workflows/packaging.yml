@@ -9,6 +9,7 @@ on:
       - 'apps/desktop/package.json'
       - 'apps/desktop/src/utility/**'
       - 'scripts/espeak/**'
+      - 'scripts/perf/**'
       - '.github/workflows/packaging.yml'
 
 env:
@@ -35,7 +36,9 @@ jobs:
       - run: bunx electron-builder --linux AppImage deb --x64
       - name: Installer sizes
         shell: bash
-        run: find release -maxdepth 1 -type f \( -name '*.dmg' -o -name '*.exe' -o -name '*.AppImage' -o -name '*.deb' \) -exec ls -l {} +
+        run: |
+          find release -maxdepth 1 -type f \( -name '*.dmg' -o -name '*.exe' -o -name '*.AppImage' -o -name '*.deb' \) -exec ls -l {} +
+          bun ../../scripts/perf/installer-size.ts release
       - name: Smoke test
         run: ENGCLAW_SMOKE=1 xvfb-run --auto-servernum "$(find release/linux-unpacked -maxdepth 1 -type f -perm -u+x ! -name "*.so*" ! -name chrome_crashpad_handler ! -name chrome-sandbox | head -1)" --no-sandbox
       - uses: actions/upload-artifact@v7

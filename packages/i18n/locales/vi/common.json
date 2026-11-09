@@ -106,7 +106,10 @@
     "review": "Nghe lại bản ghi ({{time}})",
     "analyze": "Phân tích",
     "retry": "Thử lại",
+    "restartEngine": "Khởi động lại và thử lại",
     "error": {
+      "clipTooLong": "Bản ghi dài hơn 15 phút. Hãy ghi đoạn ngắn hơn rồi thử lại.",
+      "engineStopped": "Bộ máy phân tích đã dừng đột ngột. Hãy khởi động lại và thử lại.",
       "modelMissing": "Chưa tải các mô hình phát âm. Hãy tải trong mục Mô hình AI rồi thử lại.",
       "failed": "Phân tích thất bại. Hãy thử lại."
     },
