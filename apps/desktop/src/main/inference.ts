@@ -59,6 +59,7 @@ export function registerInferenceHandlers(
         if (requestId) active.delete(requestId)
       }
     } catch (e) {
+      console.error(`[inference:${method}]`, e)
       if (e instanceof RpcFailure) return fail(e.code, e.message, e.modelId)
       return fail('FAILED', e instanceof Error ? e.message : String(e))
     }
