@@ -8,13 +8,7 @@ You need:
 
 - [Bun](https://bun.sh) (installs dependencies and runs scripts).
 - Git.
-- `espeak-ng` for running scoring locally: either install it with your package manager (`brew install espeak-ng`, `apt install espeak-ng`) or build the exact pinned copy the installers ship (needs CMake and a C compiler; on Windows use an MSYS2 MINGW64 shell):
-
-```bash
-./scripts/espeak/build.sh
-```
-
-This stages `apps/desktop/resources/espeak-ng/`. The app looks for `ESPEAK_NG`, then that folder, then common install locations, then `PATH`. You only need it to run real scoring; the unit tests do not need it.
+- CMake and a C compiler (on Windows, an MSYS2 MINGW64 shell). The app bundles its own pinned `espeak-ng`, so players install nothing. `bun run dev`, `package` and `dist` build and stage it into `apps/desktop/resources/espeak-ng/` automatically the first time (`./scripts/espeak/build.sh` does the same by hand; `FORCE=1` rebuilds). The app looks for `ESPEAK_NG`, then that folder, then common install locations, then `PATH`. The unit tests do not need it.
 
 Supported development machines are macOS on Apple Silicon, Windows x64 and Linux x64 (the `onnxruntime-node` binaries limit this).
 
