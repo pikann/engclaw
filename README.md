@@ -5,8 +5,7 @@
 <h1 align="center">Engclaw</h1>
 
 <p align="center">
-  <em>I couldn't afford an English course, so I built one that listens to me instead.<br>
-  Turns out a very patient robot never sighs at my "th". It is totally free and open source, so it won't sigh at your wallet either.</em>
+  <em>Couldn't afford an English course, so I built one. Free, open source, and it never sighs at my "th".</em>
 </p>
 
 <p align="center">
