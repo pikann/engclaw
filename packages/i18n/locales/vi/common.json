@@ -239,6 +239,32 @@
         "BAD_RESPONSE": "Máy chủ có phản hồi nhưng không giống một API tương thích OpenAI.",
         "SECURE_STORAGE_UNAVAILABLE": "Hệ thống này không thể mã hóa bí mật nên không lưu được khóa và header."
       }
+    },
+    "privacy": "Quyền riêng tư",
+    "licenses": "Giấy phép",
+    "privacyPage": {
+      "intro": "Engclaw không có tài khoản, không thu thập dữ liệu sử dụng hay phân tích. Bản ghi, lịch sử và cài đặt của bạn chỉ nằm trên máy tính này.",
+      "localTitle": "Ở lại trên thiết bị của bạn",
+      "localBody": "Nhận dạng giọng nói, chấm điểm phát âm và chuyển văn bản thành giọng nói đều chạy cục bộ. Âm thanh của bạn không bao giờ được tải lên.",
+      "leavesTitle": "Dữ liệu có thể rời khỏi thiết bị",
+      "leavesHint": "Chỉ những kết nối dưới đây được thực hiện, và chỉ vì lý do nêu ra.",
+      "hf": "Hugging Face",
+      "hfBody": "Tải mô hình giọng nói khi bạn chọn cài đặt. Không gửi dữ liệu cá nhân.",
+      "youtube": "YouTube",
+      "youtubeBody": "Tải video bạn mở để luyện nhại giọng cùng phụ đề. YouTube có thể áp dụng theo dõi riêng trong trình phát của họ.",
+      "github": "GitHub",
+      "githubBody": "Kiểm tra bản phát hành mới và tải bản cập nhật. Tắt tại Chung > Kiểm tra cập nhật.",
+      "wikimedia": "Wikimedia Commons",
+      "wikimediaBody": "Lấy hình minh họa cho từ trong từ điển. Tắt tại Chung > Hình minh họa từ điển.",
+      "llm": "Nhà cung cấp AI do bạn cấu hình",
+      "llmBody": "Nếu bạn thiết lập nhà cung cấp AI cho trợ lý hội thoại, tin nhắn của bạn chỉ được gửi tới nhà cung cấp đó.",
+      "deleteTitle": "Quyền kiểm soát của bạn",
+      "deleteBody": "Bạn có thể xóa mọi thứ Engclaw lưu trong mục Dữ liệu của bạn bất kỳ lúc nào."
+    },
+    "licensesPage": {
+      "intro": "Engclaw là phần mềm tự do theo giấy phép GPL-3.0-or-later, xây dựng trên các gói mã nguồn mở bên dưới.",
+      "source": "Mã nguồn và toàn văn giấy phép",
+      "list": "Gói của bên thứ ba"
     }
   },
   "ds": {
@@ -1032,5 +1058,6 @@
       "NOT_FOUND": "Cuộc trò chuyện này không còn nữa.",
       "FAILED": "Đã xảy ra lỗi. Hãy thử lại."
     }
-  }
+  },
+  "skipToContent": "Bỏ qua tới nội dung chính"
 }
