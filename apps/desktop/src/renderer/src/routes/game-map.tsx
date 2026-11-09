@@ -3,11 +3,13 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { ChevronDown, ChevronUp, List, Map as MapIcon, Play } from 'lucide-react'
 import type { GameChapter, GameMap, GameProgressEntry, GameWorld } from '@engclaw/ipc-contract'
+import { ChapterAsk } from '@/components/chapter-ask'
 import { ExamplesPanel, TargetAudioActions } from '@/components/game-learning-aids'
 import { Button } from '@/components/ui/button'
 import { ClickableText } from '@/components/ui/clickable-text'
 import { ProgressSummary, StarRating } from '@/components/ui/game'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { useChapterAsk } from '@/lib/use-ask-agent'
 import { MAX_STARS, clampStars, type NodeState } from '@/lib/game'
 import {
   MAP_MEMORY_KEY,
@@ -436,6 +438,24 @@ function ListView({
   )
 }
 
+const NO_ATTEMPTS: [] = []
+
+/** "Ask the agent" for the previewed chapter: there are no attempts in the preview. */
+function PreviewAsk({ chapter }: { chapter: NonNullable<GameChapter['chapter']> }) {
+  const target = useMemo(
+    () => ({
+      text: chapter.text,
+      type: chapter.type,
+      ipa: chapter.ipa,
+      meaning: chapter.meaning,
+      examples: chapter.examples,
+    }),
+    [chapter],
+  )
+  const ask = useChapterAsk(target, () => NO_ATTEMPTS)
+  return <ChapterAsk {...ask} text={chapter.text} hasAttempts={false} />
+}
+
 function Preview({
   order,
   progress,
@@ -498,7 +518,7 @@ function Preview({
             <dt className="text-muted-foreground">{t('screens.game.attempts')}</dt>
             <dd className="tabular-nums">{entry?.attempts ?? 0}</dd>
           </dl>
-          <TargetAudioActions text={chapter.text} />
+          <TargetAudioActions text={chapter.text} ask={<PreviewAsk chapter={chapter} />} />
           <ExamplesPanel examples={chapter.examples} />
           <div className="space-y-2">
             <Button asChild data-testid="preview-play">

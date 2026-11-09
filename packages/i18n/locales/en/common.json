@@ -802,6 +802,13 @@
       "askReply": "“{{target}}” — here is what it means and how to use it.",
       "askHint": "Ask about the whole target. Your run is not affected.",
       "askMic": "Speak to the agent",
+      "askPrompt": {
+        "meaning": "What does it mean?",
+        "usage": "When do I use it?",
+        "example": "Give me another example",
+        "pronounce": "How do I pronounce it?",
+        "mistakes": "Why did I get it wrong?"
+      },
       "closeAsk": "Close",
       "openConverse": "Open in Converse",
       "noProviderHint": "Set up an AI provider in Settings to ask the agent.",

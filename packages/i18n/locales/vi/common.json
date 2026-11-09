@@ -802,6 +802,13 @@
       "askReply": "“{{target}}” — đây là nghĩa và cách dùng.",
       "askHint": "Hỏi về toàn bộ mục tiêu. Lượt chơi của bạn không bị ảnh hưởng.",
       "askMic": "Nói với trợ lý",
+      "askPrompt": {
+        "meaning": "Nghĩa là gì?",
+        "usage": "Khi nào dùng?",
+        "example": "Cho tôi thêm một ví dụ",
+        "pronounce": "Phát âm thế nào?",
+        "mistakes": "Vì sao tôi phát âm sai?"
+      },
       "closeAsk": "Đóng",
       "openConverse": "Mở trong Hội thoại",
       "noProviderHint": "Hãy thiết lập nhà cung cấp AI trong Cài đặt để hỏi trợ lý.",

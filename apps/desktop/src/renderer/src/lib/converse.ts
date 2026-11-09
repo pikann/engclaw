@@ -1,3 +1,4 @@
+import { visibleUserText } from './ask-agent'
 import type { AgentCard, AgentErrorCode, AgentMessage } from '@engclaw/ipc-contract'
 
 export type ConverseError = AgentErrorCode | 'FAILED'
@@ -74,7 +75,7 @@ export function converseReducer(s: ConverseState, e: ConverseEvent): ConverseSta
         turn: 'thinking',
         error: null,
         errorDetail: null,
-        messages: [...s.messages, { id: localId(), role: 'user', text: e.text }],
+        messages: [...s.messages, { id: localId(), role: 'user', text: visibleUserText(e.text) }],
       }
     case 'sent':
       return {
@@ -143,7 +144,7 @@ export function converseReducer(s: ConverseState, e: ConverseEvent): ConverseSta
         messages: e.messages.map((m) => ({
           id: `m${m.id}`,
           role: m.role,
-          text: m.text,
+          text: m.role === 'user' ? visibleUserText(m.text) : m.text,
           cards: m.cards,
         })),
       }

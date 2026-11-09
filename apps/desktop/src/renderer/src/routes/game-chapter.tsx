@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useBlocker, useNavigate, useParams } from 'react-router'
 import { AlertDialog as AlertDialogPrimitive } from 'radix-ui'
@@ -17,6 +17,7 @@ import {
   type ChapterRun,
 } from '@engclaw/game'
 import type { GameChapter, GameProgressEntry, PronunciationResult } from '@engclaw/ipc-contract'
+import { ChapterAsk } from '@/components/chapter-ask'
 import { ExamplesPanel, TargetAudioActions } from '@/components/game-learning-aids'
 import { ModelDownloadDialog } from '@/components/model-download-dialog'
 import { Alert } from '@/components/ui/alert'
@@ -38,7 +39,14 @@ import {
   type MicErrorReason,
 } from '@/lib/audio'
 import { formatTimer } from '@/lib/practice'
+import { summarizeAttempt, type ChapterAttemptSummary } from '@/lib/ask-agent'
+import {
+  clearChapterSnapshot,
+  peekChapterSnapshot,
+  saveChapterSnapshot,
+} from '@/lib/chapter-session'
 import { prefetchSpeech } from '@/lib/speech'
+import { useChapterAsk } from '@/lib/use-ask-agent'
 
 type Chapter = NonNullable<GameChapter['chapter']>
 type Phase = 'idle' | 'recording' | 'analyzing'
@@ -125,15 +133,17 @@ function ChapterPlay({
 }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [run, setRun] = useState<ChapterRun>(newRun)
-  const [last, setLast] = useState<Last | null>(null)
+  const restored = useRef(peekChapterSnapshot(chapter.id)).current
+  const [run, setRun] = useState<ChapterRun>(restored?.run ?? newRun)
+  const [last, setLast] = useState<Last | null>(restored?.last ?? null)
+  const [summaries, setSummaries] = useState<ChapterAttemptSummary[]>(restored?.summaries ?? [])
   const [phase, setPhase] = useState<Phase>('idle')
   const [seconds, setSeconds] = useState(0)
   const [level, setLevel] = useState(0)
   const [mic, setMic] = useState<{ reason: MicErrorReason; message: string } | null>(null)
   const [failed, setFailed] = useState(false)
-  const [best, setBest] = useState(storedBest)
-  const [outcome, setOutcome] = useState<Outcome | null>(null)
+  const [best, setBest] = useState(restored?.best ?? storedBest)
+  const [outcome, setOutcome] = useState<Outcome | null>(restored?.outcome ?? null)
   const [downloadOpen, setDownloadOpen] = useState(false)
   const playing = useRef<{ stop: () => void } | null>(null)
   const recorder = useRef<MicRecorder | null>(null)
@@ -143,10 +153,33 @@ function ChapterPlay({
   const passed = isPassed(run)
   const correct = correctCount(run)
   const result = runResult(run)
+  const leavingForAsk = useRef(false)
+  const latest = useRef({ run, last, summaries, best, outcome })
+  latest.current = { run, last, summaries, best, outcome }
+
+  useEffect(() => clearChapterSnapshot(chapter.id), [chapter.id])
+
+  const saveForAsk = useCallback(() => {
+    leavingForAsk.current = true
+    playing.current?.stop()
+    saveChapterSnapshot(chapter.id, latest.current)
+  }, [chapter.id])
+  const askTarget = useMemo(
+    () => ({
+      text: chapter.text,
+      type: chapter.type,
+      ipa: chapter.ipa,
+      meaning: chapter.meaning,
+      examples: chapter.examples,
+    }),
+    [chapter],
+  )
+  const getAttempts = useCallback(() => latest.current.summaries, [])
+  const ask = useChapterAsk(askTarget, getAttempts, saveForAsk)
 
   useEffect(() => {
     const result = runResult(run)
-    if (!result) return
+    if (!result || outcome) return
     void window.engclaw.game
       .record({ order: chapter.order, ...result })
       .then((o) => {
@@ -174,7 +207,7 @@ function ChapterPlay({
     }
   }, [chapter.order])
 
-  const blocker = useBlocker(() => totalAttempts(run) > 0 && !passed)
+  const blocker = useBlocker(() => !leavingForAsk.current && totalAttempts(run) > 0 && !passed)
 
   useEffect(() => {
     if (phase !== 'recording') return
@@ -211,6 +244,7 @@ function ChapterPlay({
           pending.current = null
           const attempt = evaluateAttempt(res.value)
           setLast({ attempt, result: res.value, samples })
+          setSummaries((s) => [...s, summarizeAttempt(attempt, res.value)])
           setRun((r) => addAttempt(r, attempt))
           void saveToHistory(chapter.text, res.value, samples)
         } else if (res.code === 'MODEL_MISSING') setDownloadOpen(true)
@@ -327,7 +361,18 @@ function ChapterPlay({
             {chapter.type !== 'word' && (
               <p className="text-muted-foreground text-xs">{t('screens.game.tapWord')}</p>
             )}
-            <TargetAudioActions text={chapter.text} silenced={phase === 'recording'} />
+            <TargetAudioActions
+              text={chapter.text}
+              silenced={phase === 'recording'}
+              ask={
+                <ChapterAsk
+                  {...ask}
+                  text={chapter.text}
+                  hasAttempts={summaries.length > 0}
+                  busy={phase !== 'idle'}
+                />
+              }
+            />
           </div>
           <div className="bg-card rounded-xl border border-input p-5">
             <ExamplesPanel examples={chapter.examples} silenced={phase === 'recording'} />
