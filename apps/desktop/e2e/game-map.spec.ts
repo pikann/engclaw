@@ -1,10 +1,5 @@
-import {
-  _electron as electron,
-  expect,
-  test,
-  type ElectronApplication,
-  type Page,
-} from '@playwright/test'
+import { expect, test, type ElectronApplication, type Page } from '@playwright/test'
+import { electron } from './electron'
 import type { EngclawApi } from '@engclaw/ipc-contract'
 import axe from 'axe-core'
 import { mkdtempSync } from 'node:fs'
@@ -88,13 +83,18 @@ test('selected world and scroll position are remembered', async () => {
   await expect(page.getByTestId('world-title')).toContainText('12')
   await expect(page.getByTestId('game-node-1')).toHaveCount(0)
   await expect(page.locator('[data-testid^="game-node-"]').first()).toBeVisible()
+  // The position is remembered as a road row, so compare the centre's distance from the bottom of
+  // the road, which survives the content/viewport height changing between visits.
+  const fromBottom = (): Promise<number> =>
+    page
+      .getByTestId('road-map')
+      .evaluate((el) => el.scrollHeight - el.scrollTop - el.clientHeight / 2)
   await page.getByTestId('road-map').evaluate((el) => (el.scrollTop = 300))
+  const saved = await fromBottom()
   await page.waitForTimeout(500)
   await open()
   await expect(page.getByTestId('world-title')).toContainText('12')
-  await expect
-    .poll(() => page.getByTestId('road-map').evaluate((el) => Math.abs(el.scrollTop - 300) <= 2))
-    .toBe(true)
+  await expect.poll(async () => Math.abs((await fromBottom()) - saved) <= 2).toBe(true)
 })
 
 test('keyboard navigation and the list view are an accessible alternative', async () => {

@@ -1,4 +1,5 @@
-import { _electron as electron, expect, test, type ElectronApplication } from '@playwright/test'
+import { expect, test, type ElectronApplication } from '@playwright/test'
+import { electron } from './electron'
 import { createHash } from 'node:crypto'
 import { existsSync, mkdtempSync, writeFileSync } from 'node:fs'
 import { createServer, type Server } from 'node:http'
