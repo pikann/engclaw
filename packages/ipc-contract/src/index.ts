@@ -122,7 +122,7 @@ export const LanguageInfo = z.object({
 })
 export type LanguageInfo = z.infer<typeof LanguageInfo>
 
-/** 16 kHz mono float32 PCM, at most 60 s. */
+/** 16 kHz mono float32 PCM, at most 15 min. */
 const Pcm16k = z.custom<Float32Array>((v) => v instanceof Float32Array && v.length <= 16000 * 60)
 const RequestId = z.string().min(1).max(64)
 const LanguageCode = z.string().min(2).max(16)

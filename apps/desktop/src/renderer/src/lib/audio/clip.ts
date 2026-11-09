@@ -1,6 +1,6 @@
 /** Clip cap and overlapping chunking for CTC inference on long audio. */
 
-export const MAX_CLIP_SECONDS = 60
+export const MAX_CLIP_SECONDS = 900
 
 export function capClip(
   samples: Float32Array,
