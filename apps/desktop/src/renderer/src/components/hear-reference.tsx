@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Volume2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { DownloadModelsButton, useModelDownload } from '@/components/download-models'
 import { playPcm } from '@/lib/audio'
 
 type State = 'idle' | 'loading' | 'playing'
@@ -16,7 +17,7 @@ export function HearReference({
 }) {
   const { t } = useTranslation()
   const [state, setState] = useState<State>('idle')
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<'modelMissing' | 'failed' | null>(null)
   const playing = useRef<{ stop: () => void } | null>(null)
 
   const onClick = async (): Promise<void> => {
@@ -26,7 +27,7 @@ export function HearReference({
     try {
       const res = await window.engclaw.tts.speak({ text })
       if (!res.ok) {
-        setError(t(res.code === 'MODEL_MISSING' ? 'reference.modelMissing' : 'reference.failed'))
+        setError(res.code === 'MODEL_MISSING' ? 'modelMissing' : 'failed')
         return setState('idle')
       }
       const handle = playPcm(res.samples, res.sampleRate)
@@ -34,12 +35,14 @@ export function HearReference({
       setState('playing')
       await handle.done
     } catch {
-      setError(t('reference.failed'))
+      setError('failed')
     } finally {
       playing.current = null
       setState('idle')
     }
   }
+
+  const download = useModelDownload(() => void onClick())
 
   return (
     <div className="space-y-1">
@@ -59,9 +62,13 @@ export function HearReference({
       </Button>
       {error && (
         <p role="alert" className="text-sm text-destructive" data-testid="hear-reference-error">
-          {error}
+          {t(error === 'modelMissing' ? 'reference.modelMissing' : 'reference.failed')}
         </p>
       )}
+      {error === 'modelMissing' && (
+        <DownloadModelsButton testId="hear-reference-download" onClick={download.open} />
+      )}
+      {download.dialog}
     </div>
   )
 }

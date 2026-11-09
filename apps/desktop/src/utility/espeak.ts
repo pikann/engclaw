@@ -66,7 +66,15 @@ export class EspeakProcess implements PhonemizeBackend {
       this.child = null
       this.fail(err)
     }
-    child.on('error', onGone)
+    child.on('error', (err: NodeJS.ErrnoException) =>
+      onGone(
+        err.code === 'ENOENT'
+          ? new Error(
+              `espeak-ng was not found (${this.options.binary}). Install it (brew install espeak-ng) or run scripts/espeak/build.sh.`,
+            )
+          : err,
+      ),
+    )
     child.on('exit', (code) => onGone(new Error(`espeak-ng exited (${code})`)))
     child.stdin.on('error', onGone)
     return child

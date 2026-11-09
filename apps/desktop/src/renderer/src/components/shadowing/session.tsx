@@ -14,6 +14,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { useTranslation } from 'react-i18next'
 import { DictationActions, DictationRail, DictationSheet } from '@/components/shadowing/dictation'
 import { ResultSidebar, ResultSidebarBody } from '@/components/result-sidebar'
+import { useModelDownload } from '@/components/download-models'
 import { AttemptPanel } from '@/components/shadowing/attempt-panel'
 import { PlayerSurface } from '@/components/shadowing/player-surface'
 import { SentenceWords } from '@/components/shadowing/sentence-words'
@@ -133,6 +134,7 @@ export function ShadowingSession({
     if (loop.mode === 'playing' || loop.mode === 'waiting') dispatch({ type: 'toggle' })
   }, [loop.mode, dispatch])
   const attempt = useSegmentAttempt(videoId, segments, index, pauseForRecording)
+  const modelDownload = useModelDownload(attempt.retry)
   const [stageRef, stage] = useContentSize()
   const toggleRecord = useCallback(() => {
     setRailOpen(true)
@@ -694,11 +696,13 @@ export function ShadowingSession({
                 onToggleRecord={toggleRecord}
                 onPlay={attempt.play}
                 onRetry={attempt.retry}
+                onDownloadModels={modelDownload.open}
               />
             </ResultSidebarBody>
           </ResultSidebar>
         )}
       </div>
+      {modelDownload.dialog}
     </div>
   )
 }

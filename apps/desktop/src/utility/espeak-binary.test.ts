@@ -14,6 +14,16 @@ describe('resolveEspeak', () => {
     expect(posix(got.binary)).toMatch(/^\/res\/espeak-ng\/espeak-ng(\.exe)?$/)
     expect(posix(got.dataPath)).toBe('/res/espeak-ng')
   })
+  it('finds the copy staged in a source checkout when running unpackaged', () => {
+    const got = resolveEspeak(
+      {},
+      '/electron/res',
+      (p) => posix(p)!.startsWith('/repo/resources/espeak-ng/'),
+      '/repo/resources',
+    )
+    expect(posix(got.binary)).toMatch(/^\/repo\/resources\/espeak-ng\/espeak-ng(\.exe)?$/)
+    expect(posix(got.dataPath)).toBe('/repo/resources/espeak-ng')
+  })
   it('falls back to PATH when nothing is found', () => {
     expect(resolveEspeak({}, '/res', () => false)).toEqual({
       binary: 'espeak-ng',

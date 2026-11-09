@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { aggregateProgress, modelCard, spaceProblem } from './model-download'
+import { aggregateProgress, footerModelsStatus, modelCard, spaceProblem } from './model-download'
 
 const models = [
   { id: 'a', sizeBytes: 600 },
@@ -58,5 +58,23 @@ describe('modelCard', () => {
     })
     expect(c.status).toBe('downloading')
     expect(c.aggregate.percent).toBe(50)
+  })
+})
+
+describe('footerModelsStatus', () => {
+  const m = (state: 'ready' | 'not-installed' | 'downloading') => ({
+    id: state,
+    sizeBytes: 1,
+    state,
+  })
+  it('is ready only when every model is installed', () => {
+    expect(footerModelsStatus([m('ready')])).toBe('ready')
+    expect(footerModelsStatus([m('ready'), m('not-installed')])).toBe('missing')
+  })
+  it('shows downloading while any model downloads', () => {
+    expect(footerModelsStatus([m('not-installed'), m('downloading')])).toBe('downloading')
+  })
+  it('reads as ready until the list has loaded', () => {
+    expect(footerModelsStatus(null)).toBe('ready')
   })
 })

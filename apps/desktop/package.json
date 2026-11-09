@@ -8,9 +8,13 @@
   "author": "Engclaw",
   "main": "./out/main/index.js",
   "scripts": {
+    "espeak": "bash ../../scripts/espeak/build.sh",
+    "predev": "bash ../../scripts/espeak/build.sh || echo 'warning: could not stage espeak-ng; scoring will not work (see CONTRIBUTING.md)'",
     "dev": "electron-vite dev",
     "build": "electron-vite build",
+    "prepackage": "bash ../../scripts/espeak/build.sh",
     "package": "electron-vite build && electron-builder --dir",
+    "predist": "bash ../../scripts/espeak/build.sh",
     "dist": "electron-vite build && electron-builder",
     "typecheck": "tsc -p tsconfig.node.json && tsc -p tsconfig.web.json",
     "test:e2e": "playwright test",
