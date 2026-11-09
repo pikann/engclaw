@@ -59,6 +59,10 @@ function createWindow(): BrowserWindow {
     },
   })
   if (!headless) win.once('ready-to-show', () => win.show())
+  // On Windows/Linux a never-shown window still has its rAF throttled to ~1fps (and transitions
+  // stall), regardless of backgroundThrottling. CI shows it without stealing focus; macOS is fine.
+  else if (process.env['CI'] && process.platform !== 'darwin')
+    win.once('ready-to-show', () => win.showInactive())
   if (process.env['ENGCLAW_PERF'])
     win.once('ready-to-show', () =>
       console.log(`PERF cold-start-ms=${Math.round(process.uptime() * 1000)}`),
