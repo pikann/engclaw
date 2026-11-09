@@ -239,6 +239,32 @@
         "BAD_RESPONSE": "The server answered, but not like an OpenAI-compatible API.",
         "SECURE_STORAGE_UNAVAILABLE": "This system cannot encrypt secrets, so keys and headers cannot be saved."
       }
+    },
+    "privacy": "Privacy",
+    "licenses": "Licenses",
+    "privacyPage": {
+      "intro": "Engclaw has no accounts and no telemetry or analytics. Your recordings, history and settings stay on this computer.",
+      "localTitle": "Stays on your device",
+      "localBody": "Speech recognition, pronunciation scoring and text-to-speech run locally. Your audio is never uploaded.",
+      "leavesTitle": "What can leave your device",
+      "leavesHint": "Only these connections are ever made, and only for the reason given.",
+      "hf": "Hugging Face",
+      "hfBody": "Downloads speech models when you choose to install them. No personal data is sent.",
+      "youtube": "YouTube",
+      "youtubeBody": "Loads the video you open for shadowing, and its captions. YouTube may apply its own tracking inside its player.",
+      "github": "GitHub",
+      "githubBody": "Checks for new releases and downloads updates. Turn this off under General > Check for updates.",
+      "wikimedia": "Wikimedia Commons",
+      "wikimediaBody": "Fetches word illustrations in the dictionary. Turn this off under General > Dictionary illustrations.",
+      "llm": "AI provider you configure",
+      "llmBody": "If you set up an AI provider for the conversation agent, your messages are sent to that provider and nowhere else.",
+      "deleteTitle": "Your control",
+      "deleteBody": "You can erase everything Engclaw stores under Your data at any time."
+    },
+    "licensesPage": {
+      "intro": "Engclaw is free software licensed under GPL-3.0-or-later. It is built on the open-source packages below.",
+      "source": "Source code and full license text",
+      "list": "Third-party packages"
     }
   },
   "ds": {
@@ -1032,5 +1058,6 @@
       "NOT_FOUND": "That conversation no longer exists.",
       "FAILED": "Something went wrong. Try again."
     }
-  }
+  },
+  "skipToContent": "Skip to main content"
 }

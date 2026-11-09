@@ -2,13 +2,24 @@ import { useEffect, useId, useState, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router'
 import { Tabs as TabsPrimitive } from 'radix-ui'
 import { useTranslation } from 'react-i18next'
-import { Bot, CheckCircle2, Database, Mic, SlidersHorizontal, Trash2 } from 'lucide-react'
+import {
+  Bot,
+  CheckCircle2,
+  Database,
+  FileText,
+  Mic,
+  ShieldCheck,
+  SlidersHorizontal,
+  Trash2,
+} from 'lucide-react'
 import type { AppSettings } from '@engclaw/ipc-contract'
 import { setThemePreference, useThemePreference, type ThemePreference } from '@/lib/theme'
 import { cn } from '@/lib/utils'
 import { LanguageSwitcher } from '@/components/language-switcher'
 import { LlmProviderPanel } from '@/components/llm-provider-panel'
+import { LicensesPanel } from '@/components/licenses-panel'
 import { ModelsPanel } from '@/components/models-panel'
+import { PrivacyPanel } from '@/components/privacy-panel'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -28,6 +39,8 @@ const SECTIONS = [
   { id: 'models', icon: Mic, label: 'models.title' },
   { id: 'agent', icon: Bot, label: 'settings.llm.title' },
   { id: 'data', icon: Database, label: 'settings.data' },
+  { id: 'privacy', icon: ShieldCheck, label: 'settings.privacy' },
+  { id: 'licenses', icon: FileText, label: 'settings.licenses' },
 ] as const
 
 /** A titled group of rows, rendered as a single card. */
@@ -279,6 +292,16 @@ export function SettingsPanel() {
                 <CheckCircle2 aria-hidden="true" className="size-4" /> {t('settings.deleted')}
               </p>
             )}
+          </Section>
+        </TabsPrimitive.Content>
+        <TabsPrimitive.Content value="privacy" className="min-w-0 outline-none">
+          <Section title={t('settings.privacy')}>
+            <PrivacyPanel />
+          </Section>
+        </TabsPrimitive.Content>
+        <TabsPrimitive.Content value="licenses" className="min-w-0 outline-none">
+          <Section title={t('settings.licenses')}>
+            <LicensesPanel />
           </Section>
         </TabsPrimitive.Content>
       </TabsPrimitive.Root>

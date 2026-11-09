@@ -83,6 +83,16 @@ export function AppLayout() {
   const known = section in TITLES
   return (
     <WordLookupProvider>
+      <a
+        href="#main-content"
+        onClick={(e) => {
+          e.preventDefault()
+          document.getElementById('main-content')?.focus()
+        }}
+        className="bg-background text-foreground focus-visible:ring-ring/50 sr-only z-50 rounded-md px-3 py-2 text-sm font-medium focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus-visible:ring-[3px]"
+      >
+        {t('skipToContent')}
+      </a>
       <div className="h-screen">
         <AppShell
           linked
@@ -93,7 +103,7 @@ export function AppLayout() {
           modelsPercent={modelsPercent}
           title={known ? t(`screens.shell.${active}`) : t('screens.shell.comingSoon')}
         >
-          <main className="h-full">
+          <main id="main-content" tabIndex={-1} className="h-full outline-none">
             <div hidden={!onPractice} className="h-full">
               <PracticeScreen />
             </div>
