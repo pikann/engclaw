@@ -259,6 +259,31 @@ body {
   min-height: 600px;
 }
 
+/*
+ * Scrollbars (every scroll area in the app, including the game map): thin, always visible but
+ * subtle, stronger on hover and while dragging. Built from tokens so both themes follow.
+ * Uses the Chromium pseudo-elements rather than `scrollbar-width`/`scrollbar-color`, because
+ * those standard properties would switch the pseudo-elements off and cannot style hover.
+ */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: color-mix(in oklab, var(--muted-foreground) 35%, transparent);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in oklab, var(--muted-foreground) 65%, transparent);
+}
+::-webkit-scrollbar-thumb:active {
+  background-color: var(--muted-foreground);
+}
+
 /* One consistent keyboard focus ring (3:1 against surfaces, see tokens.test.ts). */
 :where(button, [href], input, select, textarea, [role='button'], [tabindex]):focus-visible {
   outline: 2px solid var(--ring);
