@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import { IPC, type HistoryFileResult } from '@engclaw/ipc-contract'
 import { t } from './i18n'
 import { handle } from './ipc'
+import { isAllowedExternalUrl } from './security-policy'
 import { openStore, type Store } from './store'
 
 const MIC_SETTINGS_URL: Partial<Record<NodeJS.Platform, string>> = {
@@ -78,6 +79,15 @@ export function registerStoreHandlers(onDeleteAll: () => void = () => {}): Store
     if (!url) return false
     await shell.openExternal(url)
     return true
+  })
+  handle(IPC.appOpenExternal, async ({ url }) => {
+    if (!isAllowedExternalUrl(url)) return false
+    try {
+      await shell.openExternal(url)
+      return true
+    } catch {
+      return false
+    }
   })
   return store
 }
