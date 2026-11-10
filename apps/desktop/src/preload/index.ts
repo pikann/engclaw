@@ -53,6 +53,7 @@ const api: EngclawApi = {
     deleteAllData: () => invoke(IPC.appDeleteAllData),
     openMicSettings: () => invoke(IPC.appOpenMicSettings),
     openExternal: (req) => invoke(IPC.appOpenExternal, req),
+    getEnvironment: () => invoke(IPC.appGetEnvironment),
   },
   models: {
     list: () => invoke(IPC.modelsList),

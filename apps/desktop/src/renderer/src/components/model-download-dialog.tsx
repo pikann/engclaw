@@ -190,14 +190,18 @@ export function ModelDownloadDialog({ open, onOpenChange, onReady }: Props) {
         )}
 
         {problem && (
-          <Alert className="border-destructive" data-testid="model-download-problem">
+          <Alert
+            variant="error"
+            className="border-destructive"
+            data-testid="model-download-problem"
+          >
             {problem === 'NOT_WRITABLE'
               ? t('models.dl.folderNotWritable', { dir: disk?.dir ?? '' })
               : t('models.error.DISK_SPACE')}
           </Alert>
         )}
         {error && (
-          <Alert className="border-destructive" data-testid="model-download-error">
+          <Alert variant="error" className="border-destructive" data-testid="model-download-error">
             {error}
           </Alert>
         )}
@@ -229,7 +233,11 @@ export function ModelDownloadDialog({ open, onOpenChange, onReady }: Props) {
                 {t('models.changeFolder')}
               </Button>
               {folderError && (
-                <Alert className="border-destructive" data-testid="model-download-folder-error">
+                <Alert
+                  variant="error"
+                  className="border-destructive"
+                  data-testid="model-download-folder-error"
+                >
                   {folderError}
                 </Alert>
               )}

@@ -193,13 +193,21 @@ export function ConverseScreen() {
           </Alert>
         )}
         {c.mic && (
-          <Alert className="m-4 flex items-center gap-3" data-testid="converse-mic-error">
+          <Alert
+            variant="error"
+            className="m-4 flex items-center gap-3"
+            data-testid="converse-mic-error"
+          >
             <MicOff aria-hidden="true" className="size-4 shrink-0" />
             <span>{t(c.mic.guidance)}</span>
           </Alert>
         )}
         {errorText && (
-          <Alert className="m-4 flex items-center gap-3" data-testid="converse-error">
+          <Alert
+            variant="error"
+            className="m-4 flex items-center gap-3"
+            data-testid="converse-error"
+          >
             <AlertTriangle aria-hidden="true" className="size-4 shrink-0" />
             <span>
               {errorText}

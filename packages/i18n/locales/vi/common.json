@@ -1069,5 +1069,16 @@
       "FAILED": "Đã xảy ra lỗi. Hãy thử lại."
     }
   },
-  "skipToContent": "Bỏ qua tới nội dung chính"
+  "skipToContent": "Bỏ qua tới nội dung chính",
+  "feedback": {
+    "label": "Phản hồi",
+    "tooltip": "Báo sự cố này trên GitHub",
+    "ariaLabel": "Gửi phản hồi về lỗi này",
+    "copied": "Đã sao chép toàn bộ lỗi. Hãy dán vào issue nếu cần",
+    "openFailed": "Không mở được trình duyệt. Hãy truy cập github.com/pikann/engclaw/issues",
+    "dismiss": "Đóng",
+    "boundaryTitle": "Đã xảy ra lỗi",
+    "boundaryBody": "Ứng dụng gặp lỗi không mong muốn. Bạn có thể tải lại hoặc gửi phản hồi để chúng tôi sửa.",
+    "reload": "Tải lại"
+  }
 }

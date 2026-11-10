@@ -930,6 +930,17 @@ export const TextFileResult = z.discriminatedUnion('status', [
 ])
 export type TextFileResult = z.infer<typeof TextFileResult>
 
+export const AppEnvironment = z.object({
+  appVersion: z.string(),
+  platform: z.string(),
+  osVersion: z.string(),
+  arch: z.string(),
+  electronVersion: z.string(),
+  /** Inference execution providers in preference order; the first that loads is used. */
+  executionProviders: z.array(z.string()),
+})
+export type AppEnvironment = z.infer<typeof AppEnvironment>
+
 export const AppSettings = z.object({
   /** Stop recording after ~2 s of silence once speech was heard. */
   silenceAutoStop: z.boolean().default(true),
@@ -965,6 +976,7 @@ export const IPC = {
   appDeleteAllData: 'app:deleteAllData',
   appOpenMicSettings: 'app:openMicSettings',
   appOpenExternal: 'app:openExternal',
+  appGetEnvironment: 'app:getEnvironment',
   modelsList: 'models:list',
   modelsDownload: 'models:download',
   modelsCancel: 'models:cancel',
@@ -1060,9 +1072,11 @@ export const invokeChannels = {
   [IPC.appOpenMicSettings]: { request: noArgs, response: z.boolean() },
   /** Opens an https URL in the system browser; false when it is not allowed or the OS could not open it. */
   [IPC.appOpenExternal]: {
-    request: z.object({ url: z.string().max(2048) }).strict(),
+    request: z.object({ url: z.string().max(8192) }).strict(),
     response: z.boolean(),
   },
+  /** Non-identifying app/OS facts for bug reports (no user name, paths or hostnames). */
+  [IPC.appGetEnvironment]: { request: noArgs, response: AppEnvironment },
   [IPC.modelsList]: { request: noArgs, response: z.array(ModelStatus) },
   [IPC.modelsDownload]: { request: ModelRef, response: ModelOpResult },
   [IPC.modelsCancel]: { request: ModelRef, response: z.null() },
@@ -1220,6 +1234,7 @@ export interface EngclawApi {
     deleteAllData(): Promise<null>
     openMicSettings(): Promise<boolean>
     openExternal(req: { url: string }): Promise<boolean>
+    getEnvironment(): Promise<AppEnvironment>
   }
   models: {
     list(): Promise<ModelStatus[]>

@@ -10,6 +10,8 @@ import { GameMapPage } from '@/routes/game-map'
 import { HistoryPage } from '@/routes/history'
 import { ShadowingPage } from '@/routes/shadowing'
 import { SettingsPage } from '@/routes/settings'
+import { ErrorBoundary } from '@/components/error-boundary'
+import { Toaster } from '@/components/ui/toaster'
 import { initI18n } from '@/lib/i18n'
 import { setThemePreference, useTheme, useThemePreference } from '@/lib/theme'
 import './index.css'
@@ -85,7 +87,10 @@ void initI18n().then(() =>
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <ThemeRoot>
-        <RouterProvider router={router} />
+        <ErrorBoundary>
+          <RouterProvider router={router} />
+        </ErrorBoundary>
+        <Toaster />
       </ThemeRoot>
     </StrictMode>,
   ),
