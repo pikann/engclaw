@@ -1,10 +1,12 @@
 import { app, BrowserWindow, dialog, shell } from 'electron'
 import { readFile, writeFile } from 'node:fs/promises'
+import os from 'node:os'
 import { join } from 'node:path'
 import { IPC, type HistoryFileResult } from '@engclaw/ipc-contract'
 import { t } from './i18n'
 import { handle } from './ipc'
 import { isAllowedExternalUrl } from './security-policy'
+import { DEFAULT_PROVIDERS } from '../utility/sessions'
 import { openStore, type Store } from './store'
 
 const MIC_SETTINGS_URL: Partial<Record<NodeJS.Platform, string>> = {
@@ -89,5 +91,13 @@ export function registerStoreHandlers(onDeleteAll: () => void = () => {}): Store
       return false
     }
   })
+  handle(IPC.appGetEnvironment, () => ({
+    appVersion: app.getVersion(),
+    platform: process.platform,
+    osVersion: os.release(),
+    arch: process.arch,
+    electronVersion: process.versions.electron ?? '',
+    executionProviders: DEFAULT_PROVIDERS,
+  }))
   return store
 }

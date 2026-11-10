@@ -72,6 +72,7 @@ export function ShadowingEntry({
         )}
         {error && (
           <Alert
+            variant="error"
             id="shadowing-error"
             data-testid="shadowing-error"
             data-error={error}

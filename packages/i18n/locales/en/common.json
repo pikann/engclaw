@@ -1069,5 +1069,16 @@
       "FAILED": "Something went wrong. Try again."
     }
   },
-  "skipToContent": "Skip to main content"
+  "skipToContent": "Skip to main content",
+  "feedback": {
+    "label": "Feedback",
+    "tooltip": "Report this problem on GitHub",
+    "ariaLabel": "Send feedback about this error",
+    "copied": "Full error copied. Paste it into the issue if needed",
+    "openFailed": "Couldn't open the browser. Visit github.com/pikann/engclaw/issues",
+    "dismiss": "Dismiss",
+    "boundaryTitle": "Something went wrong",
+    "boundaryBody": "The app hit an unexpected error. You can reload it, or send feedback so we can fix it.",
+    "reload": "Reload"
+  }
 }

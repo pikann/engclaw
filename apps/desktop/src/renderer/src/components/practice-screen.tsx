@@ -537,7 +537,11 @@ export function PracticeScreen() {
   const alerts = (
     <>
       {mic && (
-        <Alert className="border-destructive space-y-2" data-testid="practice-mic-error">
+        <Alert
+          variant="error"
+          className="border-destructive space-y-2"
+          data-testid="practice-mic-error"
+        >
           <p className="flex items-center gap-2 font-medium">
             <MicOff className="size-4" />
             {t(
@@ -577,6 +581,7 @@ export function PracticeScreen() {
       )}
       {s.phase === 'error' && s.error && (
         <Alert
+          variant={missing ? 'default' : 'error'}
           className={cn('space-y-2', missing ? 'border-warning' : 'border-destructive')}
           data-testid="practice-error"
         >

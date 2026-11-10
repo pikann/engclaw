@@ -125,6 +125,7 @@ export function AttemptPanel({
       )}
       {state.phase === 'error' && (
         <Alert
+          variant={state.kind === 'model' ? 'default' : 'error'}
           className={cn(
             'space-y-2',
             state.kind === 'model' ? 'border-warning' : 'border-destructive',

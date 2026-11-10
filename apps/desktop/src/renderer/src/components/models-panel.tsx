@@ -98,7 +98,7 @@ export function ModelsPanel() {
                 </div>
               </div>
             )}
-            {errors[m.id] && <Alert>{errors[m.id]}</Alert>}
+            {errors[m.id] && <Alert variant="error">{errors[m.id]}</Alert>}
             <div className="flex gap-2">
               {busy ? (
                 <Button
