@@ -17,10 +17,15 @@ const FAKE_AUDIO = '--use-file-for-fake-audio-capture='
  */
 function withPrivateAudio(options: LaunchOptions): LaunchOptions {
   if (!options?.args?.some((a) => a.startsWith(FAKE_AUDIO))) return options
+  // Without the sandbox flag macOS's audio service cannot open the file and the fake mic is silent.
+  const args = options.args.includes('--no-sandbox')
+    ? options.args
+    : [...options.args, '--no-sandbox']
+  options = { ...options, args }
   const dir = mkdtempSync(join(tmpdir(), 'engclaw-e2e-audio-'))
   return {
     ...options,
-    args: options.args.map((a) => {
+    args: (options.args ?? []).map((a) => {
       if (!a.startsWith(FAKE_AUDIO)) return a
       const src = a.slice(FAKE_AUDIO.length)
       const dest = join(dir, basename(src))

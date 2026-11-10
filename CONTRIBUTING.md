@@ -48,6 +48,18 @@ bun run test:e2e:headed   # watch it run
 
 On Linux without a display use `xvfb-run --auto-servernum bun run test:e2e`. CI runs this manually from the Actions tab.
 
+Rebuild before re-running: the specs load the built `out/` folder, not your sources.
+
+The helpers in `apps/desktop/e2e/support` let a spec cover practice, shadowing, game and converse without models or network:
+
+- `audio.ts`: sound fixtures the fake microphone plays in a loop (`speech`, `speechThenSilence`, `silence`, `tone`, `quiet`). Pick one with `launchApp({ audio })`.
+- `speech-stubs.ts`: replaces the on-device ASR, pronunciation analysis, intonation and TTS with scripted answers and logs each call with the RMS of the audio it received, which proves the fixture reached the app.
+- `fake-llm.ts`: a scriptable OpenAI-compatible provider on a loopback port (replies, HTTP errors, broken streams, tool calls, stalls) that records every request.
+- `launch.ts`: `launchApp`, plus `breakMic` / `fixMic` to simulate a denied, missing or busy microphone.
+- `shadowing.ts`: opens a cached video session offline, with a stand-in for the YouTube player.
+
+Chromium's fake mic only works with `--no-sandbox` (on macOS its audio service cannot open the WAV otherwise and records silence), so the launchers always pass it. Specs that need the real models still use `ENGCLAW_E2E_USER_DATA`.
+
 ## How the code is organised
 
 Read the [architecture overview](docs/architecture.md) first. In short:

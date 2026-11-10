@@ -28,7 +28,8 @@ test('an invalid link shows the inline error, keeps the text and clears on edit'
   await expect(banner).toBeVisible()
   await expect(banner).toHaveAttribute('data-error', 'invalid')
   await expect(banner).toContainText("That doesn't look like a YouTube link.")
-  await expect(banner.getByRole('button')).toHaveCount(0)
+  // An invalid link cannot be retried; only the Feedback button is offered.
+  await expect(banner.getByRole('button', { name: 'Try again' })).toHaveCount(0)
   await expect(field).toHaveValue('https://example.com/not-youtube')
   await expect(field).toHaveAttribute('aria-invalid', 'true')
 

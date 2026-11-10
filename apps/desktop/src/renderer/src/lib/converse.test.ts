@@ -52,6 +52,20 @@ describe('converse turn', () => {
     expect(s.conversationId).toBe('c1')
   })
 
+  it('stop-listening ends the transcribing phase, so an empty transcript or a cancel is not stuck', () => {
+    const transcribing = run([{ type: 'listen' }, { type: 'transcribing' }])
+    expect(transcribing.turn).toBe('thinking')
+    expect(run([{ type: 'stop-listening' }], transcribing).turn).toBe('idle')
+  })
+
+  it('stop-listening does not interrupt a reply that is already being generated', () => {
+    const replying = run([
+      { type: 'heard', text: 'a' },
+      { type: 'sent', conversationId: 'c', requestId: 'r1' },
+    ])
+    expect(run([{ type: 'stop-listening' }], replying)).toEqual(replying)
+  })
+
   it('ignores events of another request', () => {
     const s = run([
       { type: 'heard', text: 'a' },

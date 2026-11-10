@@ -66,7 +66,11 @@ export function converseReducer(s: ConverseState, e: ConverseEvent): ConverseSta
     case 'listen':
       return { ...s, turn: 'listening', error: null, errorDetail: null }
     case 'stop-listening':
-      return s.turn === 'listening' ? { ...s, turn: 'idle' } : s
+      // Also ends the transcribing phase (turn 'thinking' before a request exists): an empty
+      // transcript or a cancel there would otherwise leave the screen stuck on "thinking".
+      return s.turn === 'listening' || (s.turn === 'thinking' && s.requestId === null)
+        ? { ...s, turn: 'idle' }
+        : s
     case 'transcribing':
       return { ...s, turn: 'thinking', error: null, errorDetail: null }
     case 'heard':
