@@ -85,3 +85,35 @@ describe('token parity', () => {
     expect(missing).toEqual([])
   })
 })
+
+describe('scrollbars', () => {
+  /** Body of every rule whose selector mentions `::-webkit-scrollbar`. */
+  const rules = [
+    ...css
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .matchAll(/([^{}]*::-webkit-scrollbar[^{}]*)\{([^}]*)\}/g),
+  ].map((m) => ({
+    selector: m[1]!.trim().replace(/\s+/g, ' '),
+    body: m[2]!,
+  }))
+  const rule = (selector: string) =>
+    rules.find((r) => r.selector.split(/,\s*/).includes(selector))?.body ?? ''
+
+  it('is thin, with a transparent track and a rounded thumb', () => {
+    expect(rule('::-webkit-scrollbar')).toMatch(/width:\s*8px/)
+    expect(rule('::-webkit-scrollbar')).toMatch(/height:\s*8px/)
+    expect(rule('::-webkit-scrollbar-track')).toMatch(/background:\s*transparent/)
+    expect(rule('::-webkit-scrollbar-thumb')).toMatch(/border-radius:\s*9999px/)
+  })
+
+  it('gets stronger on hover and while dragging', () => {
+    expect(rule('::-webkit-scrollbar-thumb:hover')).toMatch(/background-color/)
+    expect(rule('::-webkit-scrollbar-thumb:active')).toMatch(/background-color/)
+  })
+
+  it('uses design tokens only, no hardcoded colours', () => {
+    for (const { body } of rules) {
+      expect(body).not.toMatch(/#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(|oklch\(/i)
+    }
+  })
+})
