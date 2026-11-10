@@ -5,11 +5,12 @@ import {
   Home,
   type LucideIcon,
   MessageCircle,
+  MessageSquareText,
   Mic,
   Play,
   Settings,
 } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { Logo } from '@/components/ui/logo'
@@ -131,6 +132,74 @@ function NavItem({
   )
 }
 
+const FEEDBACK_URL = 'https://github.com/pikann/engclaw/issues/new/choose'
+
+/** Sidebar button that opens the GitHub issue chooser in the system browser; shows a toast if that fails. */
+function FeedbackItem({ onFailed }: { onFailed: () => void }) {
+  const { t } = useTranslation()
+  const open = async () => {
+    const ok = await window.engclaw.app.openExternal({ url: FEEDBACK_URL }).catch(() => false)
+    if (!ok) onFailed()
+  }
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton
+        type="button"
+        tooltip={t('screens.shell.feedbackTooltip')}
+        data-testid="nav-feedback"
+        onClick={() => void open()}
+      >
+        <MessageSquareText aria-hidden="true" />
+        <span className="group-data-[collapsible=icon]:sr-only">{t('screens.shell.feedback')}</span>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  )
+}
+
+/** Fallback shown when the browser could not be opened; lets the user copy the link. */
+function FeedbackToast({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation()
+  const [copied, setCopied] = useState(false)
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  useEffect(() => {
+    timer.current = setTimeout(onClose, 15000)
+    return () => clearTimeout(timer.current)
+  }, [onClose])
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(FEEDBACK_URL)
+      setCopied(true)
+    } catch {
+      /* clipboard unavailable: the issues address is in the message */
+    }
+  }
+  return (
+    <div
+      role="status"
+      data-testid="feedback-toast"
+      className="bg-card absolute right-4 bottom-10 z-20 flex max-w-sm items-center gap-3 rounded-lg border px-4 py-3 text-sm shadow-lg"
+    >
+      <span className="flex-1">
+        {copied ? t('screens.shell.feedbackCopied') : t('screens.shell.feedbackFailed')}
+      </span>
+      <button
+        type="button"
+        onClick={() => void copy()}
+        className="focus-visible:ring-ring rounded text-xs font-medium underline underline-offset-2 outline-none focus-visible:ring-2"
+      >
+        {t('screens.shell.feedbackCopy')}
+      </button>
+      <button
+        type="button"
+        onClick={onClose}
+        className="focus-visible:ring-ring rounded text-xs outline-none focus-visible:ring-2"
+      >
+        {t('screens.shell.feedbackDismiss')}
+      </button>
+    </div>
+  )
+}
+
 /** Static app chrome for the gallery: sidebar, page header and status bar (IA doc §1.1). */
 export function AppShell({
   layout,
@@ -161,6 +230,8 @@ export function AppShell({
 }) {
   const { t } = useTranslation()
   const [open, setOpen] = useSidebarOpen(layout)
+  const [feedbackFailed, setFeedbackFailed] = useState(false)
+  const closeToast = useCallback(() => setFeedbackFailed(false), [])
   return (
     <SidebarProvider
       open={open}
@@ -203,6 +274,7 @@ export function AppShell({
                 className="mx-2 w-auto group-data-[collapsible=icon]:hidden"
               />
             )}
+            <FeedbackItem onFailed={() => setFeedbackFailed(true)} />
             <NavItem
               icon={Settings}
               active={active === 'settings'}
@@ -232,6 +304,7 @@ export function AppShell({
           {actions}
         </header>
         <div className="min-h-0 flex-1">{children}</div>
+        {feedbackFailed && <FeedbackToast onClose={closeToast} />}
         <footer className="text-muted-foreground flex h-7 shrink-0 items-center gap-4 border-t px-4 text-xs">
           <span className="flex items-center gap-1.5">
             <span

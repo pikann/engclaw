@@ -7,9 +7,12 @@ import {
   isTrustedUrl,
 } from './security-policy'
 
+const FEEDBACK_URL = 'https://github.com/pikann/engclaw/issues/new/choose'
+
 describe('isAllowedExternalUrl', () => {
-  it.each(['https://example.com/a?b=1', 'https://youtube.com/watch?v=x'])('allows %s', (u) =>
-    expect(isAllowedExternalUrl(u)).toBe(true),
+  it.each(['https://example.com/a?b=1', 'https://youtube.com/watch?v=x', FEEDBACK_URL])(
+    'allows %s',
+    (u) => expect(isAllowedExternalUrl(u)).toBe(true),
   )
   it.each([
     'http://example.com',

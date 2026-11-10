@@ -71,4 +71,5 @@ Converse is a speaking-practice chat with an AI agent. It needs a provider you s
 - **Scoring feels slow**: the models are large. The first attempt after launch loads them; later ones are faster. Close other heavy apps and keep enough free memory.
 - **Download fails**: check your connection and disk space; it resumes where it stopped.
 - **A YouTube video won't load**: pick another video with captions. YouTube changes can break this feature until the app is updated.
+- **Feedback**: click **Feedback** at the bottom of the sidebar to report a bug or request a feature on GitHub (a free GitHub account is needed).
 - **Something else**: search [Issues](https://github.com/pikann/engclaw/issues) or ask in [Discussions](https://github.com/pikann/engclaw/discussions).
