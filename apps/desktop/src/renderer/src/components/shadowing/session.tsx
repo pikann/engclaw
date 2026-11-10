@@ -46,6 +46,7 @@ import {
   shortcutFor,
 } from '@/lib/sentence-loop'
 import { useWordLookup } from '@/lib/word-lookup'
+import { TranscriptDownload } from './transcript-download'
 import { fitDictation, fitStage, formatClock, type Segment } from '@/lib/shadowing'
 import { cn } from '@/lib/utils'
 
@@ -636,6 +637,7 @@ export function ShadowingSession({
             }
           >
             <ResultSidebarBody hidden={sideTab !== 'transcript'}>
+              <TranscriptDownload segments={segments} title={title} />
               <ol className="space-y-1 text-sm" data-testid="shadowing-rail">
                 {segments.map((s, i) => (
                   <li key={s.index}>

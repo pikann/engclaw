@@ -918,6 +918,18 @@ export const LearningFileResult = z.discriminatedUnion('status', [
 ])
 export type LearningFileResult = z.infer<typeof LearningFileResult>
 
+export const TranscriptExportRequest = z.object({
+  /** Suggested file name (the main process sanitizes it again). */
+  fileName: z.string().min(1).max(200),
+  text: z.string().max(5_000_000),
+})
+export const TextFileResult = z.discriminatedUnion('status', [
+  z.object({ status: z.literal('cancelled') }),
+  z.object({ status: z.literal('error'), message: z.string() }),
+  z.object({ status: z.literal('saved'), path: z.string() }),
+])
+export type TextFileResult = z.infer<typeof TextFileResult>
+
 export const AppSettings = z.object({
   /** Stop recording after ~2 s of silence once speech was heard. */
   silenceAutoStop: z.boolean().default(true),
@@ -1002,6 +1014,7 @@ export const IPC = {
   deckQuiz: 'deck:quiz',
   deckQuizAnswer: 'deck:quizAnswer',
   deckExport: 'deck:export',
+  transcriptExport: 'transcript:export',
   deckImport: 'deck:import',
   inferenceAnalyze: 'inference:analyze',
   inferenceTranscribe: 'inference:transcribe',
@@ -1129,6 +1142,8 @@ export const invokeChannels = {
   [IPC.deckQuizAnswer]: { request: DeckQuizAnswer, response: z.null() },
   [IPC.deckExport]: { request: noArgs, response: LearningFileResult },
   [IPC.deckImport]: { request: noArgs, response: LearningFileResult },
+  /** Opens a save dialog and writes the transcript text as UTF-8. */
+  [IPC.transcriptExport]: { request: TranscriptExportRequest, response: TextFileResult },
   [IPC.inferenceAnalyze]: {
     request: AnalyzeRequest,
     response: inferenceResult(PronunciationResult),
@@ -1276,6 +1291,9 @@ export interface EngclawApi {
     quizAnswer(req: z.infer<typeof DeckQuizAnswer>): Promise<null>
     export(): Promise<LearningFileResult>
     import(): Promise<LearningFileResult>
+  }
+  transcript: {
+    export(req: z.infer<typeof TranscriptExportRequest>): Promise<TextFileResult>
   }
   tts: {
     /** Reference-voice audio (16 kHz mono) for a sentence; repeats are served from a disk cache. */

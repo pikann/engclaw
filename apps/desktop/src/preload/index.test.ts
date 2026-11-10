@@ -48,6 +48,7 @@ describe('preload bridge', () => {
       'ping',
       'player',
       'settings',
+      'transcript',
       'tts',
       'youtube',
     ])

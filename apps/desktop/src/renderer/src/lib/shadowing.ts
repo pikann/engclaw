@@ -299,3 +299,21 @@ export function formatClock(seconds: number): string {
   const s = String(total % 60).padStart(2, '0')
   return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${s}` : `${m}:${s}`
 }
+
+/** The transcript as plain text for printing: one sentence per line, optionally led by `[clock]`. */
+export function formatTranscriptText(segments: readonly Segment[], timestamps: boolean): string {
+  return segments
+    .map((s) => (timestamps ? `[${formatClock(s.start)}] ${s.text}` : s.text) + '\n')
+    .join('')
+}
+
+/** A safe `.txt` file name from a video title. */
+export function transcriptFileName(title: string): string {
+  const base = title
+    .replace(/[\\/:*?"<>|]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 120)
+    .trim()
+  return `${base || 'transcript'}.txt`
+}

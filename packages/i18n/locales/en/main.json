@@ -18,6 +18,7 @@
     "exportHistory": "Export practice history",
     "importHistory": "Import practice history",
     "exportLearning": "Export flashcards and progress",
+    "exportTranscript": "Save transcript",
     "importLearning": "Import flashcards and progress"
   }
 }
