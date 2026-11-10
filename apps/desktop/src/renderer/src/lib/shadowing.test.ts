@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import {
   fitStage,
   formatClock,
+  formatTranscriptText,
+  transcriptFileName,
   mapYouTubeError,
   parseVideoUrl,
   pickCaptionTrack,
@@ -221,4 +223,32 @@ describe('formatClock', () => {
     [-3, '0:00'],
     [Number.NaN, '0:00'],
   ])('%s -> %s', (sec, out) => expect(formatClock(sec)).toBe(out))
+})
+
+describe('formatTranscriptText', () => {
+  const segs: Segment[] = [
+    { index: 0, start: 0, end: 4, text: 'Hello there.' },
+    { index: 1, start: 4, end: 9, text: 'How are you?' },
+    { index: 2, start: 3725, end: 3730, text: 'Fine.' },
+  ]
+  it('puts one sentence per line, in order', () => {
+    expect(formatTranscriptText(segs, false)).toBe('Hello there.\nHow are you?\nFine.\n')
+  })
+  it('prefixes [clock] when timestamps are on', () => {
+    expect(formatTranscriptText(segs, true)).toBe(
+      '[0:00] Hello there.\n[0:04] How are you?\n[1:02:05] Fine.\n',
+    )
+  })
+  it('is empty for no segments', () => {
+    expect(formatTranscriptText([], true)).toBe('')
+  })
+})
+
+describe('transcriptFileName', () => {
+  it('sanitizes the title and adds .txt', () => {
+    expect(transcriptFileName('A/B: "C"?')).toBe('A B C.txt')
+  })
+  it('falls back when the title is empty', () => {
+    expect(transcriptFileName('  ')).toBe('transcript.txt')
+  })
 })

@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { electron } from './electron'
-import { mkdtempSync } from 'node:fs'
+import { mkdtempSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
@@ -175,5 +175,19 @@ test('the prosody guide setting is remembered across reloads', async () => {
   await page.getByTestId('shadowing-recent').first().click()
   await expect(page.getByTestId('shadowing-prosody-toggle')).toBeChecked()
   await expect(page.getByTestId('shadowing-pause')).toHaveCount(1)
+  await app.close()
+})
+
+test('the transcript downloads as a timestamped text file', async () => {
+  const { app, page } = await openCachedSession()
+  const target = join(mkdtempSync(join(tmpdir(), 'engclaw-e2e-')), 'out.txt')
+  await app.evaluate(({ dialog }, filePath) => {
+    dialog.showSaveDialog = (() => Promise.resolve({ canceled: false, filePath })) as never
+  }, target)
+
+  await page.getByTestId('shadowing-tab-transcript').click()
+  await page.getByTestId('shadowing-transcript-download').click()
+  await expect(page.getByTestId('shadowing-transcript-notice')).toBeVisible()
+  expect(readFileSync(target, 'utf8')).toBe(`[0:10] ${SENTENCE}\n`)
   await app.close()
 })

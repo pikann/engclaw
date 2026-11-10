@@ -122,6 +122,9 @@ const api: EngclawApi = {
     export: () => invoke(IPC.deckExport),
     import: () => invoke(IPC.deckImport),
   },
+  transcript: {
+    export: (req) => invoke(IPC.transcriptExport, req),
+  },
   tts: {
     speak: (req) => invoke(IPC.ttsSpeak, req),
   },

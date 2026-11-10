@@ -1,9 +1,9 @@
 import { app, BrowserWindow, dialog } from 'electron'
 import type Database from 'better-sqlite3'
 import { readFile, writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { basename, join } from 'node:path'
 import { findWordId, getWord, rootFamilyWords, rootMastery } from '@engclaw/dictionary'
-import { IPC, type LearningFileResult } from '@engclaw/ipc-contract'
+import { IPC, type LearningFileResult, type TextFileResult } from '@engclaw/ipc-contract'
 import { buildQuiz } from './deck-quiz'
 import { t } from './i18n'
 import { handle } from './ipc'
@@ -102,6 +102,29 @@ export function registerDeckHandlers(store: Store, dictionary: () => Database.Da
         status: 'imported',
         ...store.deck.import(raw, (word) => findWordId(db, word) !== null),
       }
+    } catch (e) {
+      return { status: 'error', message: e instanceof Error ? e.message : String(e) }
+    }
+  })
+
+  handle(IPC.transcriptExport, async (req, event): Promise<TextFileResult> => {
+    const win = parent(event)
+    const name =
+      basename(req.fileName)
+        .replace(/[\\/:*?"<>|]+/g, ' ')
+        .trim() || 'transcript.txt'
+    const options: Electron.SaveDialogOptions = {
+      title: t('dialog.exportTranscript'),
+      defaultPath: join(app.getPath('documents'), name),
+      filters: [{ name: 'Text', extensions: ['txt'] }],
+    }
+    const res = win
+      ? await dialog.showSaveDialog(win, options)
+      : await dialog.showSaveDialog(options)
+    if (res.canceled || !res.filePath) return { status: 'cancelled' }
+    try {
+      await writeFile(res.filePath, req.text, 'utf8')
+      return { status: 'saved', path: res.filePath }
     } catch (e) {
       return { status: 'error', message: e instanceof Error ? e.message : String(e) }
     }
