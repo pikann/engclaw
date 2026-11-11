@@ -128,6 +128,7 @@ describe('store', () => {
       reviewsPerDay: 200,
       wordImages: true,
       captionsVisible: true,
+      starPrompt: { done: false, moments: 0, shown: 0, lastShownAt: 0 },
     })
     store.settings.update({ silenceAutoStop: false, captionsVisible: false })
     store.db.close()
@@ -140,6 +141,7 @@ describe('store', () => {
       reviewsPerDay: 200,
       wordImages: true,
       captionsVisible: false,
+      starPrompt: { done: false, moments: 0, shown: 0, lastShownAt: 0 },
     })
   })
 

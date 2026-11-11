@@ -1071,6 +1071,14 @@
     }
   },
   "skipToContent": "Bỏ qua tới nội dung chính",
+  "starPrompt": {
+    "title": "Bạn thích Engclaw?",
+    "body": "Ứng dụng miễn phí và mã nguồn mở. Một ngôi sao trên GitHub giúp nhiều người học khác tìm thấy nó.",
+    "star": "Gắn sao trên GitHub",
+    "later": "Để sau",
+    "never": "Đừng hỏi lại",
+    "openFailed": "Không mở được trình duyệt. Hãy truy cập github.com/pikann/engclaw"
+  },
   "feedback": {
     "label": "Phản hồi",
     "tooltip": "Báo sự cố này trên GitHub",
