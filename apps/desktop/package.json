@@ -18,6 +18,7 @@
     "dist": "electron-vite build && electron-builder",
     "typecheck": "tsc -p tsconfig.node.json && tsc -p tsconfig.web.json",
     "test:e2e": "playwright test",
+    "media": "electron-vite build && playwright test -c playwright.media.config.ts",
     "test:e2e:headed": "E2E_HEADED=1 playwright test"
   },
   "dependencies": {

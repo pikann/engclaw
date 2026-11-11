@@ -60,6 +60,18 @@ The helpers in `apps/desktop/e2e/support` let a spec cover practice, shadowing, 
 
 Chromium's fake mic only works with `--no-sandbox` (on macOS its audio service cannot open the WAV otherwise and records silence), so the launchers always pass it. Specs that need the real models still use `ENGCLAW_E2E_USER_DATA`.
 
+## Regenerate the README GIFs
+
+The GIFs in `docs/media` are recorded from the real UI by `apps/desktop/media/readme-gifs.spec.ts`. Like the e2e specs they use the fake microphone and the scripted speech engine and fake LLM, so they are deterministic and need no models, microphone or network (the shadowing video is a drawn look-alike of a video player, because the real one is a native view that screenshots cannot see, and it needs the network). The navigation sidebar is collapsed in every GIF. Requires `ffmpeg` on your `PATH`.
+
+```bash
+cd apps/desktop
+bun run media                                             # build, then record all five GIFs
+bunx playwright test -c playwright.media.config.ts -g game  # re-record one scene (needs a build)
+```
+
+Change what a GIF shows by editing its scene (scores, text, pauses). Keep each GIF under about 500 KB; the status bar is cropped automatically.
+
 ## How the code is organised
 
 Read the [architecture overview](docs/architecture.md) first. In short:
