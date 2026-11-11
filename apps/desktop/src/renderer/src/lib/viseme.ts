@@ -122,7 +122,7 @@ const MIN_STEP_MS = 150
 
 export const REST: Viseme = 'rest'
 
-const clean = (s: string): string => s.replace(/[ːˈˌ.]/g, '')
+export const clean = (s: string): string => s.replace(/[ːˈˌ.]/g, '')
 
 export const visemeFor = (phone: string): Viseme => VISEMES[clean(phone)] ?? REST
 

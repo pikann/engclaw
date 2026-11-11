@@ -2,9 +2,11 @@ import { useTranslation } from 'react-i18next'
 import { ExternalLink, Mic, Sparkles } from 'lucide-react'
 import type { DictionaryWord } from '@engclaw/ipc-contract'
 import { DeckToggle } from '@/components/dictionary/deck-controls'
+import { WordArticulation } from '@/components/dictionary/word-articulation'
 import { HearReference } from '@/components/hear-reference'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ipaPhones } from '@/lib/articulation'
 import { ASK_KINDS, type AskKind } from '@/lib/ask-agent'
 import { formatIpa, groupSenses } from '@/lib/dictionary'
 import { useDictionaryRoot, useWordImage, type Loadable } from '@/lib/use-dictionary'
@@ -254,6 +256,8 @@ export function WordPage({
       </p>
     )
   const word = state.value
+  // The sounds section has its own Hear it (with the animation); the plain one is the fallback.
+  const hasSounds = ipaPhones(word.pronunciations[0] ?? '').length > 0
   return (
     <article className="space-y-5" data-testid="word-page" aria-labelledby="dict-word-title">
       <header className="space-y-2">
@@ -272,7 +276,7 @@ export function WordPage({
               {formatIpa(ipa)}
             </span>
           ))}
-          <HearReference text={word.word} variant="ghost" />
+          {!hasSounds && <HearReference text={word.word} variant="ghost" />}
           <Button
             variant="outline"
             size="sm"
@@ -285,6 +289,8 @@ export function WordPage({
           <DeckToggle word={word.word} />
         </div>
       </header>
+
+      <WordArticulation word={word.word} ipa={word.pronunciations[0]} />
 
       <WordIllustration word={word} />
 

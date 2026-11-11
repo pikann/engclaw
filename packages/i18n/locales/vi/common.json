@@ -144,7 +144,7 @@
     "chartF0": "Cao độ (F0, Hz)",
     "chartEnergy": "Năng lượng",
     "mouthAlt": "Khẩu hình {{shape}}",
-    "playMouth": "Xem khẩu hình",
+    "tongueAlt": "Vị trí lưỡi khi phát âm {{phone}}",
     "soundPick": "Âm {{phone}}"
   },
   "nav": {
@@ -1019,7 +1019,8 @@
         "imported": "Đã nhập {{imported}} thẻ mới, cập nhật {{updated}}, bỏ qua {{skipped}} (không có trong từ điển).",
         "error": "Không thể dùng tệp này: {{message}}"
       }
-    }
+    },
+    "articulation": "Khẩu hình và lưỡi"
   },
   "converse": {
     "title": "Hội thoại",

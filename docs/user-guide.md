@@ -27,7 +27,7 @@ The result shows an overall score out of 100 and tabs for **Result**, **Phonemes
 
 - **Phonemes** compares the sounds you made with the expected sounds, and marks the differences.
 - **Pitch** and energy charts compare your intonation with a reference.
-- **Words** lists the words to work on. Select a sound to see a mouth-shape animation.
+- **Words** lists the words to work on. Press **Hear it** (or select a single sound) to see the mouth shape (front view) and a side view of where the tongue, jaw and lips go, animated together (a blue zigzag marks voiced sounds, a dashed arrow marks nasal sounds).
 - **Hear it** plays the reference voice, so you can compare by ear.
 
 Your attempts are saved in **History**, where you can replay recordings, delete attempts, and export or import them as a file. Recording is capped at 15 minutes per clip.

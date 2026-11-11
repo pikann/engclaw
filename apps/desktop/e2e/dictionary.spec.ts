@@ -28,7 +28,7 @@ test('search autocompletes, opens a word page with morpheme chips and a root fam
   const word = page.getByTestId('word-page')
   await expect(word.getByRole('heading', { name: 'accelerate', level: 2 })).toBeVisible()
   await expect(page.getByTestId('word-ipa').first()).toContainText('/')
-  await expect(word.getByTestId('hear-reference')).toBeVisible()
+  await expect(word.getByTestId('word-hear')).toBeVisible()
   const chips = page.getByTestId('morpheme-chips')
   await expect(chips.getByRole('button', { name: /celer/ })).toBeVisible()
   await expect(page.getByTestId('related-words')).toBeVisible()

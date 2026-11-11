@@ -1,10 +1,13 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
-import { BookOpen, Check, Mic, Play, RotateCcw, Smile, Volume2, X } from 'lucide-react'
+import { BookOpen, Check, Mic, Play, RotateCcw, Volume2, X } from 'lucide-react'
 import type { PronunciationResult } from '@engclaw/ipc-contract'
 import { Chart } from '@/components/detail-charts'
-import { Mouth } from '@/components/mouth'
+import { ArticulationView } from '@/components/articulation-view'
+import { SoundButtons } from '@/components/sound-buttons'
+import { ipaPhones } from '@/lib/articulation'
+import { useWordArticulation } from '@/lib/use-word-articulation'
 import { Button } from '@/components/ui/button'
 import { useWordLookup } from '@/lib/word-lookup'
 import { normalizeWord } from '@/lib/words'
@@ -23,14 +26,6 @@ import {
   type WordChip,
 } from '@/lib/result'
 import { cn } from '@/lib/utils'
-
-function speak(word: string): void {
-  if (!('speechSynthesis' in window)) return
-  window.speechSynthesis.cancel()
-  const u = new SpeechSynthesisUtterance(word)
-  u.lang = 'en-US'
-  window.speechSynthesis.speak(u)
-}
 
 /** The result's view model, derived once and shared by the summary and the detail tabs. */
 export function useResultView(result: PronunciationResult, text: string) {
@@ -182,12 +177,16 @@ function WordDetail({ chip, text }: { chip: WordChip; text: string }) {
   const { t } = useTranslation()
   const e = chip.error
   const lookup = useWordLookup()
-  const [phone, setPhone] = useState<number | null>(null)
-  const [playId, setPlayId] = useState(0)
-  useEffect(() => setPhone(null), [chip.position])
-  if (!e) return null
-  const sounds = e.phones.map((p) => p.expected)
-  const mouthPhones = phone === null ? sounds : sounds.slice(phone, phone + 1)
+  const sounds = useMemo(
+    () =>
+      e?.phones.length
+        ? e.phones.map((p) => p.expected)
+        : chip.expected.length
+          ? chip.expected
+          : ipaPhones(e?.expected ?? ''),
+    [chip, e],
+  )
+  const art = useWordArticulation(chip.word, sounds)
   return (
     <div className="space-y-2 rounded-md border p-3" data-testid="word-detail">
       <div className="flex items-center gap-2">
@@ -196,11 +195,11 @@ function WordDetail({ chip, text }: { chip: WordChip; text: string }) {
           variant="outline"
           size="sm"
           data-testid="word-hear"
-          disabled={!('speechSynthesis' in window)}
-          onClick={() => speak(chip.word)}
+          disabled={art.loading}
+          onClick={() => void art.hear()}
         >
           <Volume2 />
-          {t('result.hearIt')}
+          {art.loading ? t('reference.loading') : t('result.hearIt')}
         </Button>
         {lookup && (
           <Button
@@ -216,66 +215,40 @@ function WordDetail({ chip, text }: { chip: WordChip; text: string }) {
       </div>
       <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
         <dt className="text-muted-foreground">{t('result.expected')}</dt>
-        <dd className="font-mono" data-testid="word-expected">
-          {e.phones.length
-            ? e.phones.map((p, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  data-testid="word-phone"
-                  data-wrong={isWrongPhone(p.confidence)}
-                  aria-pressed={phone === i}
-                  aria-label={t('result.soundPick', { phone: p.expected })}
-                  onClick={() => {
-                    setPhone(i)
-                    setPlayId((n) => n + 1)
-                  }}
-                  className={cn(
-                    'rounded px-0.5',
-                    phone === i && 'bg-muted',
-                    isWrongPhone(p.confidence) && 'decoration-score-low underline decoration-2',
-                  )}
-                >
-                  {p.expected}
-                </button>
-              ))
-            : e.expected}
+        <dd className="font-mono" data-testid="word-expected" lang="en-fonipa">
+          <SoundButtons
+            sounds={sounds}
+            selected={art.selected}
+            onPick={art.pick}
+            wrong={(i) => isWrongPhone(e?.phones[i]?.confidence ?? 0)}
+          />
         </dd>
-        <dt className="text-muted-foreground">{t('result.heard')}</dt>
-        <dd className="font-mono" data-testid="word-heard">
-          {e.phones.length
-            ? e.phones.map((p, i) => (
-                <span
-                  key={i}
-                  className={cn(
-                    isWrongPhone(p.confidence) && 'decoration-score-low underline decoration-2',
-                  )}
-                >
-                  {p.heard || '∅'}
-                </span>
-              ))
-            : e.actual || '∅'}
-        </dd>
+        {e && (
+          <>
+            <dt className="text-muted-foreground">{t('result.heard')}</dt>
+            <dd className="font-mono" data-testid="word-heard">
+              {e.phones.length
+                ? e.phones.map((p, i) => (
+                    <span
+                      key={i}
+                      className={cn(
+                        isWrongPhone(p.confidence) && 'decoration-score-low underline decoration-2',
+                      )}
+                    >
+                      {p.heard || '∅'}
+                    </span>
+                  ))
+                : e.actual || '∅'}
+            </dd>
+          </>
+        )}
       </dl>
-      {e.actual_word && (
+      {e?.actual_word && (
         <p className="text-muted-foreground text-sm" data-testid="word-actual">
           {t('result.understood', { word: e.actual_word })}
         </p>
       )}
-      {sounds.length > 0 && (
-        <div className="flex items-center gap-3">
-          <Mouth phones={mouthPhones} playId={playId} />
-          <Button
-            variant="outline"
-            size="sm"
-            data-testid="mouth-play"
-            onClick={() => setPlayId((n) => n + 1)}
-          >
-            <Smile />
-            {t('result.playMouth')}
-          </Button>
-        </div>
-      )}
+      {sounds.length > 0 && <ArticulationView {...art.view} />}
     </div>
   )
 }
@@ -404,7 +377,7 @@ export function WordsDetail({
   onSelect: (position: number) => void
 }) {
   const { t } = useTranslation()
-  const current = view.chips.find((c) => c.position === selected && c.error)
+  const current = view.chips.find((c) => c.position === selected)
   return (
     <div className="space-y-3">
       {current ? (
