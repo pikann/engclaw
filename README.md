@@ -20,6 +20,10 @@
   Other files and checksums: <a href="https://github.com/pikann/engclaw/releases/latest">all releases</a>
 </p>
 
+<p align="center">
+  <img src="docs/media/practice.gif" alt="Reading 'Hello, I am a developer' aloud in Practice: the score appears with the mispronounced word 'hello' marked, then Hear it plays the word while the mouth and tongue animate for each sound" width="760">
+</p>
+
 Engclaw is an open-source desktop app (macOS, Windows, Linux) for practising English pronunciation. It scores how you say a sentence against a reference, phone by phone, and lets you shadow YouTube videos. The UI is available in English and Vietnamese.
 
 - **Practice**: read a sentence aloud or speak freely, then see which sounds, words and intonation to fix.
@@ -27,6 +31,19 @@ Engclaw is an open-source desktop app (macOS, Windows, Linux) for practising Eng
 - **Pronunciation game**: pass chapters one word at a time and collect stars.
 - **Dictionary**: look up words with IPA, roots and word families, and study them as flashcards.
 - **Converse** (optional): talk to an AI speaking-practice agent through a provider you configure.
+
+<table>
+  <tr>
+    <td align="center" width="50%"><img src="docs/media/shadowing.gif" alt="Shadowing: paste a YouTube link, load the video, record a sentence and get a score with the flagged word" width="420"><br><sub><b>Shadowing</b>: paste a YouTube link, repeat a line</sub></td>
+    <td align="center" width="50%"><img src="docs/media/game.gif" alt="Pronunciation game: pick a chapter on the map, a low-scoring try does not count, a good one fills a star" width="420"><br><sub><b>Game</b>: pick a chapter, only a clean try counts</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/media/dictionary.gif" alt="Dictionary: search 'accel', open the word, hear it and watch the mouth and tongue for each sound" width="420"><br><sub><b>Dictionary</b>: IPA, roots, mouth and tongue</sub></td>
+    <td align="center"><img src="docs/media/converse.gif" alt="Converse: saying a sentence and getting a spoken reply from the AI agent" width="420"><br><sub><b>Converse</b>: optional AI speaking partner</sub></td>
+  </tr>
+</table>
+
+<sub>The GIFs are scripted recordings of the real interface (fixed audio and results, so they look the same on every run). See [CONTRIBUTING.md](CONTRIBUTING.md#regenerate-the-readme-gifs).</sub>
 
 ## How the pronunciation check works
 
