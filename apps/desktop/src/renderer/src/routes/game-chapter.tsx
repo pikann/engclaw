@@ -47,6 +47,7 @@ import {
 } from '@/lib/chapter-session'
 import { prefetchSpeech } from '@/lib/speech'
 import { useChapterAsk } from '@/lib/use-ask-agent'
+import { notifyStarMoment } from '@/lib/star-prompt'
 
 type Chapter = NonNullable<GameChapter['chapter']>
 type Phase = 'idle' | 'recording' | 'analyzing'
@@ -111,6 +112,7 @@ async function saveToHistory(text: string, r: PronunciationResult, samples: Floa
       })),
       audio: samples,
     })
+    notifyStarMoment(r.score)
   } catch (e) {
     console.error('[history] save failed', e)
   }

@@ -4,6 +4,7 @@ import { classifyMicError, playPcm, Recorder } from '@/lib/audio'
 import { decodeSegmentAudio } from '@/lib/audio/decode'
 import { checkIntonation, type IntonationState } from './intonation'
 import type { Segment } from './shadowing'
+import { notifyStarMoment } from './star-prompt'
 
 export type AttemptErrorKind = 'mic' | 'model' | 'failed'
 
@@ -112,6 +113,7 @@ export function useSegmentAttempt(
           ...body,
         })
         loadBest()
+        notifyStarMoment(body.score)
       } catch (e) {
         console.error('[shadowing] attempt save failed', e)
       }

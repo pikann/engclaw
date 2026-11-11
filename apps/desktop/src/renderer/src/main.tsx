@@ -12,6 +12,7 @@ import { ShadowingPage } from '@/routes/shadowing'
 import { SettingsPage } from '@/routes/settings'
 import { ErrorBoundary } from '@/components/error-boundary'
 import { Toaster } from '@/components/ui/toaster'
+import { StarPrompt } from '@/components/star-prompt'
 import { initI18n } from '@/lib/i18n'
 import { setThemePreference, useTheme, useThemePreference } from '@/lib/theme'
 import './index.css'
@@ -91,6 +92,7 @@ void initI18n().then(() =>
           <RouterProvider router={router} />
         </ErrorBoundary>
         <Toaster />
+        <StarPrompt />
       </ThemeRoot>
     </StrictMode>,
   ),

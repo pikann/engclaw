@@ -53,6 +53,7 @@ import {
   type PracticeMode,
 } from '@/lib/practice'
 import { firstFlagged } from '@/lib/result'
+import { notifyStarMoment } from '@/lib/star-prompt'
 import { cn } from '@/lib/utils'
 
 const MODES: readonly PracticeMode[] = ['free', 'sentence']
@@ -83,6 +84,7 @@ async function saveAttempt(
       })),
       audio: audio.samples,
     })
+    notifyStarMoment(r.score)
     return true
   } catch (e) {
     console.error('[history] save failed', e)

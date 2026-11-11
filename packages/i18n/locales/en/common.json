@@ -1071,6 +1071,14 @@
     }
   },
   "skipToContent": "Skip to main content",
+  "starPrompt": {
+    "title": "Enjoying Engclaw?",
+    "body": "It's free and open source. A star on GitHub helps other learners find it.",
+    "star": "Star on GitHub",
+    "later": "Maybe later",
+    "never": "Don't ask again",
+    "openFailed": "Couldn't open the browser. Visit github.com/pikann/engclaw"
+  },
   "feedback": {
     "label": "Feedback",
     "tooltip": "Report this problem on GitHub",

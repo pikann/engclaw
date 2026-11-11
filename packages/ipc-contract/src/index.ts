@@ -941,6 +941,18 @@ export const AppEnvironment = z.object({
 })
 export type AppEnvironment = z.infer<typeof AppEnvironment>
 
+export const StarPromptState = z.object({
+  /** True once the user starred, or chose never to be asked again. */
+  done: z.boolean(),
+  /** Good practice results seen so far (the reminder only appears after a few). */
+  moments: z.number().int().min(0),
+  /** Times the reminder was shown. */
+  shown: z.number().int().min(0),
+  /** Epoch ms of the last time it was shown; 0 if never. */
+  lastShownAt: z.number().min(0),
+})
+export type StarPromptState = z.infer<typeof StarPromptState>
+
 export const AppSettings = z.object({
   /** Stop recording after ~2 s of silence once speech was heard. */
   silenceAutoStop: z.boolean().default(true),
@@ -956,6 +968,8 @@ export const AppSettings = z.object({
   wordImages: z.boolean().default(true),
   /** Converse: show the live transcript of the conversation while it is spoken. */
   captionsVisible: z.boolean().default(true),
+  /** Friendly "star us on GitHub" reminder: how often it was shown and whether it is finished. */
+  starPrompt: StarPromptState.default({ done: false, moments: 0, shown: 0, lastShownAt: 0 }),
 })
 export type AppSettings = z.infer<typeof AppSettings>
 export const AppSettingsPatch = AppSettings.partial().strict()
