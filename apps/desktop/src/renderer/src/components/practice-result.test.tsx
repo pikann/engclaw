@@ -124,6 +124,27 @@ describe('practice result', () => {
     expect(words).toContain('data-testid="word-hear"')
   })
 
+  it('shows the mouth and the tongue together, played by Hear it or by picking a sound', () => {
+    const words = html((view) => (
+      <WordsDetail view={view} selected={1} onSelect={() => undefined} />
+    ))
+    expect(words).toContain('data-testid="articulation"')
+    expect(words).toContain('data-testid="mouth"')
+    expect(words).toContain('data-testid="tongue"')
+    expect(words).not.toContain('mouth-play')
+  })
+
+  it('shows the sounds, mouth and tongue for a word said correctly too', () => {
+    const words = html((view) => (
+      <WordsDetail view={view} selected={2} onSelect={() => undefined} />
+    ))
+    expect(words).toContain('data-testid="word-detail"')
+    expect(words).toContain('data-testid="word-hear"')
+    expect(words).toContain('data-testid="tongue"')
+    expect(words.match(/data-testid="word-phone"/g)).toHaveLength(4)
+    expect(words).not.toContain('data-testid="word-heard"')
+  })
+
   it('explains an empty pitch track instead of drawing a chart', () => {
     const quiet = { ...result, prosody: { f0: [], energy: [] } } as PronunciationResult
     expect(html(() => <PitchDetail result={quiet} />)).toContain('pitch-empty')

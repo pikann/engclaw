@@ -43,6 +43,20 @@ describe('result view model', () => {
     expect(chips.map((c) => !!c.error)).toEqual([false, true, false])
   })
 
+  it("carries each word's expected sounds, including correct words", () => {
+    const chips = wordChips(
+      {
+        ...result([err(1, 'quick')]),
+        differences: {
+          ...result([]).differences,
+          expected_phones: [['ð', 'ə'], ['k', 'w'], ['b']],
+        },
+      } as never,
+      'the quick brown',
+    )
+    expect(chips.map((c) => c.expected)).toEqual([['ð', 'ə'], ['k', 'w'], ['b']])
+  })
+
   it('auto-selects the first flagged word and counts the verdict', () => {
     const chips = wordChips(result([err(2, 'brown'), err(1, 'quick')]), 'the quick brown')
     expect(firstFlagged(chips)).toBe(1)

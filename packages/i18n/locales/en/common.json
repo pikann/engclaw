@@ -144,7 +144,7 @@
     "chartF0": "Pitch (F0, Hz)",
     "chartEnergy": "Energy",
     "mouthAlt": "Mouth shape {{shape}}",
-    "playMouth": "Show mouth",
+    "tongueAlt": "Tongue position for {{phone}}",
     "soundPick": "Sound {{phone}}"
   },
   "nav": {
@@ -1029,7 +1029,8 @@
         "imported": "Imported {{imported}} new, updated {{updated}}, skipped {{skipped}} (not in the dictionary).",
         "error": "Could not use the file: {{message}}"
       }
-    }
+    },
+    "articulation": "Mouth & tongue"
   },
   "converse": {
     "title": "Converse",

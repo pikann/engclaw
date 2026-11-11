@@ -13,6 +13,8 @@ export const HEARD_PHONE_CONFIDENCE = 0.5
 export interface WordChip {
   position: number
   word: string
+  /** The word's expected sounds (IPA), from the phonemizer; also set for words said correctly. */
+  expected: string[]
   error: WordError | null
 }
 
@@ -23,7 +25,12 @@ export function wordChips(result: PronunciationResult, text: string): WordChip[]
   const count = Math.max(expected_phones.length, words.length)
   return Array.from({ length: count }, (_, position) => {
     const error = errors.find((e) => e.position === position) ?? null
-    return { position, word: words[position] ?? error?.word ?? '', error }
+    return {
+      position,
+      word: words[position] ?? error?.word ?? '',
+      expected: expected_phones[position] ?? [],
+      error,
+    }
   })
 }
 
