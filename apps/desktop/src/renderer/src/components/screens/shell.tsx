@@ -14,7 +14,6 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { Logo } from '@/components/ui/logo'
-import { Progress } from '@/components/ui/progress'
 import {
   Sidebar,
   SidebarContent,
@@ -267,13 +266,6 @@ export function AppShell({
         </SidebarContent>
         <SidebarFooter>
           <SidebarMenu>
-            {modelsPercent != null && (
-              <Progress
-                value={modelsPercent}
-                aria-label={t('models.dl.progressLabel')}
-                className="mx-2 w-auto group-data-[collapsible=icon]:hidden"
-              />
-            )}
             <FeedbackItem onFailed={() => setFeedbackFailed(true)} />
             <NavItem
               icon={Settings}
@@ -317,7 +309,7 @@ export function AppShell({
             <span className="flex items-center gap-1.5" data-testid="footer-models">
               <span aria-hidden="true" className="bg-warning size-2 rounded-full" />
               {linked ? (
-                <Link to="/settings" className="underline-offset-2 hover:underline">
+                <Link to="/settings?tab=models" className="underline-offset-2 hover:underline">
                   {t('screens.shell.modelsMissing')}
                 </Link>
               ) : (
