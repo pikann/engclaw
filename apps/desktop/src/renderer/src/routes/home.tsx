@@ -1,3 +1,4 @@
+import { useLearningLanguage } from '@/lib/learning-language'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { HistoryAttempt } from '@engclaw/ipc-contract'
@@ -37,6 +38,7 @@ function useOnline(): boolean {
 }
 
 export function Home() {
+  const language = useLearningLanguage()
   const { models, progress, refresh } = useModels()
   const [recent, setRecent] = useState<RecentRow[] | null>(null)
   const [downloadOpen, setDownloadOpen] = useState(false)
@@ -44,9 +46,9 @@ export function Home() {
 
   useEffect(() => {
     void window.engclaw.history
-      .list({ limit: RECENT_COUNT })
+      .list({ limit: RECENT_COUNT, language })
       .then((r) => setRecent(r.attempts.map(toRow)))
-  }, [])
+  }, [language])
 
   const card = modelCard(models ?? [], progress)
   const model: ModelCardData = {

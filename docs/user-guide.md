@@ -73,3 +73,31 @@ Converse is a speaking-practice chat with an AI agent. It needs a provider you s
 - **A YouTube video won't load**: pick another video with captions. YouTube changes can break this feature until the app is updated.
 - **Feedback**: click **Feedback** at the bottom of the sidebar to report a bug or request a feature on GitHub (a free GitHub account is needed).
 - **Something else**: search [Issues](https://github.com/pikann/engclaw/issues) or ask in [Discussions](https://github.com/pikann/engclaw/discussions).
+
+## Learning language: English or Chinese (China)
+
+Use **Learning language** in the top bar to select **English** or **Chinese (China)**. This is separate from the interface language in Settings. The choice is saved across restarts. Switching starts a new practice session, stops playback and clears the previous dictionary selection and shadowing session.
+
+| Feature | English | Chinese (China / Mandarin) |
+| --- | --- | --- |
+| Dictionary | English definitions, IPA, roots and families | Offline CC-CEDICT; search simplified/traditional characters, pinyin with or without tones, or English definitions; display simplified Chinese, pinyin and English meanings |
+| Practice | Existing phone-level scoring | Record or import audio; recognize Mandarin and compare characters against your sentence; free speaking uses Mandarin transcription |
+| Hear reference | Kokoro | Bundled espeak-ng Mandarin voice (basic synthetic speech) |
+| Shadowing | English captions, IPA | Mandarin captions (`zh`, `zh-CN`, `zh-Hans`, `cmn`), pinyin, Chinese word lookup, dictation and recording |
+| Converse | English speaking partner | Mandarin speaking partner with simplified Chinese replies, Mandarin transcription and speech; requires your AI provider |
+| History | English attempts | Mandarin attempts, stored separately by language |
+| Game, roots and flashcards | Existing English corpus | Not yet available; English content is not shown as Mandarin material |
+
+The Mandarin model (`asr-zh`, about 1.28 GB) is downloaded with the usual consent prompt when first needed. Dictionary lookup, pinyin and synthesized Mandarin speech do not require that download. From source, build the bundled speech executable with `bun run --cwd apps/desktop espeak` (requires CMake and a C/C++ compiler). Packaged apps include it.
+
+**Mandarin scoring is experimental character recognition accuracy**, calculated as `100 × max(0, 1 − character edits / reference character count)`, ignoring punctuation and spaces. It does not measure phoneme accuracy, tone accuracy, or acoustic similarity. A recognizer can accept a mispronunciation or mishear correct speech. English phoneme and acoustic score tiles are omitted for Mandarin. The English stress/prosody guide is disabled for Mandarin; a shadowing recording can still show the pitch comparison with the original clip, without claiming a tone grade.
+
+CC-CEDICT definitions are English, even with a Vietnamese interface. Source and license details: [dictionary data attribution](../apps/desktop/resources/data/DICTIONARY_SOURCES.md).
+
+### Videos without CC captions
+
+Some Chinese videos have subtitles drawn into the image, with no downloadable YouTube CC track. If no matching track is available, click **Generate transcript from audio**. Engclaw downloads audio in small windows and runs the selected local speech recognizer. If the model is missing, the usual model-download consent prompt appears first. Progress is shown in seconds; Cancel stops the operation. A complete transcript is cached with the video and reused on subsequent opens. Recognized words can be wrong and the 20-second segment timings are approximate; this is not OCR of subtitles drawn into the video.
+
+YouTube can refuse audio downloads (HTTP 403) even when the video plays in its embedded player. In that case generation stops, displays the download error, and does not save an incomplete transcript. Retry later or use another video.
+
+Mandarin comparison normalizes simplified and traditional characters to simplified orthography before calculating character accuracy. Original caption text is preserved for display. Traditional dictionary clicks resolve through the exact traditional aliases in CC-CEDICT, and pinyin is displayed without IPA slash delimiters.

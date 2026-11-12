@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+import { useLearningLanguage } from '@/lib/learning-language'
 import { AlertTriangle, Film, Loader2, WifiOff } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -17,6 +19,9 @@ export function ShadowingEntry({
   onRetry,
   recents,
   onOpenRecent,
+  transcriptAction,
+  loadingMessage,
+  onCancel,
 }: {
   url: string
   onUrlChange: (url: string) => void
@@ -24,9 +29,13 @@ export function ShadowingEntry({
   loading: boolean
   error: EntryError | null
   onRetry: () => void
+  transcriptAction?: ReactNode
+  loadingMessage?: string
+  onCancel?: () => void
   recents: readonly RecentVideo[]
   onOpenRecent: (videoId: string) => void
 }) {
+  const language = useLearningLanguage()
   const { t } = useTranslation()
   const input = useRef<HTMLInputElement>(null)
 
@@ -47,6 +56,9 @@ export function ShadowingEntry({
         }}
       >
         <h3 className="text-2xl font-semibold">{t('screens.shadowing.heading')}</h3>
+        {language === 'zh' && (
+          <p className="text-sm text-muted-foreground">{t('learning.chineseCaptions')}</p>
+        )}
         <div className="flex gap-2">
           <Input
             ref={input}
@@ -67,8 +79,13 @@ export function ShadowingEntry({
         </div>
         {loading && (
           <p role="status" className="text-muted-foreground text-sm">
-            {t('screens.shadowing.loading')}
+            {loadingMessage ?? t('screens.shadowing.loading')}
           </p>
+        )}
+        {loading && onCancel && (
+          <Button type="button" variant="outline" onClick={onCancel}>
+            {t('models.cancel')}
+          </Button>
         )}
         {error && (
           <Alert
@@ -84,7 +101,18 @@ export function ShadowingEntry({
               <AlertTriangle className="mt-0.5 size-4 shrink-0" />
             )}
             <div className="space-y-2">
-              <p>{t(`screens.shadowing.error.${error}`)}</p>
+              <p>
+                {t(
+                  error === 'audioBlocked'
+                    ? 'learning.audioBlocked'
+                    : error === 'transcribeFailed'
+                      ? 'learning.generateFailed'
+                      : error === 'noTranscript' && language === 'zh'
+                        ? 'learning.noChineseCaptions'
+                        : `screens.shadowing.error.${error}`,
+                )}
+              </p>
+              {transcriptAction}
               {error === 'network' && (
                 <Button type="button" size="sm" variant="outline" onClick={onRetry}>
                   {t('practice.retry')}

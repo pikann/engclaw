@@ -1,3 +1,8 @@
+import {
+  LearningLanguageProvider,
+  LearningLanguageSelect,
+  useLearningLanguage,
+} from '@/lib/learning-language'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Outlet, useLocation } from 'react-router'
@@ -69,6 +74,15 @@ function useProvider(refreshKey: string): string | null {
  * mounted (and an in-flight recording or analysis survives) while the user visits other pages.
  */
 export function AppLayout() {
+  return (
+    <LearningLanguageProvider>
+      <LearningAppLayout />
+    </LearningLanguageProvider>
+  )
+}
+
+function LearningAppLayout() {
+  const learningLanguage = useLearningLanguage()
   const { t } = useTranslation()
   const { pathname } = useLocation()
   const layout = useLayout()
@@ -85,7 +99,7 @@ export function AppLayout() {
     pathname.startsWith('/game/chapter/')
   const known = section in TITLES
   return (
-    <WordLookupProvider>
+    <WordLookupProvider key={learningLanguage}>
       <a
         href="#main-content"
         onClick={(e) => {
@@ -99,6 +113,7 @@ export function AppLayout() {
       <div className="h-screen">
         <AppShell
           linked
+          actions={<LearningLanguageSelect />}
           layout={layout}
           active={active}
           mic={mic}

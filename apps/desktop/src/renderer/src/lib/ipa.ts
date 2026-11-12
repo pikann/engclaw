@@ -13,6 +13,14 @@ const WORD = /\b[\w']+\b/g
  * for it. Returns null when the counts disagree, so a misaligned line is hidden rather than wrong.
  */
 export function alignIpa(text: string, words: readonly IpaWord[]): IpaToken[] | null {
+  if (/\p{Script=Han}/u.test(text)) {
+    let index = 0
+    const tokens = Array.from(text).map((char) => ({
+      text: char,
+      ipa: /[\p{L}\p{N}]/u.test(char) ? (words[index++]?.ipa ?? null) : null,
+    }))
+    return index === words.length ? tokens : null
+  }
   let next = 0
   const tokens: IpaToken[] = []
   for (const piece of text.split(/\s+/).filter(Boolean)) {

@@ -1,3 +1,4 @@
+import { speakMandarin } from './mandarin-speech'
 // Inference worker entry (utility process): serves the main process over `rpc` messages.
 import { join } from 'node:path'
 import type { ContourData } from '@engclaw/ipc-contract'
@@ -72,6 +73,8 @@ async function dispatch(req: RpcRequest, signal: AbortSignal): Promise<unknown> 
     case 'phonemize':
       return inference.phonemize(p.text!, p.language)
     case 'speak': {
+      if (p.language === 'zh')
+        return { samples: await speakMandarin(p.text!), sampleRate: 16000, cached: false }
       if (!p.kokoro)
         throw new InferenceError('MODEL_MISSING', 'reference voice not installed', TTS_MODEL_ID)
       return (await speechFor(p.kokoro.modelDir, p.kokoro.cacheDir)).speak(p.text!)

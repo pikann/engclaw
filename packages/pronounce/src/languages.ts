@@ -1,4 +1,4 @@
-/** Language registry (OpenPronounce `languages.py`). English only for the PoC; add entries to extend. */
+/** Language registry (OpenPronounce `languages.py`). English pronunciation and experimental Mandarin character recognition. */
 
 export interface LanguageConfig {
   code: string
@@ -12,6 +12,15 @@ export interface LanguageConfig {
 }
 
 export const LANGUAGES: Readonly<Record<string, LanguageConfig>> = {
+  zh: {
+    code: 'zh',
+    name: '普通话（简体中文）',
+    experimental: true,
+    espeakVoice: 'cmn',
+    // The Mandarin recognition path does not load the phone model.
+    phoneModelId: 'phone',
+    asrModelId: 'asr-zh',
+  },
   en: {
     code: 'en',
     name: 'English',

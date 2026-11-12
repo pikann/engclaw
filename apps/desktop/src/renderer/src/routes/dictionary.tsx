@@ -1,3 +1,4 @@
+import { useLearningLanguage } from '@/lib/learning-language'
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router'
@@ -20,16 +21,25 @@ const toId = (raw: string | null): number | null => {
 
 /** Dictionary (IA doc §5): search · word page · roots and family, plus the roots explorer. */
 export function DictionaryPage() {
+  const language = useLearningLanguage()
   const { t } = useTranslation()
   const navigate = useNavigate()
   const layout = useLayout()
   const [params, setParams] = useSearchParams()
   const [pageTab, setPageTab] = useState('word')
-  const [recent, setRecent] = useState(() => loadRecent(localStorage))
+  const [recent, setRecent] = useState(() =>
+    loadRecent(localStorage).filter((word) =>
+      language === 'zh' ? word.id >= 1_000_000_000 : word.id < 1_000_000_000,
+    ),
+  )
 
   const sectionParam = params.get('section')
   const section =
-    sectionParam === 'roots' || sectionParam === 'flashcards' ? sectionParam : 'search'
+    language === 'zh'
+      ? 'search'
+      : sectionParam === 'roots' || sectionParam === 'flashcards'
+        ? sectionParam
+        : 'search'
   const drillRootId = toId(params.get('drill'))
   const wordId = toId(params.get('word'))
   const rootParam = toId(params.get('root'))
@@ -54,13 +64,18 @@ export function DictionaryPage() {
     (w: RecentWord) => {
       setRecent((list) => {
         const next = pushRecent(list, w)
-        saveRecent(localStorage, next)
+        saveRecent(localStorage, [
+          ...next,
+          ...loadRecent(localStorage).filter((word) =>
+            language === 'zh' ? word.id < 1_000_000_000 : word.id >= 1_000_000_000,
+          ),
+        ])
         return next
       })
       setPageTab('word')
       go({ section: null, word: String(w.id), root: null })
     },
-    [go],
+    [go, language],
   )
   const openRoot = (id: number) => {
     setPageTab('roots')
@@ -106,12 +121,16 @@ export function DictionaryPage() {
             <TabsTrigger value="search" data-testid="dictionary-tab-search">
               {t('dict.section.search')}
             </TabsTrigger>
-            <TabsTrigger value="roots" data-testid="dictionary-tab-roots">
-              {t('dict.section.roots')}
-            </TabsTrigger>
-            <TabsTrigger value="flashcards" data-testid="dictionary-tab-flashcards">
-              {t('dict.section.flashcards')}
-            </TabsTrigger>
+            {language !== 'zh' && (
+              <TabsTrigger value="roots" data-testid="dictionary-tab-roots">
+                {t('dict.section.roots')}
+              </TabsTrigger>
+            )}
+            {language !== 'zh' && (
+              <TabsTrigger value="flashcards" data-testid="dictionary-tab-flashcards">
+                {t('dict.section.flashcards')}
+              </TabsTrigger>
+            )}
           </TabsList>
         </div>
 
@@ -119,7 +138,7 @@ export function DictionaryPage() {
           <div
             className={cn(
               'grid h-full divide-x',
-              wide
+              wide && language !== 'zh'
                 ? 'grid-cols-[260px_1fr_320px]'
                 : layout === 'compact'
                   ? 'grid-cols-[220px_1fr]'
@@ -129,7 +148,9 @@ export function DictionaryPage() {
             <Pane title={t('dict.section.search')}>
               <SearchPane selectedId={wordId} recent={recent} onOpen={openWord} />
             </Pane>
-            {wide ? (
+            {language === 'zh' ? (
+              <Pane>{wordPage}</Pane>
+            ) : wide ? (
               <>
                 <Pane>{wordPage}</Pane>
                 <Pane title={t('dict.familyTitle')}>{family}</Pane>

@@ -1,8 +1,10 @@
+import { useLearningLanguage } from './learning-language'
 import { useCallback, useEffect, useState } from 'react'
 import type { ModelProgress, ModelStatus } from '@engclaw/ipc-contract'
 
 /** Installed-model state plus live download progress; `models` is null until the first load. */
 export function useModels() {
+  const language = useLearningLanguage()
   const [models, setModels] = useState<ModelStatus[] | null>(null)
   const [progress, setProgress] = useState<Record<string, ModelProgress>>({})
   const refresh = useCallback(() => window.engclaw.models.list().then(setModels), [])
@@ -14,5 +16,12 @@ export function useModels() {
       else setModels((m) => m && m.map((x) => (x.id === e.id ? { ...x, state: 'downloading' } : x)))
     })
   }, [refresh])
-  return { models, progress, refresh }
+  return {
+    models:
+      models?.filter((model) =>
+        language === 'zh' ? model.id === 'asr-zh' : model.id !== 'asr-zh',
+      ) ?? null,
+    progress,
+    refresh,
+  }
 }

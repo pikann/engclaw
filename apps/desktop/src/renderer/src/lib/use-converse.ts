@@ -1,3 +1,4 @@
+import { useLearningLanguage } from '@/lib/learning-language'
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import type { AgentConversation, AgentEvent, SpeechSummary } from '@engclaw/ipc-contract'
 import { classifyMicError, micGuidance, playPcm, Recorder, type MicErrorReason } from '@/lib/audio'
@@ -11,6 +12,7 @@ export type ConverseNotice = 'noSpeech' | 'speakFailed' | null
 
 /** The Converse turn loop: mic -> local ASR -> agent -> local TTS, with barge-in and cancel. */
 export function useConverse(platform: string) {
+  const language = useLearningLanguage()
   const [state, dispatch] = useReducer(converseReducer, initialConverse)
   const [mic, setMic] = useState<{ reason: MicErrorReason; guidance: string } | null>(null)
   const [needsModels, setNeedsModels] = useState(false)
@@ -35,28 +37,34 @@ export function useConverse(platform: string) {
     playback.current = null
   }, [])
 
-  const speak = useCallback(async (text: string) => {
-    const mine = ++turnToken.current
-    try {
-      const res = await window.engclaw.tts.speak({ text: text.slice(0, MAX_SPOKEN_CHARS) })
-      if (turnToken.current !== mine) return
-      if (!res.ok) {
-        setNotice('speakFailed')
-        if (res.code === 'MODEL_MISSING') setNeedsModels(true)
-        return dispatch({ type: 'spoken' })
+  const speak = useCallback(
+    async (text: string) => {
+      const mine = ++turnToken.current
+      try {
+        const res = await window.engclaw.tts.speak({
+          text: text.slice(0, MAX_SPOKEN_CHARS),
+          language,
+        })
+        if (turnToken.current !== mine) return
+        if (!res.ok) {
+          setNotice('speakFailed')
+          if (res.code === 'MODEL_MISSING') setNeedsModels(true)
+          return dispatch({ type: 'spoken' })
+        }
+        const h = playPcm(res.samples, res.sampleRate)
+        playback.current = h
+        await h.done
+      } catch {
+        if (turnToken.current === mine) setNotice('speakFailed')
+      } finally {
+        if (turnToken.current === mine) {
+          playback.current = null
+          dispatch({ type: 'spoken' })
+        }
       }
-      const h = playPcm(res.samples, res.sampleRate)
-      playback.current = h
-      await h.done
-    } catch {
-      if (turnToken.current === mine) setNotice('speakFailed')
-    } finally {
-      if (turnToken.current === mine) {
-        playback.current = null
-        dispatch({ type: 'spoken' })
-      }
-    }
-  }, [])
+    },
+    [language],
+  )
 
   const handleEvent = useCallback(
     (e: Exclude<AgentEvent, { type: 'tool' }>) => {
@@ -87,6 +95,8 @@ export function useConverse(platform: string) {
       recorder.current = null
       void rec?.stop().catch(() => undefined)
       if (asrId.current) void window.engclaw.inference.cancel({ requestId: asrId.current })
+      if (stateRef.current.requestId)
+        void window.engclaw.agent.cancel({ requestId: stateRef.current.requestId })
     }
   }, [refreshList, stopSpeaking])
 
@@ -129,7 +139,7 @@ export function useConverse(platform: string) {
     asrId.current = id
     dispatch({ type: 'transcribing' })
     const res = await window.engclaw.inference
-      .transcribe({ requestId: id, audio: clip.samples })
+      .transcribe({ requestId: id, audio: clip.samples, language })
       .catch(() => null)
     if (asrId.current !== id) return
     if (!res || !res.ok) {
@@ -144,14 +154,17 @@ export function useConverse(platform: string) {
       return dispatch({ type: 'stop-listening' })
     }
     // The analysis is best-effort: if it fails or is cancelled the turn goes out as plain text.
-    const speech = await window.engclaw.inference
-      .analyze({ requestId: id, audio: clip.samples, text })
-      .then((r) => (r.ok ? buildSpeechSummary(r.value) : undefined))
-      .catch(() => undefined)
+    const speech =
+      language === 'en'
+        ? await window.engclaw.inference
+            .analyze({ requestId: id, audio: clip.samples, text, language })
+            .then((r) => (r.ok ? buildSpeechSummary(r.value) : undefined))
+            .catch(() => undefined)
+        : undefined
     if (asrId.current !== id) return
     asrId.current = null
     await submit(text, speech)
-  }, [submit])
+  }, [submit, language])
 
   const startListening = useCallback(async () => {
     stopSpeaking()

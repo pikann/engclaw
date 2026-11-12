@@ -24,3 +24,11 @@ carries a link-back URL.
 Open English WordNet is licensed under
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Princeton WordNet 3.1 is
 Copyright 2011 by Princeton University and used under the WordNet License.
+
+## Mandarin Chinese
+
+`cedict.txt.gz` is an unmodified CC-CEDICT archive from [MDBG](https://www.mdbg.net/chinese/dictionary?page=cc-cedict), by the CC-CEDICT contributors. It contains simplified and traditional characters, numbered pinyin and English definitions, licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). The original copyright and license header is retained inside the archive. `cedict.manifest.json` records its exact SHA-256 checksum, size and entry count. Redistributing or adapting this data requires preserving attribution and the same license. Engclaw converts numbered pinyin to tone marks for display; the source archive is unchanged.
+
+Pinyin for arbitrary Mandarin sentences is generated with [pinyin-pro](https://github.com/zh-lx/pinyin-pro), licensed under MIT. It is a reading aid, not phoneme or tone assessment.
+
+Mandarin scoring normalizes traditional and simplified orthography with [opencc-js](https://github.com/nk2028/opencc-js). Its JavaScript implementation is MIT-licensed, and its bundled OpenCC dictionary data is Apache-2.0-licensed. Conversion runs locally; it does not translate regional vocabulary or send learner text to a service.

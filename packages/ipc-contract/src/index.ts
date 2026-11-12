@@ -29,6 +29,21 @@ export const VideoMeta = z.object({
   captionTracks: z.array(z.object({ lang: z.string(), auto: z.boolean() })),
 })
 export const TranscriptCue = z.object({ start: z.number(), dur: z.number(), text: z.string() })
+export type TranscriptCue = z.infer<typeof TranscriptCue>
+export const GeneratedTranscriptSave = VideoRef.extend({
+  language: z.enum(['en', 'zh']),
+  cues: z
+    .array(
+      TranscriptCue.extend({
+        start: z.number().min(0),
+        dur: z.number().positive(),
+        text: z.string().min(1).max(1000),
+      }),
+    )
+    .min(1)
+    .max(5000),
+}).strict()
+
 export const AudioRangeResponse = z.object({
   bytes: z.custom<Uint8Array>((v) => v instanceof Uint8Array),
   mime: z.string(),
@@ -98,7 +113,11 @@ const youtubeResult = <T extends z.ZodTypeAny>(value: T) =>
     z.object({ ok: z.literal(false), code: YouTubeErrorCode, message: z.string() }),
   ])
 
-export const SpeakRequest = z.object({ text: z.string().min(1).max(1000) }).strict()
+export const LearningLanguage = z.enum(['en', 'zh'])
+export type LearningLanguage = z.infer<typeof LearningLanguage>
+export const SpeakRequest = z
+  .object({ text: z.string().min(1).max(1000), language: LearningLanguage.optional() })
+  .strict()
 export const SpeakErrorCode = z.enum(['MODEL_MISSING', 'FAILED'])
 export const SpeakResponse = z.discriminatedUnion('ok', [
   z.object({
@@ -221,6 +240,8 @@ export type InferenceResult<T> =
 const PhoneReport = z.object({ expected: z.string(), heard: z.string(), confidence: z.number() })
 /** OpenPronounce `/pronunciation` body (snake_case, as the Python reference emits it). */
 export const PronunciationResult = z.object({
+  /** Mandarin currently reports ASR character accuracy, not phone or tone assessment. */
+  assessment: z.literal('character-accuracy').optional(),
   score: z.number(),
   distance: z.number(),
   acoustic_distance: z.number(),
@@ -270,6 +291,7 @@ export const IpaWord = z.object({ word: z.string(), ipa: z.string() })
 export type IpaWord = z.infer<typeof IpaWord>
 /** IPA for the sentences of a video's transcript; results are cached per video. */
 export const TranscriptIpaRequest = VideoRef.extend({
+  language: LearningLanguage.optional(),
   texts: z.array(z.string().min(1).max(1000)).min(1).max(5000),
   /** Only read the cache: resolves to [] unless every sentence is already cached. */
   cachedOnly: z.boolean().optional(),
@@ -300,6 +322,7 @@ export type SegmentProsody = z.infer<typeof SegmentProsody>
  * instead of failing when there is nothing cached.
  */
 export const SegmentProsodyRequest = VideoRef.extend({
+  language: LearningLanguage.optional(),
   start: z.number().min(0),
   end: z.number().min(0),
   text: z.string().min(1).max(1000),
@@ -393,6 +416,7 @@ export const HistorySaveRequest = HistoryAttempt.omit({ id: true, createdAt: tru
 export type HistorySaveRequest = z.infer<typeof HistorySaveRequest>
 export const HistoryListRequest = z
   .object({
+    language: LearningLanguage.optional(),
     limit: z.number().int().min(1).max(500).optional(),
     offset: z.number().int().min(0).optional(),
     videoId: z.string().min(1).max(32).optional(),
@@ -437,7 +461,11 @@ const RootSummarySchema = z.object({
   origins: z.array(z.string()),
 })
 export const DictionarySearchRequest = z
-  .object({ query: z.string().max(100), limit: z.number().int().min(1).max(50).optional() })
+  .object({
+    language: LearningLanguage.optional(),
+    query: z.string().max(100),
+    limit: z.number().int().min(1).max(50).optional(),
+  })
   .strict()
 export const GameChapterRequest = z.object({ order: z.number().int().min(1) }).strict()
 export const GameChapter = z.object({
@@ -761,17 +789,24 @@ export const GameRecordResult = z.object({
   previous: GameProgressEntry.nullable(),
   improved: z.boolean(),
 })
-export const DictionaryIdRequest = z.object({ id: z.number().int().min(0) }).strict()
+export const DictionaryIdRequest = z
+  .object({ language: LearningLanguage.optional(), id: z.number().int().min(0) })
+  .strict()
 export const DictionaryRootsRequest = z
   .object({ origin: z.string().max(40).optional(), query: z.string().max(100).optional() })
   .strict()
 export const DictionarySearchResult = z.object({
+  /** Exact traditional alias for Mandarin lookup; English results omit it. */
+  traditional: z.string().optional(),
   id: z.number().int(),
   word: z.string(),
   match: z.enum(['prefix', 'fuzzy']),
   distance: z.number().optional(),
 })
 export const DictionaryWord = z.object({
+  language: LearningLanguage.optional(),
+  pinyin: z.string().optional(),
+  traditional: z.string().optional(),
   id: z.number().int(),
   word: z.string(),
   pronunciations: z.array(z.string()),
@@ -954,6 +989,8 @@ export const StarPromptState = z.object({
 export type StarPromptState = z.infer<typeof StarPromptState>
 
 export const AppSettings = z.object({
+  /** Target language for learning, separate from the interface locale. */
+  learningLanguage: LearningLanguage.default('en'),
   /** Stop recording after ~2 s of silence once speech was heard. */
   silenceAutoStop: z.boolean().default(true),
   /** Check GitHub releases for a newer version on launch. */
@@ -1002,6 +1039,7 @@ export const IPC = {
   modelsProgress: 'models:progress',
   youtubeMeta: 'youtube:meta',
   youtubeTranscript: 'youtube:transcript',
+  youtubeSaveGeneratedTranscript: 'youtube:saveGeneratedTranscript',
   youtubeAudioRange: 'youtube:audioRange',
   youtubeRecent: 'youtube:recent',
   youtubeGetSettings: 'youtube:getSettings',
@@ -1106,6 +1144,7 @@ export const invokeChannels = {
     request: TranscriptRequest,
     response: youtubeResult(z.array(TranscriptCue)),
   },
+  [IPC.youtubeSaveGeneratedTranscript]: { request: GeneratedTranscriptSave, response: z.null() },
   [IPC.youtubeAudioRange]: {
     request: AudioRangeRequest,
     response: youtubeResult(AudioRangeResponse),
@@ -1266,6 +1305,7 @@ export interface EngclawApi {
     transcript(
       req: z.infer<typeof TranscriptRequest>,
     ): Promise<YouTubeResult<z.infer<typeof TranscriptCue>[]>>
+    saveGeneratedTranscript(req: z.infer<typeof GeneratedTranscriptSave>): Promise<null>
     audioRange(
       req: z.infer<typeof AudioRangeRequest>,
     ): Promise<YouTubeResult<z.infer<typeof AudioRangeResponse>>>

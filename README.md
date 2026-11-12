@@ -24,7 +24,7 @@
   <img src="docs/media/practice.gif" alt="Reading 'Hello, I am a developer' aloud in Practice: the score appears with the mispronounced word 'hello' marked, then Hear it plays the word while the mouth and tongue animate for each sound" width="760">
 </p>
 
-Engclaw is an open-source desktop app (macOS, Windows, Linux) for practising English pronunciation. It scores how you say a sentence against a reference, phone by phone, and lets you shadow YouTube videos. The UI is available in English and Vietnamese.
+Engclaw is an open-source desktop app (macOS, Windows, Linux) for practising English pronunciation. It scores how you say a sentence against a reference, phone by phone, and lets you shadow YouTube videos. Choose **Learning language → English / Chinese (China)** in the header. Dictionary, Practice, Shadowing and Converse follow that choice; the UI remains available in English and Vietnamese. Mandarin currently uses speech recognition to measure character accuracy, not individual sounds or tones.
 
 - **Practice**: read a sentence aloud or speak freely, then see which sounds, words and intonation to fix.
 - **Shadowing**: repeat sentences from a YouTube video with a transcript, or test yourself with dictation.
@@ -83,7 +83,7 @@ Please read this before installing; these are the honest limits of the current r
 | **Memory**           | The models are large (the two wav2vec2 models are about 1.26 GB each as files). Plan for several GB of free RAM while scoring; models load on demand and unload when idle. We have not published formal minimum specs yet, so treat 8 GB as a practical starting point on a machine with a recent CPU. |
 | **Speed**            | Scoring runs on your CPU, or on the GPU through WebGPU when available, with an automatic CPU fallback. The target is under about 3 seconds for a 5-second clip on a recent laptop. Older machines will be slower.                                                                                      |
 | **Network**          | Needed once to download the models, and for YouTube, word illustrations, updates and the AI agent. Practice and the game work offline after the models are installed.                                                                                                                                  |
-| **Language**         | Pronunciation scoring is English only. The interface is English and Vietnamese.                                                                                                                                                                                                                        |
+| **Language**         | English phone-level pronunciation scoring; experimental Mandarin speech recognition and character accuracy. Mandarin dictionary definitions are in English. Game and flashcards currently have English content only. The interface is English and Vietnamese.                                                                                                                                                                                                                        |
 | **Recording length** | Clips are limited to 15 minutes.                                                                                                                                                                                                                                                                       |
 
 ## Install
@@ -92,12 +92,13 @@ Use the download buttons at the top of this page (or pick a file from [GitHub Re
 
 ## Models
 
-Models are not bundled or committed. They are downloaded from Hugging Face Hub the first time a feature needs them, verified by SHA-256 checksum, and stored in the app data directory (you can change the folder in Settings → AI models). The app uses a fixed set of models, pinned by revision in [`apps/desktop/resources/models.json`](apps/desktop/resources/models.json). There is no model picker.
+Models are not bundled or committed. They are downloaded from Hugging Face Hub the first time a feature needs them, verified by SHA-256 checksum, and stored in the app data directory (you can change the folder in Settings → AI models). The app uses a fixed set of models, pinned by revision in [`apps/desktop/resources/models.json`](apps/desktop/resources/models.json). The selected learning language determines which models are needed. Mandarin uses its own ASR model and the bundled espeak-ng Mandarin voice, and does not require the English ASR or Kokoro models.
 
 | Model                                           | Used for                  | Download size | License    |
 | ----------------------------------------------- | ------------------------- | ------------- | ---------- |
 | Phone recognizer, `wav2vec2-lv-60-espeak-cv-ft` | Pronunciation, game       | about 1.26 GB | Apache-2.0 |
 | Speech recognition, `wav2vec2-large-960h`       | Speaking freely, Converse | about 1.26 GB | Apache-2.0 |
+| Mandarin speech recognition, wav2vec2-large-xlsr-53-chinese-zh-cn | Mandarin Practice, Shadowing and Converse | about 1.28 GB | Apache-2.0 |
 | Reference voice, Kokoro-82M                     | Hear it, examples         | about 0.33 GB | Apache-2.0 |
 
 Models run at original fp32 precision; int8 was tested and rejected because it changed the phone output too much. See [docs/model-export.md](docs/model-export.md) for how the ONNX files are produced.

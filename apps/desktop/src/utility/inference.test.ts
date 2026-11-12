@@ -49,6 +49,22 @@ beforeEach(() => vi.useFakeTimers())
 afterEach(() => vi.useRealTimers())
 
 describe('InferenceService', () => {
+  it('runs Mandarin recognition and accuracy without English phone or voice models', async () => {
+    const s = setup()
+    const result = await s.service.analyze(audio, '你好', 'zh', { asr: '/m/asr-zh' }, s.opts())
+    expect(result.language).toBe('zh')
+    expect(result.assessment).toBe('character-accuracy')
+    expect(s.loads).toEqual(['/m/asr-zh'])
+    expect(s.stages).toEqual(['loading-asr-model', 'transcribing', 'scoring'])
+    await expect(s.service.analyze(audio, '你好', 'zh', {}, s.opts())).rejects.toMatchObject({
+      code: 'MODEL_MISSING',
+      modelId: 'asr-zh',
+    })
+    const reading = await s.service.phonemize('你好', 'zh')
+    expect(reading.words[0]).toEqual({ word: '你', phones: ['nǐ'] })
+    await s.service.unloadAll()
+  })
+
   it('loads a model lazily, reports the loading stage, and reuses it', async () => {
     const s = setup()
     expect(s.loads).toEqual([])

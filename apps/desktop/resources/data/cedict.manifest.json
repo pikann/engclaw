@@ -1,0 +1,10 @@
+{
+  "file": "cedict.txt.gz",
+  "bytes": 3984733,
+  "sha256": "c4450a361f0659bb1bf152577d07cc45f65dc280616b68b23bafc6fec817155b",
+  "entries": 125405,
+  "source": "https://www.mdbg.net/chinese/export/cedict/cedict_1_0_ts_utf-8_mdbg.txt.gz",
+  "attribution": "CC-CEDICT contributors; distributed by MDBG",
+  "license": "CC-BY-SA-4.0",
+  "modified": false
+}

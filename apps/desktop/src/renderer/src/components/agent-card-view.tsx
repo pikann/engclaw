@@ -1,3 +1,4 @@
+import { useLearningLanguage } from '@/lib/learning-language'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AgentCard } from '@engclaw/ipc-contract'
@@ -29,12 +30,17 @@ function useHear(word: string): () => void {
 
 /** The dictionary's first IPA for a word the model gave no IPA for; undefined while loading or when absent. */
 function useDictionaryIpa(word: string, skip: boolean): string | undefined {
+  const language = useLearningLanguage()
   const [found, setFound] = useState<{ word: string; ipa?: string } | null>(null)
   useEffect(() => {
     if (skip) return
     let live = true
-    resolveWord(word, (query) => window.engclaw.dictionary.search({ query, limit: 8 }))
-      .then((hit) => (hit ? window.engclaw.dictionary.word({ id: hit.id }) : null))
+    resolveWord(
+      word,
+      (query) => window.engclaw.dictionary.search({ query, limit: 8, language }),
+      language,
+    )
+      .then((hit) => (hit ? window.engclaw.dictionary.word({ id: hit.id, language }) : null))
       .then(
         (entry) => live && setFound({ word, ipa: entry?.pronunciations[0] }),
         () => undefined,
@@ -42,7 +48,7 @@ function useDictionaryIpa(word: string, skip: boolean): string | undefined {
     return () => {
       live = false
     }
-  }, [word, skip])
+  }, [word, skip, language])
   return found?.word === word ? found.ipa : undefined
 }
 

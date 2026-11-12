@@ -90,3 +90,20 @@ describe('SentenceWords', () => {
     expect(pending).toContain('Hello,')
   })
 })
+
+it('renders Mandarin pinyin without IPA delimiters and with its own language tag', () => {
+  const html = render({
+    text: '學習',
+    language: 'zh',
+    showIpa: true,
+    ipa: [
+      { text: '學', ipa: 'xué' },
+      { text: '習', ipa: 'xí' },
+    ],
+    prosody: null,
+  })
+  expect(html).toContain('lang="zh-Latn-pinyin"')
+  expect(html).toContain('xué')
+  expect(html).not.toContain('/xué/')
+  expect(html).not.toContain('en-fonipa')
+})

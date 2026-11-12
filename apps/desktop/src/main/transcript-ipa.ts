@@ -10,16 +10,18 @@ export async function transcriptIpa(
   videoId: string,
   texts: readonly string[],
   cachedOnly = false,
+  language = 'en',
 ): Promise<InferenceResult<IpaWord[][]>> {
   const out: IpaWord[][] = []
   for (const text of texts) {
-    let words = videos.getIpa(videoId, text)
+    const key = language === 'en' ? text : `${language}:${text}`
+    let words = videos.getIpa(videoId, key)
     if (!words && cachedOnly) return { ok: true, value: [] }
     if (!words) {
       const res = await phonemize(text)
       if (!res.ok) return res
       words = res.value.words.map((w) => ({ word: w.word, ipa: w.phones.join('') }))
-      videos.putIpa(videoId, text, words)
+      videos.putIpa(videoId, key, words)
     }
     out.push(words)
   }

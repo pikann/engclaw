@@ -29,6 +29,27 @@ export class CachedYouTube {
     return cues
   }
 
+  saveGeneratedTranscript(videoId: string, language: 'en' | 'zh', cues: TranscriptCue[]): void {
+    const meta = this.videos.getMeta(videoId)
+    if (!meta) throw new Error('Video metadata is missing')
+    let end = 0
+    for (const cue of cues) {
+      if (cue.start < end || cue.start + cue.dur > meta.durationSec + 0.05)
+        throw new Error('Invalid transcript timing')
+      end = cue.start + cue.dur
+    }
+    const lang = `${language}-x-engclaw-asr`
+    this.videos.putTranscript(videoId, lang, cues)
+    this.videos.putMeta({
+      ...meta,
+      captionTracks: [
+        ...meta.captionTracks.filter((track) => track.lang !== lang),
+        { lang, auto: true },
+      ],
+    })
+    this.videos.touch(videoId)
+  }
+
   private readonly pendingRanges = new Map<string, Promise<AudioRange>>()
 
   /** Concurrent requests for the same range share one fetch. */

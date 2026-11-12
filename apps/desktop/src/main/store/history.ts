@@ -82,23 +82,40 @@ export class HistoryStore {
     return attempt
   }
 
-  list(limit = 100, offset = 0, videoId?: string): HistoryAttempt[] {
-    const where = videoId === undefined ? '' : 'WHERE video_id = @videoId'
+  list(limit = 100, offset = 0, videoId?: string, language?: string): HistoryAttempt[] {
+    const filters = [
+      videoId === undefined ? null : 'video_id = @videoId',
+      language === undefined ? null : 'language = @language',
+    ].filter(Boolean)
+    const where = filters.length ? `WHERE ${filters.join(' AND ')}` : ''
     return (
       this.db
         .prepare(
           `SELECT * FROM attempts ${where} ORDER BY created_at DESC, id LIMIT @limit OFFSET @offset`,
         )
-        .all({ limit, offset, ...(videoId === undefined ? {} : { videoId }) }) as Row[]
+        .all({
+          limit,
+          offset,
+          ...(videoId === undefined ? {} : { videoId }),
+          ...(language === undefined ? {} : { language }),
+        }) as Row[]
     ).map(toAttempt)
   }
 
-  count(videoId?: string): number {
-    const row =
-      videoId === undefined
-        ? this.db.prepare('SELECT COUNT(*) AS n FROM attempts').get()
-        : this.db.prepare('SELECT COUNT(*) AS n FROM attempts WHERE video_id = ?').get(videoId)
-    return (row as { n: number }).n
+  count(videoId?: string, language?: string): number {
+    const filters = [
+      videoId === undefined ? null : 'video_id = @videoId',
+      language === undefined ? null : 'language = @language',
+    ].filter(Boolean)
+    const where = filters.length ? `WHERE ${filters.join(' AND ')}` : ''
+    return (
+      this.db
+        .prepare(`SELECT COUNT(*) AS n FROM attempts ${where}`)
+        .get({
+          ...(videoId === undefined ? {} : { videoId }),
+          ...(language === undefined ? {} : { language }),
+        }) as { n: number }
+    ).n
   }
 
   audio(id: string): Float32Array | null {

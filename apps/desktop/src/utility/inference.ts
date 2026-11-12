@@ -1,3 +1,4 @@
+import { mandarinReadings, mandarinResult } from './mandarin'
 import { freemem } from 'node:os'
 import type { InferenceProgress, PhonemizeResult } from '@engclaw/ipc-contract'
 import { forcedAlignWords, getLanguage, logSoftmax, type Phonemizer } from '@engclaw/pronounce'
@@ -73,6 +74,14 @@ export class InferenceService {
     return this.exclusive(opts, async (ctl) => {
       assertClipLength(audio)
       const lang = this.language(languageCode)
+      if (lang.code === 'zh') {
+        const asr = await this.adapter('asr', dirs.asr, lang.asrModelId, ctl, ['asr'])
+        ctl.stage('transcribing')
+        const transcript = await transcribeAudio(asr, audio)
+        ctl.check()
+        ctl.stage('scoring')
+        return mandarinResult(text, transcript.text)
+      }
       const [phone, asr] = [
         await this.adapter('phone', dirs.phone, lang.phoneModelId, ctl, ['phone', 'asr']),
         await this.adapter('asr', dirs.asr, lang.asrModelId, ctl, ['phone', 'asr']),
@@ -136,7 +145,10 @@ export class InferenceService {
   async phonemize(text: string, languageCode: string | undefined): Promise<PhonemizeResult> {
     const lang = this.language(languageCode)
     return {
-      words: await this.deps.phonemizer.getPhonemesWithWordMapping(text),
+      words:
+        lang.code === 'zh'
+          ? mandarinReadings(text)
+          : await this.deps.phonemizer.getPhonemesWithWordMapping(text),
       language: lang.code,
     }
   }

@@ -1,3 +1,4 @@
+import { useLearningLanguage } from '@/lib/learning-language'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { HistorySaveRequest, PronunciationResult } from '@engclaw/ipc-contract'
 import { classifyMicError, playPcm, Recorder } from '@/lib/audio'
@@ -30,6 +31,7 @@ export function useSegmentAttempt(
   /** Called right before the microphone opens so the video stops playing over the learner. */
   onRecordStart: () => void,
 ) {
+  const language = useLearningLanguage()
   const [byIndex, setByIndex] = useState<Record<number, AttemptState>>({})
   const [intonation, setIntonation] = useState<Record<number, IntonationState>>({})
   const [best, setBest] = useState<Record<number, number>>({})
@@ -49,17 +51,17 @@ export function useSegmentAttempt(
 
   const loadBest = useCallback(() => {
     void window.engclaw.history
-      .list({ videoId, limit: HISTORY_FETCH })
+      .list({ videoId, limit: HISTORY_FETCH, language })
       .then(({ attempts }) => {
         const next: Record<number, number> = {}
         for (const a of attempts) {
-          if (a.segmentIndex == null) continue
+          if (a.segmentIndex == null || a.language !== language) continue
           next[a.segmentIndex] = Math.max(next[a.segmentIndex] ?? 0, a.score)
         }
         setBest(next)
       })
       .catch(() => undefined)
-  }, [videoId])
+  }, [videoId, language])
 
   useEffect(() => {
     setByIndex({})
@@ -137,7 +139,7 @@ export function useSegmentAttempt(
           ...(detail ? { detail } : {}),
         })
       try {
-        const res = await window.engclaw.inference.analyze({ requestId: id, audio, text })
+        const res = await window.engclaw.inference.analyze({ requestId: id, audio, text, language })
         if (requestIds.current[i] !== id) return
         if (!res.ok) return fail(res.code, res.message)
         const result = res.value
@@ -158,7 +160,7 @@ export function useSegmentAttempt(
         if (requestIds.current[i] === id) set(i, { phase: 'error', kind: 'failed', audio })
       }
     },
-    [set, runIntonation, save],
+    [set, runIntonation, save, language],
   )
 
   const stop = useCallback(async () => {
@@ -203,6 +205,11 @@ export function useSegmentAttempt(
     () => () => {
       void recording.current?.rec.stop()
       playing.current?.stop()
+      for (const requestId of Object.values(requestIds.current)) {
+        void window.engclaw.inference.cancel({ requestId })
+        void window.engclaw.inference.cancel({ requestId: `${requestId}-fluency` })
+      }
+      requestIds.current = {}
     },
     [],
   )

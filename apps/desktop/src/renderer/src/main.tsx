@@ -1,3 +1,4 @@
+import { EnglishContentOnly } from '@/components/english-content-only'
 import { StrictMode, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createHashRouter, RouterProvider } from 'react-router'
@@ -31,8 +32,22 @@ const router = createHashRouter([
       { path: 'shadowing', element: <ShadowingPage /> },
       { path: 'converse', element: <ConversePage /> },
       { path: 'dictionary', element: <DictionaryPage /> },
-      { path: 'game', element: <GameMapPage /> },
-      { path: 'game/chapter/:order', element: <GameChapterPage /> },
+      {
+        path: 'game',
+        element: (
+          <EnglishContentOnly>
+            <GameMapPage />
+          </EnglishContentOnly>
+        ),
+      },
+      {
+        path: 'game/chapter/:order',
+        element: (
+          <EnglishContentOnly>
+            <GameChapterPage />
+          </EnglishContentOnly>
+        ),
+      },
       { path: 'history', element: <HistoryPage /> },
       { path: 'settings', element: <SettingsPage /> },
       { path: '*', element: <ComingSoon /> },

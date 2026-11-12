@@ -1,3 +1,4 @@
+import { useLearningLanguage } from '@/lib/learning-language'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { playPcm } from '@/lib/audio'
 
@@ -9,6 +10,7 @@ export type SpeechError = 'modelMissing' | 'failed'
  * it so each button can show its own loading/playing state; playing the same key again stops it.
  */
 export function useSpeech() {
+  const language = useLearningLanguage()
   const [active, setActive] = useState<{ key: string; phase: SpeechPhase } | null>(null)
   const [error, setError] = useState<SpeechError | null>(null)
   const handle = useRef<{ stop: () => void } | null>(null)
@@ -31,7 +33,7 @@ export function useSpeech() {
       setError(null)
       setActive({ key, phase: 'loading' })
       try {
-        const res = await window.engclaw.tts.speak({ text })
+        const res = await window.engclaw.tts.speak({ text, language })
         if (token.current !== mine) return
         if (!res.ok) {
           setError(res.code === 'MODEL_MISSING' ? 'modelMissing' : 'failed')
@@ -50,7 +52,7 @@ export function useSpeech() {
         }
       }
     },
-    [active?.key, stop],
+    [active?.key, stop, language],
   )
 
   /** Plays the last requested clip again, e.g. once a missing model has been installed. */

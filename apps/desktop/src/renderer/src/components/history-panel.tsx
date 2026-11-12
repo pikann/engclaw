@@ -1,3 +1,4 @@
+import { useLearningLanguage } from '@/lib/learning-language'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Download, Play, Trash2, Upload } from 'lucide-react'
@@ -10,6 +11,7 @@ const PAGE = 20
 
 /** Past attempts: replay the recording, delete, export / import as JSON. */
 export function HistoryPanel() {
+  const language = useLearningLanguage()
   const { t } = useTranslation()
   const [items, setItems] = useState<HistoryAttempt[]>([])
   const [total, setTotal] = useState(0)
@@ -18,11 +20,14 @@ export function HistoryPanel() {
   const [params] = useSearchParams()
   const focusId = params.get('attempt')
 
-  const load = useCallback(async (limit: number) => {
-    const r = await window.engclaw.history.list({ limit })
-    setItems(r.attempts)
-    setTotal(r.total)
-  }, [])
+  const load = useCallback(
+    async (limit: number) => {
+      const r = await window.engclaw.history.list({ limit, language })
+      setItems(r.attempts)
+      setTotal(r.total)
+    },
+    [language],
+  )
 
   useEffect(() => {
     void load(PAGE)

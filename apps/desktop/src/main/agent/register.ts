@@ -1,3 +1,5 @@
+import { MANDARIN_SYSTEM_PROMPT, SYSTEM_PROMPT } from './persona'
+import type { ChineseDictionary } from '../chinese-dictionary'
 import { BrowserWindow, net } from 'electron'
 import type Database from 'better-sqlite3'
 import { getWord, searchWords } from '@engclaw/dictionary'
@@ -34,18 +36,33 @@ export function registerAgentHandlers(
   llm: LlmConfigStore,
   store: Store,
   openDictionary: () => Database.Database,
+  chinese: ChineseDictionary,
 ): AgentService {
   const emit = (e: AgentEvent): void => {
     for (const w of BrowserWindow.getAllWindows()) w.webContents.send(IPC.agentEvent, e)
   }
+  const source = dictionarySource(openDictionary)
   const service = new AgentService({
+    systemPrompt: () =>
+      store.settings.get().learningLanguage === 'zh' ? MANDARIN_SYSTEM_PROMPT : SYSTEM_PROMPT,
     store: store.agent,
     config: () => llm.load(),
     fetchFn: (url, init) => net.fetch(url, init),
     emit,
     tools: {
-      lookup_dictionary: lookupDictionaryTool(dictionarySource(openDictionary)),
-      get_practice_history: practiceHistoryTool({ recent: (n) => store.history.list(n) }),
+      lookup_dictionary: lookupDictionaryTool({
+        lookup(word) {
+          if (store.settings.get().learningLanguage !== 'zh') return source.lookup(word)
+          const hit = chinese.search(word, 1)[0]
+          const entry = hit && chinese.word(hit.id)
+          return entry
+            ? { word: entry.word, ipa: [entry.pinyin ?? ''], senses: entry.senses, morphemes: [] }
+            : null
+        },
+      }),
+      get_practice_history: practiceHistoryTool({
+        recent: (n) => store.history.list(n, 0, undefined, store.settings.get().learningLanguage),
+      }),
     },
   })
   handle(IPC.agentSend, (req) => service.send(req))

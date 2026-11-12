@@ -1,3 +1,4 @@
+import { useLearningLanguage } from '@/lib/learning-language'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { playPcm } from '@/lib/audio'
 
@@ -16,7 +17,7 @@ function speakBrowser(
   if (!('speechSynthesis' in window)) return
   window.speechSynthesis.cancel()
   const u = new SpeechSynthesisUtterance(word)
-  u.lang = 'en-US'
+  u.lang = /\p{Script=Han}/u.test(word) ? 'zh-CN' : 'en-US'
   let t0 = 0
   speaking = u
   // A cancelled earlier word may still report its end; only the latest one counts.
@@ -43,6 +44,7 @@ export interface ArticulationCue {
  * same moment for exactly its length, so first play is as in sync as any other.
  */
 export function useWordArticulation(word: string, sounds: readonly string[]) {
+  const language = useLearningLanguage()
   const [selected, setSelected] = useState<number | null>(null)
   const [cue, setCue] = useState<ArticulationCue>({ playId: 0, stopId: 0, durationMs: undefined })
   const [loading, setLoading] = useState(false)
@@ -62,9 +64,9 @@ export function useWordArticulation(word: string, sounds: readonly string[]) {
     setLoading(false)
     setCue((c) => ({ ...c, stopId: c.stopId + 1 }))
     // Warm the voice cache so the first Hear it has little to wait for.
-    void window.engclaw?.tts?.speak({ text: word }).catch(() => undefined)
+    void window.engclaw?.tts?.speak({ text: word, language }).catch(() => undefined)
     return halt
-  }, [word, halt])
+  }, [word, halt, language])
 
   const play = (durationMs: number | undefined): void => {
     setSelected(null)
@@ -87,7 +89,7 @@ export function useWordArticulation(word: string, sounds: readonly string[]) {
     if (!tts) return browser()
     setLoading(true)
     try {
-      const res = await tts.speak({ text: word })
+      const res = await tts.speak({ text: word, language })
       if (mine !== token.current) return
       if (!res.ok) return browser()
       const handle = playPcm(res.samples, res.sampleRate)

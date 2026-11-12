@@ -4,7 +4,11 @@ import { YouTubeError } from './types'
 
 describe('InnertubeAdapter', () => {
   it('rejects non-id input before any network call', async () => {
-    const a = new InnertubeAdapter({ fetch: (() => { throw new Error('no network') }) as never })
+    const a = new InnertubeAdapter({
+      fetch: (() => {
+        throw new Error('no network')
+      }) as never,
+    })
     await expect(a.meta('http://169.254.169.254/')).rejects.toMatchObject({ code: 'NOT_FOUND' })
   })
   it('rejects oversized ranges', async () => {
@@ -110,5 +114,58 @@ describe('InnertubeAdapter retries', () => {
       code: 'NO_CAPTIONS',
     })
     expect(t.calls()).toBe(2)
+  })
+})
+
+describe('audio client fallback', () => {
+  it('tries another client when an accepted stream index has a forbidden audio body', async () => {
+    const clients: string[] = []
+    const bodies: string[] = []
+    const head = new Uint8Array(52)
+    const sidx = new DataView(head.buffer, 8)
+    sidx.setUint32(0, 44)
+    sidx.setUint32(4, 0x73696478)
+    sidx.setUint32(16, 1000)
+    sidx.setUint16(30, 1)
+    sidx.setUint32(32, 4)
+    sidx.setUint32(36, 20000)
+    const adapter = new InnertubeAdapter({
+      clients: ['MWEB', 'IOS'],
+      sleep: async () => undefined,
+      createInnertube: async () =>
+        ({
+          getBasicInfo: async (_id: string, { client }: { client: string }) => {
+            clients.push(client)
+            return {
+              playability_status: { status: 'OK' },
+              streaming_data: {
+                adaptive_formats: [
+                  {
+                    has_audio: true,
+                    has_video: false,
+                    bitrate: 1,
+                    url: `https://media.example/${client}`,
+                    mime_type: 'audio/mp4',
+                    init_range: { start: 0, end: 7 },
+                    index_range: { start: 8, end: 51 },
+                  },
+                ],
+              },
+            }
+          },
+        }) as never,
+      fetch: (async (url: string, init: RequestInit) => {
+        if ((init.headers as Record<string, string>).range === 'bytes=0-51')
+          return new Response(head)
+        bodies.push(new URL(url).origin + new URL(url).pathname)
+        return new URL(url).pathname.endsWith('/MWEB')
+          ? new Response(null, { status: 403 })
+          : new Response(new Uint8Array([1, 2, 3, 4]))
+      }) as never,
+    })
+    const result = await adapter.audioRange('2mKgniIiHi4', 0, 10)
+    expect(clients).toEqual(['MWEB', 'IOS'])
+    expect(bodies).toEqual(['https://media.example/MWEB', 'https://media.example/IOS'])
+    expect(Array.from(result.bytes.slice(-4))).toEqual([1, 2, 3, 4])
   })
 })

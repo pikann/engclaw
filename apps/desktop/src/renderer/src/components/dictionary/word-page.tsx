@@ -1,3 +1,4 @@
+import { ChineseWord } from './chinese-word'
 import { useTranslation } from 'react-i18next'
 import { ExternalLink, Mic, Sparkles } from 'lucide-react'
 import type { DictionaryWord } from '@engclaw/ipc-contract'
@@ -256,6 +257,7 @@ export function WordPage({
       </p>
     )
   const word = state.value
+  if (word.language === 'zh') return <ChineseWord word={word} onPractice={onPractice} />
   // The sounds section has its own Hear it (with the animation); the plain one is the fallback.
   const hasSounds = ipaPhones(word.pronunciations[0] ?? '').length > 0
   return (

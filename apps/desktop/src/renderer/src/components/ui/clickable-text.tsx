@@ -1,3 +1,4 @@
+import { useLearningLanguage } from '@/lib/learning-language'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ClickableWord } from '@/components/ui/clickable-word'
@@ -30,6 +31,7 @@ export function ClickableText({
    */
   light?: boolean
 }) {
+  const language = useLearningLanguage()
   const { t } = useTranslation()
   const lookup = useWordLookup()
   const parts = useMemo(() => {
@@ -48,7 +50,12 @@ export function ClickableText({
           p.word === null ? (
             p.text
           ) : (
-            <span key={i} lang="en" data-word={p.word} className={cn(LIGHT_WORD, className)}>
+            <span
+              key={i}
+              lang={language === 'zh' ? 'zh-CN' : 'en'}
+              data-word={p.word}
+              className={cn(LIGHT_WORD, className)}
+            >
               {p.text}
             </span>
           ),
@@ -63,7 +70,7 @@ export function ClickableText({
         ) : (
           <ClickableWord
             key={i}
-            lang="en"
+            lang={language === 'zh' ? 'zh-CN' : 'en'}
             className={className}
             aria-label={t('dict.lookupWord', { word: p.text })}
             data-word={p.word}

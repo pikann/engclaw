@@ -53,15 +53,20 @@ export function SentenceWords({
   ipa,
   showIpa,
   prosody,
+  language = 'en',
 }: {
   text: string
+  language?: 'en' | 'zh'
   ipa: readonly IpaToken[] | null
   showIpa: boolean
   /** Null while the prosody guide is off. */
   prosody: ProsodyState | null
 }) {
   const { t } = useTranslation()
-  const pieces = text.split(/\s+/).filter(Boolean)
+  const pieces =
+    /\p{Script=Han}/u.test(text) && ipa
+      ? ipa.map((token) => token.text)
+      : text.split(/\s+/).filter(Boolean)
   if (!showIpa && !prosody)
     return (
       <p data-testid="shadowing-sentence" className="leading-snug">
@@ -98,11 +103,11 @@ export function SentenceWords({
             </span>
             {showIpa && (
               <span
-                lang="en-fonipa"
+                lang={language === 'zh' ? 'zh-Latn-pinyin' : 'en-fonipa'}
                 data-testid="shadowing-word-ipa"
                 className="text-muted-foreground text-[0.55em] leading-tight"
               >
-                {ipa?.[i]?.ipa ? `/${ipa[i]!.ipa}/` : ' '}
+                {ipa?.[i]?.ipa ? (language === 'zh' ? ipa[i]!.ipa : `/${ipa[i]!.ipa}/`) : ' '}
               </span>
             )}
           </span>

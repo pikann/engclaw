@@ -1,3 +1,4 @@
+import { useLearningLanguage } from '@/lib/learning-language'
 import { useEffect, useId, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search } from 'lucide-react'
@@ -24,6 +25,7 @@ export function SearchPane({
   recent: RecentWord[]
   onOpen: (word: RecentWord) => void
 }) {
+  const language = useLearningLanguage()
   const { t } = useTranslation()
   const [query, setQuery] = useState('')
   const [search, setSearch] = useState<Search>({ status: 'idle' })
@@ -40,7 +42,7 @@ export function SearchPane({
     }
     const timer = setTimeout(() => {
       window.engclaw.dictionary
-        .search({ query: trimmed, limit: 20 })
+        .search({ query: trimmed, limit: 20, language })
         .then(
           (results): Search => ({ status: 'ready', query: trimmed, results }),
           (): Search => ({ status: 'error' }),
@@ -52,7 +54,7 @@ export function SearchPane({
         })
     }, DEBOUNCE_MS)
     return () => clearTimeout(timer)
-  }, [query])
+  }, [query, language])
 
   const searching = query.trim() !== ''
   const items: { id: number; word: string; fuzzy?: boolean }[] =
@@ -91,7 +93,7 @@ export function SearchPane({
           aria-autocomplete="list"
           aria-activedescendant={items.length ? optionId(active) : undefined}
           aria-label={t('dict.searchLabel')}
-          placeholder={t('dict.searchPlaceholder')}
+          placeholder={t(language === 'zh' ? 'learning.chineseSearch' : 'dict.searchPlaceholder')}
           data-testid="dictionary-search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}

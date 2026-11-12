@@ -1,4 +1,5 @@
-import { Innertube, UniversalCache } from 'youtubei.js'
+import { evaluatePlayerScript } from './player-script'
+import { Innertube, UniversalCache, Platform, Constants } from 'youtubei.js'
 import {
   YouTubeError,
   type AudioRange,
@@ -7,6 +8,8 @@ import {
   type YouTubeAdapter,
 } from './types'
 import { parseVideoId } from './videoId'
+
+Platform.shim.eval = (data) => evaluatePlayerScript(data.output)
 
 type Info = Awaited<ReturnType<Innertube['getBasicInfo']>>
 type Client = 'WEB' | 'MWEB' | 'IOS' | 'ANDROID' | 'TV'
@@ -52,7 +55,9 @@ export class InnertubeAdapter implements YouTubeAdapter {
   constructor(opts: InnertubeAdapterOptions = {}) {
     this.clients = opts.clients ?? ['MWEB', 'IOS', 'WEB']
     this.fetchFn = opts.fetch ?? fetch
-    this.create = opts.createInnertube ?? (() => Innertube.create({ cache: new UniversalCache(false) }))
+    this.create =
+      opts.createInnertube ??
+      (() => Innertube.create({ cache: new UniversalCache(false), fetch: this.fetchFn }))
     this.sleep = opts.sleep ?? ((ms) => new Promise((r) => setTimeout(r, ms)))
     this.log = opts.log ?? (() => undefined)
   }
@@ -164,18 +169,23 @@ export class InnertubeAdapter implements YouTubeAdapter {
     if (!(endSec > startSec) || endSec - startSec > 120)
       throw new YouTubeError('NOT_FOUND', 'Invalid range')
     // A cached stream's URL can have expired: drop it and look the video up once more.
-    for (const attempt of [0, 1]) {
+    const rejected = new Set<Client>()
+    const attempts = this.clients.length
+    let lastAudioError: unknown
+    for (let attempt = 0; attempt < attempts; attempt++) {
       let stream: AudioStream
       try {
-        stream = await this.audioStream(videoId)
+        stream = await this.audioStream(videoId, rejected)
       } catch (e) {
-        throw classify(e)
+        throw classify(lastAudioError ?? e)
       }
       try {
         return await this.fetchRange(stream, startSec, endSec)
       } catch (e) {
         this.streams.delete(videoId)
-        if (attempt === 1 || e instanceof YouTubeError) throw classify(e)
+        lastAudioError = e
+        rejected.add(stream.client)
+        if (attempt === attempts - 1 || e instanceof YouTubeError) throw classify(e)
       }
     }
     throw new YouTubeError('EXTRACTOR_BROKEN', 'unreachable')
@@ -185,10 +195,13 @@ export class InnertubeAdapter implements YouTubeAdapter {
    * The audio stream of a video: its URL and fragment index. Looked up once per video and shared,
    * because every lookup is a player request that YouTube throttles when a transcript is walked.
    */
-  private audioStream(videoId: string): Promise<AudioStream> {
+  private async audioStream(videoId: string, rejected: ReadonlySet<Client>): Promise<AudioStream> {
     const hit = this.streams.get(videoId)
-    if (hit && Date.now() - hit.at < STREAM_TTL_MS) return hit.stream
-    const stream = this.lookupStream(videoId)
+    if (hit && Date.now() - hit.at < STREAM_TTL_MS) {
+      const cached = await hit.stream
+      if (!rejected.has(cached.client)) return cached
+    }
+    const stream = this.lookupStream(videoId, rejected)
     this.streams.set(videoId, { at: Date.now(), stream })
     // A failed lookup is remembered briefly too, so a throttled video is not asked again per segment.
     stream.catch(() => {
@@ -198,13 +211,15 @@ export class InnertubeAdapter implements YouTubeAdapter {
     return stream
   }
 
-  private async lookupStream(videoId: string): Promise<AudioStream> {
+  private async lookupStream(videoId: string, rejected: ReadonlySet<Client>): Promise<AudioStream> {
     let last: unknown
     // A client can hand out audio URLs that then 403, so each one gets its chance.
     for (const client of this.clients) {
+      if (rejected.has(client)) continue
       try {
         return await this.streamVia(client, videoId)
       } catch (e) {
+        this.log(`youtube audio client ${client}: ${String(e)}\n`)
         last = e
       }
     }
@@ -215,20 +230,43 @@ export class InnertubeAdapter implements YouTubeAdapter {
     const pickAudio = (i: Info) =>
       i.streaming_data?.adaptive_formats
         .filter((f) => f.has_audio && !f.has_video && f.url && f.init_range && f.index_range)
-        .sort((a, b) => a.bitrate - b.bitrate)[0]
+        .sort(
+          (a, b) =>
+            Number(!!b.audio_track?.audio_is_default) - Number(!!a.audio_track?.audio_is_default) ||
+            Number(!!b.is_original) - Number(!!a.is_original) ||
+            a.bitrate - b.bitrate,
+        )[0]
     const info = await this.info(videoId, (i) => !!pickAudio(i), [client])
     const fmt = pickAudio(info)
     if (!fmt?.url || !fmt.init_range || !fmt.index_range)
       throw new YouTubeError('EXTRACTOR_BROKEN', 'No usable audio format')
-    const url = fmt.url
-    const head = await this.getBytes(url, 0, fmt.index_range.end)
+    const url =
+      typeof fmt.decipher === 'function'
+        ? await fmt.decipher((await this.innertube()).session.player)
+        : fmt.url
+    const profile = Constants.CLIENTS[client]
+    const headers: Record<string, string> =
+      'USER_AGENT' in profile ? { 'user-agent': profile.USER_AGENT } : {}
+    const head = await this.getBytes(url, 0, fmt.index_range.end, headers)
     const frags = parseSidx(head.subarray(fmt.index_range.start), fmt.index_range.end + 1)
     if (!frags.length) throw new YouTubeError('EXTRACTOR_BROKEN', 'No fragment index')
-    return { url, mime: fmt.mime_type, init: head.subarray(0, fmt.init_range.end + 1), frags }
+    return {
+      client,
+      headers,
+      url,
+      mime: fmt.mime_type,
+      init: head.subarray(0, fmt.init_range.end + 1),
+      frags,
+    }
   }
 
-  private async getBytes(url: string, from: number, to: number): Promise<Uint8Array> {
-    const res = await this.fetchFn(url, { headers: { range: `bytes=${from}-${to}` } })
+  private async getBytes(
+    url: string,
+    from: number,
+    to: number,
+    headers: Record<string, string> = {},
+  ): Promise<Uint8Array> {
+    const res = await this.fetchFn(url, { headers: { ...headers, range: `bytes=${from}-${to}` } })
     if (!res.ok) throw new Error(`audio status code ${res.status}`)
     return new Uint8Array(await res.arrayBuffer())
   }
@@ -243,7 +281,12 @@ export class InnertubeAdapter implements YouTubeAdapter {
     const first = picked[0]
     const lastFrag = picked[picked.length - 1]
     if (!first || !lastFrag) throw new YouTubeError('NOT_FOUND', 'Range outside the audio')
-    const body = await this.getBytes(stream.url, first.offset, lastFrag.offset + lastFrag.size - 1)
+    const body = await this.getBytes(
+      stream.url,
+      first.offset,
+      lastFrag.offset + lastFrag.size - 1,
+      stream.headers,
+    )
     const bytes = new Uint8Array(stream.init.length + body.length)
     bytes.set(stream.init)
     bytes.set(body, stream.init.length)
@@ -252,6 +295,8 @@ export class InnertubeAdapter implements YouTubeAdapter {
 }
 
 interface AudioStream {
+  headers: Record<string, string>
+  client: Client
   url: string
   mime: string
   init: Uint8Array
