@@ -377,7 +377,7 @@
     },
     "home": {
       "welcome": "Chào mừng đến với Engclaw",
-      "welcomeBody": "Luyện nói tiếng Anh với phản hồi được xử lý ngay trên máy của bạn. Chọn nơi bắt đầu.",
+      "welcomeBody": "Luyện nói với phản hồi được xử lý trên máy. Chọn ngôn ngữ học và nơi bắt đầu.",
       "card": {
         "practice": {
           "title": "Luyện phát âm",
@@ -1089,5 +1089,34 @@
     "boundaryTitle": "Đã xảy ra lỗi",
     "boundaryBody": "Ứng dụng gặp lỗi không mong muốn. Bạn có thể tải lại hoặc gửi phản hồi để chúng tôi sửa.",
     "reload": "Tải lại"
+  },
+  "learning": {
+    "label": "Ngôn ngữ học",
+    "en": "Tiếng Anh",
+    "zh": "Tiếng Trung (Trung Quốc)",
+    "saveError": "Không lưu được lựa chọn. Hãy thử lại.",
+    "traditional": "Chữ phồn thể",
+    "chineseDefinitions": "Nghĩa tiếng Anh (CC-CEDICT)",
+    "chineseSearch": "Chữ Hán, pinyin hoặc nghĩa tiếng Anh…",
+    "pinyin": "Pinyin",
+    "characterAccuracy": "Mức khớp câu tiếng Trung",
+    "assessmentNote": "Tiếng Trung: điểm dựa trên độ khớp ký tự từ nhận dạng giọng nói, chưa đánh giá từng âm hoặc thanh điệu. Kết quả nhận dạng có thể sai.",
+    "reference": "Câu mẫu",
+    "heard": "Máy nhận dạng được",
+    "mismatches": "Ký tự khác với câu mẫu",
+    "englishOnly": "Mục này hiện có nội dung tiếng Anh. Chọn ngôn ngữ học Tiếng Anh để sử dụng.",
+    "chineseCaptions": "Chọn video tiếng Trung phổ thông. Nếu không có phụ đề CC, bạn có thể tạo lời thoại từ âm thanh.",
+    "chineseVoice": "Giọng tiếng Trung tổng hợp cơ bản; dùng video bản ngữ để luyện ngữ điệu.",
+    "switchHint": "Đổi ngôn ngữ học sẽ bắt đầu lại phiên luyện tập hiện tại.",
+    "pinyinHint": "Hiện pinyin dưới chữ Hán",
+    "pinyinLoading": "Đang tạo pinyin…",
+    "pinyinError": "Không tạo được pinyin.",
+    "noChineseCaptions": "YouTube không cung cấp track phụ đề tiếng Trung cho video này.",
+    "generate": "Tạo lời thoại từ âm thanh",
+    "generateHint": "Bạn có thể nhận dạng giọng nói trên máy để tạo lời thoại. Cần mô hình nhận dạng và có thể mất vài phút.",
+    "generating": "Đang nhận dạng: {{current}} / {{total}} giây…",
+    "generateFailed": "Không tạo được lời thoại từ âm thanh. Hãy kiểm tra mô hình, kết nối mạng rồi thử lại.",
+    "generatedNote": "Lời thoại được nhận dạng tự động: có thể sai từ và thời gian chỉ là ước lượng.",
+    "audioBlocked": "YouTube từ chối tải âm thanh (403). Chưa lưu được lời thoại hoàn chỉnh. Hãy thử lại sau hoặc chọn video khác."
   }
 }

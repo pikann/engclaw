@@ -1,3 +1,4 @@
+import { useLearningLanguage } from '@/lib/learning-language'
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
@@ -11,13 +12,12 @@ import { resolveWord } from '@/lib/words'
 
 type Resolved = { word: string; id: number | null } | null
 
-const search = (query: string) => window.engclaw.dictionary.search({ query, limit: 8 })
-
 /**
  * App-wide dictionary dialog. Any `ClickableText` below it opens the entry for the clicked word
  * in place, so the session underneath (a playing video, a recording) is left untouched.
  */
 export function WordLookupProvider({ children }: { children: ReactNode }) {
+  const language = useLearningLanguage()
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [word, setWord] = useState<string | null>(null)
@@ -35,14 +35,18 @@ export function WordLookupProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (word === null) return
     let live = true
-    resolveWord(word, search).then(
+    resolveWord(
+      word,
+      (query) => window.engclaw.dictionary.search({ query, limit: 8, language }),
+      language,
+    ).then(
       (hit) => live && setResolved({ word, id: hit?.id ?? null }),
       () => live && setResolved({ word, id: null }),
     )
     return () => {
       live = false
     }
-  }, [word])
+  }, [word, language])
 
   const id = override?.id ?? (resolved?.word === word ? (resolved?.id ?? null) : null)
   const searching = word !== null && !override && resolved?.word !== word

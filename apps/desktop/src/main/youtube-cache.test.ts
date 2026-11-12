@@ -37,6 +37,22 @@ describe('CachedYouTube', () => {
     rmSync(dir, { recursive: true, force: true })
   })
 
+  it('stores generated Mandarin transcripts as a reusable caption track', async () => {
+    const adapter = fakeAdapter()
+    const yt = new CachedYouTube(adapter, store.videos)
+    await yt.meta(ID)
+    yt.saveGeneratedTranscript(ID, 'zh', CUES)
+    expect((await yt.meta(ID)).captionTracks).toContainEqual({
+      lang: 'zh-x-engclaw-asr',
+      auto: true,
+    })
+    expect(await yt.transcript(ID, 'zh-x-engclaw-asr')).toEqual(CUES)
+    expect(adapter.transcript).not.toHaveBeenCalled()
+    expect(() =>
+      yt.saveGeneratedTranscript(ID, 'zh', [{ start: 59, dur: 10, text: 'too long' }]),
+    ).toThrow('timing')
+  })
+
   it('fetches once, then serves meta and transcript from SQLite without the adapter', async () => {
     const adapter = fakeAdapter()
     const yt = new CachedYouTube(adapter, store.videos)

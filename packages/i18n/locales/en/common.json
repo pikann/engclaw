@@ -377,7 +377,7 @@
     },
     "home": {
       "welcome": "Welcome to Engclaw",
-      "welcomeBody": "Practice speaking English with feedback that stays on your device. Pick where to start.",
+      "welcomeBody": "Practice speaking with feedback processed on your device. Choose your learning language and where to start.",
       "card": {
         "practice": {
           "title": "Practice pronunciation",
@@ -1089,5 +1089,34 @@
     "boundaryTitle": "Something went wrong",
     "boundaryBody": "The app hit an unexpected error. You can reload it, or send feedback so we can fix it.",
     "reload": "Reload"
+  },
+  "learning": {
+    "label": "Learning language",
+    "en": "English",
+    "zh": "Chinese (China)",
+    "saveError": "Could not save your choice. Please try again.",
+    "traditional": "Traditional characters",
+    "chineseDefinitions": "English definitions (CC-CEDICT)",
+    "chineseSearch": "Chinese characters, pinyin or English meaning…",
+    "pinyin": "Pinyin",
+    "characterAccuracy": "Mandarin character accuracy",
+    "assessmentNote": "Mandarin scores measure character matches from speech recognition, not individual sounds or tones. Recognition may make mistakes.",
+    "reference": "Reference sentence",
+    "heard": "Recognized speech",
+    "mismatches": "Characters that differ from the reference",
+    "englishOnly": "This section currently has English content. Select English as your learning language to use it.",
+    "chineseCaptions": "Use a Mandarin video. If CC captions are unavailable, you can generate a transcript from its audio.",
+    "chineseVoice": "Basic synthesized Mandarin voice; use native-speaker videos to practice intonation.",
+    "switchHint": "Changing the learning language starts a new practice session.",
+    "pinyinHint": "Show pinyin under Chinese characters",
+    "pinyinLoading": "Generating pinyin…",
+    "pinyinError": "Could not generate pinyin.",
+    "noChineseCaptions": "YouTube did not provide a Mandarin caption track for this video.",
+    "generate": "Generate transcript from audio",
+    "generateHint": "You can recognize speech locally to create a transcript. This needs the speech model and may take a few minutes.",
+    "generating": "Recognizing speech: {{current}} / {{total}} seconds…",
+    "generateFailed": "Could not create a transcript from the audio. Check the model and network connection, then try again.",
+    "generatedNote": "Automatically recognized transcript: words may be incorrect and timestamps are approximate.",
+    "audioBlocked": "YouTube refused the audio download (403). No complete transcript was saved. Try again later or choose another video."
   }
 }

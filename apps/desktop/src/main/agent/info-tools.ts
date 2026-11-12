@@ -27,7 +27,7 @@ const clip = (s: string): string => (s.length > MAX_TEXT ? `${s.slice(0, MAX_TEX
 export const lookupDictionaryTool = (source: DictionarySource) =>
   defineTool({
     description:
-      "Look up an English word in the offline dictionary: definitions, part of speech, IPA, word parts (prefix/root/suffix) and an example. Use it when you need exact facts about a word the learner asks about. Returns found:false when the word isn't in the dictionary.",
+      "Look up a word in the selected learning language in the offline dictionary: English entries have definitions, IPA and word parts; Mandarin entries have simplified characters, pinyin and English definitions. Use it when you need exact facts about a word the learner asks about. Returns found:false when the word isn't in the dictionary.",
     schema: z.object({ word: z.string().trim().min(1).max(64) }),
     async run({ word }) {
       const entry = source.lookup(word)

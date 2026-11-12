@@ -1,3 +1,4 @@
+import { useLearningLanguage } from '@/lib/learning-language'
 import {
   AlertTriangle,
   ArrowLeft,
@@ -91,12 +92,15 @@ export function ShadowingSession({
   title,
   segments,
   onBack,
+  generated = false,
 }: {
   videoId: string
   title: string
   segments: readonly Segment[]
   onBack: () => void
+  generated?: boolean
 }) {
+  const language = useLearningLanguage()
   const { t } = useTranslation()
   const lookup = useWordLookup()
   const [mode, setMode] = useState<'shadowing' | 'dictation'>('shadowing')
@@ -215,7 +219,7 @@ export function ShadowingSession({
         setShowIpa(!showIpa)
         return
       }
-      if (e.key.toLowerCase() === 'p') {
+      if (e.key.toLowerCase() === 'p' && language === 'en') {
         setShowProsody(!showProsody)
         return
       }
@@ -230,6 +234,7 @@ export function ShadowingSession({
   }, [
     blocked,
     runShortcut,
+    language,
     showIpa,
     setShowIpa,
     showProsody,
@@ -244,6 +249,11 @@ export function ShadowingSession({
 
   return (
     <div data-testid="shadowing-session" className="flex h-full min-h-0 flex-col">
+      {generated && (
+        <p className="shrink-0 bg-muted px-4 py-2 text-sm" data-testid="generated-transcript-note">
+          {t('learning.generatedNote')}
+        </p>
+      )}
       <div className="flex shrink-0 items-center gap-2 border-b px-4 py-2">
         <Button variant="ghost" size="sm" onClick={onBack}>
           <ArrowLeft />
@@ -366,10 +376,11 @@ export function ShadowingSession({
                 {shown && (
                   <div className="leading-snug" style={{ fontSize: fit.fontSize }}>
                     <SentenceWords
+                      language={language}
                       text={shown.text}
                       ipa={shownIpa}
                       showIpa={showIpa}
-                      prosody={showProsody ? prosody : null}
+                      prosody={language === 'en' && showProsody ? prosody : null}
                     />
                   </div>
                 )}
@@ -528,19 +539,30 @@ export function ShadowingSession({
                     size="sm"
                     data-testid="shadowing-ipa-toggle"
                     aria-keyshortcuts="I"
-                    aria-label={t('screens.shadowing.ipaHint')}
+                    aria-label={t(
+                      language === 'zh' ? 'learning.pinyinHint' : 'screens.shadowing.ipaHint',
+                    )}
                     checked={showIpa}
                     onCheckedChange={setShowIpa}
                   />
-                  <label htmlFor="shadowing-ipa" title={t('screens.shadowing.ipaHint')}>
-                    {t('screens.shadowing.ipa')}
+                  <label
+                    htmlFor="shadowing-ipa"
+                    title={t(
+                      language === 'zh' ? 'learning.pinyinHint' : 'screens.shadowing.ipaHint',
+                    )}
+                  >
+                    {t(language === 'zh' ? 'learning.pinyin' : 'screens.shadowing.ipa')}
                   </label>
                   {showIpa && ipa.status === 'loading' && (
                     <span
                       role="status"
                       className="text-muted-foreground absolute top-full left-0 mt-1 whitespace-nowrap"
                     >
-                      {t('screens.shadowing.ipaLoading')}
+                      {t(
+                        language === 'zh'
+                          ? 'learning.pinyinLoading'
+                          : 'screens.shadowing.ipaLoading',
+                      )}
                     </span>
                   )}
                   {showIpa && ipa.status === 'error' && (
@@ -548,7 +570,7 @@ export function ShadowingSession({
                       role="alert"
                       className="absolute top-full left-0 mt-1 flex items-center gap-1 whitespace-nowrap"
                     >
-                      {t('screens.shadowing.ipaError')}
+                      {t(language === 'zh' ? 'learning.pinyinError' : 'screens.shadowing.ipaError')}
                       <Button size="sm" variant="outline" onClick={retryIpa}>
                         {t('practice.retry')}
                       </Button>
@@ -563,7 +585,8 @@ export function ShadowingSession({
                     size="sm"
                     data-testid="shadowing-prosody-toggle"
                     aria-keyshortcuts="P"
-                    checked={showProsody}
+                    checked={language === 'en' && showProsody}
+                    disabled={language === 'zh'}
                     onCheckedChange={setShowProsody}
                   />
                   <label htmlFor="shadowing-prosody">{t('screens.shadowing.prosody.toggle')}</label>
@@ -672,13 +695,13 @@ export function ShadowingSession({
                         <ClickableText text={s.text} light />
                         {showIpa && (
                           <span
-                            lang="en-fonipa"
+                            lang={language === 'zh' ? 'zh-Latn-pinyin' : 'en-fonipa'}
                             className="text-muted-foreground block truncate text-xs font-normal"
                           >
                             {ipaWords(s.text)
                               ?.map((tok) => tok.ipa)
                               .filter(Boolean)
-                              .map((v) => `/${v}/`)
+                              .map((v) => (language === 'zh' ? v : `/${v}/`))
                               .join(' ') || '\u00a0'}
                           </span>
                         )}

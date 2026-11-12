@@ -11,14 +11,17 @@ const WORD_CHARS = /[\p{L}\p{N}]/u
 const EDGE = /^([^\p{L}\p{N}]*)(.*?)([^\p{L}\p{N}]*)$/su
 
 export function tokenizeSentence(text: string): Token[] {
-  return text
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((raw) => {
-      if (!WORD_CHARS.test(raw)) return { before: '', word: '', after: raw }
-      const m = EDGE.exec(raw)!
-      return { before: m[1]!, word: m[2]!, after: m[3]! }
-    })
+  const pieces = /\p{Script=Han}/u.test(text)
+    ? Array.from(
+        new Intl.Segmenter('zh-CN', { granularity: 'word' }).segment(text),
+        (part) => part.segment,
+      ).filter((part) => part.trim())
+    : text.split(/\s+/)
+  return pieces.filter(Boolean).map((raw) => {
+    if (!WORD_CHARS.test(raw)) return { before: '', word: '', after: raw }
+    const m = EDGE.exec(raw)!
+    return { before: m[1]!, word: m[2]!, after: m[3]! }
+  })
 }
 
 export const DEFAULT_BLANK_PERCENT = 30

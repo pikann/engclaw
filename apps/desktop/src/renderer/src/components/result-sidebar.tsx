@@ -1,3 +1,4 @@
+import { MandarinResult } from '@/components/mandarin-result'
 import { useEffect, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { PronunciationResult } from '@engclaw/ipc-contract'
@@ -79,6 +80,13 @@ export function PronunciationResultSections({
     setSelected(firstFlagged(view.chips))
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reset only when a new result arrives
   }, [result])
+  if (result.assessment === 'character-accuracy')
+    return (
+      <div data-testid={testId}>
+        <MandarinResult result={result} text={text} onReplay={onPlay} onRetry={onRetry} />
+        {beforePitch}
+      </div>
+    )
   return (
     <div className="space-y-4" data-testid={testId}>
       <ResultSummary

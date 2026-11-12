@@ -24,6 +24,7 @@ export interface AgentDeps {
   config: () => ProviderConfig | null
   fetchFn: FetchLike
   emit: (e: AgentEvent) => void
+  systemPrompt?: () => string
   tools?: ToolSet
   /** Overrides the network model (tests). */
   modelFor?: (cfg: ProviderConfig) => LanguageModel
@@ -101,7 +102,7 @@ export class AgentService {
       const text = await runAgentTurn({
         model,
         timedOut,
-        system: SYSTEM_PROMPT,
+        system: this.deps.systemPrompt?.() ?? SYSTEM_PROMPT,
         messages: history,
         tools: { ...this.deps.tools, show_card: showCardTool(cards) },
         signal: ctrl.signal,

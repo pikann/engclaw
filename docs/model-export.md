@@ -48,3 +48,7 @@ Check the ONNX output against PyTorch on a few real clips: maximum absolute logi
 2. Note the repo's commit SHA (the revision) and each file's size and SHA-256 (`sha256sum`).
 3. Update the entry in `apps/desktop/resources/models.json`: `repo`, `revision`, and each file's `path`, `size`, `sha256`. The schema is `packages/models/src/catalog.ts`; `packages/models/src/bundled-catalog.test.ts` validates the shipped file.
 4. Run `bun run test`, then try a real download in the app. A new revision ships with an app release; the Model Manager then offers the update and removes the old revision.
+
+## Mandarin recognition
+
+`asr-zh` uses the fp32 ONNX export [onnx-community/wav2vec2-large-xlsr-53-chinese-zh-cn-ONNX](https://huggingface.co/onnx-community/wav2vec2-large-xlsr-53-chinese-zh-cn-ONNX), pinned to `269b21c2b6ea9bebaa5d6b17bfeebf5a23beaa7b`. Its upstream model is [jonatasgrosman/wav2vec2-large-xlsr-53-chinese-zh-cn](https://huggingface.co/jonatasgrosman/wav2vec2-large-xlsr-53-chinese-zh-cn) (Apache-2.0). The bundled catalog records actual size and SHA-256 for every downloaded file. It emits CTC character logits, with no required hidden-state export. Mandarin analysis uses character error rate and does not route through the English phoneme/hidden-state comparison pipeline. The bundled espeak-ng `cmn` voice supplies Mandarin reference playback; pinyin-pro supplies context-sensitive pinyin.

@@ -1,3 +1,4 @@
+import { useLearningLanguage } from '@/lib/learning-language'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ModelProgress, ModelsDiskInfo, ModelStatus } from '@engclaw/ipc-contract'
@@ -30,6 +31,7 @@ interface Props {
  * Pausing keeps the partial files, so resuming (or retrying after a failure) continues from them.
  */
 export function ModelDownloadDialog({ open, onOpenChange, onReady }: Props) {
+  const language = useLearningLanguage()
   const { t } = useTranslation()
   const [models, setModels] = useState<ModelStatus[]>([])
   const [disk, setDisk] = useState<ModelsDiskInfo | null>(null)
@@ -48,9 +50,11 @@ export function ModelDownloadDialog({ open, onOpenChange, onReady }: Props) {
       window.engclaw.models.list(),
       window.engclaw.models.diskInfo(),
     ])
-    setModels(list)
+    setModels(
+      list.filter((model) => (language === 'zh' ? model.id === 'asr-zh' : model.id !== 'asr-zh')),
+    )
     setDisk(info)
-  }, [])
+  }, [language])
 
   useEffect(() => {
     if (!open) return

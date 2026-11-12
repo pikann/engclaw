@@ -15,6 +15,14 @@ export function normalizeWord(raw: string): string {
 
 /** Splits text into plain and word parts that concatenate back to the original text. */
 export function segmentText(text: string): TextPart[] {
+  if (/\p{Script=Han}/u.test(text))
+    return Array.from(
+      new Intl.Segmenter('zh-CN', { granularity: 'word' }).segment(text),
+      (part) => ({
+        text: part.segment,
+        word: part.isWordLike && LETTER.test(part.segment) ? normalizeWord(part.segment) : null,
+      }),
+    )
   const parts: TextPart[] = []
   let last = 0
   for (const m of text.matchAll(WORD)) {
@@ -63,11 +71,19 @@ export function lookupCandidates(word: string): string[] {
 /** The entry that best matches the first candidate that has an exact (case-insensitive) entry. */
 export async function resolveWord(
   word: string,
-  search: (query: string) => Promise<{ id: number; word: string }[]>,
+  search: (query: string) => Promise<{ id: number; word: string; traditional?: string }[]>,
+  language: 'en' | 'zh' = 'en',
 ): Promise<{ id: number; word: string } | null> {
-  for (const candidate of lookupCandidates(word)) {
+  const candidates = language === 'zh' ? [normalizeWord(word)] : lookupCandidates(word)
+  for (const candidate of candidates) {
     const hits = await search(candidate)
-    const exact = hits.find((h) => normalizeWord(h.word) === candidate)
+    const exact = hits.find(
+      (h) =>
+        normalizeWord(h.word) === candidate ||
+        (language === 'zh' &&
+          h.traditional !== undefined &&
+          normalizeWord(h.traditional) === candidate),
+    )
     if (exact) return exact
   }
   return null

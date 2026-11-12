@@ -1,3 +1,4 @@
+import { useLearningLanguage } from './learning-language'
 import { useEffect, useRef, useState } from 'react'
 import type { InferenceResult, SegmentProsody } from '@engclaw/ipc-contract'
 import { decodeSegmentAudio } from '@/lib/audio/decode'
@@ -75,11 +76,12 @@ export async function loadSegmentProsody(
 
 /** Prosody of the shown segment, analysed in the background while the transcript stays usable. */
 export function useSegmentProsody(videoId: string, segment: Segment | undefined, enabled: boolean) {
+  const language = useLearningLanguage()
   const [result, setResult] = useState<{ key: string; state: ProsodyState } | null>(null)
   const [attempt, setAttempt] = useState(0)
   const key = segment ? `${videoId}:${segment.start}:${segment.end}:${segment.text}` : ''
   useEffect(() => {
-    if (!segment) return
+    if (!segment || language === 'zh') return
     let live = true
     void loadSegmentProsody(
       { api: window.engclaw, decode: decodeSegmentAudio },
@@ -95,7 +97,7 @@ export function useSegmentProsody(videoId: string, segment: Segment | undefined,
     }
     // `segment` is identified by `key`; its object identity changes with every transcript render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, videoId, enabled, attempt])
+  }, [key, videoId, enabled, attempt, language])
   const state: ProsodyState = result?.key === key ? result.state : { status: 'idle' }
   return { state, retry: () => setAttempt((n) => n + 1) }
 }
@@ -133,10 +135,12 @@ export function usePrefetchProsody(
   segments: readonly Segment[],
   startIndex: number,
 ) {
+  const language = useLearningLanguage()
   const latest = useRef({ segments, startIndex })
   latest.current = { segments, startIndex }
   const transcriptKey = `${videoId}:${segments.length}:${segments[0]?.text ?? ''}:${segments.at(-1)?.end ?? ''}`
   useEffect(() => {
+    if (language === 'zh') return
     let live = true
     const { segments: all, startIndex: from } = latest.current
     void prefetchProsody(
@@ -148,5 +152,5 @@ export function usePrefetchProsody(
     return () => {
       live = false
     }
-  }, [transcriptKey, videoId])
+  }, [transcriptKey, videoId, language])
 }

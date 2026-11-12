@@ -27,3 +27,9 @@ export const EVAL_USER_TURNS: readonly string[] = [
   'Tell me everything about the history of the English language, please.',
   'I am going to travel to Japan next month with my friends.',
 ]
+
+/** Uses the same conversation rules with Mandarin output and pinyin reading aids. */
+export const MANDARIN_SYSTEM_PROMPT =
+  SYSTEM_PROMPT.replaceAll('English', 'Mandarin Chinese') +
+  `
+Use simplified Chinese characters. When explaining pronunciation, give pinyin with tone marks. Never claim to have measured tones or individual Mandarin sounds; ASR character matches are not a tone assessment.`

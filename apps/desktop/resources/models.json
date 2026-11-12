@@ -81,6 +81,35 @@
           "sha256": "8fbea51ea711f2af382e88c833d9e288c6dc82ce5e98421ea61c058ce21a34cb"
         }
       ]
+    },
+    {
+      "id": "asr-zh",
+      "name": "Mandarin speech recognizer (wav2vec2-large-xlsr-53-chinese-zh-cn)",
+      "license": "Apache-2.0",
+      "repo": "onnx-community/wav2vec2-large-xlsr-53-chinese-zh-cn-ONNX",
+      "revision": "269b21c2b6ea9bebaa5d6b17bfeebf5a23beaa7b",
+      "files": [
+        {
+          "path": "config.json",
+          "size": 2298,
+          "sha256": "08ee684b341d3affd41a4c07bb3ea41aa0661047e35c116264c843574efe90f0"
+        },
+        {
+          "path": "preprocessor_config.json",
+          "size": 214,
+          "sha256": "60ca5a31e13f69ee2fbf147504c8676db5f6398fd7a6b12294341dff838edfcf"
+        },
+        {
+          "path": "vocab.json",
+          "size": 51366,
+          "sha256": "029f7b0629e8ee64c42b1e8b4a0d3c4b0438910ff06b55cd74f81ef410be7d66"
+        },
+        {
+          "path": "onnx/model.onnx",
+          "size": 1276797847,
+          "sha256": "cf73860d3eb1a3107e5b3b40c7bfbb3149d358393654137d52ee24c04155f81a"
+        }
+      ]
     }
   ]
 }

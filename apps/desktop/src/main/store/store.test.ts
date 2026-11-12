@@ -121,6 +121,7 @@ describe('store', () => {
 
   it('settings default, persist and patch', () => {
     expect(store.settings.get()).toEqual({
+      learningLanguage: 'en',
       silenceAutoStop: true,
       checkForUpdates: true,
       theme: 'system',
@@ -134,6 +135,7 @@ describe('store', () => {
     store.db.close()
     store = openStore(dbPath())
     expect(store.settings.get()).toEqual({
+      learningLanguage: 'en',
       silenceAutoStop: false,
       checkForUpdates: true,
       theme: 'system',
@@ -143,6 +145,17 @@ describe('store', () => {
       captionsVisible: false,
       starPrompt: { done: false, moments: 0, shown: 0, lastShownAt: 0 },
     })
+  })
+
+  it('persists the learning language independently and filters history before pagination', () => {
+    store.settings.update({ learningLanguage: 'zh' })
+    store.history.save(attempt({ text: '你好', language: 'zh' }))
+    store.history.save(attempt({ text: 'hello', language: 'en' }))
+    expect(store.history.count(undefined, 'zh')).toBe(1)
+    expect(store.history.list(1, 0, undefined, 'zh')[0]?.text).toBe('你好')
+    store.db.close()
+    store = openStore(dbPath())
+    expect(store.settings.get().learningLanguage).toBe('zh')
   })
 
   it('deleteAll wipes history, recordings and settings', () => {

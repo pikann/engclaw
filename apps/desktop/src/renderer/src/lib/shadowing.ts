@@ -50,10 +50,10 @@ function sentenceEnds(text: string): number[] {
   const ends: number[] = []
   for (let i = 0; i < text.length; i++) {
     const ch = text[i]!
-    if (ch !== '.' && ch !== '!' && ch !== '?' && ch !== '…') continue
+    if (!/[.!?…。！？]/.test(ch)) continue
     let end = i + 1
-    while (end < text.length && /[.!?…"'”’)\]]/.test(text[end]!)) end++
-    if (end < text.length && !/\s/.test(text[end]!)) {
+    while (end < text.length && /[.!?…。！？"'”’)\]]/.test(text[end]!)) end++
+    if (!/[。！？]/.test(ch) && end < text.length && !/\s/.test(text[end]!)) {
       i = end - 1
       continue
     }
@@ -159,15 +159,23 @@ export function segmentIndexAt(segments: readonly Segment[], time: number): numb
   return found
 }
 
-/** The caption language to load: manual English first, then auto-generated English, else null. */
+/** Select a caption track in the target language; Mandarin never falls back to English or Cantonese. */
 export function pickCaptionTrack(
   tracks: readonly { lang: string; auto: boolean }[],
+  language: 'en' | 'zh' = 'en',
 ): string | null {
-  const english = tracks.filter((t) => t.lang === 'en' || t.lang.startsWith('en-'))
-  return (english.find((t) => !t.auto) ?? english[0])?.lang ?? null
+  const matching = tracks.filter((track) =>
+    language === 'en'
+      ? /^en(?:-|$)/i.test(track.lang)
+      : /^(?:zh(?:-(?:CN|TW|SG|Hans|Hant)(?:-(?:CN|TW|SG))?)?|cmn(?:-(?:CN|TW|SG))?|zh-x-engclaw-asr)$/i.test(
+          track.lang,
+        ),
+  )
+  return (matching.find((track) => !track.auto) ?? matching[0])?.lang ?? null
 }
 
-export type EntryError = 'invalid' | 'noTranscript' | 'unavailable' | 'network'
+export type EntryError =
+  'invalid' | 'noTranscript' | 'unavailable' | 'network' | 'transcribeFailed' | 'audioBlocked'
 
 /**
  * Which entry-screen banner a main-process YouTube failure maps to (IA doc §4.1). A broken

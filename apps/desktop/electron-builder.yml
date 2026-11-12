@@ -10,6 +10,8 @@ extraResources:
     to: add.onnx
   - from: resources/models.json
     to: models.json
+  - from: resources/data/cedict.txt.gz
+    to: cedict.txt.gz
   - from: resources/data/dictionary.sqlite
     to: dictionary.sqlite
   - from: resources/data/game-content.sqlite

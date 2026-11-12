@@ -1,3 +1,5 @@
+import { MandarinResult } from '@/components/mandarin-result'
+import { useLearningLanguage } from '@/lib/learning-language'
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router'
@@ -203,6 +205,7 @@ function HistoryList({
  * Speak freely: record or import audio, correct the ASR transcript, analyze the corrected text.
  */
 export function PracticeScreen() {
+  const language = useLearningLanguage()
   const { t } = useTranslation()
   const [state, dispatch] = useReducer(tabsReducer, initialTabs)
   const mode = state.active
@@ -241,10 +244,10 @@ export function PracticeScreen() {
 
   const loadHistory = useCallback(() => {
     void window.engclaw.history
-      .list({ limit: HISTORY_FETCH })
-      .then((r) => setHistory(r.attempts))
+      .list({ limit: HISTORY_FETCH, language })
+      .then((r) => setHistory(r.attempts.filter((attempt) => attempt.language === language)))
       .catch(() => undefined)
-  }, [])
+  }, [language])
   useEffect(loadHistory, [loadHistory])
 
   const analyze = useCallback(
@@ -255,6 +258,7 @@ export function PracticeScreen() {
       try {
         const res = await window.engclaw.inference.analyze({
           requestId: id,
+          language,
           audio: audio.samples,
           text,
         })
@@ -283,7 +287,7 @@ export function PracticeScreen() {
           })
       }
     },
-    [send, loadHistory],
+    [send, loadHistory, language],
   )
 
   const transcribe = useCallback(
@@ -293,6 +297,7 @@ export function PracticeScreen() {
       try {
         const res = await window.engclaw.inference.transcribe({
           requestId: id,
+          language,
           audio: audio.samples,
         })
         if (requestIds.current[m] !== id) return
@@ -313,7 +318,7 @@ export function PracticeScreen() {
           })
       }
     },
-    [send],
+    [send, language],
   )
 
   const runTranscribe = (m: PracticeMode): void => {
@@ -451,6 +456,11 @@ export function PracticeScreen() {
     () => () => {
       void recording.current?.rec.stop()
       playing.current?.stop()
+      for (const mode of MODES) {
+        const requestId = requestIds.current[mode]
+        requestIds.current[mode] = null
+        if (requestId) void window.engclaw.inference.cancel({ requestId })
+      }
     },
     [],
   )
@@ -525,7 +535,11 @@ export function PracticeScreen() {
         className={cn(awaitingEdit && 'border-primary ring-primary/30 ring-[3px]')}
         maxLength={1000}
         aria-invalid={s.hint}
-        placeholder={t(free ? 'practice.freePlaceholder' : 'practice.placeholder')}
+        placeholder={
+          language === 'zh'
+            ? '你好，我正在学习中文。'
+            : t(free ? 'practice.freePlaceholder' : 'practice.placeholder')
+        }
         onChange={(e) => send(mode, { type: 'text', text: e.target.value })}
       />
       {s.hint && (
@@ -641,7 +655,10 @@ export function PracticeScreen() {
                 {t('screens.practice.examples')}
               </p>
               <div className="flex flex-wrap gap-2">
-                {EXAMPLES.map((ex) => (
+                {(language === 'zh'
+                  ? ['你好，我正在学习中文。', '请说慢一点。', '今天你想做什么？']
+                  : EXAMPLES
+                ).map((ex) => (
                   <Button
                     key={ex}
                     variant="secondary"
@@ -768,6 +785,8 @@ export function PracticeScreen() {
         onCancel={cancel}
         messageKey={s.phase === 'transcribing' ? 'practice.transcribing' : undefined}
       />
+    ) : stage === 'result' && result?.assessment === 'character-accuracy' ? (
+      <MandarinResult result={result} text={s.text} onReplay={togglePlay} onRetry={rerecord} />
     ) : stage === 'result' && result ? (
       <div className="grid items-start gap-5 xl:grid-cols-2">
         <div className="space-y-5">
@@ -803,7 +822,7 @@ export function PracticeScreen() {
 
   return (
     <section
-      className="relative h-full"
+      className="relative flex h-full flex-col"
       data-testid="practice-card"
       aria-label={t('practice.title')}
       data-stage={stage}
@@ -819,10 +838,13 @@ export function PracticeScreen() {
         if (f && !busy && stage === 'record') void loadFile(f)
       }}
     >
+      {language === 'zh' && (
+        <p className="px-6 pt-3 text-sm text-muted-foreground">{t('learning.assessmentNote')}</p>
+      )}
       <Tabs
         value={mode}
         onValueChange={(v) => requestSwitch(v as PracticeMode)}
-        className="h-full min-h-0 gap-0"
+        className="min-h-0 flex-1 gap-0"
       >
         <div className="mx-auto flex w-full max-w-xl shrink-0 flex-col items-center gap-2 px-6 pt-5">
           <div>

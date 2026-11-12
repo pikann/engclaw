@@ -36,6 +36,7 @@ export function registerInferenceHandlers(
   client: UtilityClient,
   models: ModelManager,
   videos: VideoStore,
+  learningLanguage: () => string = () => DEFAULT_LANGUAGE,
 ): void {
   const active = new Map<string, number>()
 
@@ -67,8 +68,10 @@ export function registerInferenceHandlers(
 
   /** Model folders the language needs, or the first missing model as a MODEL_MISSING result. */
   async function needs(language: string | undefined, withVoice: boolean, withPhone: boolean) {
-    const lang = getLanguage(language)
+    const lang = getLanguage(language ?? learningLanguage())
     if (!lang) return { error: fail('UNSUPPORTED_LANGUAGE', `unsupported language: ${language}`) }
+    withPhone = withPhone && lang.code !== 'zh'
+    withVoice = withVoice && lang.code !== 'zh'
     const phone = withPhone ? await installed(models, lang.phoneModelId) : null
     const asr = await installed(models, lang.asrModelId)
     const kokoro = withVoice ? await kokoroLocation(models) : null
@@ -116,34 +119,41 @@ export function registerInferenceHandlers(
       videos.putContour(cacheKey.videoId, cacheKey.start, cacheKey.end, out.value.referenceContour)
     return { ok: true, value: out.value.result }
   })
-  handle(IPC.youtubeProsody, async ({ videoId, start, end, text, audio, cachedOnly }, event) => {
-    const cached = videos.getProsody(videoId, start, end, text, PROSODY_VERSION)
-    if (cached) return { ok: true, value: cached } as const
-    if (cachedOnly || !audio) return { ok: true, value: null } as const
-    if (audio.length < MIN_SAMPLES) return fail('INVALID_INPUT', 'the segment audio is too short')
-    const n = await needs(undefined, false, false)
-    if (n.error) return n.error
-    const out = await run<SegmentProsody>(event, null, 'prosody', { ...n.params, audio, text })
-    if (out.ok) videos.putProsody(videoId, start, end, text, PROSODY_VERSION, out.value)
-    return out
-  })
+  handle(
+    IPC.youtubeProsody,
+    async (
+      { videoId, start, end, text, audio, cachedOnly, language = learningLanguage() },
+      event,
+    ) => {
+      if ((language ?? learningLanguage()) === 'zh') return { ok: true, value: null } as const
+      const cached = videos.getProsody(videoId, start, end, text, PROSODY_VERSION)
+      if (cached) return { ok: true, value: cached } as const
+      if (cachedOnly || !audio) return { ok: true, value: null } as const
+      if (audio.length < MIN_SAMPLES) return fail('INVALID_INPUT', 'the segment audio is too short')
+      const n = await needs(language, false, false)
+      if (n.error) return n.error
+      const out = await run<SegmentProsody>(event, null, 'prosody', { ...n.params, audio, text })
+      if (out.ok) videos.putProsody(videoId, start, end, text, PROSODY_VERSION, out.value)
+      return out
+    },
+  )
   handle(
     IPC.contoursHas,
     ({ videoId, start, end }) => videos.getContour(videoId, start, end) !== null,
   )
-  handle(IPC.inferencePhonemize, ({ text, language }, event) => {
+  handle(IPC.inferencePhonemize, ({ text, language = learningLanguage() }, event) => {
     if (!getLanguage(language))
       return fail('UNSUPPORTED_LANGUAGE', `unsupported language: ${language}`)
     return run(event, null, 'phonemize', { text, language: language ?? DEFAULT_LANGUAGE })
   })
-  handle(IPC.youtubeIpa, ({ videoId, texts, cachedOnly }, event) =>
+  handle(IPC.youtubeIpa, ({ videoId, texts, cachedOnly, language = learningLanguage() }, event) =>
     transcriptIpa(
       videos,
-      (text) =>
-        run<PhonemizeResult>(event, null, 'phonemize', { text, language: DEFAULT_LANGUAGE }),
+      (text) => run<PhonemizeResult>(event, null, 'phonemize', { text, language }),
       videoId,
       texts,
       cachedOnly,
+      language,
     ),
   )
   handle(IPC.inferenceLanguages, () =>

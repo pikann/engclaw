@@ -89,6 +89,17 @@ describe('resolveWord', () => {
     expect(await resolveWord('running', search)).toEqual({ id: 1, word: 'run' })
   })
 
+  it('resolves a traditional click to its exact simplified dictionary entry in Mandarin', async () => {
+    const entry = { id: 1000000001, word: '学习', traditional: '學習' }
+    const search = vi.fn().mockResolvedValue([{ id: 2, word: '学生', traditional: '學生' }, entry])
+    expect(await resolveWord('學習', search, 'zh')).toEqual(entry)
+    expect(search).toHaveBeenCalledExactlyOnceWith('學習')
+    expect(await resolveWord('學習', search, 'en')).toBeNull()
+  })
+  it('rejects traditional prefix matches instead of opening a different word', async () => {
+    const search = vi.fn().mockResolvedValue([{ id: 1, word: '学习者', traditional: '學習者' }])
+    expect(await resolveWord('學習', search, 'zh')).toBeNull()
+  })
   it('ignores fuzzy and prefix hits that are not the word', async () => {
     const search = vi.fn().mockResolvedValue([{ id: 9, word: 'zzzzed' }])
     expect(await resolveWord('zzzz', search)).toBeNull()

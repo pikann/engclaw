@@ -1,3 +1,4 @@
+import { ChineseDictionary, readCedict } from './chinese-dictionary'
 import { app, BrowserWindow, net, protocol, systemPreferences, utilityProcess } from 'electron'
 import { join, normalize } from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -113,7 +114,10 @@ function runSmoke(child: Electron.UtilityProcess): void {
   setTimeout(() => app.exit(3), 90_000)
 }
 
-const youtube = new InnertubeAdapter({ log: appendInferenceLog })
+const youtube = new InnertubeAdapter({
+  log: appendInferenceLog,
+  fetch: (url, init) => net.fetch(url instanceof URL ? url.href : url, init),
+})
 
 async function yt<T>(fn: () => Promise<T>): Promise<YouTubeResult<T>> {
   try {
@@ -177,8 +181,15 @@ void app.whenReady().then(async () => {
   })
   const llmConfig = registerLlmHandlers()
   const store = registerStoreHandlers(() => llmConfig.clear())
-  const openDictionary = registerDictionaryHandlers(store)
-  registerAgentHandlers(llmConfig, store, openDictionary)
+  const chineseDictionary = new ChineseDictionary(() =>
+    readCedict(
+      app.isPackaged
+        ? join(process.resourcesPath, 'cedict.txt.gz')
+        : join(app.getAppPath(), 'resources/data/cedict.txt.gz'),
+    ),
+  )
+  const openDictionary = registerDictionaryHandlers(store, chineseDictionary)
+  registerAgentHandlers(llmConfig, store, openDictionary, chineseDictionary)
   const models = registerModelHandlers()
   const cachedYoutube = new CachedYouTube(
     youtube,
@@ -189,6 +200,10 @@ void app.whenReady().then(async () => {
   handle(IPC.youtubeTranscript, ({ videoId, lang }) =>
     yt(() => cachedYoutube.transcript(parseVideoId(videoId), lang)),
   )
+  handle(IPC.youtubeSaveGeneratedTranscript, ({ videoId, language, cues }) => {
+    cachedYoutube.saveGeneratedTranscript(parseVideoId(videoId), language, cues)
+    return null
+  })
   handle(IPC.youtubeAudioRange, ({ videoId, start, end }) =>
     yt(() => cachedYoutube.audioRange(parseVideoId(videoId), start, end)),
   )
@@ -204,8 +219,13 @@ void app.whenReady().then(async () => {
   createWindow()
   if (process.env['ENGCLAW_SMOKE']) runSmoke(startUtility())
   const inference = new UtilityClient(startUtility)
-  registerTtsHandlers(inference, models)
-  registerInferenceHandlers(inference, models, store.videos)
+  registerTtsHandlers(inference, models, () => store.settings.get().learningLanguage)
+  registerInferenceHandlers(
+    inference,
+    models,
+    store.videos,
+    () => store.settings.get().learningLanguage,
+  )
   if (!process.env['ENGCLAW_SMOKE']) startAutoUpdate(() => store.settings.get().checkForUpdates)
 })
 

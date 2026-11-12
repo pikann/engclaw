@@ -25,18 +25,22 @@ interface Spoke {
 }
 
 /** `tts:speak` -> utility process (Kokoro + disk cache under userData/tts-cache). */
-export function registerTtsHandlers(client: UtilityClient, models: ModelManager): void {
-  handle(IPC.ttsSpeak, async ({ text }): Promise<SpeakResponse> => {
+export function registerTtsHandlers(
+  client: UtilityClient,
+  models: ModelManager,
+  learningLanguage: () => string = () => 'en',
+): void {
+  handle(IPC.ttsSpeak, async ({ text, language = learningLanguage() }): Promise<SpeakResponse> => {
     const started = performance.now()
-    const kokoro = await kokoroLocation(models)
-    if (!kokoro)
+    const kokoro = language === 'zh' ? null : await kokoroLocation(models)
+    if (!kokoro && language !== 'zh')
       return {
         ok: false,
         code: 'MODEL_MISSING',
         message: 'The reference voice model is not downloaded.',
       }
     try {
-      const r = await client.call<Spoke>('speak', { text, kokoro }).result
+      const r = await client.call<Spoke>('speak', { text, kokoro, language }).result
       const ms = Math.round(performance.now() - started)
       console.info(`[tts] speak cached=${r.cached} ${ms}ms (${text.length} chars)`)
       return { ok: true, samples: r.samples, sampleRate: r.sampleRate, cached: r.cached, ms }
