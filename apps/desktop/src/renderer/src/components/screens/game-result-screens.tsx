@@ -73,7 +73,7 @@ export function ResultCard({ stars, newBest, compare, last }: ResultVariant) {
                 {t('screens.game.compare')}
               </TableCaption>
               <TableHeader>
-                <TableRow className="border-b-0 text-muted-foreground text-left text-xs">
+                <TableRow className="text-muted-foreground text-left text-xs">
                   <TableHead scope="col" className="h-auto px-0 pb-1 font-medium">
                     <span className="sr-only">{t('screens.game.col.stars')}</span>
                   </TableHead>
@@ -86,7 +86,7 @@ export function ResultCard({ stars, newBest, compare, last }: ResultVariant) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow className="border-b-0 border-t">
+                <TableRow>
                   <TableHead scope="row" className="h-auto px-0 py-1.5 text-left font-normal">
                     {t('screens.game.col.stars')}
                   </TableHead>
@@ -97,7 +97,7 @@ export function ResultCard({ stars, newBest, compare, last }: ResultVariant) {
                     <StarRating stars={before} size="sm" />
                   </TableCell>
                 </TableRow>
-                <TableRow className="border-b-0 border-t">
+                <TableRow>
                   <TableHead scope="row" className="h-auto px-0 py-1.5 text-left font-normal">
                     {t('screens.game.avgScore')}
                   </TableHead>

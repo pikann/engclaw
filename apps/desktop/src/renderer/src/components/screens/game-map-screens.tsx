@@ -522,7 +522,7 @@ function ListView({ chapters, selected }: { chapters: Chapter[]; selected: numbe
       <Table className="w-full text-sm" data-testid="chapter-list">
         <TableCaption className="sr-only">{t('screens.game.listCaption')}</TableCaption>
         <TableHeader>
-          <TableRow className="border-b-0 text-muted-foreground text-left text-xs">
+          <TableRow className="text-muted-foreground text-left text-xs">
             {(['num', 'target', 'kind', 'world', 'stars', 'status'] as const).map((k) => (
               <TableHead key={k} scope="col" className="h-auto px-0 pb-2 font-medium">
                 {t(`screens.game.col.${k}`)}
@@ -535,7 +535,7 @@ function ListView({ chapters, selected }: { chapters: Chapter[]; selected: numbe
             <TableRow
               key={c.index}
               aria-selected={selected === c.index}
-              className={cn('border-t border-b-0', selected === c.index && 'bg-primary-soft')}
+              className={cn(selected === c.index && 'bg-primary-soft')}
             >
               <TableCell className="px-0 py-1.5 tabular-nums">{c.index}</TableCell>
               <TableCell className="px-0">{c.target}</TableCell>

@@ -141,7 +141,7 @@ export function ShadowingEntry({
                   aria-label={t('screens.shadowing.openRecent', { title: v.title })}
                   disabled={loading}
                   onClick={() => onOpenRecent(v.videoId)}
-                  className="h-auto justify-start whitespace-normal font-normal focus-visible:ring-ring/50 hover:bg-muted/50 w-full space-y-1.5 rounded-md p-1 text-left outline-none focus-visible:ring-[3px] disabled:opacity-50"
+                  className="h-auto flex-col items-stretch justify-start gap-1.5 whitespace-normal font-normal focus-visible:ring-ring/50 hover:bg-muted/50 w-full rounded-md p-1 text-left outline-none focus-visible:ring-[3px] disabled:opacity-50"
                 >
                   <div className="bg-muted text-muted-foreground flex aspect-video items-center justify-center rounded-md">
                     <Film aria-hidden="true" />

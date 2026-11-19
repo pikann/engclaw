@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useRegisterNativeOverlay } from '@/lib/native-overlay'
 import { cn } from '@/lib/utils'
 import { AlertDialog as AlertDialogPrimitive } from 'radix-ui'
 
@@ -46,6 +47,21 @@ function AlertDialogContent({
   return (
     <AlertDialogPortal>
       <AlertDialogOverlay />
+      <AlertDialogContentInner {...props} size={size} className={className} />
+    </AlertDialogPortal>
+  )
+}
+
+function AlertDialogContentInner({
+  className,
+  size = 'default',
+  ...props
+}: React.ComponentProps<typeof AlertDialogPrimitive.Content> & {
+  size?: 'default' | 'sm'
+}) {
+  useRegisterNativeOverlay()
+  return (
+    <>
       <AlertDialogPrimitive.Content
         data-slot="alert-dialog-content"
         data-size={size}
@@ -55,7 +71,7 @@ function AlertDialogContent({
         )}
         {...props}
       />
-    </AlertDialogPortal>
+    </>
   )
 }
 

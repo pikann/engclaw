@@ -62,12 +62,12 @@ export function ChapterResultCard({
       </div>
       {previous && (
         <>
-          <Table className="w-full text-sm" data-testid="game-compare">
-            <TableCaption className="text-muted-foreground mb-1 text-left text-xs font-medium">
+          <Table className="w-full caption-top text-sm" data-testid="game-compare">
+            <TableCaption className="text-muted-foreground mt-0 mb-1 caption-top text-left text-xs font-medium">
               {t('screens.game.compare')}
             </TableCaption>
             <TableHeader>
-              <TableRow className="border-b-0 text-muted-foreground text-left text-xs">
+              <TableRow className="text-muted-foreground text-left text-xs">
                 <TableHead scope="col" className="h-auto px-0 pb-1 font-medium">
                   <span className="sr-only">{t('screens.game.col.stars')}</span>
                 </TableHead>
@@ -80,7 +80,7 @@ export function ChapterResultCard({
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow className="border-b-0 border-t">
+              <TableRow>
                 <TableHead scope="row" className="h-auto px-0 py-1.5 text-left font-normal">
                   {t('screens.game.col.stars')}
                 </TableHead>
@@ -91,7 +91,7 @@ export function ChapterResultCard({
                   <StarRating stars={previous.stars} size="sm" />
                 </TableCell>
               </TableRow>
-              <TableRow className="border-b-0 border-t">
+              <TableRow>
                 <TableHead scope="row" className="h-auto px-0 py-1.5 text-left font-normal">
                   {t('screens.game.avgScore')}
                 </TableHead>

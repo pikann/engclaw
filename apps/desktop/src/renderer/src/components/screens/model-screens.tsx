@@ -58,7 +58,7 @@ export function DownloadPrompt({ state }: { state: DownloadState }) {
       <Table className="w-full text-sm">
         <TableCaption className="sr-only">{t('screens.models.tableCaption')}</TableCaption>
         <TableHeader>
-          <TableRow className="border-b-0 text-muted-foreground text-left text-xs">
+          <TableRow className="text-muted-foreground text-left text-xs">
             <TableHead scope="col" className="h-auto px-0 pb-1 font-medium">
               {t('screens.models.colModel')}
             </TableHead>
@@ -72,7 +72,7 @@ export function DownloadPrompt({ state }: { state: DownloadState }) {
         </TableHeader>
         <TableBody>
           {MODELS.map((m) => (
-            <TableRow key={m.key} className="border-b-0 border-t">
+            <TableRow key={m.key}>
               <TableCell className="px-0 py-1.5">{t(`screens.models.name.${m.key}`)}</TableCell>
               <TableCell className="px-0 py-1.5 text-right tabular-nums">{m.size}</TableCell>
               <TableCell className="px-0 text-muted-foreground py-1.5 pl-4">
