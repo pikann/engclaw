@@ -8,6 +8,15 @@ import { ProgressSummary, StarRating } from '@/components/ui/game'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { MAX_STARS, clampStars, nodeStates, progressOf, type NodeState } from '@/lib/game'
 import { cn } from '@/lib/utils'
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 
 export type TargetType = 'word' | 'phrase' | 'idiom'
 
@@ -510,34 +519,36 @@ function ListView({ chapters, selected }: { chapters: Chapter[]; selected: numbe
       role="region"
       aria-label={t('screens.game.listCaption')}
     >
-      <table className="w-full text-sm" data-testid="chapter-list">
-        <caption className="sr-only">{t('screens.game.listCaption')}</caption>
-        <thead>
-          <tr className="text-muted-foreground text-left text-xs">
+      <Table className="w-full text-sm" data-testid="chapter-list">
+        <TableCaption className="sr-only">{t('screens.game.listCaption')}</TableCaption>
+        <TableHeader>
+          <TableRow className="border-b-0 text-muted-foreground text-left text-xs">
             {(['num', 'target', 'kind', 'world', 'stars', 'status'] as const).map((k) => (
-              <th key={k} scope="col" className="pb-2 font-medium">
+              <TableHead key={k} scope="col" className="h-auto px-0 pb-2 font-medium">
                 {t(`screens.game.col.${k}`)}
-              </th>
+              </TableHead>
             ))}
-          </tr>
-        </thead>
-        <tbody>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {chapters.map((c) => (
-            <tr
+            <TableRow
               key={c.index}
               aria-selected={selected === c.index}
-              className={cn('border-t', selected === c.index && 'bg-primary-soft')}
+              className={cn('border-t border-b-0', selected === c.index && 'bg-primary-soft')}
             >
-              <td className="py-1.5 tabular-nums">{c.index}</td>
-              <td>{c.target}</td>
-              <td>{t(`screens.game.type.${c.type}`)}</td>
-              <td>{c.world + 1}</td>
-              <td>{c.stars ? <StarRating stars={c.stars} size="sm" /> : '—'}</td>
-              <td>{t(`screens.game.status.${c.state}`)}</td>
-            </tr>
+              <TableCell className="px-0 py-1.5 tabular-nums">{c.index}</TableCell>
+              <TableCell className="px-0">{c.target}</TableCell>
+              <TableCell className="px-0">{t(`screens.game.type.${c.type}`)}</TableCell>
+              <TableCell className="px-0">{c.world + 1}</TableCell>
+              <TableCell className="px-0">
+                {c.stars ? <StarRating stars={c.stars} size="sm" /> : '—'}
+              </TableCell>
+              <TableCell className="px-0">{t(`screens.game.status.${c.state}`)}</TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   )
 }

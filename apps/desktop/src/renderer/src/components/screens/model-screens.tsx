@@ -12,6 +12,15 @@ import { AppShell, layoutOf } from '@/components/screens/shell'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 
 export type DownloadState =
   'prompt' | 'downloading' | 'paused' | 'offline' | 'error' | 'lowDisk' | 'unwritable' | 'done'
@@ -46,33 +55,33 @@ export function DownloadPrompt({ state }: { state: DownloadState }) {
           {t('screens.models.intro', { size: '1.3 GB' })}
         </p>
       </header>
-      <table className="w-full text-sm">
-        <caption className="sr-only">{t('screens.models.tableCaption')}</caption>
-        <thead>
-          <tr className="text-muted-foreground text-left text-xs">
-            <th scope="col" className="pb-1 font-medium">
+      <Table className="w-full text-sm">
+        <TableCaption className="sr-only">{t('screens.models.tableCaption')}</TableCaption>
+        <TableHeader>
+          <TableRow className="border-b-0 text-muted-foreground text-left text-xs">
+            <TableHead scope="col" className="h-auto px-0 pb-1 font-medium">
               {t('screens.models.colModel')}
-            </th>
-            <th scope="col" className="pb-1 text-right font-medium">
+            </TableHead>
+            <TableHead scope="col" className="h-auto px-0 pb-1 text-right font-medium">
               {t('screens.models.colSize')}
-            </th>
-            <th scope="col" className="pb-1 pl-4 font-medium">
+            </TableHead>
+            <TableHead scope="col" className="h-auto px-0 pb-1 pl-4 font-medium">
               {t('screens.models.colFor')}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {MODELS.map((m) => (
-            <tr key={m.key} className="border-t">
-              <td className="py-1.5">{t(`screens.models.name.${m.key}`)}</td>
-              <td className="py-1.5 text-right tabular-nums">{m.size}</td>
-              <td className="text-muted-foreground py-1.5 pl-4">
+            <TableRow key={m.key} className="border-b-0 border-t">
+              <TableCell className="px-0 py-1.5">{t(`screens.models.name.${m.key}`)}</TableCell>
+              <TableCell className="px-0 py-1.5 text-right tabular-nums">{m.size}</TableCell>
+              <TableCell className="px-0 text-muted-foreground py-1.5 pl-4">
                 {t(`screens.models.for.${m.key}`)}
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
       <p className="text-muted-foreground flex flex-wrap items-center gap-x-3 text-sm">
         <HardDrive className="size-4" aria-hidden="true" />
         <span className="font-mono">~/Engclaw/models</span>

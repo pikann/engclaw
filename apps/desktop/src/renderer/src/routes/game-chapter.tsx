@@ -1,7 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useBlocker, useNavigate, useParams } from 'react-router'
-import { AlertDialog as AlertDialogPrimitive } from 'radix-ui'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { AlertTriangle, MicOff, X } from 'lucide-react'
 import {
   addAttempt,
@@ -512,41 +521,32 @@ function ChapterPlay({
         </ResultSidebar>
       </div>
 
-      <AlertDialogPrimitive.Root open={blocker.state === 'blocked'}>
-        <AlertDialogPrimitive.Portal>
-          <AlertDialogPrimitive.Overlay className="bg-background/70 fixed inset-0 z-50 backdrop-blur-[1px]" />
-          <AlertDialogPrimitive.Content
-            data-testid="game-leave-dialog"
-            className="bg-card fixed top-1/2 left-1/2 z-50 w-120 max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 space-y-4 rounded-xl border p-6 shadow-lg"
-          >
-            <AlertDialogPrimitive.Title className="text-lg font-semibold">
-              {t('screens.game.leaveTitle')}
-            </AlertDialogPrimitive.Title>
-            <AlertDialogPrimitive.Description className="text-muted-foreground text-sm">
+      <AlertDialog open={blocker.state === 'blocked'}>
+        <AlertDialogContent data-testid="game-leave-dialog" className="w-120">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('screens.game.leaveTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
               {t('screens.game.leaveBody', { n: correct })}
-            </AlertDialogPrimitive.Description>
-            <footer className="flex flex-wrap justify-end gap-2">
-              <AlertDialogPrimitive.Action asChild>
-                <Button
-                  variant="outline"
-                  data-testid="game-leave-confirm"
-                  onClick={() => blocker.state === 'blocked' && blocker.proceed()}
-                >
-                  {t('screens.game.leave')}
-                </Button>
-              </AlertDialogPrimitive.Action>
-              <AlertDialogPrimitive.Cancel asChild>
-                <Button
-                  data-testid="game-leave-stay"
-                  onClick={() => blocker.state === 'blocked' && blocker.reset()}
-                >
-                  {t('screens.game.stay')}
-                </Button>
-              </AlertDialogPrimitive.Cancel>
-            </footer>
-          </AlertDialogPrimitive.Content>
-        </AlertDialogPrimitive.Portal>
-      </AlertDialogPrimitive.Root>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction
+              variant="outline"
+              data-testid="game-leave-confirm"
+              onClick={() => blocker.state === 'blocked' && blocker.proceed()}
+            >
+              {t('screens.game.leave')}
+            </AlertDialogAction>
+            <AlertDialogCancel
+              variant="default"
+              data-testid="game-leave-stay"
+              onClick={() => blocker.state === 'blocked' && blocker.reset()}
+            >
+              {t('screens.game.stay')}
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <ModelDownloadDialog
         open={downloadOpen}

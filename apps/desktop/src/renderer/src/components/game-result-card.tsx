@@ -5,6 +5,15 @@ import type { RunResult } from '@engclaw/game'
 import type { GameProgressEntry } from '@engclaw/ipc-contract'
 import { Button } from '@/components/ui/button'
 import { NewBestBadge, StarBurst, StarRating, StatTile } from '@/components/ui/game'
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 
 /** Shown when a chapter run is passed: this run's result, the comparison with the stored best, and next actions. */
 export function ChapterResultCard({
@@ -53,48 +62,48 @@ export function ChapterResultCard({
       </div>
       {previous && (
         <>
-          <table className="w-full text-sm" data-testid="game-compare">
-            <caption className="text-muted-foreground mb-1 text-left text-xs font-medium">
+          <Table className="w-full text-sm" data-testid="game-compare">
+            <TableCaption className="text-muted-foreground mb-1 text-left text-xs font-medium">
               {t('screens.game.compare')}
-            </caption>
-            <thead>
-              <tr className="text-muted-foreground text-left text-xs">
-                <th scope="col" className="pb-1 font-medium">
+            </TableCaption>
+            <TableHeader>
+              <TableRow className="border-b-0 text-muted-foreground text-left text-xs">
+                <TableHead scope="col" className="h-auto px-0 pb-1 font-medium">
                   <span className="sr-only">{t('screens.game.col.stars')}</span>
-                </th>
-                <th scope="col" className="pb-1 font-medium">
+                </TableHead>
+                <TableHead scope="col" className="h-auto px-0 pb-1 font-medium">
                   {t('screens.game.thisRun')}
-                </th>
-                <th scope="col" className="pb-1 font-medium">
+                </TableHead>
+                <TableHead scope="col" className="h-auto px-0 pb-1 font-medium">
                   {t('screens.game.prevBest')}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="border-t">
-                <th scope="row" className="py-1.5 text-left font-normal">
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow className="border-b-0 border-t">
+                <TableHead scope="row" className="h-auto px-0 py-1.5 text-left font-normal">
                   {t('screens.game.col.stars')}
-                </th>
-                <td>
+                </TableHead>
+                <TableCell className="px-0">
                   <StarRating stars={run.stars} size="sm" />
-                </td>
-                <td>
+                </TableCell>
+                <TableCell className="px-0">
                   <StarRating stars={previous.stars} size="sm" />
-                </td>
-              </tr>
-              <tr className="border-t">
-                <th scope="row" className="py-1.5 text-left font-normal">
+                </TableCell>
+              </TableRow>
+              <TableRow className="border-b-0 border-t">
+                <TableHead scope="row" className="h-auto px-0 py-1.5 text-left font-normal">
                   {t('screens.game.avgScore')}
-                </th>
-                <td className="tabular-nums" data-testid="game-compare-this">
+                </TableHead>
+                <TableCell className="px-0 tabular-nums" data-testid="game-compare-this">
                   {avg}
-                </td>
-                <td className="tabular-nums" data-testid="game-compare-prev">
+                </TableCell>
+                <TableCell className="px-0 tabular-nums" data-testid="game-compare-prev">
                   {Math.round(previous.avgScore)}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
           {!newBest && (
             <p className="text-muted-foreground text-sm" data-testid="game-best-kept">
               {t('screens.game.bestKept')}

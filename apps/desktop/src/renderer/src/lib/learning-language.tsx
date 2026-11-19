@@ -2,6 +2,14 @@ import { useNavigate, useLocation } from 'react-router'
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { LearningLanguage } from '@engclaw/ipc-contract'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
 
 const Context = createContext<{ language: LearningLanguage }>({ language: 'en' })
 export const useLearningLanguage = () => useContext(Context).language
@@ -68,21 +76,27 @@ export function LearningLanguageSelect() {
   const { change, saving, error } = useContext(ChangeContext)
   return (
     <div className="flex items-center gap-2 text-sm">
-      <label htmlFor="learning-language" className="text-muted-foreground">
+      <Label htmlFor="learning-language" className="text-muted-foreground">
         {t('learning.label')}
-      </label>
-      <select
-        id="learning-language"
-        data-testid="learning-language"
+      </Label>
+      <Select
         value={language}
         disabled={saving}
-        title={t('learning.switchHint')}
-        className="bg-background rounded-md border px-2 py-1"
-        onChange={(event) => change(event.target.value as LearningLanguage)}
+        onValueChange={(value) => change(value as LearningLanguage)}
       >
-        <option value="en">{t('learning.en')}</option>
-        <option value="zh">{t('learning.zh')}</option>
-      </select>
+        <SelectTrigger
+          id="learning-language"
+          data-testid="learning-language"
+          size="sm"
+          title={t('learning.switchHint')}
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="en">{t('learning.en')}</SelectItem>
+          <SelectItem value="zh">{t('learning.zh')}</SelectItem>
+        </SelectContent>
+      </Select>
       {error && <span role="alert">{t('learning.saveError')}</span>}
     </div>
   )

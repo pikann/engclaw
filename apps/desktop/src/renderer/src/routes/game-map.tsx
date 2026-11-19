@@ -8,6 +8,13 @@ import { ExamplesPanel, TargetAudioActions } from '@/components/game-learning-ai
 import { Button } from '@/components/ui/button'
 import { ClickableText } from '@/components/ui/clickable-text'
 import { ProgressSummary, StarRating } from '@/components/ui/game'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { useChapterAsk } from '@/lib/use-ask-agent'
 import { MAX_STARS, clampStars, type NodeState } from '@/lib/game'
@@ -661,26 +668,28 @@ export function GameMapPage() {
             ? t('screens.game.finishedBanner')
             : t('screens.game.continue', { n: next })}
         </Button>
-        <label className="flex items-center gap-2 text-sm">
-          <span className="sr-only">{t('screens.game.jump')}</span>
-          <select
-            data-testid="game-world-select"
-            aria-label={t('screens.game.jump')}
-            value={world}
-            onChange={(e) => goToWorld(Number(e.target.value))}
-            className="bg-background h-8 rounded-md border px-2 text-sm"
-          >
-            {map.worlds.map((w) => (
-              <option key={w.world} value={w.world}>
-                {t('screens.game.worldOption', {
-                  n: w.world,
-                  passed: worldTally(w, progress).passed,
-                  total: w.count,
-                })}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div className="flex items-center gap-2 text-sm">
+          <Select value={String(world)} onValueChange={(v) => goToWorld(Number(v))}>
+            <SelectTrigger
+              data-testid="game-world-select"
+              size="sm"
+              aria-label={t('screens.game.jump')}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {map.worlds.map((w) => (
+                <SelectItem key={w.world} value={String(w.world)}>
+                  {t('screens.game.worldOption', {
+                    n: w.world,
+                    passed: worldTally(w, progress).passed,
+                    total: w.count,
+                  })}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <ToggleGroup
           type="single"
           value={view}

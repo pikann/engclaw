@@ -6,6 +6,7 @@ import { RootFamily } from '@/components/dictionary/root-family'
 import { Pane, type Layout } from '@/components/screens/shell'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 
 /** Root explorer: filter the roots by origin language and text, open one to see its family. */
 export function RootsBrowser({
@@ -74,15 +75,16 @@ export function RootsBrowser({
           </div>
           <div role="group" aria-label={t('dict.originFilter')} className="flex flex-wrap gap-1.5">
             {[null, ...origins].map((o) => (
-              <button
+              <Button
+                variant="outline"
                 key={o ?? 'all'}
                 type="button"
                 aria-pressed={origin === o}
                 onClick={() => setOrigin(o)}
-                className="hover:bg-primary-soft focus-visible:ring-ring/50 aria-pressed:bg-primary-soft aria-pressed:border-primary rounded-md border px-2 py-1 text-xs focus-visible:ring-[3px] focus-visible:outline-none aria-pressed:font-medium"
+                className="h-auto justify-start whitespace-normal font-normal hover:bg-primary-soft focus-visible:ring-ring/50 aria-pressed:bg-primary-soft aria-pressed:border-primary rounded-md border px-2 py-1 text-xs focus-visible:ring-[3px] focus-visible:outline-none aria-pressed:font-medium"
               >
                 {o ?? t('dict.allOrigins')}
-              </button>
+              </Button>
             ))}
           </div>
           {failed && (
@@ -99,11 +101,12 @@ export function RootsBrowser({
             <ul aria-label={t('dict.rootsList')} className="space-y-0.5" data-testid="roots-list">
               {list.roots.map((r) => (
                 <li key={r.id}>
-                  <button
+                  <Button
+                    variant="ghost"
                     type="button"
                     aria-current={r.id === selectedId ? 'true' : undefined}
                     onClick={() => onSelect(r.id)}
-                    className="hover:bg-primary-soft focus-visible:ring-ring/50 aria-[current=true]:bg-primary-soft flex w-full flex-col rounded-md px-2 py-1.5 text-left text-sm focus-visible:ring-[3px] focus-visible:outline-none aria-[current=true]:font-medium"
+                    className="h-auto justify-start whitespace-normal font-normal hover:bg-primary-soft focus-visible:ring-ring/50 aria-[current=true]:bg-primary-soft flex w-full flex-col rounded-md px-2 py-1.5 text-left text-sm focus-visible:ring-[3px] focus-visible:outline-none aria-[current=true]:font-medium"
                   >
                     <span className="flex items-baseline justify-between gap-2">
                       <span className="break-words">{r.root}</span>
@@ -112,7 +115,7 @@ export function RootsBrowser({
                       </span>
                     </span>
                     <span className="text-muted-foreground text-xs break-words">{r.meaning}</span>
-                  </button>
+                  </Button>
                 </li>
               ))}
             </ul>

@@ -134,13 +134,14 @@ export function ShadowingEntry({
           <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
             {recents.map((v) => (
               <li key={v.videoId}>
-                <button
+                <Button
+                  variant="ghost"
                   type="button"
                   data-testid="shadowing-recent"
                   aria-label={t('screens.shadowing.openRecent', { title: v.title })}
                   disabled={loading}
                   onClick={() => onOpenRecent(v.videoId)}
-                  className="focus-visible:ring-ring/50 hover:bg-muted/50 w-full space-y-1.5 rounded-md p-1 text-left outline-none focus-visible:ring-[3px] disabled:opacity-50"
+                  className="h-auto justify-start whitespace-normal font-normal focus-visible:ring-ring/50 hover:bg-muted/50 w-full space-y-1.5 rounded-md p-1 text-left outline-none focus-visible:ring-[3px] disabled:opacity-50"
                 >
                   <div className="bg-muted text-muted-foreground flex aspect-video items-center justify-center rounded-md">
                     <Film aria-hidden="true" />
@@ -149,7 +150,7 @@ export function ShadowingEntry({
                   <p className="text-muted-foreground text-xs tabular-nums">
                     {formatClock(v.durationSec)}
                   </p>
-                </button>
+                </Button>
               </li>
             ))}
           </ul>

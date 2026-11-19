@@ -390,12 +390,13 @@ export function WordsDetail({
       <ul className="space-y-1 text-sm">
         {view.chips.map((c) => (
           <li key={c.position}>
-            <button
+            <Button
+              variant="ghost"
               type="button"
               aria-pressed={c.position === selected}
               onClick={() => onSelect(c.position)}
               className={cn(
-                'focus-visible:ring-ring/50 flex w-full items-center justify-between rounded-md border px-3 py-1.5 text-left focus-visible:ring-[3px] focus-visible:outline-none',
+                'h-auto justify-start whitespace-normal font-normal focus-visible:ring-ring/50 flex w-full items-center justify-between rounded-md border px-3 py-1.5 text-left focus-visible:ring-[3px] focus-visible:outline-none',
                 c.position === selected && 'bg-primary-soft',
               )}
             >
@@ -409,7 +410,7 @@ export function WordsDetail({
                 {c.error ? <X className="size-4" /> : <Check className="size-4" />}
                 {c.error ? t('screens.practice.needsWork') : t('result.chipOk')}
               </span>
-            </button>
+            </Button>
           </li>
         ))}
       </ul>

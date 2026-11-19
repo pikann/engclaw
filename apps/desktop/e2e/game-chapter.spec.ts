@@ -191,6 +191,7 @@ test('leaving mid-chapter asks first and resets the run', async () => {
   await page.getByTestId('game-leave-stay').click()
   await expect(page.getByTestId('game-count')).toHaveText('1/5')
   await page.getByTestId('nav-history').click()
+  await expect(page.getByTestId('game-leave-dialog')).toBeVisible()
   await page.getByTestId('game-leave-confirm').click()
   await expect(page.getByTestId('game-chapter')).toHaveCount(0)
   await page.evaluate(() => (location.hash = '#/game/chapter/1'))

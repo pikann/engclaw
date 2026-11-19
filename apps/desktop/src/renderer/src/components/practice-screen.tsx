@@ -3,7 +3,16 @@ import { useLearningLanguage } from '@/lib/learning-language'
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router'
-import { AlertDialog as AlertDialogPrimitive } from 'radix-ui'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import {
   AlertTriangle,
   Bookmark,
@@ -57,6 +66,7 @@ import {
 import { firstFlagged } from '@/lib/result'
 import { notifyStarMoment } from '@/lib/star-prompt'
 import { cn } from '@/lib/utils'
+import { Label } from '@/components/ui/label'
 
 const MODES: readonly PracticeMode[] = ['free', 'sentence']
 const HISTORY_SHOWN = 5
@@ -147,19 +157,20 @@ function HistoryList({
   const id = `practice-history-${mode}`
   return (
     <div className="space-y-2" data-testid="practice-history">
-      <button
+      <Button
+        variant="ghost"
         type="button"
         aria-expanded={open}
         aria-controls={id}
         onClick={() => setOpen((o) => !o)}
-        className="hover:bg-primary-soft focus-visible:ring-ring/50 flex w-full items-center gap-1 rounded-md px-1 py-1 text-left text-sm font-medium focus-visible:ring-[3px] focus-visible:outline-none"
+        className="h-auto justify-start whitespace-normal font-normal hover:bg-primary-soft focus-visible:ring-ring/50 flex w-full items-center gap-1 rounded-md px-1 py-1 text-left text-sm font-medium focus-visible:ring-[3px] focus-visible:outline-none"
       >
         <ChevronRight
           className={cn('size-4 shrink-0 transition-transform', open && 'rotate-90')}
           aria-hidden="true"
         />
         {t('screens.practice.historyTitle')}
-      </button>
+      </Button>
       <div id={id} hidden={!open}>
         {items.length === 0 ? (
           <p className="text-muted-foreground px-1 text-sm">{t('screens.practice.historyEmpty')}</p>
@@ -167,11 +178,12 @@ function HistoryList({
           <ul className="divide-y rounded-lg border">
             {items.map((a) => (
               <li key={a.id}>
-                <button
+                <Button
+                  variant="ghost"
                   type="button"
                   data-testid="practice-history-item"
                   onClick={() => onPick(a.text)}
-                  className="hover:bg-primary-soft focus-visible:ring-ring/50 flex w-full items-center gap-2 px-3 py-2 text-left focus-visible:ring-[3px] focus-visible:outline-none"
+                  className="h-auto justify-start whitespace-normal font-normal hover:bg-primary-soft focus-visible:ring-ring/50 flex w-full items-center gap-2 px-3 py-2 text-left focus-visible:ring-[3px] focus-visible:outline-none"
                 >
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm">{a.text}</span>
@@ -186,7 +198,7 @@ function HistoryList({
                   <span className="shrink-0 text-sm font-semibold tabular-nums">
                     {Math.round(a.score)}
                   </span>
-                </button>
+                </Button>
               </li>
             ))}
           </ul>
@@ -520,11 +532,11 @@ export function PracticeScreen() {
 
   const textField = (
     <div className="space-y-2">
-      <label htmlFor="practice-text" className="text-sm font-medium">
+      <Label htmlFor="practice-text" className="text-sm font-medium">
         {free && s.transcribed
           ? t('result.weHeard')
           : t(free ? 'screens.practice.speakLabel' : 'screens.practice.readLabel')}
-      </label>
+      </Label>
       <Textarea
         id="practice-text"
         ref={textRef}
@@ -880,41 +892,28 @@ export function PracticeScreen() {
         </TabsContent>
       </Tabs>
 
-      <AlertDialogPrimitive.Root
-        open={confirmTo !== null}
-        onOpenChange={(open) => !open && setConfirmTo(null)}
-      >
-        <AlertDialogPrimitive.Portal>
-          <AlertDialogPrimitive.Overlay className="bg-background/70 fixed inset-0 z-50 backdrop-blur-[1px]" />
-          <AlertDialogPrimitive.Content
-            data-testid="practice-switch-confirm"
-            className="bg-card fixed top-1/2 left-1/2 z-50 w-120 max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 space-y-4 rounded-xl border p-6 shadow-lg"
-          >
-            <AlertDialogPrimitive.Title className="text-lg font-semibold">
+      <AlertDialog open={confirmTo !== null} onOpenChange={(open) => !open && setConfirmTo(null)}>
+        <AlertDialogContent data-testid="practice-switch-confirm" className="w-120">
+          <AlertDialogHeader>
+            <AlertDialogTitle>
               {t('screens.practice.switchTitle', { tab: confirmTo ? modeName(confirmTo) : '' })}
-            </AlertDialogPrimitive.Title>
-            <AlertDialogPrimitive.Description className="text-muted-foreground text-sm">
-              {t('screens.practice.switchBody')}
-            </AlertDialogPrimitive.Description>
-            <footer className="flex flex-wrap justify-end gap-2">
-              <AlertDialogPrimitive.Action asChild>
-                <Button
-                  variant="outline"
-                  data-testid="practice-switch-discard"
-                  onClick={discardAndSwitch}
-                >
-                  {t('screens.practice.switchDiscard')}
-                </Button>
-              </AlertDialogPrimitive.Action>
-              <AlertDialogPrimitive.Cancel asChild>
-                <Button data-testid="practice-switch-stay">
-                  {t('screens.practice.switchStay')}
-                </Button>
-              </AlertDialogPrimitive.Cancel>
-            </footer>
-          </AlertDialogPrimitive.Content>
-        </AlertDialogPrimitive.Portal>
-      </AlertDialogPrimitive.Root>
+            </AlertDialogTitle>
+            <AlertDialogDescription>{t('screens.practice.switchBody')}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction
+              variant="outline"
+              data-testid="practice-switch-discard"
+              onClick={discardAndSwitch}
+            >
+              {t('screens.practice.switchDiscard')}
+            </AlertDialogAction>
+            <AlertDialogCancel variant="default" data-testid="practice-switch-stay">
+              {t('screens.practice.switchStay')}
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <ModelDownloadDialog
         open={downloadOpen}
