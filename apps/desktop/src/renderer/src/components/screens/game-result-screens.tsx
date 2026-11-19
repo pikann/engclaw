@@ -68,8 +68,8 @@ export function ResultCard({ stars, newBest, compare, last }: ResultVariant) {
             <StatTile label={t('screens.game.correctLabel')} value="5/5" />
           </div>
           {compare && (
-            <Table className="w-full text-sm" data-testid="compare">
-              <TableCaption className="text-muted-foreground mb-1 text-left text-xs font-medium">
+            <Table className="w-full caption-top text-sm" data-testid="compare">
+              <TableCaption className="text-muted-foreground mt-0 mb-1 caption-top text-left text-xs font-medium">
                 {t('screens.game.compare')}
               </TableCaption>
               <TableHeader>
