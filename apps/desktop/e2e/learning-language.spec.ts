@@ -2,6 +2,7 @@ import { audioFixtures } from './support/audio'
 import type { EngclawApi } from '@engclaw/ipc-contract'
 import { expect, test } from '@playwright/test'
 import { launchApp } from './support/launch'
+import { chooseLearningLanguage, expectLearningLanguage } from './support/learning-language'
 import { stubPlayer, VIDEO } from './support/shadowing'
 
 // Real persisted settings and bundled dictionary; no speech-model downloads or YouTube access.
@@ -12,8 +13,8 @@ test('learning language changes dictionary and practice, and survives a relaunch
     const uiLanguage = await page.evaluate(() =>
       (window as unknown as { engclaw: EngclawApi }).engclaw.settings.getLanguage(),
     )
-    await page.getByTestId('learning-language').selectOption('zh')
-    await expect(page.getByTestId('learning-language')).toHaveValue('zh')
+    await chooseLearningLanguage(page, 'zh')
+    await expectLearningLanguage(page, 'zh')
     await expect
       .poll(() =>
         page.evaluate(
@@ -73,8 +74,8 @@ test('learning language changes dictionary and practice, and survives a relaunch
 
   const second = await launchApp({ userData })
   try {
-    await expect(second.page.getByTestId('learning-language')).toHaveValue('zh')
-    await second.page.getByTestId('learning-language').selectOption('en')
+    await expectLearningLanguage(second.page, 'zh')
+    await chooseLearningLanguage(second.page, 'en')
     await second.page.getByTestId('nav-dictionary').click()
     await second.page.getByTestId('dictionary-search').fill('accel')
     const result = second.page
@@ -122,7 +123,7 @@ for (const captionLanguage of ['zh-CN', 'zh-Hant', 'zh-TW']) {
         },
         { videoId: VIDEO, captionLanguage },
       )
-      await page.getByTestId('learning-language').selectOption('zh')
+      await chooseLearningLanguage(page, 'zh')
       await page.getByTestId('nav-shadowing').click()
       await page.getByTestId('shadowing-url').fill(VIDEO)
       await page.getByTestId('shadowing-load').click()
@@ -142,7 +143,7 @@ for (const captionLanguage of ['zh-CN', 'zh-Hant', 'zh-TW']) {
       await expect(readings.first()).toHaveText('xué')
       const railReadings = page.locator('[data-testid="shadowing-session"] [lang="zh-Latn-pinyin"]')
       for (const reading of await railReadings.allTextContents()) expect(reading).not.toContain('/')
-      await page.getByTestId('learning-language').selectOption('en')
+      await chooseLearningLanguage(page, 'en')
       await expect(page.getByTestId('shadowing-entry')).toBeVisible()
       await page.getByTestId('shadowing-url').fill(VIDEO)
       await page.getByTestId('shadowing-load').click()
@@ -156,7 +157,7 @@ for (const captionLanguage of ['zh-CN', 'zh-Hant', 'zh-TW']) {
 test('Mandarin practice asks for only the Mandarin model before downloading', async () => {
   const { app, page } = await launchApp()
   try {
-    await page.getByTestId('learning-language').selectOption('zh')
+    await chooseLearningLanguage(page, 'zh')
     await page.getByTestId('nav-practice').click()
     await page.getByTestId('practice-text').fill('你好')
     await expect(page.getByTestId('practice-example').first()).toContainText('你好')
@@ -175,16 +176,16 @@ test('Mandarin practice asks for only the Mandarin model before downloading', as
 test('a failed preference save keeps the current language and shows an error', async () => {
   const { app, page } = await launchApp()
   try {
-    await expect(page.getByTestId('learning-language')).toHaveValue('en')
+    await expectLearningLanguage(page, 'en')
     await app.evaluate(({ ipcMain }) => {
       ipcMain.removeHandler('app:updateSettings')
       ipcMain.handle('app:updateSettings', () => {
         throw new Error('test: settings unavailable')
       })
     })
-    await page.getByTestId('learning-language').selectOption('zh')
+    await chooseLearningLanguage(page, 'zh')
     await expect(page.getByRole('alert')).toContainText('Could not save')
-    await expect(page.getByTestId('learning-language')).toHaveValue('en')
+    await expectLearningLanguage(page, 'en')
     await expect(page.getByTestId('learning-language')).toBeEnabled()
   } finally {
     await app.close()
@@ -232,7 +233,7 @@ test('a video without CC can generate and reopen a cached Mandarin transcript', 
       },
       { video: VIDEO, audio: audioFixtures().speech },
     )
-    await page.getByTestId('learning-language').selectOption('zh')
+    await chooseLearningLanguage(page, 'zh')
     await page.getByTestId('nav-shadowing').click()
     await page.getByTestId('shadowing-url').fill(VIDEO)
     await page.getByTestId('shadowing-load').click()

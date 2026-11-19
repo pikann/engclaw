@@ -22,6 +22,7 @@ import { Input } from '@/components/ui/input'
 import { PlayerControls } from '@/components/ui/player-controls'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
+import { Label } from '@/components/ui/label'
 
 export type EntryState =
   'empty' | 'loading' | 'invalid' | 'noTranscript' | 'unavailable' | 'network' | 'no-recents'
@@ -356,9 +357,9 @@ function BlankInput({ n, value, status }: { n: number; value: string; status: Bl
     ) : null
   return (
     <div className="flex items-center gap-2">
-      <label className="text-muted-foreground w-16 shrink-0 text-sm" htmlFor={`blank-${n}`}>
+      <Label className="text-muted-foreground w-16 shrink-0 text-sm" htmlFor={`blank-${n}`}>
         {t('screens.dictation.blank', { n })}
-      </label>
+      </Label>
       <Input
         id={`blank-${n}`}
         readOnly

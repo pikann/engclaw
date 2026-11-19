@@ -24,6 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { cn } from '@/lib/utils'
+import { Label } from '@/components/ui/label'
 
 export type PracticeMode = 'read' | 'free'
 export type PracticePhase =
@@ -511,11 +512,11 @@ function InputPane({
   return (
     <div className="space-y-4">
       <div className="space-y-1.5">
-        <label htmlFor={`screen-text-${mode}`} className="text-sm font-medium">
+        <Label htmlFor={`screen-text-${mode}`} className="text-sm font-medium">
           {free && text
             ? t('result.weHeard')
             : t(free ? 'screens.practice.speakLabel' : 'screens.practice.readLabel')}
-        </label>
+        </Label>
         <Textarea
           id={`screen-text-${mode}`}
           readOnly

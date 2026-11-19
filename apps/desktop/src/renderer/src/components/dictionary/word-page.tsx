@@ -43,13 +43,14 @@ function MorphemeChips({
                 +
               </span>
             )}
-            <button
+            <Button
+              variant="outline"
               type="button"
               data-kind={m.kind}
               aria-pressed={m.root.id === activeRootId}
               onClick={() => onOpenRoot(m.root.id)}
               className={cn(
-                'focus-visible:ring-ring/50 flex flex-col items-start rounded-lg border px-3 py-1.5 text-left',
+                'h-auto justify-start whitespace-normal font-normal focus-visible:ring-ring/50 flex flex-col items-start rounded-lg border px-3 py-1.5 text-left',
                 'hover:bg-primary-soft focus-visible:ring-[3px] focus-visible:outline-none',
                 'aria-pressed:bg-primary-soft aria-pressed:border-primary',
                 m.kind === 'root' && 'border-2',
@@ -59,7 +60,7 @@ function MorphemeChips({
               <span className="text-muted-foreground text-xs">
                 {t(`dict.kind.${m.kind}`)} · {m.root.meaning}
               </span>
-            </button>
+            </Button>
           </li>
         ))}
       </ul>

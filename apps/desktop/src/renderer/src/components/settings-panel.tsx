@@ -1,6 +1,5 @@
 import { useEffect, useId, useState, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router'
-import { Tabs as TabsPrimitive } from 'radix-ui'
 import { useTranslation } from 'react-i18next'
 import {
   Bot,
@@ -31,6 +30,8 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 
 const THEMES = ['system', 'light', 'dark'] as const satisfies readonly ThemePreference[]
 
@@ -125,62 +126,56 @@ export function SettingsPanel() {
         <p className="text-muted-foreground mt-1 text-sm">{t('settings.subtitle')}</p>
       </header>
 
-      <TabsPrimitive.Root
+      <Tabs
         value={tab}
         onValueChange={setTab}
         orientation="vertical"
         className="grid grid-cols-[minmax(0,1fr)] gap-8 md:grid-cols-[11rem_minmax(0,1fr)]"
       >
-        <TabsPrimitive.List
+        <TabsList
+          variant="line"
           aria-label={t('settings.nav')}
-          className="flex gap-1 overflow-x-auto md:flex-col md:self-start"
+          className="h-auto w-full justify-start overflow-x-auto p-0 md:w-full md:flex-col md:items-stretch md:self-start"
         >
           {SECTIONS.map(({ id, icon: Icon, label }) => (
-            <TabsPrimitive.Trigger
+            <TabsTrigger
               key={id}
               value={id}
               data-testid={`settings-tab-${id}`}
-              className="focus-visible:ring-ring/50 text-muted-foreground hover:bg-muted/60 hover:text-foreground data-[state=active]:bg-muted data-[state=active]:text-foreground flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium outline-none focus-visible:ring-[3px]"
+              className="hover:bg-muted/60 data-[state=active]:bg-muted h-auto flex-none justify-start gap-2 px-3 py-2 text-left after:hidden"
             >
               <Icon aria-hidden="true" className="size-4" />
               {t(label)}
-            </TabsPrimitive.Trigger>
+            </TabsTrigger>
           ))}
-        </TabsPrimitive.List>
+        </TabsList>
 
-        <TabsPrimitive.Content value="general" className="min-w-0 outline-none">
+        <TabsContent value="general" className="min-w-0 outline-none">
           <Section title={t('settings.general')}>
             <div className={rows}>
               <SettingRow label={t('settings.language')} hint={t('settings.languageHint')}>
                 <LanguageSwitcher />
               </SettingRow>
               <SettingRow label={t('settings.theme')} hint={t('settings.themeHint')}>
-                <div
-                  role="group"
+                <ToggleGroup
+                  type="single"
+                  variant="outline"
+                  size="sm"
+                  value={theme}
                   aria-label={t('settings.theme')}
-                  className="bg-muted inline-flex rounded-lg p-0.5"
+                  onValueChange={(v) => {
+                    if (!v) return
+                    const k = v as ThemePreference
+                    setThemePreference(k)
+                    void window.engclaw.app.updateSettings({ theme: k })
+                  }}
                 >
                   {THEMES.map((k) => (
-                    <button
-                      key={k}
-                      type="button"
-                      aria-pressed={theme === k}
-                      data-testid={`theme-${k}`}
-                      onClick={() => {
-                        setThemePreference(k)
-                        void window.engclaw.app.updateSettings({ theme: k })
-                      }}
-                      className={cn(
-                        'focus-visible:ring-ring/50 rounded-md px-3 py-1 text-sm font-medium outline-none focus-visible:ring-[3px]',
-                        theme === k
-                          ? 'bg-background text-foreground shadow-sm'
-                          : 'text-muted-foreground hover:text-foreground',
-                      )}
-                    >
+                    <ToggleGroupItem key={k} value={k} data-testid={`theme-${k}`}>
                       {t(`settings.theme${k[0]!.toUpperCase()}${k.slice(1)}`)}
-                    </button>
+                    </ToggleGroupItem>
                   ))}
-                </div>
+                </ToggleGroup>
               </SettingRow>
               {settings && (
                 <>
@@ -258,19 +253,19 @@ export function SettingsPanel() {
               )}
             </div>
           </Section>
-        </TabsPrimitive.Content>
-        <TabsPrimitive.Content value="models" className="min-w-0 outline-none">
+        </TabsContent>
+        <TabsContent value="models" className="min-w-0 outline-none">
           <Section title={t('models.title')} hint={t('settings.modelsHint')}>
             <ModelsPanel />
           </Section>
-        </TabsPrimitive.Content>
-        <TabsPrimitive.Content value="agent" className="min-w-0 outline-none">
+        </TabsContent>
+        <TabsContent value="agent" className="min-w-0 outline-none">
           <Section title={t('settings.llm.title')}>
             <LlmProviderPanel />
           </Section>
-        </TabsPrimitive.Content>
+        </TabsContent>
 
-        <TabsPrimitive.Content value="data" className="min-w-0 outline-none">
+        <TabsContent value="data" className="min-w-0 outline-none">
           <Section title={t('settings.data')}>
             <div className={cn(rows, 'border-destructive/40')}>
               <SettingRow label={t('settings.deleteAll')} hint={t('settings.dataHint')}>
@@ -293,18 +288,18 @@ export function SettingsPanel() {
               </p>
             )}
           </Section>
-        </TabsPrimitive.Content>
-        <TabsPrimitive.Content value="privacy" className="min-w-0 outline-none">
+        </TabsContent>
+        <TabsContent value="privacy" className="min-w-0 outline-none">
           <Section title={t('settings.privacy')}>
             <PrivacyPanel />
           </Section>
-        </TabsPrimitive.Content>
-        <TabsPrimitive.Content value="licenses" className="min-w-0 outline-none">
+        </TabsContent>
+        <TabsContent value="licenses" className="min-w-0 outline-none">
           <Section title={t('settings.licenses')}>
             <LicensesPanel />
           </Section>
-        </TabsPrimitive.Content>
-      </TabsPrimitive.Root>
+        </TabsContent>
+      </Tabs>
 
       <Dialog open={confirming} onOpenChange={setConfirming}>
         <DialogContent>

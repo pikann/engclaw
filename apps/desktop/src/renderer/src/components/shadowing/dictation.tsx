@@ -230,13 +230,14 @@ export function DictationRail({
           const Icon = STATUS_ICON[status]
           return (
             <li key={s.index}>
-              <button
+              <Button
+                variant="ghost"
                 type="button"
                 aria-current={i === index ? 'true' : undefined}
                 data-status={status}
                 onClick={() => onSelect(i)}
                 className={cn(
-                  'focus-visible:ring-ring/50 hover:bg-muted flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left outline-none focus-visible:ring-[3px]',
+                  'h-auto justify-start whitespace-normal font-normal focus-visible:ring-ring/50 hover:bg-muted flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left outline-none focus-visible:ring-[3px]',
                   i === index && 'bg-primary-soft font-medium',
                 )}
               >
@@ -257,7 +258,7 @@ export function DictationRail({
                     ? s.text
                     : t('screens.dictation.segment', { n: i + 1, total: segments.length })}
                 </span>
-              </button>
+              </Button>
             </li>
           )
         })}

@@ -4,6 +4,7 @@ import { RootDeckActions } from '@/components/dictionary/deck-controls'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useDictionaryRoot } from '@/lib/use-dictionary'
+import { Button } from '@/components/ui/button'
 
 /** A root with its meaning, origin and the family of words built on it. */
 export function RootFamily({
@@ -74,14 +75,15 @@ export function RootFamily({
           <ul className="flex flex-wrap gap-1.5" data-testid="root-family-words">
             {r.words.map((w) => (
               <li key={w.id}>
-                <button
+                <Button
+                  variant="outline"
                   type="button"
                   onClick={() => onOpenWord(w)}
                   aria-current={w.id === currentWordId ? 'true' : undefined}
-                  className="hover:bg-primary-soft focus-visible:ring-ring/50 aria-[current=true]:bg-primary-soft rounded-md border px-2 py-1 text-sm focus-visible:ring-[3px] focus-visible:outline-none aria-[current=true]:font-medium"
+                  className="h-auto justify-start whitespace-normal font-normal hover:bg-primary-soft focus-visible:ring-ring/50 aria-[current=true]:bg-primary-soft rounded-md border px-2 py-1 text-sm focus-visible:ring-[3px] focus-visible:outline-none aria-[current=true]:font-medium"
                 >
                   {w.word}
-                </button>
+                </Button>
               </li>
             ))}
           </ul>
