@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { formatIpa, groupSenses, loadRecent, pushRecent, saveRecent } from './dictionary'
+import {
+  formatIpa,
+  groupSenses,
+  loadRecent,
+  mergeRelated,
+  pushRecent,
+  saveRecent,
+} from './dictionary'
 
 describe('pushRecent', () => {
   it('puts the newest word first and drops an earlier copy', () => {
@@ -50,13 +57,41 @@ describe('formatIpa', () => {
 describe('groupSenses', () => {
   it('groups consecutive senses by part of speech, keeping order', () => {
     const senses = [
-      { pos: 'v', definition: 'a', example: null },
-      { pos: 'n', definition: 'b', example: null },
-      { pos: 'v', definition: 'c', example: 'ex' },
+      { pos: 'v', definition: 'a', example: null, synonyms: [], antonyms: [] },
+      { pos: 'n', definition: 'b', example: null, synonyms: [], antonyms: [] },
+      { pos: 'v', definition: 'c', example: 'ex', synonyms: [], antonyms: [] },
     ]
     expect(groupSenses(senses).map((g) => [g.pos, g.senses.map((s) => s.definition)])).toEqual([
       ['v', ['a', 'c']],
       ['n', ['b']],
     ])
+  })
+})
+
+describe('mergeRelated', () => {
+  const sense = (synonyms: string[], antonyms: [string, boolean][] = []) => ({
+    pos: 'a',
+    definition: 'd',
+    example: null,
+    synonyms: synonyms.map((word, id) => ({ id, word })),
+    antonyms: antonyms.map(([word, indirect], id) => ({ id, word, indirect })),
+  })
+
+  it('merges senses without duplicates, in order of first appearance', () => {
+    const senses = [sense(['glad', 'merry']), sense(['merry', 'cheerful'])]
+    expect(mergeRelated(senses, 'synonyms').map((s) => s.word)).toEqual([
+      'glad',
+      'merry',
+      'cheerful',
+    ])
+  })
+
+  it('prefers a direct antonym over an indirect one for the same word', () => {
+    const senses = [sense([], [['cold', true]]), sense([], [['cold', false]])]
+    expect(mergeRelated(senses, 'antonyms')).toEqual([{ id: 0, word: 'cold', indirect: false }])
+  })
+
+  it('returns nothing when no sense has relations', () => {
+    expect(mergeRelated([sense([])], 'synonyms')).toEqual([])
   })
 })

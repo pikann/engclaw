@@ -75,3 +75,63 @@ describe('parseWordnet', () => {
     expect(entries.map((e) => e.word)).toContain('Tom & Jerry')
   })
 })
+
+const RELATIONS_XML = `<?xml version="1.0"?>
+<LexicalResource>
+  <Lexicon id="oewn" version="2024">
+    <LexicalEntry id="oewn-happy-a">
+      <Lemma writtenForm="happy" partOfSpeech="a"/>
+      <Sense id="happy-1" synset="syn-happy-a">
+        <SenseRelation relType="antonym" target="unhappy-1"/>
+        <SenseRelation relType="derivation" target="happiness-1"/>
+      </Sense>
+      <Sense id="happy-2" synset="syn-fortunate-s"/>
+    </LexicalEntry>
+    <LexicalEntry id="oewn-glad-a">
+      <Lemma writtenForm="glad" partOfSpeech="a"/>
+      <Sense id="glad-1" synset="syn-happy-a"/>
+    </LexicalEntry>
+    <LexicalEntry id="oewn-felicitous-a">
+      <Lemma writtenForm="felicitous" partOfSpeech="a"/>
+      <Sense id="felicitous-1" synset="syn-fortunate-s"/>
+    </LexicalEntry>
+    <LexicalEntry id="oewn-unhappy-a">
+      <Lemma writtenForm="unhappy" partOfSpeech="a"/>
+      <Sense id="unhappy-1" synset="syn-unhappy-a">
+        <SenseRelation relType="antonym" target="happy-1"/>
+      </Sense>
+    </LexicalEntry>
+    <Synset id="syn-happy-a" partOfSpeech="a"><Definition>joyful</Definition></Synset>
+    <Synset id="syn-fortunate-s" partOfSpeech="s"><Definition>lucky</Definition><SynsetRelation relType="similar" target="syn-happy-a"/></Synset>
+    <Synset id="syn-unhappy-a" partOfSpeech="a"><Definition>sad</Definition></Synset>
+  </Lexicon>
+</LexicalResource>`
+
+describe('parseWordnet relations', () => {
+  const { entries } = parseWordnet(RELATIONS_XML)
+  const senses = (word: string) => entries.find((e) => e.word === word)!.senses
+
+  it('lists the other lemmas of the synset as synonyms, never the word itself', () => {
+    expect(senses('happy')[0]!.synonyms).toEqual(['glad'])
+    expect(senses('glad')[0]!.synonyms).toEqual(['happy'])
+  })
+
+  it('keeps synonyms per sense', () => {
+    expect(senses('happy')[1]!.synonyms).toEqual(['felicitous'])
+  })
+
+  it('omits relation keys when a sense has none', () => {
+    expect(senses('unhappy')[0]!.synonyms).toBeUndefined()
+    expect(senses('glad')[0]!.antonyms).toBeUndefined()
+  })
+
+  it('reads direct antonyms from sense relations only', () => {
+    expect(senses('happy')[0]!.antonyms).toEqual([{ word: 'unhappy' }])
+    expect(senses('unhappy')[0]!.antonyms).toEqual([{ word: 'happy' }])
+  })
+
+  it('gives satellite senses the head antonym, marked indirect', () => {
+    expect(senses('happy')[1]!.antonyms).toEqual([{ word: 'unhappy', indirect: true }])
+    expect(senses('felicitous')[0]!.antonyms).toEqual([{ word: 'unhappy', indirect: true }])
+  })
+})

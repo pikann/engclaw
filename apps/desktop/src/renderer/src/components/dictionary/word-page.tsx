@@ -1,4 +1,5 @@
 import { ChineseWord } from './chinese-word'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ExternalLink, Mic, Sparkles } from 'lucide-react'
 import type { DictionaryWord } from '@engclaw/ipc-contract'
@@ -9,11 +10,12 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ipaPhones } from '@/lib/articulation'
 import { ASK_KINDS, type AskKind } from '@/lib/ask-agent'
-import { formatIpa, groupSenses } from '@/lib/dictionary'
+import { formatIpa, groupSenses, mergeRelated, type RelatedItem } from '@/lib/dictionary'
 import { useDictionaryRoot, useWordImage, type Loadable } from '@/lib/use-dictionary'
 import { cn } from '@/lib/utils'
 
 const RELATED_LIMIT = 12
+const RELATION_LIMIT = 8
 
 export const primaryRootId = (word: DictionaryWord): number | null =>
   (word.morphemes.find((m) => m.kind === 'root') ?? word.morphemes[0])?.root.id ?? null
@@ -62,6 +64,94 @@ function MorphemeChips({
         ))}
       </ul>
     </>
+  )
+}
+
+function RelationRow({
+  kind,
+  items,
+  onOpenWord,
+  className,
+}: {
+  kind: 'synonyms' | 'antonyms'
+  items: RelatedItem[]
+  onOpenWord: (word: { id: number; word: string }) => void
+  className?: string
+}) {
+  const { t } = useTranslation()
+  const [expanded, setExpanded] = useState(false)
+  if (items.length === 0) return null
+  const shown = expanded ? items : items.slice(0, RELATION_LIMIT)
+  const hidden = items.length - RELATION_LIMIT
+  const hasIndirect = items.some((i) => i.indirect)
+  return (
+    <div
+      className={cn('flex flex-wrap items-center gap-1.5 text-sm', className)}
+      data-testid={`relation-${kind}`}
+    >
+      <span className="text-muted-foreground text-xs font-medium">{t(`dict.${kind}`)}:</span>
+      <ul className="flex flex-wrap gap-1.5" lang="en" aria-label={t(`dict.${kind}`)}>
+        {shown.map((item) => (
+          <li key={item.word}>
+            {item.id === null ? (
+              <span className="rounded-md border border-dashed px-2 py-0.5 text-xs">
+                {item.word}
+              </span>
+            ) : (
+              <Button
+                variant="outline"
+                size="xs"
+                aria-label={t(item.indirect ? 'dict.openRelatedIndirect' : 'dict.openRelated', {
+                  word: item.word,
+                })}
+                title={item.indirect ? t('dict.indirectAntonym') : undefined}
+                data-indirect={item.indirect ? 'true' : undefined}
+                onClick={() => onOpenWord({ id: item.id!, word: item.word })}
+              >
+                {item.word}
+                {item.indirect && <span aria-hidden="true">*</span>}
+              </Button>
+            )}
+          </li>
+        ))}
+      </ul>
+      {hidden > 0 && (
+        <Button
+          variant="link"
+          size="xs"
+          className="h-auto p-0"
+          aria-expanded={expanded}
+          onClick={() => setExpanded((e) => !e)}
+        >
+          {expanded ? t('dict.showLess') : t('dict.showMore', { count: hidden })}
+        </Button>
+      )}
+      {hasIndirect && (
+        <span className="text-muted-foreground w-full text-xs">* {t('dict.indirectAntonym')}</span>
+      )}
+    </div>
+  )
+}
+
+function RelationsSummary({
+  word,
+  onOpenWord,
+}: {
+  word: DictionaryWord
+  onOpenWord: (word: { id: number; word: string }) => void
+}) {
+  const { t } = useTranslation()
+  const synonyms = mergeRelated(word.senses, 'synonyms')
+  const antonyms = mergeRelated(word.senses, 'antonyms')
+  if (synonyms.length === 0 && antonyms.length === 0) return null
+  return (
+    <section aria-labelledby="dict-relations" className="space-y-2" data-testid="relations-summary">
+      <h4 id="dict-relations" className="text-sm font-semibold">
+        {t('dict.relationsSummary')}
+      </h4>
+      <RelationRow kind="synonyms" items={synonyms} onOpenWord={onOpenWord} />
+      <RelationRow kind="antonyms" items={antonyms} onOpenWord={onOpenWord} />
+    </section>
   )
 }
 
@@ -261,7 +351,12 @@ export function WordPage({
   // The sounds section has its own Hear it (with the animation); the plain one is the fallback.
   const hasSounds = ipaPhones(word.pronunciations[0] ?? '').length > 0
   return (
-    <article className="space-y-5" data-testid="word-page" aria-labelledby="dict-word-title">
+    <article
+      key={word.id}
+      className="space-y-5"
+      data-testid="word-page"
+      aria-labelledby="dict-word-title"
+    >
       <header className="space-y-2">
         <h2 id="dict-word-title" lang="en" className="text-2xl font-semibold break-words">
           {word.word}
@@ -296,6 +391,8 @@ export function WordPage({
 
       <WordIllustration word={word} />
 
+      <RelationsSummary word={word} onOpenWord={onOpenWord} />
+
       <section aria-labelledby="dict-defs" className="space-y-3">
         <h4 id="dict-defs" className="text-sm font-semibold">
           {t('dict.definitions')}
@@ -312,6 +409,18 @@ export function WordPage({
                   {s.example && (
                     <span className="text-muted-foreground block italic">“{s.example}”</span>
                   )}
+                  <RelationRow
+                    kind="synonyms"
+                    items={s.synonyms}
+                    onOpenWord={onOpenWord}
+                    className="mt-1"
+                  />
+                  <RelationRow
+                    kind="antonyms"
+                    items={s.antonyms}
+                    onOpenWord={onOpenWord}
+                    className="mt-1"
+                  />
                 </li>
               ))}
             </ol>
