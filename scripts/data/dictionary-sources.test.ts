@@ -136,8 +136,12 @@ describe('parseWordnet relations', () => {
   })
 
   it('gives satellite senses the head antonym, marked indirect', () => {
-    expect(senses('happy')[1]!.antonyms).toEqual([{ word: 'unhappy', synset: 'syn-unhappy-a', indirect: true }])
-    expect(senses('felicitous')[0]!.antonyms).toEqual([{ word: 'unhappy', synset: 'syn-unhappy-a', indirect: true }])
+    expect(senses('happy')[1]!.antonyms).toEqual([
+      { word: 'unhappy', synset: 'syn-unhappy-a', indirect: true },
+    ])
+    expect(senses('felicitous')[0]!.antonyms).toEqual([
+      { word: 'unhappy', synset: 'syn-unhappy-a', indirect: true },
+    ])
   })
 
   it('keeps multi-word lemmas, decoded, once per synset', () => {

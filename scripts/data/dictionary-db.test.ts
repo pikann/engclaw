@@ -23,17 +23,24 @@ const input: DictionaryInput = {
         word: 'abduct',
         senses: [
           {
+            synset: 'syn-abduct-v',
             pos: 'v',
             definition: 'take away',
             example: 'abduct a child',
             synonyms: ['kidnap', 'snatch up'],
-            antonyms: [{ word: 'release', indirect: true }, { word: 'returnee' }],
+            antonyms: [
+              { word: 'release', synset: 'syn-release-v', indirect: true },
+              { word: 'returnee', synset: 'syn-returnee-n' },
+            ],
           },
         ],
       },
-      { word: 'duct', senses: [{ pos: 'n', definition: 'a tube' }] },
-      { word: 'kidnap', senses: [{ pos: 'v', definition: 'seize', synonyms: ['abduct'] }] },
-      { word: 'release', senses: [{ pos: 'v', definition: 'let go' }] },
+      { word: 'duct', senses: [{ synset: 'syn-duct-n', pos: 'n', definition: 'a tube' }] },
+      {
+        word: 'kidnap',
+        senses: [{ synset: 'syn-kidnap-v', pos: 'v', definition: 'seize', synonyms: ['abduct'] }],
+      },
+      { word: 'release', senses: [{ synset: 'syn-release-v', pos: 'v', definition: 'let go' }] },
     ],
   },
   pronunciations: new Map([['abduct', ['æbˈdʌkt']]]),
