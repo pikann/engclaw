@@ -65,9 +65,9 @@ describe('parseWordnet', () => {
   it('groups senses per word in source order with the first example only', () => {
     const bank = entries.find((e) => e.word === 'bank')!
     expect(bank.senses).toEqual([
-      { pos: 'n', definition: 'sloping land', example: 'the river bank' },
-      { pos: 'n', definition: 'a financial institution' },
-      { pos: 'v', definition: 'tip laterally' },
+      { synset: 'oewn-1-n', pos: 'n', definition: 'sloping land', example: 'the river bank' },
+      { synset: 'oewn-2-n', pos: 'n', definition: 'a financial institution' },
+      { synset: 'oewn-3-v', pos: 'v', definition: 'tip laterally' },
     ])
   })
 
@@ -101,6 +101,11 @@ const RELATIONS_XML = `<?xml version="1.0"?>
         <SenseRelation relType="antonym" target="happy-1"/>
       </Sense>
     </LexicalEntry>
+    <LexicalEntry id="oewn-well-off-a">
+      <Lemma writtenForm="well &amp; off" partOfSpeech="a"/>
+      <Sense id="wo-1" synset="syn-happy-a"/>
+      <Sense id="wo-2" synset="syn-happy-a"/>
+    </LexicalEntry>
     <Synset id="syn-happy-a" partOfSpeech="a"><Definition>joyful</Definition></Synset>
     <Synset id="syn-fortunate-s" partOfSpeech="s"><Definition>lucky</Definition><SynsetRelation relType="similar" target="syn-happy-a"/></Synset>
     <Synset id="syn-unhappy-a" partOfSpeech="a"><Definition>sad</Definition></Synset>
@@ -112,8 +117,8 @@ describe('parseWordnet relations', () => {
   const senses = (word: string) => entries.find((e) => e.word === word)!.senses
 
   it('lists the other lemmas of the synset as synonyms, never the word itself', () => {
-    expect(senses('happy')[0]!.synonyms).toEqual(['glad'])
-    expect(senses('glad')[0]!.synonyms).toEqual(['happy'])
+    expect(senses('happy')[0]!.synonyms).toEqual(['glad', 'well & off'])
+    expect(senses('glad')[0]!.synonyms).toEqual(['happy', 'well & off'])
   })
 
   it('keeps synonyms per sense', () => {
@@ -126,12 +131,20 @@ describe('parseWordnet relations', () => {
   })
 
   it('reads direct antonyms from sense relations only', () => {
-    expect(senses('happy')[0]!.antonyms).toEqual([{ word: 'unhappy' }])
-    expect(senses('unhappy')[0]!.antonyms).toEqual([{ word: 'happy' }])
+    expect(senses('happy')[0]!.antonyms).toEqual([{ word: 'unhappy', synset: 'syn-unhappy-a' }])
+    expect(senses('unhappy')[0]!.antonyms).toEqual([{ word: 'happy', synset: 'syn-happy-a' }])
   })
 
   it('gives satellite senses the head antonym, marked indirect', () => {
-    expect(senses('happy')[1]!.antonyms).toEqual([{ word: 'unhappy', indirect: true }])
-    expect(senses('felicitous')[0]!.antonyms).toEqual([{ word: 'unhappy', indirect: true }])
+    expect(senses('happy')[1]!.antonyms).toEqual([{ word: 'unhappy', synset: 'syn-unhappy-a', indirect: true }])
+    expect(senses('felicitous')[0]!.antonyms).toEqual([{ word: 'unhappy', synset: 'syn-unhappy-a', indirect: true }])
+  })
+
+  it('keeps multi-word lemmas, decoded, once per synset', () => {
+    expect(senses('well & off')[0]!.synonyms).toEqual(['happy', 'glad'])
+  })
+
+  it('keeps the synset id on each sense', () => {
+    expect(senses('happy').map((s) => s.synset)).toEqual(['syn-happy-a', 'syn-fortunate-s'])
   })
 })
