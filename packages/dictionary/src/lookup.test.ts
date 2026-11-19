@@ -88,6 +88,31 @@ describe('getWord', () => {
   it('returns null for an unknown id', () => {
     expect(getWord(db, 999)).toBeNull()
   })
+
+  it('never lists the word itself as its own synonym or antonym', () => {
+    const d = new Database(':memory:')
+    d.exec(SCHEMA_SQL)
+    d.exec(`
+      INSERT INTO entries (id, word, norm) VALUES (1, 'a', 'a'), (2, 'b', 'b');
+      INSERT INTO senses VALUES (1, 0, 'n', 'x', NULL);
+      INSERT INTO sense_links VALUES (1, 0, '1' || char(9) || '2', '1');
+    `)
+    expect(getWord(d, 1)!.senses[0]).toMatchObject({
+      synonyms: [{ id: 2, word: 'b' }],
+      antonyms: [],
+    })
+  })
+
+  it('returns empty relation lists for an older DB without sense_links', () => {
+    const d = new Database(':memory:')
+    d.exec(SCHEMA_SQL)
+    d.exec(`
+      INSERT INTO entries (id, word, norm) VALUES (1, 'a', 'a');
+      INSERT INTO senses VALUES (1, 0, 'n', 'x', NULL);
+      DROP TABLE sense_links;
+    `)
+    expect(getWord(d, 1)!.senses[0]).toMatchObject({ synonyms: [], antonyms: [] })
+  })
 })
 
 describe('getRoot', () => {
