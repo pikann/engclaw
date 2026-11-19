@@ -1,10 +1,12 @@
 export interface WordnetAntonym {
   word: string
+  synset: string
   /** Inherited from the head synset of an adjective satellite, not stated on the sense itself. */
   indirect?: true
 }
 
 export interface WordnetSense {
+  synset: string
   pos: string
   definition: string
   example?: string
@@ -151,6 +153,7 @@ export function parseWordnet(xml: string): { version: string; entries: WordnetEn
     if (!id || !pos || !definition) continue
     const example = /<Example>([\s\S]*?)<\/Example>/.exec(m[2]!)?.[1]
     synsets.set(id, {
+      synset: id,
       pos,
       definition: decodeXml(definition),
       ...(example ? { example: decodeXml(example) } : {}),
@@ -164,6 +167,7 @@ export function parseWordnet(xml: string): { version: string; entries: WordnetEn
     antonymSenseIds: string[]
   }
   const lemmaOfSense = new Map<string, string>()
+  const synsetOfSense = new Map<string, string>()
   const lemmasOfSynset = new Map<string, string[]>()
   const sensesOfSynset = new Map<string, string[]>()
   const antonymIdsOfSense = new Map<string, string[]>()
@@ -185,6 +189,7 @@ export function parseWordnet(xml: string): { version: string; entries: WordnetEn
       ].map((r) => r[1]!)
       if (senseId) {
         lemmaOfSense.set(senseId, word)
+        synsetOfSense.set(senseId, synset)
         sensesOfSynset.set(synset, [...(sensesOfSynset.get(synset) ?? []), senseId])
         antonymIdsOfSense.set(senseId, antonymSenseIds)
       }
@@ -196,9 +201,18 @@ export function parseWordnet(xml: string): { version: string; entries: WordnetEn
     raw.set(word, list)
   }
 
-  const lemmasOf = (senseIds: string[]): string[] => [
-    ...new Set(senseIds.flatMap((id) => lemmaOfSense.get(id) ?? [])),
-  ]
+  const antonymsOf = (senseIds: string[], indirect: boolean): WordnetAntonym[] => {
+    const seen = new Set<string>()
+    const out: WordnetAntonym[] = []
+    for (const id of senseIds) {
+      const word = lemmaOfSense.get(id)
+      const synset = synsetOfSense.get(id)
+      if (!word || !synset || seen.has(word)) continue
+      seen.add(word)
+      out.push({ word, synset, ...(indirect ? { indirect: true as const } : {}) })
+    }
+    return out
+  }
 
   const byWord = new Map<string, WordnetSense[]>()
   for (const [word, list] of raw) {
@@ -209,15 +223,13 @@ export function parseWordnet(xml: string): { version: string; entries: WordnetEn
       const sense: WordnetSense = { ...base }
       const synonyms = (lemmasOfSynset.get(synset) ?? []).filter((w) => w !== word)
       if (synonyms.length > 0) sense.synonyms = synonyms
-      let antonyms: WordnetAntonym[] = lemmasOf(antonymSenseIds).map((w) => ({ word: w }))
+      let antonyms = antonymsOf(antonymSenseIds, false)
       const head = headOfSatellite.get(synset)
       if (antonyms.length === 0 && head)
-        antonyms = lemmasOf(
+        antonyms = antonymsOf(
           (sensesOfSynset.get(head) ?? []).flatMap((id) => antonymIdsOfSense.get(id) ?? []),
-        ).map((w) => ({
-          word: w,
-          indirect: true as const,
-        }))
+          true,
+        )
       if (antonyms.length > 0) sense.antonyms = antonyms
       senses.push(sense)
     }
