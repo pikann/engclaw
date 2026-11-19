@@ -88,13 +88,16 @@ export function getWord(db: SqlDb, id: number): WordEntry | null {
       'SELECT ordinal, pos, definition, example FROM senses WHERE entry_id = ? ORDER BY ordinal',
     )
     .all(id) as { ordinal: number; pos: string; definition: string; example: string | null }[]
-  const links = new Map(
-    (
-      db
+  const linkRows = (() => {
+    try {
+      return db
         .prepare('SELECT sense_ordinal, synonyms, antonyms FROM sense_links WHERE entry_id = ?')
         .all(id) as { sense_ordinal: number; synonyms: string; antonyms: string }[]
-    ).map((l) => [l.sense_ordinal, l]),
-  )
+    } catch {
+      return []
+    }
+  })()
+  const links = new Map(linkRows.map((l) => [l.sense_ordinal, l]))
   const targetIds = [...links.values()]
     .flatMap((l) => [...splitLinks(l.synonyms), ...splitLinks(l.antonyms)])
     .map((t) => /^~?(\d+)$/.exec(t)?.[1])
@@ -114,6 +117,7 @@ export function getWord(db: SqlDb, id: number): WordEntry | null {
     const indirect = token.startsWith('~')
     const body = indirect ? token.slice(1) : token
     if (body.startsWith('=')) return { id: null, word: body.slice(1), indirect }
+    if (Number(body) === id) return null
     const word = wordOf.get(Number(body))
     return word === undefined ? null : { id: Number(body), word, indirect }
   }

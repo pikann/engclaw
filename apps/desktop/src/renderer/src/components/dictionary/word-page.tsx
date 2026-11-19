@@ -67,7 +67,7 @@ function MorphemeChips({
   )
 }
 
-function RelationRow({
+export function RelationRow({
   kind,
   items,
   onOpenWord,
