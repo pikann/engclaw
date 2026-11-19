@@ -939,6 +939,7 @@
     "indirectAntonym": "indirect: opposite of the closest main sense",
     "showMore": "Show {{count}} more",
     "openRelated": "Open “{{word}}”",
+    "openRelatedIndirect": "Open “{{word}}” (indirect antonym)",
     "showLess": "Show less",
     "noRelated": "No related words.",
     "sendPractice": "Send to Practice",

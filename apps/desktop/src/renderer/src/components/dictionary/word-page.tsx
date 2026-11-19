@@ -101,7 +101,9 @@ function RelationRow({
               <Button
                 variant="outline"
                 size="xs"
-                aria-label={t('dict.openRelated', { word: item.word })}
+                aria-label={t(item.indirect ? 'dict.openRelatedIndirect' : 'dict.openRelated', {
+                  word: item.word,
+                })}
                 title={item.indirect ? t('dict.indirectAntonym') : undefined}
                 data-indirect={item.indirect ? 'true' : undefined}
                 onClick={() => onOpenWord({ id: item.id!, word: item.word })}
@@ -349,7 +351,12 @@ export function WordPage({
   // The sounds section has its own Hear it (with the animation); the plain one is the fallback.
   const hasSounds = ipaPhones(word.pronunciations[0] ?? '').length > 0
   return (
-    <article className="space-y-5" data-testid="word-page" aria-labelledby="dict-word-title">
+    <article
+      key={word.id}
+      className="space-y-5"
+      data-testid="word-page"
+      aria-labelledby="dict-word-title"
+    >
       <header className="space-y-2">
         <h2 id="dict-word-title" lang="en" className="text-2xl font-semibold break-words">
           {word.word}

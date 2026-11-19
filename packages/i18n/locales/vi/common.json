@@ -939,6 +939,7 @@
     "indirectAntonym": "gián tiếp: trái nghĩa với nghĩa chính gần nhất",
     "showMore": "Xem thêm {{count}}",
     "openRelated": "Mở “{{word}}”",
+    "openRelatedIndirect": "Mở “{{word}}” (trái nghĩa gián tiếp)",
     "showLess": "Thu gọn",
     "noRelated": "Không có từ liên quan.",
     "sendPractice": "Gửi sang Luyện tập",
