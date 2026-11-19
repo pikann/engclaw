@@ -7,7 +7,13 @@ export interface DictionarySource {
   lookup(word: string): {
     word: string
     ipa: string[]
-    senses: { pos: string; definition: string; example: string | null }[]
+    senses: {
+      pos: string
+      definition: string
+      example: string | null
+      synonyms?: { word: string }[]
+      antonyms?: { word: string; indirect?: boolean }[]
+    }[]
     morphemes: { kind: string; form: string; meaning: string }[]
   } | null
 }
@@ -21,13 +27,20 @@ const MAX_SENSES = 4
 const MAX_ATTEMPTS = 20
 const MAX_TEXT = 200
 const MAX_PROBLEMS = 8
+const MAX_RELATED = 5
 
 const clip = (s: string): string => (s.length > MAX_TEXT ? `${s.slice(0, MAX_TEXT)}…` : s)
+
+const related = (words: { word: string }[]): string[] =>
+  words.slice(0, MAX_RELATED).map((w) => w.word)
+
+const directAntonyms = (words: { word: string; indirect?: boolean }[]): string[] =>
+  related(words.filter((w) => !w.indirect))
 
 export const lookupDictionaryTool = (source: DictionarySource) =>
   defineTool({
     description:
-      "Look up a word in the selected learning language in the offline dictionary: English entries have definitions, IPA and word parts; Mandarin entries have simplified characters, pinyin and English definitions. Use it when you need exact facts about a word the learner asks about. Returns found:false when the word isn't in the dictionary.",
+      "Look up a word in the selected learning language in the offline dictionary: English entries have definitions, IPA, word parts and per-sense synonyms/antonyms; Mandarin entries have simplified characters, pinyin and English definitions. Use it when you need exact facts about a word the learner asks about. Returns found:false when the word isn't in the dictionary.",
     schema: z.object({ word: z.string().trim().min(1).max(64) }),
     async run({ word }) {
       const entry = source.lookup(word)
@@ -40,6 +53,11 @@ export const lookupDictionaryTool = (source: DictionarySource) =>
           pos: s.pos,
           definition: clip(s.definition),
           ...(s.example && { example: clip(s.example) }),
+          ...(s.synonyms?.length && { synonyms: related(s.synonyms) }),
+          ...(s.antonyms &&
+            directAntonyms(s.antonyms).length > 0 && {
+              antonyms: directAntonyms(s.antonyms),
+            }),
         })),
         parts: entry.morphemes.map((m) => ({
           kind: m.kind,
