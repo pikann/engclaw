@@ -51,7 +51,7 @@ The **Game** is a map of chapters, each focused on a word, phrase or idiom. Say 
 
 ## Dictionary
 
-Search a word to see its definitions, IPA and audio, examples, and a picture for concrete words (from Wikimedia Commons; this can be switched off in **Settings → General**). The **Roots & family** tab shows word origins and related words. Words can be added to flashcards; the number of new cards and reviews per day is set in Settings. Select any word in a result or transcript to look it up.
+Search a word to see its definitions, IPA and audio, examples, synonyms and antonyms (per meaning, with a summary on top; select one to open it), and a picture for concrete words (from Wikimedia Commons; this can be switched off in **Settings → General**). The **Roots & family** tab shows word origins and related words. Words can be added to flashcards; the number of new cards and reviews per day is set in Settings. Select any word in a result or transcript to look it up.
 
 ## Converse (optional)
 

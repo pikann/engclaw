@@ -1,3 +1,4 @@
+import { LINK_SEPARATOR } from './schema'
 import type { SqlDb } from './search'
 
 export interface RootSummary {
@@ -30,11 +31,25 @@ export interface EtymologyStep {
   term: string
 }
 
+export interface RelatedWord {
+  /** Null when the word is not a dictionary entry: render as plain text. */
+  id: number | null
+  word: string
+}
+
+export interface WordSense {
+  pos: string
+  definition: string
+  example: string | null
+  synonyms: RelatedWord[]
+  antonyms: (RelatedWord & { indirect: boolean })[]
+}
+
 export interface WordEntry {
   id: number
   word: string
   pronunciations: string[]
-  senses: { pos: string; definition: string; example: string | null }[]
+  senses: WordSense[]
   morphemes: WordMorpheme[]
   etymology: {
     chain: EtymologyStep[]
@@ -61,14 +76,63 @@ const rootSummary = (r: RootRow): RootSummary => ({
   origins: JSON.parse(r.origins) as string[],
 })
 
+const splitLinks = (text: string | undefined): string[] => (text ? text.split(LINK_SEPARATOR) : [])
+
 export function getWord(db: SqlDb, id: number): WordEntry | null {
   const entry = db.prepare('SELECT id, word FROM entries WHERE id = ?').get(id) as
     { id: number; word: string } | undefined
   if (!entry) return null
 
-  const senses = db
-    .prepare('SELECT pos, definition, example FROM senses WHERE entry_id = ? ORDER BY ordinal')
-    .all(id) as WordEntry['senses']
+  const senseRows = db
+    .prepare(
+      'SELECT ordinal, pos, definition, example FROM senses WHERE entry_id = ? ORDER BY ordinal',
+    )
+    .all(id) as { ordinal: number; pos: string; definition: string; example: string | null }[]
+  const links = new Map(
+    (
+      db
+        .prepare('SELECT sense_ordinal, synonyms, antonyms FROM sense_links WHERE entry_id = ?')
+        .all(id) as { sense_ordinal: number; synonyms: string; antonyms: string }[]
+    ).map((l) => [l.sense_ordinal, l]),
+  )
+  const targetIds = [...links.values()]
+    .flatMap((l) => [...splitLinks(l.synonyms), ...splitLinks(l.antonyms)])
+    .map((t) => /^~?(\d+)$/.exec(t)?.[1])
+    .filter((n): n is string => n !== undefined)
+  const wordOf = new Map(
+    targetIds.length === 0
+      ? []
+      : (
+          db
+            .prepare(
+              `SELECT id, word FROM entries WHERE id IN (${targetIds.map(() => '?').join(',')})`,
+            )
+            .all(...targetIds.map(Number)) as { id: number; word: string }[]
+        ).map((e) => [e.id, e.word]),
+  )
+  const related = (token: string): (RelatedWord & { indirect: boolean }) | null => {
+    const indirect = token.startsWith('~')
+    const body = indirect ? token.slice(1) : token
+    if (body.startsWith('=')) return { id: null, word: body.slice(1), indirect }
+    const word = wordOf.get(Number(body))
+    return word === undefined ? null : { id: Number(body), word, indirect }
+  }
+  const senses: WordSense[] = senseRows.map((s) => {
+    const link = links.get(s.ordinal)
+    return {
+      pos: s.pos,
+      definition: s.definition,
+      example: s.example,
+      synonyms: splitLinks(link?.synonyms).flatMap((t) => {
+        const r = related(t)
+        return r ? [{ id: r.id, word: r.word }] : []
+      }),
+      antonyms: splitLinks(link?.antonyms).flatMap((t) => {
+        const r = related(t)
+        return r ? [r] : []
+      }),
+    }
+  })
   const pronunciations = (
     db.prepare('SELECT ipa FROM pronunciations WHERE entry_id = ? ORDER BY ordinal').all(id) as {
       ipa: string

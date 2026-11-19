@@ -1,4 +1,11 @@
-export const SCHEMA_VERSION = 1
+export const SCHEMA_VERSION = 2
+
+/**
+ * `sense_links` stores a sense's synonyms and antonyms as tab-separated tokens, to keep the
+ * shipped database small: an entry id (`123`), `=text` for a word that is not an entry, and for
+ * antonyms a `~` prefix marks an indirect one (`~123`).
+ */
+export const LINK_SEPARATOR = '\t'
 
 export const SCHEMA_SQL = `
 CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL) WITHOUT ROWID;
@@ -10,6 +17,13 @@ CREATE TABLE senses (
   definition TEXT NOT NULL,
   example TEXT,
   PRIMARY KEY (entry_id, ordinal)
+) WITHOUT ROWID;
+CREATE TABLE sense_links (
+  entry_id INTEGER NOT NULL REFERENCES entries (id),
+  sense_ordinal INTEGER NOT NULL,
+  synonyms TEXT NOT NULL,
+  antonyms TEXT NOT NULL,
+  PRIMARY KEY (entry_id, sense_ordinal)
 ) WITHOUT ROWID;
 CREATE TABLE pronunciations (
   entry_id INTEGER NOT NULL REFERENCES entries (id),

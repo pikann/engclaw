@@ -1,7 +1,12 @@
 import { createHash } from 'node:crypto'
 import { createRequire } from 'node:module'
 import { readFileSync, rmSync, statSync } from 'node:fs'
-import { SCHEMA_SQL, SCHEMA_VERSION, type Manifest } from '../../packages/dictionary/src'
+import {
+  LINK_SEPARATOR,
+  SCHEMA_SQL,
+  SCHEMA_VERSION,
+  type Manifest,
+} from '../../packages/dictionary/src'
 import { expandForms, linkMorphemes, type RootEntry } from './morphemes'
 import type { WordnetEntry } from './dictionary-sources'
 import type { WordEtymology } from './wiktextract-etymology'
@@ -9,7 +14,7 @@ import type { WordEtymology } from './wiktextract-etymology'
 const require = createRequire(new URL('../../apps/desktop/package.json', import.meta.url))
 const Database = require('better-sqlite3') as typeof import('better-sqlite3')
 
-export const DATASET_REVISION = 1
+export const DATASET_REVISION = 2
 const MAX_PRONUNCIATIONS = 3
 
 export interface DictionaryInput {
@@ -71,11 +76,14 @@ export function buildDictionary(file: string, input: DictionaryInput): Manifest 
   const sorted = [...words]
     .map((word) => ({ word, norm: word.toLowerCase() }))
     .sort((a, b) => (a.norm < b.norm ? -1 : a.norm > b.norm ? 1 : a.word < b.word ? -1 : 1))
-  const ids = new Map<string, number>()
+  const ids = new Map(sorted.map(({ word }, i) => [word, i + 1]))
 
   const insertEntry = db.prepare('INSERT INTO entries (id, word, norm) VALUES (?, ?, ?)')
   const insertSense = db.prepare(
     'INSERT INTO senses (entry_id, ordinal, pos, definition, example) VALUES (?, ?, ?, ?, ?)',
+  )
+  const insertLinks = db.prepare(
+    'INSERT INTO sense_links (entry_id, sense_ordinal, synonyms, antonyms) VALUES (?, ?, ?, ?)',
   )
   const insertPron = db.prepare(
     'INSERT INTO pronunciations (entry_id, ordinal, ipa) VALUES (?, ?, ?)',
@@ -90,23 +98,40 @@ export function buildDictionary(file: string, input: DictionaryInput): Manifest 
     `INSERT INTO etymology (entry_id, origin_chain, pie_root, first_use, source_url, etymonline_url)
      VALUES (?, ?, ?, ?, ?, ?)`,
   )
+  const relationCounts = { synonyms: 0, antonyms: 0 }
   const count = (sql: string) => (db.prepare(sql).get() as { n: number }).n
 
   db.transaction(() => {
     sorted.forEach(({ word, norm }, i) => {
       const id = i + 1
-      ids.set(word, id)
       insertEntry.run(id, word, norm)
-      senses
-        .get(word)
-        ?.forEach((s, ordinal) =>
-          insertSense.run(id, ordinal, s.pos, s.definition, s.example ?? null),
-        )
+      senses.get(word)?.forEach((s, ordinal) => {
+        insertSense.run(id, ordinal, s.pos, s.definition, s.example ?? null)
+      })
       input.pronunciations
         .get(norm)
         ?.slice(0, MAX_PRONUNCIATIONS)
         .forEach((ipa, ordinal) => insertPron.run(id, ordinal, ipa))
     })
+
+    // After every entry exists, so targets resolve regardless of alphabetical order.
+    const token = (target: string, indirect = false) => {
+      const targetId = ids.get(target)
+      return (indirect ? '~' : '') + (targetId === undefined ? `=${target}` : String(targetId))
+    }
+    for (const { word } of sorted) {
+      senses.get(word)?.forEach((s, ordinal) => {
+        if (!s.synonyms?.length && !s.antonyms?.length) return
+        relationCounts.synonyms += s.synonyms?.length ?? 0
+        relationCounts.antonyms += s.antonyms?.length ?? 0
+        insertLinks.run(
+          ids.get(word),
+          ordinal,
+          (s.synonyms ?? []).map((w) => token(w)).join(LINK_SEPARATOR),
+          (s.antonyms ?? []).map((a) => token(a.word, a.indirect === true)).join(LINK_SEPARATOR),
+        )
+      })
+    }
 
     input.roots.forEach((r, i) =>
       insertRoot.run(
@@ -156,6 +181,8 @@ export function buildDictionary(file: string, input: DictionaryInput): Manifest 
   const counts = {
     entries: count('SELECT count(*) n FROM entries'),
     senses: count('SELECT count(*) n FROM senses'),
+    synonyms: relationCounts.synonyms,
+    antonyms: relationCounts.antonyms,
     pronunciations: count('SELECT count(*) n FROM pronunciations'),
     roots: count('SELECT count(*) n FROM roots'),
     morphemes: count('SELECT count(*) n FROM morphemes'),

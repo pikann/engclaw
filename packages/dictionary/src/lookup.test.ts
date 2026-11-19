@@ -22,6 +22,9 @@ beforeAll(() => {
       (1, 1, 'v', 'examine officially', NULL),
       (1, 0, 'v', 'look over carefully', 'Please inspect it'),
       (4, 0, 'v', 'interpret written words', NULL);
+    INSERT INTO sense_links VALUES
+      (1, 0, char(51) || char(9) || '=look into', '~5'),
+      (4, 0, '1' || char(9) || '999', '');
     INSERT INTO pronunciations VALUES (4, 1, 'ˈɹid'), (4, 0, 'ˈɹɛd'), (1, 0, 'ˌɪnˈspɛkt');
     INSERT INTO roots VALUES
       (10, 'in', '["in","im"]', 'in, into', '["Latin"]', 'https://r/in'),
@@ -47,8 +50,14 @@ describe('getWord', () => {
       pos: 'v',
       definition: 'look over carefully',
       example: 'Please inspect it',
+      synonyms: [
+        { id: 3, word: 'inbox' },
+        { id: null, word: 'look into' },
+      ],
+      antonyms: [{ id: 5, word: 'telescope', indirect: true }],
     })
     expect(w.senses[1]!.example).toBeNull()
+    expect(w.senses[1]).toMatchObject({ synonyms: [], antonyms: [] })
     expect(w.pronunciations).toEqual(['ˌɪnˈspɛkt'])
     expect(w.morphemes.map((m) => [m.kind, m.form, m.root.root, m.root.meaning])).toEqual([
       ['prefix', 'in', 'in', 'in, into'],
@@ -69,6 +78,11 @@ describe('getWord', () => {
     expect(w.pronunciations).toEqual(['ˈɹɛd', 'ˈɹid'])
     expect(w.morphemes).toEqual([])
     expect(w.etymology).toBeNull()
+  })
+
+  it('keeps relations on the sense they belong to and skips dangling ids', () => {
+    expect(getWord(db, 4)!.senses[0]!.synonyms).toEqual([{ id: 1, word: 'inspect' }])
+    expect(getWord(db, 4)!.senses[0]!.antonyms).toEqual([])
   })
 
   it('returns null for an unknown id', () => {
