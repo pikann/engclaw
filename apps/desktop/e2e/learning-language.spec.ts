@@ -1,15 +1,23 @@
 import { audioFixtures } from './support/audio'
 import type { EngclawApi } from '@engclaw/ipc-contract'
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 import { launchApp } from './support/launch'
 import { chooseLearningLanguage, expectLearningLanguage } from './support/learning-language'
 import { callLog, scored, stubSpeech } from './support/speech-stubs'
 import { stubPlayer, VIDEO } from './support/shadowing'
 
-async function setGuideLanguage(
-  page: import('@playwright/test').Page,
-  language: 'English' | 'Tiếng Việt',
-) {
+async function setInterfaceLanguage(page: Page, language: 'en' | 'vi') {
+  await page.evaluate(
+    (next) =>
+      (window as unknown as { engclaw: EngclawApi }).engclaw.settings.setLanguage({
+        language: next,
+      }),
+    language,
+  )
+  await expect(page.locator('html')).toHaveAttribute('lang', language)
+}
+
+async function setGuideLanguage(page: Page, language: 'English' | 'Tiếng Việt') {
   await page.getByTestId('nav-settings').click()
   const selector = page.getByTestId('pronunciation-guide-language')
   await selector.click()
@@ -261,9 +269,11 @@ test('Mandarin standalone iang gives guidance and plays its sample', async () =>
   }
 })
 
-test('English read-aloud shows IPA, Vietnamese sound tips and a linking example', async () => {
+test('English read-aloud shows IPA and linking guidance with Vietnamese interface', async () => {
   const { page, app } = await launchApp()
   try {
+    await setInterfaceLanguage(page, 'vi')
+    await setGuideLanguage(page, 'English')
     await page.getByTestId('nav-practice').click()
     await page.getByTestId('practice-mode-sentence').click()
     await page.getByTestId('practice-text').fill('Hold on')
@@ -283,6 +293,8 @@ test('English read-aloud shows IPA, Vietnamese sound tips and a linking example'
 test('Pronunciation guide language changes independently and survives a relaunch', async () => {
   const { app, page, userData } = await launchApp()
   try {
+    await setInterfaceLanguage(page, 'en')
+    await setGuideLanguage(page, 'English')
     await chooseLearningLanguage(page, 'zh')
     await page.getByTestId('nav-practice').click()
     await page.getByTestId('practice-mode-sentence').click()
