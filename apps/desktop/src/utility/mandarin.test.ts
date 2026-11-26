@@ -75,6 +75,8 @@ describe('Mandarin assessment', () => {
     ['shui4zhao2', '睡著'],
     ['zhao2ji2', '著急'],
     ['zhuo2shou3', '著手'],
+    ['zhu4zhe3', '著者'],
+    ['zhu4yi4', '著譯'],
   ])('scores %s against the contextual reading of %s', (reference, transcript) => {
     const result = mandarinResult(reference, transcript)
     expect(result.score).toBe(100)

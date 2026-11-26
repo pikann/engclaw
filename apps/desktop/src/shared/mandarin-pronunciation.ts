@@ -8,7 +8,7 @@ const toSimplified = Converter({ from: 't', to: 'cn' })
 // Lexical zhù forms keep 著 in simplified Chinese too (see the bundled CC-CEDICT).
 // Other traditional uses take the simplified spelling 着, which lets pinyin-pro
 // distinguish aspectual zhe from contextual zháo and zhuó.
-const lexicalZhu = /著[作名书称述录]|[知卓原合名土专巨较昭拙炳王编要论译遗显]著|著/gu
+const lexicalZhu = /著[作名书称述录者译]|[知卓原合名土专巨较昭拙炳王编要论译遗显]著|著/gu
 
 function normalizeReadingText(text: string): string {
   return toSimplified(text).replace(/\p{Script=Han}+/gu, (phrase) =>

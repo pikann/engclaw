@@ -42,6 +42,8 @@ describe('Mandarin pronunciation guide', () => {
     ['著重', '着重', 'zhuó zhòng', 'zhuo2zhong4'],
     ['著作', '著作', 'zhù zuò', 'zhu4zuo4'],
     ['著名', '著名', 'zhù míng', 'zhu4ming2'],
+    ['著者', '著者', 'zhù zhě', 'zhu4zhe3'],
+    ['著譯', '著译', 'zhù yì', 'zhu4yi4'],
   ])(
     'looks up the contextual reading of %s and %s for the guide and speech',
     (traditional, simplified, marked, numbered) => {
