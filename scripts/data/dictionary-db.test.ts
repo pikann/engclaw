@@ -21,9 +21,26 @@ const input: DictionaryInput = {
     entries: [
       {
         word: 'abduct',
-        senses: [{ pos: 'v', definition: 'take away', example: 'abduct a child' }],
+        senses: [
+          {
+            synset: 'syn-abduct-v',
+            pos: 'v',
+            definition: 'take away',
+            example: 'abduct a child',
+            synonyms: ['kidnap', 'snatch up'],
+            antonyms: [
+              { word: 'release', synset: 'syn-release-v', indirect: true },
+              { word: 'returnee', synset: 'syn-returnee-n' },
+            ],
+          },
+        ],
       },
-      { word: 'duct', senses: [{ pos: 'n', definition: 'a tube' }] },
+      { word: 'duct', senses: [{ synset: 'syn-duct-n', pos: 'n', definition: 'a tube' }] },
+      {
+        word: 'kidnap',
+        senses: [{ synset: 'syn-kidnap-v', pos: 'v', definition: 'seize', synonyms: ['abduct'] }],
+      },
+      { word: 'release', senses: [{ synset: 'syn-release-v', pos: 'v', definition: 'let go' }] },
     ],
   },
   pronunciations: new Map([['abduct', ['æbˈdʌkt']]]),
@@ -70,7 +87,7 @@ describe('buildDictionary', () => {
 
   it('writes a manifest whose checksum matches the file', () => {
     const sha = createHash('sha256').update(readFileSync(file)).digest('hex')
-    expect(manifest).toMatchObject({ sha256: sha, version: '2024.1', schemaVersion: 1 })
+    expect(manifest).toMatchObject({ sha256: sha, version: '2024.2', schemaVersion: 2 })
     expect(manifest.bytes).toBe(readFileSync(file).length)
     expect(manifest.sources.map((s) => s.name)).toEqual(
       expect.arrayContaining(['Open English WordNet', 'CMUdict', 'Wiktionary']),
@@ -85,6 +102,28 @@ describe('buildDictionary', () => {
     expect(db.prepare('SELECT ipa FROM pronunciations WHERE entry_id = ?').all(e.id)).toEqual([
       { ipa: 'æbˈdʌkt' },
     ])
+  })
+
+  it('stores synonyms and antonyms per sense as tokens, with labels for non-entries', () => {
+    const id = (word: string) =>
+      one<{ id: number }>('SELECT id FROM entries WHERE word = ?', word).id
+    const row = one<{ sense_ordinal: number; synonyms: string; antonyms: string }>(
+      'SELECT sense_ordinal, synonyms, antonyms FROM sense_links WHERE entry_id = ?',
+      id('abduct'),
+    )
+    expect(row).toEqual({
+      sense_ordinal: 0,
+      synonyms: [String(id('kidnap')), '=snatch up'].join('\t'),
+      antonyms: [`~${id('release')}`, '=returnee'].join('\t'),
+    })
+  })
+
+  it('stores no row for a sense without relations', () => {
+    expect(one<{ n: number }>('SELECT count(*) n FROM sense_links').n).toBe(2)
+  })
+
+  it('counts relations in the manifest', () => {
+    expect(manifest.counts).toMatchObject({ synonyms: 3, antonyms: 2 })
   })
 
   it('links example words to prefix and root morphemes', () => {

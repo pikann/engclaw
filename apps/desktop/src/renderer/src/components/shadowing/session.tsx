@@ -50,6 +50,7 @@ import { useWordLookup } from '@/lib/word-lookup'
 import { TranscriptDownload } from './transcript-download'
 import { fitDictation, fitStage, formatClock, type Segment } from '@/lib/shadowing'
 import { cn } from '@/lib/utils'
+import { Label } from '@/components/ui/label'
 
 const REPEAT_CYCLE = [1, 3, MAX_REPEAT]
 const DICTATION_SHORTCUTS: Record<
@@ -462,7 +463,7 @@ export function ShadowingSession({
                   </DropdownMenuRadioGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <label className="flex items-center gap-2 text-sm">
+              <Label className="flex items-center gap-2 text-sm">
                 {t('screens.shadowing.repeat')}
                 <Input
                   type="number"
@@ -479,7 +480,7 @@ export function ShadowingSession({
                     if (Number.isFinite(n)) setSettings({ repeat: n })
                   }}
                 />
-              </label>
+              </Label>
               {dictation && (
                 <div className="flex items-center gap-2 text-sm">
                   <Switch
@@ -489,9 +490,9 @@ export function ShadowingSession({
                     checked={autoAdvance}
                     onCheckedChange={setAutoAdvance}
                   />
-                  <label htmlFor="dictation-auto-advance">
+                  <Label htmlFor="dictation-auto-advance">
                     {t('screens.dictation.autoAdvance')}
-                  </label>
+                  </Label>
                 </div>
               )}
               {!dictation && (
@@ -507,7 +508,7 @@ export function ShadowingSession({
                       setSettings({ autoContinuePct: on ? lastAutoPct.current : 0 })
                     }}
                   />
-                  <label htmlFor="shadowing-auto">{t('screens.shadowing.autoContinue')}</label>
+                  <Label htmlFor="shadowing-auto">{t('screens.shadowing.autoContinue')}</Label>
                   <Input
                     id="shadowing-auto"
                     disabled={!autoOn}
@@ -545,14 +546,14 @@ export function ShadowingSession({
                     checked={showIpa}
                     onCheckedChange={setShowIpa}
                   />
-                  <label
+                  <Label
                     htmlFor="shadowing-ipa"
                     title={t(
                       language === 'zh' ? 'learning.pinyinHint' : 'screens.shadowing.ipaHint',
                     )}
                   >
                     {t(language === 'zh' ? 'learning.pinyin' : 'screens.shadowing.ipa')}
-                  </label>
+                  </Label>
                   {showIpa && ipa.status === 'loading' && (
                     <span
                       role="status"
@@ -589,7 +590,7 @@ export function ShadowingSession({
                     disabled={language === 'zh'}
                     onCheckedChange={setShowProsody}
                   />
-                  <label htmlFor="shadowing-prosody">{t('screens.shadowing.prosody.toggle')}</label>
+                  <Label htmlFor="shadowing-prosody">{t('screens.shadowing.prosody.toggle')}</Label>
                   {showProsody && prosody.status === 'loading' && (
                     <span
                       role="status"

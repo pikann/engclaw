@@ -809,6 +809,7 @@ export const DictionarySearchResult = z.object({
   match: z.enum(['prefix', 'fuzzy']),
   distance: z.number().optional(),
 })
+const RelatedWordSchema = z.object({ id: z.number().int().nullable(), word: z.string() })
 export const DictionaryWord = z.object({
   language: LearningLanguage.optional(),
   pinyin: z.string().optional(),
@@ -817,7 +818,13 @@ export const DictionaryWord = z.object({
   word: z.string(),
   pronunciations: z.array(z.string()),
   senses: z.array(
-    z.object({ pos: z.string(), definition: z.string(), example: z.string().nullable() }),
+    z.object({
+      pos: z.string(),
+      definition: z.string(),
+      example: z.string().nullable(),
+      synonyms: z.array(RelatedWordSchema).default([]),
+      antonyms: z.array(RelatedWordSchema.extend({ indirect: z.boolean() })).default([]),
+    }),
   ),
   morphemes: z.array(
     z.object({

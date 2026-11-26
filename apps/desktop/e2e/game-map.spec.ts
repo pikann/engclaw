@@ -79,7 +79,11 @@ test('passed chapters unlock the next, stay replayable, and continue jumps to th
 
 test('selected world and scroll position are remembered', async () => {
   await open()
-  await page.getByTestId('game-world-select').selectOption('12')
+  await page.getByTestId('game-world-select').click()
+  await page
+    .getByRole('option')
+    .filter({ hasText: /^World 12 / })
+    .click()
   await expect(page.getByTestId('world-title')).toContainText('12')
   await expect(page.getByTestId('game-node-1')).toHaveCount(0)
   await expect(page.locator('[data-testid^="game-node-"]').first()).toBeVisible()

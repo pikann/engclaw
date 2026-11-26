@@ -32,7 +32,32 @@ const dictionary: DictionarySource = {
           })),
           morphemes: [],
         }
-      : null,
+      : w === 'happy'
+        ? {
+            word: 'happy',
+            ipa: ['ˈhæpi'],
+            senses: [
+              {
+                pos: 'adj',
+                definition: 'feeling pleasure',
+                example: null,
+                synonyms: Array.from({ length: 9 }, (_, i) => ({ id: i, word: `syn${i}` })),
+                antonyms: [
+                  { id: 1, word: 'unhappy', indirect: false },
+                  { id: 2, word: 'sad', indirect: true },
+                ],
+              },
+              {
+                pos: 'adj',
+                definition: 'fortunate',
+                example: null,
+                synonyms: [],
+                antonyms: [{ id: 3, word: 'cursed', indirect: true }],
+              },
+            ],
+            morphemes: [],
+          }
+        : null,
 }
 
 function setup(model: ReturnType<typeof scriptedModel>['model'], history: HistoryAttempt[]) {
@@ -116,6 +141,24 @@ describe('agent info tools', () => {
     expect(JSON.parse(found!).senses).toHaveLength(4)
     expect(bad1).toContain('invalid arguments')
     expect(bad2).toContain('invalid arguments')
+  })
+
+  it('includes capped synonyms and direct antonyms per sense, omitting empty lists', async () => {
+    const { model, calls } = scriptedModel([
+      toolCalls(
+        { id: 'a', name: 'lookup_dictionary', input: { word: 'happy' } },
+        { id: 'b', name: 'lookup_dictionary', input: { word: 'thorough' } },
+      ),
+      text('Ok.'),
+    ])
+    const { service } = setup(model, [])
+    service.send({ text: 'hi' })
+    await service.idle
+    const [happy, thorough] = toolOutputs(calls[1]!.prompt).map((s) => JSON.parse(s))
+    expect(happy.senses[0].synonyms).toEqual(['syn0', 'syn1', 'syn2', 'syn3', 'syn4'])
+    expect(happy.senses[0].antonyms).toEqual(['unhappy'])
+    expect(happy.senses[1]).toEqual({ pos: 'adj', definition: 'fortunate' })
+    expect(thorough.senses[0]).toEqual({ pos: 'adj', definition: 'sense 0' })
   })
 
   it('exposes only read-only sources', () => {

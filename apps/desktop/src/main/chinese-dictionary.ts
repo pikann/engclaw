@@ -136,7 +136,13 @@ export class ChineseDictionary {
         { format: 'numToSymbol' },
       ),
       pronunciations: [],
-      senses: entry.definitions.map((definition) => ({ pos: '', definition, example: null })),
+      senses: entry.definitions.map((definition) => ({
+        pos: '',
+        definition,
+        example: null,
+        synonyms: [],
+        antonyms: [],
+      })),
       morphemes: [],
       etymology: null,
     }

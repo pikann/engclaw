@@ -72,17 +72,18 @@ function ConversationList({
     <ul className="space-y-0.5 p-2" data-testid="converse-history">
       {items.map((c) => (
         <li key={c.id}>
-          <button
+          <Button
+            variant="ghost"
             type="button"
             aria-current={c.id === activeId ? 'true' : undefined}
             onClick={() => onOpen(c.id)}
             className={cn(
-              'hover:bg-primary-soft focus-visible:ring-ring/50 w-full truncate rounded-md px-2 py-1.5 text-left text-sm outline-none focus-visible:ring-[3px]',
+              'h-auto justify-start whitespace-normal font-normal hover:bg-primary-soft focus-visible:ring-ring/50 w-full truncate rounded-md px-2 py-1.5 text-left text-sm outline-none focus-visible:ring-[3px]',
               c.id === activeId && 'bg-primary-soft font-medium',
             )}
           >
             {c.title || t('converse.untitled')}
-          </button>
+          </Button>
         </li>
       ))}
     </ul>

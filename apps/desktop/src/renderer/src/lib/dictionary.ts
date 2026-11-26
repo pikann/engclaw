@@ -45,3 +45,18 @@ export function groupSenses(senses: DictionaryWord['senses']) {
   }
   return groups
 }
+
+export type WordSense = DictionaryWord['senses'][number]
+export type RelatedItem = WordSense['synonyms'][number] & { indirect?: boolean }
+
+/** Unique related words across all senses, in order of first appearance; a direct hit beats an indirect one. */
+export function mergeRelated(senses: WordSense[], kind: 'synonyms' | 'antonyms'): RelatedItem[] {
+  const byWord = new Map<string, RelatedItem>()
+  for (const sense of senses)
+    for (const item of sense[kind] as RelatedItem[]) {
+      const known = byWord.get(item.word)
+      if (!known) byWord.set(item.word, item)
+      else if (known.indirect && !item.indirect) byWord.set(item.word, item)
+    }
+  return [...byWord.values()]
+}
