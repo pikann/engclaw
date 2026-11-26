@@ -2,6 +2,7 @@ import { Converter } from 'opencc-js/t2cn'
 import type { PronunciationResult } from '@engclaw/ipc-contract'
 import { levenshtein, opcodes } from '@engclaw/pronounce'
 import { pinyin } from 'pinyin-pro'
+import { hasHanzi, mandarinGuide } from '../shared/mandarin-pronunciation'
 import { InferenceError } from './errors'
 
 // Normalize orthography only; do not translate regional vocabulary.
@@ -22,10 +23,16 @@ export function mandarinReadings(text: string) {
 
 /** Character error rate from actual Mandarin ASR. No phone, acoustic or tone measurements are claimed. */
 export function mandarinResult(text: string, transcript: string): PronunciationResult {
-  const expected = chineseCharacters(text)
-  const heard = chineseCharacters(transcript)
+  const bySyllable = !hasHanzi(text) && /[a-z]/iu.test(text.normalize('NFD'))
+  const target = bySyllable ? mandarinGuide(text) : []
+  const recognized = bySyllable ? mandarinGuide(transcript) : []
+  const expected = bySyllable ? target.map((item) => item.plain) : chineseCharacters(text)
+  const heard = bySyllable ? recognized.map((item) => item.plain) : chineseCharacters(transcript)
   if (!expected.length)
-    throw new InferenceError('INVALID_INPUT', 'text has no speakable characters')
+    throw new InferenceError('INVALID_INPUT', 'text has no speakable characters or pinyin')
+  const expectedLabels = bySyllable ? target.map((item) => item.marked) : expected
+  const heardLabels = bySyllable ? recognized.map((item) => item.marked) : heard
+  const separator = bySyllable ? ' ' : ''
   const distance = levenshtein(expected, heard)
   const errors: PronunciationResult['differences']['errors'] = []
   for (const [tag, i1, i2, j1, j2] of opcodes(expected, heard)) {
@@ -35,8 +42,8 @@ export function mandarinResult(text: string, transcript: string): PronunciationR
         position: i1,
         word: '',
         expected: '',
-        actual: heard.slice(j1, j2).join(''),
-        actual_word: heard.slice(j1, j2).join(''),
+        actual: heardLabels.slice(j1, j2).join(separator),
+        actual_word: heardLabels.slice(j1, j2).join(separator),
         phone_distance: 0,
         confidence: 0,
         phones: [],
@@ -45,10 +52,10 @@ export function mandarinResult(text: string, transcript: string): PronunciationR
       for (let i = i1; i < i2; i++)
         errors.push({
           position: i,
-          word: expected[i]!,
-          expected: expected[i]!,
-          actual: tag === 'delete' ? '' : (heard[j1 + i - i1] ?? ''),
-          actual_word: tag === 'delete' ? '' : (heard[j1 + i - i1] ?? ''),
+          word: expectedLabels[i]!,
+          expected: expectedLabels[i]!,
+          actual: tag === 'delete' ? '' : (heardLabels[j1 + i - i1] ?? ''),
+          actual_word: tag === 'delete' ? '' : (heardLabels[j1 + i - i1] ?? ''),
           phone_distance: 0,
           confidence: 0,
           phones: [],
@@ -62,7 +69,7 @@ export function mandarinResult(text: string, transcript: string): PronunciationR
   }
   return {
     language: 'zh',
-    assessment: 'character-accuracy',
+    assessment: bySyllable ? 'syllable-accuracy' : 'character-accuracy',
     score: Math.round(100 * Math.max(0, 1 - distance / expected.length)),
     distance,
     acoustic_distance: 0,

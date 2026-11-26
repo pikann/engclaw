@@ -2,6 +2,7 @@ import { audioFixtures } from './support/audio'
 import type { EngclawApi } from '@engclaw/ipc-contract'
 import { expect, test } from '@playwright/test'
 import { launchApp } from './support/launch'
+import { callLog, scored, stubSpeech } from './support/speech-stubs'
 import { stubPlayer, VIDEO } from './support/shadowing'
 
 // Real persisted settings and bundled dictionary; no speech-model downloads or YouTube access.
@@ -85,6 +86,180 @@ test('learning language changes dictionary and practice, and survives a relaunch
     await expect(second.page.getByTestId('word-ipa').first()).toBeVisible()
   } finally {
     await second.app.close()
+  }
+})
+
+test('Mandarin pinyin practice plays samples and scores microphone audio', async () => {
+  const { page, app } = await launchApp({ audio: 'speech' })
+  try {
+    await page.getByTestId('learning-language').selectOption('zh')
+    await page.getByTestId('nav-practice').click()
+    await page.getByTestId('practice-mode-sentence').click()
+    await page.getByTestId('practice-text').fill('miàntiáo')
+    const guide = page.getByTestId('mandarin-guide')
+    await page.getByTestId('practice-text').fill('yong')
+    await expect(guide).toContainText('“i-ung”')
+    await page.getByTestId('practice-text').fill('miàntiáo')
+    await expect(guide).toContainText('miàn')
+    await expect(guide).toContainText('tiáo')
+    const vietnamesePhrase = guide.getByTestId('mandarin-vietnamese-phrase')
+    await expect(vietnamesePhrase).toHaveText('“miền” → “thi-ao”')
+    await expect(guide.getByTestId('mandarin-reference-text')).toContainText('miàn tiáo')
+    await expect(guide.getByRole('button', { name: /1×/ })).toHaveAttribute('aria-pressed', 'true')
+    await page.evaluate(() => {
+      const play = HTMLMediaElement.prototype.play
+      HTMLMediaElement.prototype.play = function () {
+        this.addEventListener(
+          'playing',
+          () => {
+            document.body.dataset.referencePlayback = `${this.playbackRate}:${this.preservesPitch}`
+          },
+          { once: true },
+        )
+        return play.call(this)
+      }
+    })
+    const sample = guide.getByTestId('hear-reference')
+    await sample.click()
+    await expect(sample).toHaveAttribute('data-playback', 'playing')
+    await expect(sample).toHaveAttribute('data-playback', 'idle')
+    await guide.getByRole('button', { name: /0[.,]75×/ }).click()
+    await sample.click()
+    await expect(page.locator('body')).toHaveAttribute('data-reference-playback', '0.75:true')
+    await expect(guide.getByTestId('hear-reference-error')).toHaveCount(0)
+    await guide.getByRole('button', { name: 'tiáo' }).click()
+    await expect(vietnamesePhrase).toHaveText('“miền” → “thi-ao”')
+    await expect(guide).toContainText('Đầu lưỡi chạm lợi trên rồi bật hơi rõ')
+    const syllable = guide.getByTestId('hear-reference-alternate')
+    await syllable.click()
+    await expect(syllable).toHaveAttribute('data-playback', 'playing')
+    await expect(guide.getByTestId('hear-reference-error')).toHaveCount(0)
+
+    await page.getByTestId('practice-text').fill('yu3yan1, yong')
+    await expect(vietnamesePhrase).toHaveText('“i tròn môi” → “iên” | “i-ung”')
+    await page.getByTestId('practice-text').fill('yu3yan1')
+    await expect(guide.getByTestId('mandarin-reference-text')).toContainText('yǔ yān')
+    await sample.click()
+    await expect(guide).toContainText(/uses synthesized pinyin|dùng giọng pinyin tổng hợp/)
+    await page.getByTestId('practice-text').fill('yu3yan2')
+    await expect(guide.getByTestId('mandarin-reference-text')).toContainText('yǔ yán')
+    const separated = guide.getByTestId('hear-reference-segmented')
+    await separated.click()
+    await expect(separated).toHaveAttribute('data-playback', 'playing')
+    await expect(guide.getByTestId('hear-reference-error')).toHaveCount(0)
+    await page.getByTestId('practice-text').fill('yi2ding4')
+    await expect(vietnamesePhrase).toHaveText('“í” → “tìng”')
+    await page.getByTestId('practice-text').fill('miàntiáo')
+
+    const result = scored(100)
+    await stubSpeech(app, {
+      analyze: [
+        {
+          reply: {
+            ...result,
+            value: {
+              ...result.value,
+              language: 'zh',
+              assessment: 'syllable-accuracy',
+              transcribe: '面条',
+            },
+          },
+        },
+      ],
+    })
+    await page.getByTestId('practice-record').click()
+    await expect(page.getByTestId('practice-stop')).toBeVisible()
+    await expect(sample).toBeDisabled()
+    await expect(page.getByTestId('recorder-timer')).not.toHaveText('0:00')
+    await page.getByTestId('practice-stop').click()
+    const assessment = page.getByTestId('mandarin-result')
+    await expect(assessment.getByTestId('result-score')).toHaveText('100')
+    await expect(assessment).toContainText('面条')
+    await expect(guide).toBeVisible()
+  } finally {
+    await app.close()
+  }
+})
+
+test('Mandarin standalone j animates the tongue and records the example syllable', async () => {
+  const { app, page } = await launchApp({ audio: 'speech' })
+  try {
+    await page.getByTestId('learning-language').selectOption('zh')
+    await page.getByTestId('nav-practice').click()
+    await page.getByTestId('practice-mode-sentence').click()
+    await page.getByTestId('practice-text').fill('j')
+    const guide = page.getByTestId('mandarin-initial-guide')
+    await expect(guide).toContainText('jī (鸡)')
+    await expect(guide).toContainText('Đặt đầu lưỡi sát mặt trong răng dưới')
+    await expect(guide.getByTestId('articulation-profile')).toBeVisible()
+    await guide.getByRole('button', { name: /Replay mouth movement|Xem lại chuyển động/ }).click()
+    await expect(guide.getByTestId('tongue')).toHaveAttribute('data-phone', 'tɕ')
+    await expect(guide.getByTestId('articulation-airflow')).toBeVisible()
+    await guide.getByTestId('hear-reference').click()
+    await expect(guide.getByTestId('hear-reference')).toHaveAttribute('data-playback', 'playing')
+
+    const result = scored(100)
+    await stubSpeech(app, {
+      analyze: [
+        {
+          reply: {
+            ...result,
+            value: {
+              ...result.value,
+              language: 'zh',
+              assessment: 'syllable-accuracy',
+              transcribe: '鸡',
+            },
+          },
+        },
+      ],
+    })
+    await page.getByTestId('practice-record').click()
+    await expect(page.getByTestId('recorder-timer')).not.toHaveText('0:00')
+    await page.getByTestId('practice-stop').click()
+    await expect(page.getByTestId('mandarin-result')).toContainText('jī')
+    expect((await callLog(app)).analyze[0]?.text).toBe('jī')
+  } finally {
+    await app.close()
+  }
+})
+
+test('Mandarin standalone iang gives guidance and plays its sample', async () => {
+  const { app, page } = await launchApp()
+  try {
+    await page.getByTestId('learning-language').selectOption('zh')
+    await page.getByTestId('nav-practice').click()
+    await page.getByTestId('practice-mode-sentence').click()
+    await page.getByTestId('practice-text').fill('iang')
+    const guide = page.getByTestId('mandarin-final-guide')
+    await expect(guide).toContainText('“i-ang”')
+    await expect(guide).toContainText('yāng (央)')
+    await expect(guide.getByTestId('articulation-profile')).toBeVisible()
+    const hear = guide.getByTestId('hear-reference')
+    await hear.click()
+    await expect(hear).toHaveAttribute('data-playback', 'playing')
+    await expect(guide.getByTestId('hear-reference-error')).toHaveCount(0)
+  } finally {
+    await app.close()
+  }
+})
+
+test('English read-aloud shows IPA, Vietnamese sound tips and a linking example', async () => {
+  const { page, app } = await launchApp()
+  try {
+    await page.getByTestId('nav-practice').click()
+    await page.getByTestId('practice-mode-sentence').click()
+    await page.getByTestId('practice-text').fill('Hold on')
+    const guide = page.getByTestId('english-guide')
+    await expect(guide).toContainText('Nghe gần giống tiếng Việt')
+    await expect(guide).toContainText('Đọc liền hold → on')
+    await expect(guide.getByTestId('hear-reference')).toBeEnabled()
+    await guide.getByRole('button', { name: 'on', exact: true }).click()
+    await expect(guide.getByTestId('hear-reference-alternate')).toHaveText(/on/)
+    await guide.getByRole('button', { name: /1×/ }).click()
+    await expect(guide.getByRole('button', { name: /1×/ })).toHaveAttribute('aria-pressed', 'true')
+  } finally {
+    await app.close()
   }
 })
 

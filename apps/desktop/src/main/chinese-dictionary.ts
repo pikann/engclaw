@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { gunzipSync } from 'node:zlib'
-import { convert } from 'pinyin-pro'
+import { convert, pinyin } from 'pinyin-pro'
 import type { DictionarySearchResult, DictionaryWord } from '@engclaw/ipc-contract'
 
 /** Separate id range prevents Chinese words being mistaken for English words or deck cards. */
@@ -19,13 +19,78 @@ const normalize = (text: string) =>
     .replace(/u\u0308/g, 'v')
     .replace(/[\u0300-\u036f1-5\s']/g, '')
 
+const numberedReading = (text: string) =>
+  text.toLowerCase().replace(/u:|ü/gu, 'v').replace(/\s+/gu, '')
+
 /** The bundled, unmodified CC-CEDICT archive is parsed lazily, entirely offline. */
 export class ChineseDictionary {
   private entries: Entry[] | undefined
+  private speechSpellings: Map<string, string> | undefined
+  private spokenVariants: Map<string, string> | undefined
   constructor(private readonly source: () => string) {}
   private all() {
     if (!this.entries) this.entries = parseCedict(this.source())
     return this.entries
+  }
+  /** Match the complete numbered reading, keeping homophones with different tones apart. */
+  speechText(numbered: string): string | undefined {
+    if (!this.speechSpellings) {
+      this.speechSpellings = new Map()
+      this.spokenVariants = new Map()
+      const entries = this.all().filter((entry) => /^\p{Script=Han}+$/u.test(entry.simplified))
+      const usage = new Map<string, number>()
+      for (const word of new Set(entries.map((entry) => entry.simplified))) {
+        if (Array.from(word).length < 2) continue
+        for (const char of new Set(word)) usage.set(char, (usage.get(char) ?? 0) + 1)
+      }
+      for (const entry of entries) {
+        const key = numberedReading(entry.pinyin)
+        if (!/^(?:[a-z]+[1-5])+$/u.test(key)) continue
+        const previous = this.speechSpellings.get(key)
+        const isolated = Array.from(entry.simplified).length === 1
+        // A standalone sample needs a character with just one possible reading.
+        if (
+          previous &&
+          (!isolated || (usage.get(previous) ?? 0) >= (usage.get(entry.simplified) ?? 0))
+        )
+          continue
+        if (isolated) {
+          const reading = pinyin(entry.simplified, { type: 'all' })[0]
+          if (reading?.polyphonic.length !== 1) continue
+          const pronunciation = convert(reading.pinyin, { format: 'symbolToNum' }).replaceAll(
+            'ü',
+            'v',
+          )
+          if (pronunciation !== key) continue
+        }
+        this.speechSpellings.set(key, entry.simplified)
+      }
+
+      for (const { pinyin: reading, simplified: word } of entries) {
+        const key = numberedReading(reading)
+        if (!/^(?:[a-z]+[1-5]){2,}$/u.test(key)) continue
+        const syllables = key.match(/[a-z]+[1-5]/gu) ?? []
+        if (/[一不]/u.test(word)) {
+          const options = { type: 'array', toneType: 'num', v: true } as const
+          const lexical = pinyin(word, { ...options, toneSandhi: false }).join('')
+          if (lexical === key) {
+            const spoken = pinyin(word, options).join('')
+            if (spoken !== key && !this.spokenVariants.has(spoken))
+              this.spokenVariants.set(spoken, word)
+          }
+        }
+        // A two-syllable 3+3 word is also commonly entered with its spoken 2+3 tones.
+        if (syllables.length === 2 && syllables.every((item) => item.endsWith('3'))) {
+          const spoken = syllables[0]!.slice(0, -1) + '2' + syllables[1]
+          if (!this.spokenVariants.has(spoken)) this.spokenVariants.set(spoken, word)
+        }
+      }
+    }
+    const parts = numbered.split(',').map((part) => {
+      const key = part.trim()
+      return this.speechSpellings?.get(key) ?? this.spokenVariants?.get(key)
+    })
+    return parts.every(Boolean) ? parts.join('，') : undefined
   }
   search(query: string, limit = 20): DictionarySearchResult[] {
     const q = query.trim().toLowerCase()

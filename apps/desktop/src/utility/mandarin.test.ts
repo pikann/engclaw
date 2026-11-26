@@ -53,6 +53,16 @@ describe('Mandarin assessment', () => {
       }),
     ])
   })
+  it('scores pinyin against recognized Mandarin syllables and reports mismatches', () => {
+    expect(mandarinResult('miàntiáo', '面条')).toMatchObject({
+      assessment: 'syllable-accuracy',
+      score: 100,
+    })
+    const partial = mandarinResult('mian4 tiao2', '面包')
+    expect(partial.score).toBe(50)
+    expect(partial.differences.errors).toMatchObject([{ expected: 'tiáo', actual: 'bāo' }])
+    expect(mandarinResult('miàntiáo', '').score).toBe(0)
+  })
   it('returns context-sensitive pinyin without punctuation slots', () => {
     expect(mandarinReadings('你好，世界！')).toEqual([
       { word: '你', phones: ['nǐ'] },

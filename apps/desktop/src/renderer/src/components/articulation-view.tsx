@@ -23,11 +23,13 @@ export function ArticulationView({
   playId,
   durationMs,
   stopId = 0,
+  showProfile = false,
 }: {
   phones: readonly string[]
   playId: number
   durationMs?: number
   stopId?: number
+  showProfile?: boolean
 }) {
   const reduced = usePrefersReducedMotion()
   const key = phones.join(' ')
@@ -62,7 +64,7 @@ export function ArticulationView({
   return (
     <div className="flex flex-wrap items-center gap-2" data-testid="articulation">
       <Mouth viseme={frame.viseme} />
-      <Tongue pose={frame.pose} phone={frame.phone} />
+      <Tongue pose={frame.pose} phone={frame.phone} showProfile={showProfile} />
     </div>
   )
 }

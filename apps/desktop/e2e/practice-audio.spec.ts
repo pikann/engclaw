@@ -58,7 +58,7 @@ test.describe('Read aloud', () => {
     expect(call!.rms).toBeGreaterThan(SPEECH_RMS)
     // The take is saved to history.
     await page.getByTestId('nav-history').click()
-    await expect(page.getByText(SENTENCE).first()).toBeVisible()
+    await expect(page.getByTestId('history-panel').getByText(SENTENCE)).toBeVisible()
     await app.close()
   })
 

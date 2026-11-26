@@ -3,6 +3,28 @@
     "title": "Engclaw",
     "hello": "Xin chào từ Engclaw"
   },
+  "englishGuide": {
+    "title": "Tách âm và luyện đọc",
+    "loading": "Đang lấy phiên âm IPA…",
+    "unavailable": "Chưa lấy được phiên âm cho đoạn này.",
+    "hearWord": "Nghe {{word}}"
+  },
+  "mandarinGuide": {
+    "finalTitle": "Vận mẫu {{final}}",
+    "finalSample": "Nghe và ghi âm âm tiết mẫu {{reading}} ({{han}}) để luyện phần vần.",
+    "hearSeparated": "Nghe tách nhịp",
+    "initialTitle": "Thanh mẫu {{initial}}",
+    "replayMotion": "Xem lại chuyển động",
+    "initialSample": "Nghe và ghi âm âm tiết {{reading}} ({{han}}) để luyện thanh mẫu này.",
+    "title": "Tách âm và luyện đọc",
+    "hint": "Chọn từng âm tiết để xem cách đặt môi, lưỡi và lên xuống giọng. So sánh với tiếng Việt chỉ để hình dung gần đúng.",
+    "placeholder": "Nhập chữ Hán hoặc pinyin, ví dụ 面条, miàntiáo, mian4 tiao2",
+    "invalid": "Thử tách âm bằng dấu cách và thêm dấu thanh hoặc số 1–5. Ví dụ: mian4 tiao2.",
+    "hearAll": "Nghe cả cụm",
+    "hearSyllable": "Nghe {{syllable}}",
+    "syllableAccuracy": "Độ khớp âm tiết",
+    "scoreNote": "Điểm dựa trên các âm tiết từ chữ mà máy nhận diện được. Nghe lại bản thu để đối chiếu thanh điệu."
+  },
   "language": {
     "label": "Ngôn ngữ",
     "en": "English",
@@ -93,6 +115,10 @@
     }
   },
   "reference": {
+    "pinyinFallback": "Mẫu này dùng giọng pinyin tổng hợp. Kiểm tra số thanh hoặc nhập chữ Hán để nghe theo từ.",
+    "reading": "Mẫu đang đọc",
+    "slowPlayback": "Chậm 0,75×",
+    "normalPlayback": "Bình thường 1×",
     "hear": "Nghe giọng mẫu",
     "playing": "Đang phát…",
     "loading": "Đang chuẩn bị…",
@@ -1100,13 +1126,13 @@
     "chineseSearch": "Chữ Hán, pinyin hoặc nghĩa tiếng Anh…",
     "pinyin": "Pinyin",
     "characterAccuracy": "Mức khớp câu tiếng Trung",
-    "assessmentNote": "Tiếng Trung: điểm dựa trên độ khớp ký tự từ nhận dạng giọng nói, chưa đánh giá từng âm hoặc thanh điệu. Kết quả nhận dạng có thể sai.",
+    "assessmentNote": "Điểm tiếng Trung dựa trên kết quả nhận dạng giọng nói. Với pinyin, điểm tính theo âm tiết. Với chữ Hán, điểm tính theo chữ.",
     "reference": "Câu mẫu",
     "heard": "Máy nhận dạng được",
     "mismatches": "Ký tự khác với câu mẫu",
     "englishOnly": "Mục này hiện có nội dung tiếng Anh. Chọn ngôn ngữ học Tiếng Anh để sử dụng.",
     "chineseCaptions": "Chọn video tiếng Trung phổ thông. Nếu không có phụ đề CC, bạn có thể tạo lời thoại từ âm thanh.",
-    "chineseVoice": "Giọng tiếng Trung tổng hợp cơ bản; dùng video bản ngữ để luyện ngữ điệu.",
+    "chineseVoice": "Giọng đọc tiếng Trung tổng hợp.",
     "switchHint": "Đổi ngôn ngữ học sẽ bắt đầu lại phiên luyện tập hiện tại.",
     "pinyinHint": "Hiện pinyin dưới chữ Hán",
     "pinyinLoading": "Đang tạo pinyin…",

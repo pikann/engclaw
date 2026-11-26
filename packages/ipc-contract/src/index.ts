@@ -116,8 +116,13 @@ const youtubeResult = <T extends z.ZodTypeAny>(value: T) =>
 export const LearningLanguage = z.enum(['en', 'zh'])
 export type LearningLanguage = z.infer<typeof LearningLanguage>
 export const SpeakRequest = z
-  .object({ text: z.string().min(1).max(1000), language: LearningLanguage.optional() })
+  .object({
+    text: z.string().min(1).max(3000),
+    language: LearningLanguage.optional(),
+    pinyin: z.boolean().optional(),
+  })
   .strict()
+  .refine(({ pinyin, text }) => pinyin || text.length <= 1000, { path: ['text'] })
 export const SpeakErrorCode = z.enum(['MODEL_MISSING', 'FAILED'])
 export const SpeakResponse = z.discriminatedUnion('ok', [
   z.object({
@@ -126,6 +131,7 @@ export const SpeakResponse = z.discriminatedUnion('ok', [
     samples: z.custom<Float32Array>((v) => v instanceof Float32Array),
     sampleRate: z.number(),
     cached: z.boolean(),
+    pinyinFallback: z.literal(true).optional(),
     /** Main-process wall time for this request: cache read or synthesis, excluding IPC to the renderer. */
     ms: z.number(),
   }),
@@ -241,7 +247,7 @@ const PhoneReport = z.object({ expected: z.string(), heard: z.string(), confiden
 /** OpenPronounce `/pronunciation` body (snake_case, as the Python reference emits it). */
 export const PronunciationResult = z.object({
   /** Mandarin currently reports ASR character accuracy, not phone or tone assessment. */
-  assessment: z.literal('character-accuracy').optional(),
+  assessment: z.enum(['character-accuracy', 'syllable-accuracy']).optional(),
   score: z.number(),
   distance: z.number(),
   acoustic_distance: z.number(),

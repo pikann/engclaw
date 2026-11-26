@@ -3,6 +3,28 @@
     "title": "Engclaw",
     "hello": "Hello from Engclaw"
   },
+  "englishGuide": {
+    "title": "Pronunciation guide",
+    "loading": "Loading IPA…",
+    "unavailable": "No IPA is available for this text.",
+    "hearWord": "Hear {{word}}"
+  },
+  "mandarinGuide": {
+    "finalTitle": "Final {{final}}",
+    "finalSample": "Listen to and record the example syllable {{reading}} ({{han}}) to practise the final.",
+    "hearSeparated": "Hear with pauses",
+    "initialTitle": "Initial {{initial}}",
+    "replayMotion": "Replay mouth movement",
+    "initialSample": "Listen to and record {{reading}} ({{han}}) to practise this initial.",
+    "title": "Pronunciation guide",
+    "hint": "Select a syllable to see Vietnamese pronunciation tips. The Vietnamese sounds are approximate.",
+    "placeholder": "Enter Chinese characters or pinyin, e.g. 面条, miàntiáo, mian4 tiao2",
+    "invalid": "Try separating syllables with spaces and adding tone marks or numbers 1–5, e.g. mian4 tiao2.",
+    "hearAll": "Hear the whole phrase",
+    "hearSyllable": "Hear {{syllable}}",
+    "syllableAccuracy": "Syllable match",
+    "scoreNote": "The score compares syllables from the speech recognizer’s transcript. Replay your recording to compare tones."
+  },
   "language": {
     "label": "Language",
     "en": "English",
@@ -93,6 +115,10 @@
     }
   },
   "reference": {
+    "pinyinFallback": "This sample uses synthesized pinyin. Check the tone numbers or enter Chinese characters to hear the word.",
+    "reading": "Sample text",
+    "slowPlayback": "Slow 0.75×",
+    "normalPlayback": "Normal 1×",
     "hear": "Hear the reference",
     "playing": "Playing…",
     "loading": "Preparing…",
@@ -1100,13 +1126,13 @@
     "chineseSearch": "Chinese characters, pinyin or English meaning…",
     "pinyin": "Pinyin",
     "characterAccuracy": "Mandarin character accuracy",
-    "assessmentNote": "Mandarin scores measure character matches from speech recognition, not individual sounds or tones. Recognition may make mistakes.",
+    "assessmentNote": "Mandarin scores are based on speech recognition. Pinyin is matched by syllable and Chinese text by character.",
     "reference": "Reference sentence",
     "heard": "Recognized speech",
     "mismatches": "Characters that differ from the reference",
     "englishOnly": "This section currently has English content. Select English as your learning language to use it.",
     "chineseCaptions": "Use a Mandarin video. If CC captions are unavailable, you can generate a transcript from its audio.",
-    "chineseVoice": "Basic synthesized Mandarin voice; use native-speaker videos to practice intonation.",
+    "chineseVoice": "Synthesized Mandarin voice.",
     "switchHint": "Changing the learning language starts a new practice session.",
     "pinyinHint": "Show pinyin under Chinese characters",
     "pinyinLoading": "Generating pinyin…",

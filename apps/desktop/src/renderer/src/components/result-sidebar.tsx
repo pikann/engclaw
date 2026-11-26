@@ -80,7 +80,7 @@ export function PronunciationResultSections({
     setSelected(firstFlagged(view.chips))
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reset only when a new result arrives
   }, [result])
-  if (result.assessment === 'character-accuracy')
+  if (result.assessment)
     return (
       <div data-testid={testId}>
         <MandarinResult result={result} text={text} onReplay={onPlay} onRetry={onRetry} />
