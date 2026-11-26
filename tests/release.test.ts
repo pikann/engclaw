@@ -1,5 +1,7 @@
 /** Static checks that keep the release pipeline honest (ENGC-57). */
-import { readFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
@@ -41,5 +43,27 @@ describe('release workflow', () => {
   it('publishes SHA256SUMS for every tag, pre-releases included', () => {
     expect(workflow).toContain('SHA256SUMS')
     expect(workflow).not.toMatch(/checksums:[\s\S]*?if:/)
+  })
+})
+
+describe('speech detector in installers', () => {
+  const { assertSpeechDetector } = createRequire(import.meta.url)(
+    '../apps/desktop/build/after-pack.cjs',
+  ) as { assertSpeechDetector(resourcesDir: string): void }
+
+  // These workflows call electron-builder directly, so the package.json `pre*` hooks never run.
+  it.each(['release.yml', 'packaging.yml'])('%s fetches the model before packaging', (name) => {
+    const text = read('.github/workflows', name)
+    const fetched = text.indexOf('run: bun run vad')
+    expect(fetched).toBeGreaterThan(-1)
+    expect(fetched).toBeLessThan(text.indexOf('bunx electron-builder'))
+  })
+
+  it('fails a build whose packaged resources lack the model', () => {
+    const resources = mkdtempSync(join(tmpdir(), 'engclaw-resources-'))
+    expect(() => assertSpeechDetector(resources)).toThrow('bun run vad')
+    mkdirSync(join(resources, 'vad'))
+    writeFileSync(join(resources, 'vad', 'silero_vad_16k_op15.onnx'), 'model')
+    expect(() => assertSpeechDetector(resources)).not.toThrow()
   })
 })
