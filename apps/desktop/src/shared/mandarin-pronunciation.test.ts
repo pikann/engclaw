@@ -32,6 +32,39 @@ describe('Mandarin pronunciation guide', () => {
     expect(mandarinGuide(text).find((item) => item.han === '著')?.marked).toBe(expected)
   })
 
+  it.each([
+    ['睡著', '睡着', 'shuì zháo', 'shui4zhao2'],
+    ['看著', '看着', 'kàn zhe', 'kan4zhe5'],
+    ['跟著', '跟着', 'gēn zhe', 'gen1zhe5'],
+    ['著急', '着急', 'zháo jí', 'zhao2ji2'],
+    ['著火', '着火', 'zháo huǒ', 'zhao2huo3'],
+    ['著手', '着手', 'zhuó shǒu', 'zhuo2shou3'],
+    ['著重', '着重', 'zhuó zhòng', 'zhuo2zhong4'],
+    ['著作', '著作', 'zhù zuò', 'zhu4zuo4'],
+    ['著名', '著名', 'zhù míng', 'zhu4ming2'],
+  ])(
+    'looks up the contextual reading of %s and %s for the guide and speech',
+    (traditional, simplified, marked, numbered) => {
+      for (const text of [traditional, simplified]) {
+        const items = mandarinGuide(text)
+        expect(items.map((item) => item.han).join('')).toBe(text)
+        expect(items.map((item) => item.marked).join(' ')).toBe(marked)
+        expect(pinyinSpeech(items)).toBe(numbered)
+      }
+    },
+  )
+
+  it('resolves several readings in the same sentence', () => {
+    const text = '看著銀行的著名建築，他著急了。'
+    const items = mandarinGuide(text)
+    expect(items.filter((item) => item.han === '著').map((item) => item.marked)).toEqual([
+      'zhe',
+      'zhù',
+      'zháo',
+    ])
+    expect(items.find((item) => item.han === '行')?.marked).toBe('háng')
+  })
+
   it('keeps word breaks, punctuation pauses and ü when converting to speech', () => {
     const items = mandarinGuide('xī’ān，lüè')
     expect(items.map(({ marked, pauseBefore }) => [marked, pauseBefore])).toEqual([

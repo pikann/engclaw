@@ -69,6 +69,18 @@ describe('Mandarin assessment', () => {
     expect(result.differences.errors).toEqual([])
   })
 
+  it.each([
+    ['kan4zhe5', '看著'],
+    ['gen1zhe5', '跟著'],
+    ['shui4zhao2', '睡著'],
+    ['zhao2ji2', '著急'],
+    ['zhuo2shou3', '著手'],
+  ])('scores %s against the contextual reading of %s', (reference, transcript) => {
+    const result = mandarinResult(reference, transcript)
+    expect(result.score).toBe(100)
+    expect(result.differences.errors).toEqual([])
+  })
+
   it('returns context-sensitive pinyin without punctuation slots', () => {
     expect(mandarinReadings('你好，世界！')).toEqual([
       { word: '你', phones: ['nǐ'] },

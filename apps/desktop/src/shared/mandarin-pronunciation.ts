@@ -5,6 +5,19 @@ import { pinyin } from 'pinyin-pro'
 // replace shared characters such as 著 with 着 and discard a valid reading.
 const toSimplified = Converter({ from: 't', to: 'cn' })
 
+// Lexical zhù forms keep 著 in simplified Chinese too (see the bundled CC-CEDICT).
+// Other traditional uses take the simplified spelling 着, which lets pinyin-pro
+// distinguish aspectual zhe from contextual zháo and zhuó.
+const lexicalZhu = /著[作名书称述录]|[知卓原合名土专巨较昭拙炳王编要论译遗显]著|著/gu
+
+function normalizeReadingText(text: string): string {
+  return toSimplified(text).replace(/\p{Script=Han}+/gu, (phrase) =>
+    phrase === '著'
+      ? phrase
+      : phrase.replace(lexicalZhu, (match) => (match === '著' ? '着' : match)),
+  )
+}
+
 // Standard spellings grouped by initial. Keeping the combinations explicit avoids
 // treating an arbitrary Latin word as a Mandarin syllable.
 const spellings: Record<string, string> = {
@@ -112,7 +125,7 @@ export function mandarinGuide(text: string): MandarinSyllable[] {
   if (hasHanzi(text)) {
     let paused = false
     const original = Array.from(text)
-    const simplified = toSimplified(text)
+    const simplified = normalizeReadingText(text)
     const aligned = Array.from(simplified).length === original.length
     return pinyin(aligned ? simplified : text, { type: 'all', traditional: true }).flatMap(
       ({ origin, pinyin: reading, isZh }, index) => {
