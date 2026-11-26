@@ -71,10 +71,14 @@ function syllable(raw: string, han = '', pauseBefore = false): MandarinSyllable 
   const marks = [...letters.matchAll(tonePattern)]
   const number = /[0-5]$/u.exec(letters)?.[0]
   if (marks.length > 1 || (marks.length && number)) return null
-  const plain = letters
+  const spelling = letters
     .replace(tonePattern, '')
     .replace(/[0-5]$/u, '')
     .normalize('NFC')
+  // nue and lue are common ASCII inputs for nüe and lüe. Keep an explicit
+  // boundary (nu e) intact by accepting the alias only within this syllable.
+  const undottedUmlaut = /^[nl]ue$/u.test(spelling)
+  const plain = undottedUmlaut ? spelling.replace('u', 'ü') : spelling
   const parts = syllableParts.get(plain)
   if (!parts) return null
   let tone = Number(number ?? (han ? 5 : 0)) as Tone
@@ -91,7 +95,8 @@ function syllable(raw: string, han = '', pauseBefore = false): MandarinSyllable 
           'NFC',
         )
       : plain
-  if (marks.length && marked.normalize('NFD') !== letters) return null
+  const inputSpelling = undottedUmlaut ? marked.replace('ü', 'u') : marked
+  if (marks.length && inputSpelling.normalize('NFD') !== letters) return null
   return { han, marked, plain, ...parts, tone, pauseBefore }
 }
 
