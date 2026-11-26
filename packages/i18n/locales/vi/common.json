@@ -481,6 +481,7 @@
       "readLabel": "Văn bản cần đọc",
       "speakLabel": "Chúng tôi nghe được",
       "check": "Kiểm tra phát âm của tôi",
+      "editText": "Sửa nội dung",
       "reviewTitle": "Đây có phải điều bạn đã nói?",
       "reviewHint": "Sửa lỗi trong văn bản nếu có, rồi nhấn “Kiểm tra phát âm của tôi”.",
       "reviewHintRead": "Hài lòng với bản ghi âm? Nhấn “Kiểm tra phát âm của tôi”.",

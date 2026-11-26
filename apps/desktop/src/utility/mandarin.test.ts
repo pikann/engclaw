@@ -63,6 +63,12 @@ describe('Mandarin assessment', () => {
     expect(partial.differences.errors).toMatchObject([{ expected: 'tiáo', actual: 'bāo' }])
     expect(mandarinResult('miàntiáo', '').score).toBe(0)
   })
+  it('does not change the reading of a shared Han character before scoring', () => {
+    const result = mandarinResult('xian3zhu4', '显著')
+    expect(result.score).toBe(100)
+    expect(result.differences.errors).toEqual([])
+  })
+
   it('returns context-sensitive pinyin without punctuation slots', () => {
     expect(mandarinReadings('你好，世界！')).toEqual([
       { word: '你', phones: ['nǐ'] },

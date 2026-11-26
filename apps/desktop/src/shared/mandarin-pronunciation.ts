@@ -1,7 +1,9 @@
 import { Converter } from 'opencc-js/t2cn'
 import { pinyin } from 'pinyin-pro'
 
-const toSimplified = Converter({ from: 'tw', to: 'cn' })
+// Use standard traditional forms for phrase matching. Taiwan variant normalization can
+// replace shared characters such as 著 with 着 and discard a valid reading.
+const toSimplified = Converter({ from: 't', to: 'cn' })
 
 // Standard spellings grouped by initial. Keeping the combinations explicit avoids
 // treating an arbitrary Latin word as a Mandarin syllable.

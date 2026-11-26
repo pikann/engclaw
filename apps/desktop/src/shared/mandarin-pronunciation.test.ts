@@ -18,6 +18,20 @@ describe('Mandarin pronunciation guide', () => {
     ])
   })
 
+  it.each([
+    ['显著', 'zhù'],
+    ['顯著', 'zhù'],
+    ['土著', 'zhù'],
+    ['著稱', 'zhù'],
+    ['論著', 'zhù'],
+    ['原著', 'zhù'],
+    ['著書', 'zhù'],
+    ['編著', 'zhù'],
+    ['著', 'zhù'],
+  ])('keeps the lexical reading of 著 in %s', (text, expected) => {
+    expect(mandarinGuide(text).find((item) => item.han === '著')?.marked).toBe(expected)
+  })
+
   it('keeps word breaks, punctuation pauses and ü when converting to speech', () => {
     const items = mandarinGuide('xī’ān，lüè')
     expect(items.map(({ marked, pauseBefore }) => [marked, pauseBefore])).toEqual([

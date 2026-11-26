@@ -7,6 +7,7 @@ import { DownloadModelsButton, useModelDownload } from '@/components/download-mo
 import { playPcm, playSlowPcm } from '@/lib/audio'
 
 type State = 'idle' | 'loading' | 'playing'
+type SampleId = 'hear-reference' | 'hear-reference-alternate' | 'hear-reference-segmented'
 
 interface Sample {
   text: string
@@ -39,40 +40,53 @@ export function HearReference({
   const { t } = useTranslation()
   const [state, setState] = useState<State>('idle')
   const [rate, setRate] = useState<number>(defaultRate)
-  const [active, setActive] = useState(0)
+  const [active, setActive] = useState<SampleId>('hear-reference')
   const [pinyinFallback, setPinyinFallback] = useState(false)
   const [error, setError] = useState<'modelMissing' | 'failed' | null>(null)
   const playing = useRef<{ stop: () => void } | null>(null)
 
+  const lastSample = useRef<{ id: SampleId; text: string; pinyin: boolean } | null>(null)
   const token = useRef(0)
   const halt = useCallback(() => {
     token.current++
     playing.current?.stop()
     playing.current = null
   }, [])
-  useEffect(() => {
+  const reset = useCallback(() => {
     halt()
+    lastSample.current = null
     setState('idle')
     setError(null)
     setPinyinFallback(false)
-    return halt
-  }, [
-    text,
-    language,
-    pinyin,
-    alternate?.text,
-    alternate?.pinyin,
-    segmented?.text,
-    disabled,
-    rate,
-    halt,
-  ])
+  }, [halt])
 
-  const onClick = async (sample: Sample, index: number): Promise<void> => {
-    if (state === 'playing' && index === active) return playing.current?.stop()
+  useEffect(() => {
+    reset()
+    return halt
+  }, [language, disabled, rate, halt, reset])
+
+  const alternateText = alternate?.text
+  const alternatePinyin = alternate?.pinyin
+  const segmentedText = segmented?.text
+  const segmentedPinyin = segmented?.pinyin
+  useEffect(() => {
+    const previous = lastSample.current
+    if (!previous) return
+    const inputs = {
+      'hear-reference': [text, pinyin],
+      'hear-reference-alternate': [alternateText, alternatePinyin],
+      'hear-reference-segmented': [segmentedText, segmentedPinyin],
+    } as const
+    const [currentText, currentPinyin] = inputs[previous.id]
+    if (previous.text !== currentText || previous.pinyin !== !!currentPinyin) reset()
+  }, [text, pinyin, alternateText, alternatePinyin, segmentedText, segmentedPinyin, reset])
+
+  const onClick = async (sample: Sample, id: SampleId): Promise<void> => {
+    if (state === 'playing' && id === active) return playing.current?.stop()
     halt()
     const mine = token.current
-    setActive(index)
+    lastSample.current = { id, text: sample.text, pinyin: !!sample.pinyin }
+    setActive(id)
     setError(null)
     setPinyinFallback(false)
     setState('loading')
@@ -107,27 +121,27 @@ export function HearReference({
   }
 
   const main = { text, pinyin, label }
-  const download = useModelDownload(() => void onClick(main, 0))
-  const samples = [
+  const download = useModelDownload(() => void onClick(main, 'hear-reference'))
+  const samples: { sample: Sample; id: SampleId }[] = [
     { sample: main, id: 'hear-reference' },
-    ...(alternate ? [{ sample: alternate, id: 'hear-reference-alternate' }] : []),
-    ...(segmented ? [{ sample: segmented, id: 'hear-reference-segmented' }] : []),
+    ...(alternate ? [{ sample: alternate, id: 'hear-reference-alternate' as const }] : []),
+    ...(segmented ? [{ sample: segmented, id: 'hear-reference-segmented' as const }] : []),
   ]
 
   return (
     <div className="space-y-1">
       <div className="flex flex-wrap gap-2">
-        {samples.map(({ sample, id }, index) => {
-          const status = index === active ? state : 'idle'
+        {samples.map(({ sample, id }) => {
+          const status = id === active ? state : 'idle'
           return (
             <Button
-              key={index}
+              key={id}
               variant={variant}
               size="sm"
               data-testid={id}
               data-playback={status}
               disabled={disabled || state === 'loading' || !sample.text.trim()}
-              onClick={() => void onClick(sample, index)}
+              onClick={() => void onClick(sample, id)}
             >
               <Volume2 />
               {status === 'loading'

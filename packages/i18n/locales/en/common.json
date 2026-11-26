@@ -481,6 +481,7 @@
       "readLabel": "Text to read",
       "speakLabel": "We heard",
       "check": "Check my pronunciation",
+      "editText": "Edit text",
       "reviewTitle": "Is this what you said?",
       "reviewHint": "Fix any mistakes in the text, then press “Check my pronunciation”.",
       "reviewHintRead": "Happy with your recording? Press “Check my pronunciation”.",

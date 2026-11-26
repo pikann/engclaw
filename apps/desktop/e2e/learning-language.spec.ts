@@ -177,6 +177,8 @@ test('Mandarin pinyin practice plays samples and scores microphone audio', async
     await expect(assessment.getByTestId('result-score')).toHaveText('100')
     await expect(assessment).toContainText('面条')
     await expect(guide).toBeVisible()
+    await assessment.getByRole('button', { name: /Edit text|Sửa nội dung/ }).click()
+    await expect(page.getByTestId('practice-text')).toHaveValue('miàntiáo')
   } finally {
     await app.close()
   }
@@ -259,6 +261,44 @@ test('English read-aloud shows IPA, Vietnamese sound tips and a linking example'
     await expect(guide.getByTestId('hear-reference-alternate')).toHaveText(/on/)
     await guide.getByRole('button', { name: /1×/ }).click()
     await expect(guide.getByRole('button', { name: /1×/ })).toHaveAttribute('aria-pressed', 'true')
+  } finally {
+    await app.close()
+  }
+})
+
+test('English phrase playback continues when per-word samples become available', async () => {
+  const { app, page } = await launchApp()
+  try {
+    await stubSpeech(app, { tts: [{ reply: { ok: true, seconds: 4 } }] })
+    await app.evaluate(({ ipcMain }) => {
+      type TestMain = typeof globalThis & { releasePronunciation?: () => void }
+      const pronunciationReady = new Promise<void>((resolve) => {
+        ;(globalThis as TestMain).releasePronunciation = resolve
+      })
+      ipcMain.removeHandler('inference:phonemize')
+      ipcMain.handle('inference:phonemize', async () => {
+        await pronunciationReady
+        return {
+          ok: true,
+          value: { language: 'en', words: [{ word: 'hold', phones: ['h', 'oʊ', 'l', 'd'] }] },
+        }
+      })
+    })
+    await page.getByTestId('nav-practice').click()
+    await page.getByTestId('practice-mode-sentence').click()
+    await page.getByTestId('practice-text').fill('Hold on')
+    const guide = page.getByTestId('english-guide')
+    const phrase = guide.getByTestId('hear-reference')
+    const word = guide.getByTestId('hear-reference-alternate')
+    await phrase.click()
+    await expect(phrase).toHaveAttribute('data-playback', 'playing')
+    await expect(word).toHaveCount(0)
+    await app.evaluate(() => {
+      const main = globalThis as typeof globalThis & { releasePronunciation?: () => void }
+      main.releasePronunciation?.()
+    })
+    await expect(word).toBeVisible()
+    await expect(phrase).toHaveAttribute('data-playback', 'playing')
   } finally {
     await app.close()
   }
