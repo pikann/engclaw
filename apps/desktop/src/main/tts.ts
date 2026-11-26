@@ -35,7 +35,7 @@ export function registerTtsHandlers(
 ): void {
   handle(
     IPC.ttsSpeak,
-    async ({ text, language = learningLanguage(), pinyin }): Promise<SpeakResponse> => {
+    async ({ text, language = learningLanguage(), pinyin, segmented }): Promise<SpeakResponse> => {
       const started = performance.now()
       const kokoro = language === 'zh' ? null : await kokoroLocation(models)
       if (!kokoro && language !== 'zh')
@@ -48,7 +48,7 @@ export function registerTtsHandlers(
         const nativeText =
           language === 'zh' && process.platform === 'darwin'
             ? pinyin
-              ? dictionary?.speechText(text)
+              ? dictionary?.speechText(text, segmented)
               : text
             : undefined
         const r = await client.call<Spoke>('speak', { text, kokoro, language, pinyin, nativeText })

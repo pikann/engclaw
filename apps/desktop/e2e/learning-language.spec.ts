@@ -150,8 +150,8 @@ test('Mandarin pinyin practice plays samples and scores microphone audio', async
 
     await page.getByTestId('practice-text').fill('yu3yan1, yong')
     await expect(vietnamesePhrase).toHaveText('“i tròn môi” → “iên” | “i-ung”')
-    await page.getByTestId('practice-text').fill('yu3yan1')
-    await expect(guide.getByTestId('mandarin-reference-text')).toContainText('yǔ yān')
+    await page.getByTestId('practice-text').fill('qiong1')
+    await expect(guide.getByTestId('mandarin-reference-text')).toContainText('qiōng')
     await sample.click()
     await expect(guide).toContainText(/uses synthesized pinyin|dùng giọng pinyin tổng hợp/)
     await page.getByTestId('practice-text').fill('yu3yan2')

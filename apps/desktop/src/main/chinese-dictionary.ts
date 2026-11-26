@@ -33,7 +33,7 @@ export class ChineseDictionary {
     return this.entries
   }
   /** Match the complete numbered reading, keeping homophones with different tones apart. */
-  speechText(numbered: string): string | undefined {
+  speechText(numbered: string, segmented = false): string | undefined {
     if (!this.speechSpellings) {
       this.speechSpellings = new Map()
       this.spokenVariants = new Map()
@@ -86,9 +86,36 @@ export class ChineseDictionary {
         }
       }
     }
-    const parts = numbered.split(',').map((part) => {
-      const key = part.trim()
-      return this.speechSpellings?.get(key) ?? this.spokenVariants?.get(key)
+    const lookup = (key: string) => this.speechSpellings?.get(key) ?? this.spokenVariants?.get(key)
+    const syllables = numbered.split(',').map((part) => part.trim())
+    if (segmented && syllables.length > 1) {
+      // Keep the characters of the whole word when they still have the requested
+      // reading in isolation. Sandhi may require a different sample for a single beat.
+      const whole = lookup(syllables.join(''))
+      const characters = whole ? Array.from(whole) : []
+      if (
+        characters.length === syllables.length &&
+        characters.every(
+          (char, index) => pinyin(char, { toneType: 'num', v: true }) === syllables[index],
+        )
+      ) {
+        return characters.join('，')
+      }
+    }
+    const parts = syllables.map((part) => {
+      const exact = lookup(part)
+      if (exact) return exact
+
+      // Keep the same voice as the individual samples for an unlisted phrase,
+      // but only if the joined characters retain every requested syllable and tone.
+      const chunks = part.match(/[a-z]+[1-5]/gu) ?? []
+      if (chunks.length < 2 || chunks.join('') !== part) return undefined
+      const samples = chunks.map((chunk) => this.speechSpellings?.get(chunk))
+      if (samples.some((sample) => !sample || Array.from(sample).length !== 1)) return undefined
+      const joined = samples.join('')
+      return pinyin(joined, { toneType: 'num', v: true, type: 'array' }).join('') === part
+        ? joined
+        : undefined
     })
     return parts.every(Boolean) ? parts.join('，') : undefined
   }

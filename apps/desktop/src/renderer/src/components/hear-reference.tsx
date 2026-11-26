@@ -95,6 +95,7 @@ export function HearReference({
         text: sample.text,
         language,
         ...(sample.pinyin ? { pinyin: true } : {}),
+        ...(id === 'hear-reference-segmented' ? { segmented: true } : {}),
       })
       if (mine !== token.current) return
       if (!res.ok) {

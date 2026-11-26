@@ -120,6 +120,7 @@ export const SpeakRequest = z
     text: z.string().min(1).max(3000),
     language: LearningLanguage.optional(),
     pinyin: z.boolean().optional(),
+    segmented: z.boolean().optional(),
   })
   .strict()
   .refine(({ pinyin, text }) => pinyin || text.length <= 1000, { path: ['text'] })
