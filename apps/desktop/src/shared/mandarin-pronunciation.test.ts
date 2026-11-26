@@ -77,6 +77,24 @@ describe('Mandarin pronunciation guide', () => {
     expect(pinyinSpeech(items)).toBe('xi1an1, lve4')
   })
 
+  it.each([
+    ['nue4', 'nüè', 'nve4'],
+    ['nuè', 'nüè', 'nve4'],
+    ['nve4', 'nüè', 'nve4'],
+    ['nu:e4', 'nüè', 'nve4'],
+    ['lue4', 'lüè', 'lve4'],
+    ['luè', 'lüè', 'lve4'],
+  ])('accepts the keyboard spelling %s as a single üe syllable', (text, marked, numbered) => {
+    const items = mandarinGuide(text)
+    expect(items).toHaveLength(1)
+    expect(items[0]?.marked).toBe(marked)
+    expect(pinyinSpeech(items)).toBe(numbered)
+  })
+
+  it('keeps an explicit boundary between nu and e', () => {
+    expect(mandarinGuide('nu e4').map((item) => item.marked)).toEqual(['nu', 'è'])
+  })
+
   it('distinguishes missing tone marks and explicit neutral tone', () => {
     expect(mandarinGuide('ma ma5 ma0').map(({ tone }) => tone)).toEqual([0, 5, 5])
     expect(mandarinGuide('hello')).toEqual([])
