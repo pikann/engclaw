@@ -61,6 +61,18 @@ async function speakWithTingting(text: string): Promise<Float32Array> {
   }
 }
 
+const iongInitials: Record<string, string> = { j: 'tS;', q: 'tS;h', x: 'S;' }
+const espeakTones: Record<string, string> = { 1: '55', 2: '35', 3: '214', 4: '51', 5: '11' }
+
+export function espeakPinyinInput(text: string): string {
+  // The bundled Mandarin rules send j/q/x + iong to the English voice. Spell out
+  // those syllables in eSpeak's Mandarin phoneme alphabet, including the requested tone.
+  return text.replace(
+    /(?<![a-z])([jqx])iong([1-5])/gu,
+    (_, initial: string, tone: string) => `[[${iongInitials[initial]}ju${espeakTones[tone]}N]]`,
+  )
+}
+
 /** Use macOS Mandarin speech when a matching Chinese reading is available, with an offline fallback. */
 export async function speakMandarin(
   text: string,
@@ -93,6 +105,7 @@ export async function speakMandarin(
     )
     child.stdin?.on('error', reject)
     // Whole phrases arrive joined; explicit commas mark pauses in the segmented sample.
-    child.stdin?.end(text.replace(/[\r\n]+/g, ' '))
+    const input = text.replace(/[\r\n]+/g, ' ')
+    child.stdin?.end(pinyin ? espeakPinyinInput(input) : input)
   })
 }

@@ -1,11 +1,13 @@
+import { resources } from '@engclaw/i18n'
 import { pinyin } from 'pinyin-pro'
 import { describe, expect, it } from 'vitest'
 import { MANDARIN_FINALS, mandarinFinal } from './mandarin-final'
-import { finalTips, mandarinGuide, vietnameseFinals } from './mandarin-pronunciation'
+import { mandarinGuide, vietnameseFinals } from './mandarin-pronunciation'
 
 describe('Standalone Mandarin finals', () => {
   it('provides a listenable example and Vietnamese guidance for every supported final', () => {
-    expect(Object.keys(finalTips).sort()).toEqual([...MANDARIN_FINALS].sort())
+    for (const { common } of Object.values(resources))
+      expect(Object.keys(common.pronunciation.finals).sort()).toEqual([...MANDARIN_FINALS].sort())
     expect(Object.keys(vietnameseFinals).sort()).toEqual([...MANDARIN_FINALS].sort())
     for (const final of MANDARIN_FINALS) {
       const item = mandarinFinal(final)!

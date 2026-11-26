@@ -1,3 +1,4 @@
+import { AppSettingsPatch } from '@engclaw/ipc-contract'
 import Database from 'better-sqlite3'
 import { mkdtempSync, existsSync, readdirSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -122,6 +123,7 @@ describe('store', () => {
   it('settings default, persist and patch', () => {
     expect(store.settings.get()).toEqual({
       learningLanguage: 'en',
+      pronunciationGuideLanguage: 'auto',
       silenceAutoStop: true,
       checkForUpdates: true,
       theme: 'system',
@@ -131,11 +133,16 @@ describe('store', () => {
       captionsVisible: true,
       starPrompt: { done: false, moments: 0, shown: 0, lastShownAt: 0 },
     })
-    store.settings.update({ silenceAutoStop: false, captionsVisible: false })
+    store.settings.update({
+      silenceAutoStop: false,
+      captionsVisible: false,
+      pronunciationGuideLanguage: 'vi',
+    })
     store.db.close()
     store = openStore(dbPath())
     expect(store.settings.get()).toEqual({
       learningLanguage: 'en',
+      pronunciationGuideLanguage: 'vi',
       silenceAutoStop: false,
       checkForUpdates: true,
       theme: 'system',
@@ -144,6 +151,19 @@ describe('store', () => {
       wordImages: true,
       captionsVisible: false,
       starPrompt: { done: false, moments: 0, shown: 0, lastShownAt: 0 },
+    })
+  })
+
+  it('keeps other settings when an IPC patch changes one language preference', () => {
+    store.settings.update({ learningLanguage: 'zh', theme: 'dark' })
+    const guidePatch = AppSettingsPatch.parse({ pronunciationGuideLanguage: 'vi' })
+    expect(guidePatch).toEqual({ pronunciationGuideLanguage: 'vi' })
+    store.settings.update(guidePatch)
+    store.settings.update(AppSettingsPatch.parse({ learningLanguage: 'en' }))
+    expect(store.settings.get()).toMatchObject({
+      learningLanguage: 'en',
+      pronunciationGuideLanguage: 'vi',
+      theme: 'dark',
     })
   })
 

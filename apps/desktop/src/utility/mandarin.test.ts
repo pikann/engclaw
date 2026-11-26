@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { chineseCharacters, mandarinReadings, mandarinResult } from './mandarin'
-import { espeakPcm } from './mandarin-speech'
+import { espeakPcm, espeakPinyinInput } from './mandarin-speech'
 import { encodeWav } from '../main/store/wav'
 
 describe('Mandarin assessment', () => {
@@ -93,6 +93,13 @@ describe('Mandarin assessment', () => {
 })
 
 describe('Mandarin speech audio', () => {
+  it('keeps iong syllables in the Mandarin fallback and preserves their tones', () => {
+    expect(espeakPinyinInput('qiong1, xiong2jiong3')).toBe(
+      '[[tS;hju55N]], [[S;ju35N]][[tS;ju214N]]',
+    )
+    expect(espeakPinyinInput('mian4tiao2')).toBe('mian4tiao2')
+  })
+
   it('decodes and resamples a WAV, including espeak streaming length headers', () => {
     const wav = encodeWav(new Float32Array(22050).fill(0.25), 22050)
     wav.writeUInt32LE(0x7fffffff, 40)

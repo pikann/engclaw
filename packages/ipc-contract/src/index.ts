@@ -1001,9 +1001,13 @@ export const StarPromptState = z.object({
 })
 export type StarPromptState = z.infer<typeof StarPromptState>
 
+export const PronunciationGuideLanguage = z.enum(['auto', 'en', 'vi'])
+export type PronunciationGuideLanguage = z.infer<typeof PronunciationGuideLanguage>
+
 export const AppSettings = z.object({
   /** Target language for learning, separate from the interface locale. */
   learningLanguage: LearningLanguage.default('en'),
+  pronunciationGuideLanguage: PronunciationGuideLanguage.default('auto'),
   /** Stop recording after ~2 s of silence once speech was heard. */
   silenceAutoStop: z.boolean().default(true),
   /** Check GitHub releases for a newer version on launch. */
@@ -1022,7 +1026,19 @@ export const AppSettings = z.object({
   starPrompt: StarPromptState.default({ done: false, moments: 0, shown: 0, lastShownAt: 0 }),
 })
 export type AppSettings = z.infer<typeof AppSettings>
-export const AppSettingsPatch = AppSettings.partial().strict()
+// Defaults apply when loading a complete settings record. A patch must only
+// write the fields the caller supplied, so one preference cannot reset another.
+const appSettingsPatchShape = Object.fromEntries(
+  Object.entries(AppSettings.shape).map(([key, schema]) => [
+    key,
+    schema.removeDefault().optional(),
+  ]),
+) as {
+  [Key in keyof typeof AppSettings.shape]: z.ZodOptional<
+    ReturnType<(typeof AppSettings.shape)[Key]['removeDefault']>
+  >
+}
+export const AppSettingsPatch = z.strictObject(appSettingsPatchShape)
 
 export const IPC = {
   ping: 'app:ping',

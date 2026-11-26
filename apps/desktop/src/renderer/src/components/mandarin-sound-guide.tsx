@@ -2,16 +2,11 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ArticulationView } from '@/components/articulation-view'
 import { HearReference } from '@/components/hear-reference'
+import { usePronunciationGuide } from '@/lib/learning-language'
 import { Button } from '@/components/ui/button'
 import type { MandarinFinal } from '@/lib/mandarin-final'
 import type { MandarinInitial } from '@/lib/mandarin-initial'
-import { finalTips, initialTips, vietnameseFinals } from '@/lib/mandarin-pronunciation'
-
-const palatalSteps = [
-  'Đặt đầu lưỡi sát mặt trong răng dưới.',
-  'Nâng mặt trước của lưỡi lên sát vòm cứng để chặn hơi trong chốc lát.',
-  'Hạ mặt lưỡi vừa đủ để hơi thoát qua khe hẹp, rồi chuyển sang i ngay. Bật hơi nhẹ.',
-]
+import { vietnameseFinals } from '@/lib/mandarin-pronunciation'
 
 export function MandarinSoundGuide({
   item,
@@ -21,6 +16,7 @@ export function MandarinSoundGuide({
   disabled: boolean
 }) {
   const { t } = useTranslation()
+  const { language, t: guideT } = usePronunciationGuide()
   const [playId, setPlayId] = useState(0)
   const replay = () => setPlayId((id) => id + 1)
   const final = 'final' in item
@@ -35,17 +31,22 @@ export function MandarinSoundGuide({
           ? t('mandarinGuide.finalTitle', { final: item.spelling })
           : t('mandarinGuide.initialTitle', { initial: item.initial })}
       </h3>
-      <div className="space-y-2 text-sm" lang="vi">
-        {final && (
+      <div className="space-y-2 text-sm" lang={language}>
+        {final && language === 'vi' && (
           <p>
-            <strong>Nghe gần giống tiếng Việt</strong> · “{vietnameseFinals[item.final]}”
+            <strong>{guideT('pronunciation.approximation')}</strong> · “
+            {vietnameseFinals[item.final]}”
           </p>
         )}
-        <p>{final ? finalTips[item.final] : initialTips[item.initial]}</p>
+        <p>
+          {guideT(
+            final ? `pronunciation.finals.${item.final}` : `pronunciation.initials.${item.initial}`,
+          )}
+        </p>
         {!final && item.initial === 'j' && (
           <ol className="list-decimal space-y-1 pl-5">
-            {palatalSteps.map((step) => (
-              <li key={step}>{step}</li>
+            {[0, 1, 2].map((step) => (
+              <li key={step}>{guideT(`pronunciation.jSteps.${step}`)}</li>
             ))}
           </ol>
         )}

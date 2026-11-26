@@ -6,6 +6,17 @@ import { chooseLearningLanguage, expectLearningLanguage } from './support/learni
 import { callLog, scored, stubSpeech } from './support/speech-stubs'
 import { stubPlayer, VIDEO } from './support/shadowing'
 
+async function setGuideLanguage(
+  page: import('@playwright/test').Page,
+  language: 'English' | 'Tiếng Việt',
+) {
+  await page.getByTestId('nav-settings').click()
+  const selector = page.getByTestId('pronunciation-guide-language')
+  await selector.click()
+  await page.getByRole('option', { name: language, exact: true }).click()
+  await expect(selector).toHaveText(language)
+}
+
 // Real persisted settings and bundled dictionary; no speech-model downloads or YouTube access.
 test('learning language changes dictionary and practice, and survives a relaunch', async () => {
   const first = await launchApp()
@@ -94,6 +105,7 @@ test('Mandarin pinyin practice plays samples and scores microphone audio', async
   const { page, app } = await launchApp({ audio: 'speech' })
   try {
     await chooseLearningLanguage(page, 'zh')
+    await setGuideLanguage(page, 'Tiếng Việt')
     await page.getByTestId('nav-practice').click()
     await page.getByTestId('practice-mode-sentence').click()
     await page.getByTestId('practice-text').fill('miàntiáo')
@@ -188,6 +200,7 @@ test('Mandarin standalone j animates the tongue and records the example syllable
   const { app, page } = await launchApp({ audio: 'speech' })
   try {
     await chooseLearningLanguage(page, 'zh')
+    await setGuideLanguage(page, 'Tiếng Việt')
     await page.getByTestId('nav-practice').click()
     await page.getByTestId('practice-mode-sentence').click()
     await page.getByTestId('practice-text').fill('j')
@@ -231,6 +244,7 @@ test('Mandarin standalone iang gives guidance and plays its sample', async () =>
   const { app, page } = await launchApp()
   try {
     await chooseLearningLanguage(page, 'zh')
+    await setGuideLanguage(page, 'Tiếng Việt')
     await page.getByTestId('nav-practice').click()
     await page.getByTestId('practice-mode-sentence').click()
     await page.getByTestId('practice-text').fill('iang')
@@ -254,8 +268,8 @@ test('English read-aloud shows IPA, Vietnamese sound tips and a linking example'
     await page.getByTestId('practice-mode-sentence').click()
     await page.getByTestId('practice-text').fill('Hold on')
     const guide = page.getByTestId('english-guide')
-    await expect(guide).toContainText('Nghe gần giống tiếng Việt')
-    await expect(guide).toContainText('Đọc liền hold → on')
+    await expect(guide).not.toContainText('Nghe gần giống tiếng Việt')
+    await expect(guide).toContainText('Link hold → on')
     await expect(guide.getByTestId('hear-reference')).toBeEnabled()
     await guide.getByRole('button', { name: 'on', exact: true }).click()
     await expect(guide.getByTestId('hear-reference-alternate')).toHaveText(/on/)
@@ -263,6 +277,39 @@ test('English read-aloud shows IPA, Vietnamese sound tips and a linking example'
     await expect(guide.getByRole('button', { name: /1×/ })).toHaveAttribute('aria-pressed', 'true')
   } finally {
     await app.close()
+  }
+})
+
+test('Pronunciation guide language changes independently and survives a relaunch', async () => {
+  const { app, page, userData } = await launchApp()
+  try {
+    await chooseLearningLanguage(page, 'zh')
+    await page.getByTestId('nav-practice').click()
+    await page.getByTestId('practice-mode-sentence').click()
+    await page.getByTestId('practice-text').fill('qiong1')
+    const guide = page.getByTestId('mandarin-guide')
+    await expect(guide).toContainText('Keep your pitch high and level')
+    await expect(guide.getByTestId('mandarin-vietnamese-phrase')).toHaveCount(0)
+    await guide.getByTestId('hear-reference').click()
+    await expect(guide.getByTestId('hear-reference')).toHaveAttribute('data-playback', 'playing')
+    await setGuideLanguage(page, 'Tiếng Việt')
+    await expectLearningLanguage(page, 'zh')
+  } finally {
+    await app.close()
+  }
+
+  const reopened = await launchApp({ userData })
+  try {
+    await expectLearningLanguage(reopened.page, 'zh')
+    await reopened.page.getByTestId('nav-practice').click()
+    await reopened.page.getByTestId('practice-mode-sentence').click()
+    await reopened.page.getByTestId('practice-text').fill('qiong1')
+    const guide = reopened.page.getByTestId('mandarin-guide')
+    await expect(guide.getByTestId('mandarin-vietnamese-phrase')).toBeVisible()
+    await expect(guide).toContainText('Giữ giọng cao và ngang')
+    await expect(guide.getByTestId('hear-reference')).toHaveText('Hear the whole phrase')
+  } finally {
+    await reopened.app.close()
   }
 })
 

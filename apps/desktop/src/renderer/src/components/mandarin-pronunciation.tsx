@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { HearReference } from '@/components/hear-reference'
+import { usePronunciationGuide } from '@/lib/learning-language'
 import { Button } from '@/components/ui/button'
 import {
-  finalTip,
-  initialTips,
+  finalTipKey,
   pinyinSpeech,
-  toneTips,
+  toneArrows,
   vietnameseApproximation,
   type MandarinSyllable,
 } from '@/lib/mandarin-pronunciation'
@@ -15,19 +15,13 @@ function readTogether(items: MandarinSyllable[], index: number): string | null {
   const current = items[index]
   const next = items[index + 1]
   if (!current || !next) return null
-  if (next.pauseBefore) return 'Ngắt nhẹ ở dấu câu rồi sang âm tiếp theo.'
-  if (current.tone === 3 && next.tone === 3)
-    return 'Khi hai thanh 3 đi liền thành một cụm, âm đầu thường lên như thanh 2. Với chuỗi dài hơn, nghe mẫu để bắt nhịp theo cụm.'
-  if (current.tone === 4 && next.tone === 2) {
-    const transition = current.final.endsWith('n')
-      ? ' Khép bằng n rồi bật sang âm sau, không ngắt hơi.'
-      : ' Chuyển sang âm sau ngay, giữ hai nhịp liền.'
-    return 'Hạ giọng dứt khoát ở âm đầu rồi nâng giọng ở âm sau.' + transition
-  }
-  if (next.tone === 5) return 'Đọc âm sau nhẹ và ngắn, bám sát nhịp âm trước.'
-  if (current.final.endsWith('n'))
-    return 'Khép âm đầu bằng n rồi chuyển thẳng sang âm sau. Giữ n ở cuối âm đầu và đọc hai nhịp liền.'
-  return 'Giữ nguyên phần cuối của âm đầu, rồi chuyển ngay sang âm sau trong cùng một hơi.'
+  if (next.pauseBefore) return 'pronunciation.pause'
+  if (current.tone === 3 && next.tone === 3) return 'pronunciation.twoThirds'
+  if (current.tone === 4 && next.tone === 2)
+    return current.final.endsWith('n') ? 'pronunciation.fallRiseN' : 'pronunciation.fallRise'
+  if (next.tone === 5) return 'pronunciation.neutralNext'
+  if (current.final.endsWith('n')) return 'pronunciation.linkN'
+  return 'pronunciation.linkSyllables'
 }
 
 export function MandarinPronunciation({
@@ -42,6 +36,7 @@ export function MandarinPronunciation({
   disabled: boolean
 }) {
   const { t } = useTranslation()
+  const { language, t: guideT } = usePronunciationGuide()
   const [selected, setSelected] = useState(0)
   const item = items[selected]!
   const next = items[selected + 1]
@@ -55,29 +50,33 @@ export function MandarinPronunciation({
     >
       <div className="space-y-1">
         <h3 className="text-base font-semibold">{t('mandarinGuide.title')}</h3>
-        <p className="text-muted-foreground text-xs">{t('mandarinGuide.hint')}</p>
-      </div>
-      <div className="bg-muted/50 space-y-1 rounded-lg p-3 text-sm" lang="vi">
-        <p className="font-semibold">Nghe gần giống tiếng Việt</p>
-        <p
-          className="text-base font-medium leading-relaxed"
-          data-testid="mandarin-vietnamese-phrase"
-        >
-          {items.map((syllable, index) => (
-            <span key={index}>
-              {index > 0 && (syllable.pauseBefore ? ' | ' : ' → ')}“
-              {vietnameseApproximation(syllable)}”
-            </span>
-          ))}
-        </p>
-        <p className="text-muted-foreground text-xs">
-          {items.length === 1
-            ? 'Đọc trong một nhịp. Dùng mẫu nghe để bắt chước thanh điệu.'
-            : items.some((syllable, index) => index > 0 && syllable.pauseBefore)
-              ? 'Đọc liền theo mũi tên và ngắt nhẹ ở dấu |.'
-              : 'Đọc liền theo mũi tên. Dấu tiếng Việt chỉ gợi hướng lên xuống của giọng.'}
+        <p className="text-muted-foreground text-xs" lang={language}>
+          {guideT('mandarinGuide.hint')}
         </p>
       </div>
+      {language === 'vi' && (
+        <div className="bg-muted/50 space-y-1 rounded-lg p-3 text-sm" lang="vi">
+          <p className="font-semibold">{guideT('pronunciation.approximation')}</p>
+          <p
+            className="text-base font-medium leading-relaxed"
+            data-testid="mandarin-vietnamese-phrase"
+          >
+            {items.map((syllable, index) => (
+              <span key={index}>
+                {index > 0 && (syllable.pauseBefore ? ' | ' : ' → ')}“
+                {vietnameseApproximation(syllable)}”
+              </span>
+            ))}
+          </p>
+          <p className="text-muted-foreground text-xs">
+            {items.length === 1
+              ? guideT('pronunciation.oneBeat')
+              : items.some((syllable, index) => index > 0 && syllable.pauseBefore)
+                ? guideT('pronunciation.approximationPause')
+                : guideT('pronunciation.approximationTone')}
+          </p>
+        </div>
+      )}
       <div className="flex max-h-40 flex-wrap gap-2 overflow-y-auto p-1">
         {items.map((syllable, index) => (
           <Button
@@ -89,32 +88,42 @@ export function MandarinPronunciation({
           >
             {syllable.han && <span lang="zh-CN">{syllable.han}</span>}
             <span lang="zh-Latn-pinyin">{syllable.marked}</span>
-            <span aria-hidden="true">{toneTips[syllable.tone][0]}</span>
+            <span aria-hidden="true">{toneArrows[syllable.tone]}</span>
           </Button>
         ))}
       </div>
-      <dl className="bg-muted/50 space-y-2 rounded-lg p-3 text-sm" lang="vi" aria-live="polite">
+      <dl
+        className="bg-muted/50 space-y-2 rounded-lg p-3 text-sm"
+        lang={language}
+        aria-live="polite"
+      >
         <div>
-          <dt className="font-medium">Âm đầu · {item.initial || '∅'}</dt>
-          <dd>{initialTips[item.initial]}</dd>
+          <dt className="font-medium">
+            {guideT('pronunciation.initial')} · {item.initial || '∅'}
+          </dt>
+          <dd>{guideT(`pronunciation.initials.${item.initial || 'none'}`)}</dd>
         </div>
         <div>
-          <dt className="font-medium">Vần · {item.final}</dt>
-          <dd>{finalTip(item)}</dd>
+          <dt className="font-medium">
+            {guideT('pronunciation.final')} · {item.final}
+          </dt>
+          <dd>{guideT(finalTipKey(item), { defaultValue: guideT('pronunciation.fallback') })}</dd>
         </div>
         <div>
-          <dt className="font-medium">Cao độ · {toneTips[item.tone][0]}</dt>
-          <dd>{toneTips[item.tone][1]}</dd>
+          <dt className="font-medium">
+            {guideT('pronunciation.tone')} · {toneArrows[item.tone]}
+          </dt>
+          <dd>{guideT(`pronunciation.tones.${item.tone}`)}</dd>
         </div>
         {next && tip && (
           <div>
             <dt className="font-medium">
-              Đọc liền ·{' '}
+              {guideT('pronunciation.connected')} ·{' '}
               <span lang="zh-Latn-pinyin">
                 {item.marked} → {next.marked}
               </span>
             </dt>
-            <dd>{tip}</dd>
+            <dd>{guideT(tip)}</dd>
           </div>
         )}
       </dl>

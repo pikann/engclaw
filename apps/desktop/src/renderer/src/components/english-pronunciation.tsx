@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { PhonemizeResult } from '@engclaw/ipc-contract'
 import { HearReference } from '@/components/hear-reference'
+import { usePronunciationGuide } from '@/lib/learning-language'
 import { Button } from '@/components/ui/button'
 import { ipaPhones } from '@/lib/articulation'
 
@@ -59,6 +60,7 @@ const VOWEL = /^[aeiouæɑɒɔəɛɜɚɝɪʊʌ]/u
 
 export function EnglishPronunciation({ text, disabled }: { text: string; disabled: boolean }) {
   const { t } = useTranslation()
+  const { language, t: guideT } = usePronunciationGuide()
   const [words, setWords] = useState<PhonemizeResult['words'] | null>(null)
   const [selected, setSelected] = useState(0)
 
@@ -130,25 +132,29 @@ export function EnglishPronunciation({ text, disabled }: { text: string; disable
           <p className="font-semibold" lang="en-fonipa">
             /{ipa}/
           </p>
-          <div lang="vi">
-            <p className="font-medium">Nghe gần giống tiếng Việt</p>
+          <div lang={language}>
+            {language === 'vi' && (
+              <p className="font-medium">{guideT('pronunciation.approximation')}</p>
+            )}
             <ul className="mt-1 flex flex-wrap gap-1.5">
               {sounds.map((sound, index) => (
                 <li key={index} className="bg-card rounded-md border px-2 py-1">
                   <span lang="en-fonipa">/{sound}/</span> ·{' '}
-                  {vietnamese[sound] ?? 'nghe và bắt chước âm mẫu'}
+                  {language === 'vi'
+                    ? (vietnamese[sound] ?? guideT('pronunciation.listenAndCopy'))
+                    : guideT(`pronunciation.englishSounds.${sound}`, {
+                        defaultValue: guideT('pronunciation.listenAndCopy'),
+                      })}
                 </li>
               ))}
             </ul>
-            <p className="mt-2">
-              Ghép các âm liền nhau. Với phụ âm cuối, giữ âm gọn và tránh thêm “ơ”.
-            </p>
+            <p className="mt-2">{guideT('pronunciation.attachSounds')}</p>
             {link && word && next && (
               <p className="mt-1">
                 <strong>
-                  Đọc liền {word.word} → {next.word}
+                  {guideT('pronunciation.linkWordsTitle', { first: word.word, second: next.word })}
                 </strong>{' '}
-                · Giữ /{currentEnd}/ cuối từ rồi chuyển thẳng sang /{nextSound}/.
+                · {guideT('pronunciation.linkWordsBody', { end: currentEnd, start: nextSound })}
               </p>
             )}
           </div>
