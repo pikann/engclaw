@@ -13,6 +13,7 @@ import { loadModelAdapter } from './model-adapter'
 import type { RpcCancel, RpcRequest, RpcResult } from './rpc'
 import { runSmoke } from './smoke'
 import { SpeechService } from './speech'
+import { loadSileroVad, type SileroVad } from './vad'
 
 const espeak = new EspeakProcess(resolveEspeak())
 const phonemizer = new CachedPhonemizer(espeak)
@@ -31,6 +32,17 @@ function speechFor(modelDir: string, cacheDir: string): Promise<SpeechService> {
   return speech.service
 }
 process.on('exit', () => phonemizer.dispose())
+
+// The speech detector loads on the first recording and stays. It answers outside the inference
+// queue, so a running analysis does not hold its requests back in line.
+let vad: Promise<SileroVad> | null = null
+function vadFor(modelPath: string): Promise<SileroVad> {
+  if (!vad) {
+    vad = loadSileroVad(modelPath)
+    vad.catch(() => (vad = null))
+  }
+  return vad
+}
 
 // Set by each request that carries it: where the reference-voice model and its audio cache live.
 let kokoroDirs: { modelDir: string; cacheDir: string } | null = null
@@ -57,6 +69,9 @@ async function dispatch(req: RpcRequest, signal: AbortSignal): Promise<unknown> 
     reference?: { audio: Float32Array } | { contour: ContourData }
     models?: ModelDirs
     kokoro?: { modelDir: string; cacheDir: string }
+    modelPath?: string
+    frames?: Float32Array
+    state?: Float32Array
   }
   const opts = {
     signal,
@@ -64,6 +79,8 @@ async function dispatch(req: RpcRequest, signal: AbortSignal): Promise<unknown> 
   }
   if (p.kokoro) kokoroDirs = p.kokoro
   switch (req.method) {
+    case 'vad':
+      return (await vadFor(p.modelPath!)).process(p.frames!, p.state)
     case 'analyze':
       return inference.analyze(p.audio!, p.text!, p.language, p.models ?? {}, opts)
     case 'transcribe':

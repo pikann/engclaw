@@ -9,3 +9,5 @@ test-results
 
 # built by scripts/espeak/build.sh
 apps/desktop/resources/espeak-ng/
+# Fetched by scripts/vad/fetch.mjs
+apps/desktop/resources/vad/*.onnx

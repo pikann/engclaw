@@ -9,6 +9,7 @@ on:
       - 'apps/desktop/package.json'
       - 'apps/desktop/src/utility/**'
       - 'scripts/espeak/**'
+      - 'scripts/vad/**'
       - 'scripts/perf/**'
       - '.github/workflows/packaging.yml'
 
@@ -30,6 +31,9 @@ jobs:
       - run: bun install --frozen-lockfile
         working-directory: .
       - run: bunx electron-vite build
+      - name: Fetch the speech detector model
+        working-directory: .
+        run: bun run vad
       - name: Build bundled espeak-ng
         working-directory: .
         run: ./scripts/espeak/build.sh

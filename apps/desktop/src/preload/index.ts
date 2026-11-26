@@ -138,6 +138,7 @@ const api: EngclawApi = {
     phonemize: (req) => invoke(IPC.inferencePhonemize, req),
     languages: () => invoke(IPC.inferenceLanguages),
     cancel: (req) => invoke(IPC.inferenceCancel, req),
+    vad: (req) => invoke(IPC.inferenceVad, req),
     onProgress: (cb) => subscribe(IPC.inferenceProgress, cb),
   },
 }

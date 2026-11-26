@@ -49,6 +49,9 @@ jobs:
       - run: bun install --frozen-lockfile
         working-directory: .
       - run: bunx electron-vite build
+      - name: Fetch the speech detector model
+        working-directory: .
+        run: bun run vad
       - name: Set up MSYS2 (Windows espeak-ng build)
         if: matrix.name == 'windows-x64'
         uses: msys2/setup-msys2@v2

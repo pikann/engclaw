@@ -10,6 +10,9 @@ extraResources:
     to: add.onnx
   - from: resources/models.json
     to: models.json
+  # Silero VAD (MIT): finds speech before any model is downloaded.
+  - from: resources/vad
+    to: vad
   - from: resources/data/cedict.txt.gz
     to: cedict.txt.gz
   - from: resources/data/dictionary.sqlite

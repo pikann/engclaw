@@ -52,7 +52,7 @@ Rebuild before re-running: the specs load the built `out/` folder, not your sour
 
 The helpers in `apps/desktop/e2e/support` let a spec cover practice, shadowing, game and converse without models or network:
 
-- `audio.ts`: sound fixtures the fake microphone plays in a loop (`speech`, `speechThenSilence`, `silence`, `tone`, `quiet`). Pick one with `launchApp({ audio })`.
+- `audio.ts`: sound fixtures the fake microphone plays in a loop (`speech`, `speechThenSilence`, `speechThenClatter`, `silence`, `tone`, `quiet`). Pick one with `launchApp({ audio })`.
 - `speech-stubs.ts`: replaces the on-device ASR, pronunciation analysis, intonation and TTS with scripted answers and logs each call with the RMS of the audio it received, which proves the fixture reached the app.
 - `fake-llm.ts`: a scriptable OpenAI-compatible provider on a loopback port (replies, HTTP errors, broken streams, tool calls, stalls) that records every request.
 - `launch.ts`: `launchApp`, plus `breakMic` / `fixMic` to simulate a denied, missing or busy microphone.
@@ -89,6 +89,10 @@ Rules that are checked by tests or review: no Node APIs in the renderer, every I
 The scoring port is tested against outputs from the Python [OpenPronounce](https://github.com/Halleck45/OpenPronounce) reference, stored in `tests/golden`. Regenerate only when you change the algorithm on purpose or move to a newer upstream commit. The steps (Python 3.10+, `espeak-ng`, `ffmpeg`, network on first run) are in [tests/golden/README.md](tests/golden/README.md). Record the new upstream commit there and explain the diff in your PR.
 
 The dictionary and game content databases in `apps/desktop/resources/data` are built by the scripts in `scripts/data` (for example `bun scripts/data/build-dictionary.ts`). Crawlers cache under the git-ignored `.cache/`; never commit raw crawled pages. Read the `*_SOURCES.md` files next to the databases for licensing rules first.
+
+## Speech detector model
+
+`bun run vad` downloads the pinned Silero VAD model into `apps/desktop/resources/vad/` and checks its SHA-256. `bun run test`, `dev`, `package` and `dist` run it for you; run it once before `test:e2e` on a fresh clone. The file is git-ignored.
 
 ## Export or update models
 

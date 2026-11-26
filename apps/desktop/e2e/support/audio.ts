@@ -10,6 +10,9 @@ import { join, resolve } from 'node:path'
  * - `speech`: a real recording of "Hello, I am a developer" (tests/golden/audio), ~1.9 s.
  * - `speechThenSilence`: the same sentence followed by 3 s of silence, so the 2 s silence
  *   auto-stop fires on its own.
+ * - `speechThenClatter`: the sentence followed by 8 s of short, loud knocks. The loudness
+ *   detector hears each knock as sound, so only the speech detector can tell the speaker has
+ *   stopped. (Steady noise would not do: the browser's noise suppression removes it.)
  * - `silence`: 4 s of digital silence (nothing to hear).
  * - `tone`: 3 s of a steady 220 Hz tone, loud but not speech.
  * - `quiet`: the speech scaled to ~0.1 % of its level, below the voice-activity threshold.
@@ -80,7 +83,17 @@ const concat = (...parts: Float32Array[]): Float32Array => {
   return out
 }
 
-export type AudioFixture = 'speech' | 'speechThenSilence' | 'silence' | 'tone' | 'quiet'
+/** Repeatable white noise. */
+export function noiseSamples(seconds: number, rms: number): Float32Array {
+  let seed = 1
+  const random = () => (seed = (seed * 48271) % 2147483647) / 2147483647
+  return silenceSamples(seconds).map(
+    () => Math.sqrt(-2 * Math.log(random())) * Math.cos(2 * Math.PI * random()) * rms,
+  )
+}
+
+export type AudioFixture =
+  'speech' | 'speechThenSilence' | 'speechThenClatter' | 'silence' | 'tone' | 'quiet'
 
 let cache: Record<AudioFixture, string> | null = null
 
@@ -97,6 +110,13 @@ export function audioFixtures(): Record<AudioFixture, string> {
   cache = {
     speech: GOLDEN,
     speechThenSilence: make('speech-then-silence', concat(speech, silenceSamples(3))),
+    speechThenClatter: make(
+      'speech-then-clatter',
+      concat(
+        speech,
+        ...Array.from({ length: 16 }, () => concat(noiseSamples(0.05, 0.3), silenceSamples(0.45))),
+      ),
+    ),
     silence: make('silence', silenceSamples(4)),
     tone: make('tone', toneSamples(220, 3)),
     quiet: make(

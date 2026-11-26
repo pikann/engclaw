@@ -1,4 +1,4 @@
-import { SilenceDetector } from './vad'
+import { AutoStop } from './auto-stop'
 import { MAX_CLIP_SECONDS } from './clip'
 import { resampleLinear, TARGET_SAMPLE_RATE } from './resample'
 import workletUrl from './recorder.worklet.ts?worker&url'
@@ -27,7 +27,7 @@ export class Recorder {
   private node?: AudioWorkletNode
   private chunks: Float32Array[] = []
   private total = 0
-  private vad?: SilenceDetector
+  private autoStop?: AutoStop
   private stopped = false
 
   constructor(private readonly opts: RecorderOptions = {}) {}
@@ -48,7 +48,12 @@ export class Recorder {
     const src = ctx.createMediaStreamSource(this.stream)
     const node = new AudioWorkletNode(ctx, 'recorder', { numberOfOutputs: 0 })
     this.node = node
-    this.vad = new SilenceDetector({ sampleRate: ctx.sampleRate })
+    if (this.opts.silenceAutoStop !== false)
+      this.autoStop = new AutoStop({
+        sampleRate: ctx.sampleRate,
+        vad: (req) => window.engclaw.inference.vad(req),
+        onStop: () => this.opts.onAutoStop?.('silence'),
+      })
     node.port.onmessage = (e: MessageEvent<Float32Array>) => this.onFrame(e.data, ctx.sampleRate)
     src.connect(node)
   }
@@ -64,12 +69,12 @@ export class Recorder {
       this.opts.onLevel(Math.sqrt(sum / (frame.length || 1)))
     }
     if (this.total / rate >= MAX_CLIP_SECONDS) this.opts.onAutoStop?.('max')
-    else if (this.opts.silenceAutoStop !== false && this.vad?.push(frame))
-      this.opts.onAutoStop?.('silence')
+    else this.autoStop?.push(frame)
   }
 
   async stop(): Promise<Recording> {
     this.stopped = true
+    this.autoStop?.close()
     const rate = this.ctx?.sampleRate ?? TARGET_SAMPLE_RATE
     this.node?.disconnect()
     this.stream?.getTracks().forEach((t) => t.stop())

@@ -169,6 +169,23 @@ export const PhonemizeRequest = z
   .strict()
 export const CancelRequest = z.object({ requestId: RequestId }).strict()
 
+/** Whole 512-sample frames of 16 kHz audio from a live recording, at most 64 of them (about 2 s). */
+export const VadRequest = z
+  .object({
+    frames: z.custom<Float32Array>(
+      (v) =>
+        v instanceof Float32Array && v.length > 0 && v.length <= 512 * 64 && v.length % 512 === 0,
+    ),
+    /** What the model remembers of this recording, from the previous answer. */
+    state: z.custom<Float32Array>((v) => v instanceof Float32Array && v.length === 320).optional(),
+  })
+  .strict()
+export const VadResult = z.object({
+  /** One speech probability per frame. */
+  probs: z.array(z.number()),
+  state: z.custom<Float32Array>((v) => v instanceof Float32Array),
+})
+
 /** Per-frame pitch (Hz, 0 = unvoiced) and energy of a speech clip. */
 export interface ContourData {
   f0: number[]
@@ -1118,6 +1135,7 @@ export const IPC = {
   inferencePhonemize: 'inference:phonemize',
   inferenceLanguages: 'inference:languages',
   inferenceCancel: 'inference:cancel',
+  inferenceVad: 'inference:vad',
   inferenceProgress: 'inference:progress',
 } as const
 
@@ -1267,6 +1285,7 @@ export const invokeChannels = {
   },
   [IPC.inferenceLanguages]: { request: noArgs, response: z.array(LanguageInfo) },
   [IPC.inferenceCancel]: { request: CancelRequest, response: z.null() },
+  [IPC.inferenceVad]: { request: VadRequest, response: inferenceResult(VadResult) },
 } as const
 
 /** Main -> renderer push channels and their payload schemas. */
@@ -1420,6 +1439,8 @@ export interface EngclawApi {
     ): Promise<InferenceResult<z.infer<typeof PhonemizeResult>>>
     /** `/languages`. */
     languages(): Promise<LanguageInfo[]>
+    /** Voice activity in a live recording (silence auto-stop). */
+    vad(req: z.infer<typeof VadRequest>): Promise<InferenceResult<z.infer<typeof VadResult>>>
     /** Aborts a running analyze/transcribe; that call resolves with code CANCELLED. */
     cancel(req: z.infer<typeof CancelRequest>): Promise<null>
     onProgress(cb: (e: InferenceProgress) => void): () => void

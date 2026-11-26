@@ -37,13 +37,15 @@ export function registerInferenceHandlers(
   models: ModelManager,
   videos: VideoStore,
   learningLanguage: () => string = () => DEFAULT_LANGUAGE,
+  /** The speech detector shipped with the app. */
+  vadModel = '',
 ): void {
   const active = new Map<string, number>()
 
   async function run<T>(
     event: Electron.IpcMainInvokeEvent,
     requestId: string | null,
-    method: 'analyze' | 'transcribe' | 'phonemize' | 'intonation' | 'prosody',
+    method: 'analyze' | 'transcribe' | 'phonemize' | 'intonation' | 'prosody' | 'vad',
     params: Record<string, unknown>,
   ): Promise<InferenceResult<T>> {
     try {
@@ -158,6 +160,9 @@ export function registerInferenceHandlers(
   )
   handle(IPC.inferenceLanguages, () =>
     Object.values(LANGUAGES).map(({ code, name, experimental }) => ({ code, name, experimental })),
+  )
+  handle(IPC.inferenceVad, ({ frames, state }, event) =>
+    run(event, null, 'vad', { frames, state, modelPath: vadModel }),
   )
   handle(IPC.inferenceCancel, ({ requestId }) => {
     const id = active.get(requestId)
