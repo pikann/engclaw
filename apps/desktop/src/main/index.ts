@@ -219,7 +219,12 @@ void app.whenReady().then(async () => {
   createWindow()
   if (process.env['ENGCLAW_SMOKE']) runSmoke(startUtility())
   const inference = new UtilityClient(startUtility)
-  registerTtsHandlers(inference, models, () => store.settings.get().learningLanguage)
+  registerTtsHandlers(
+    inference,
+    models,
+    () => store.settings.get().learningLanguage,
+    chineseDictionary,
+  )
   registerInferenceHandlers(
     inference,
     models,

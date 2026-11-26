@@ -51,6 +51,8 @@ async function dispatch(req: RpcRequest, signal: AbortSignal): Promise<unknown> 
   const p = req.params as {
     audio?: Float32Array
     text?: string
+    pinyin?: boolean
+    nativeText?: string
     language?: string
     reference?: { audio: Float32Array } | { contour: ContourData }
     models?: ModelDirs
@@ -74,7 +76,11 @@ async function dispatch(req: RpcRequest, signal: AbortSignal): Promise<unknown> 
       return inference.phonemize(p.text!, p.language)
     case 'speak': {
       if (p.language === 'zh')
-        return { samples: await speakMandarin(p.text!), sampleRate: 16000, cached: false }
+        return {
+          ...(await speakMandarin(p.text!, p.pinyin, p.nativeText)),
+          sampleRate: 16000,
+          cached: false,
+        }
       if (!p.kokoro)
         throw new InferenceError('MODEL_MISSING', 'reference voice not installed', TTS_MODEL_ID)
       return (await speechFor(p.kokoro.modelDir, p.kokoro.cacheDir)).speak(p.text!)

@@ -10,23 +10,32 @@ export function MandarinResult({
   text,
   onReplay,
   onRetry,
+  onEdit,
+  reference,
 }: {
   result: PronunciationResult
   text: string
   onReplay: () => void
   onRetry: () => void
+  onEdit?: () => void
+  reference?: React.ReactNode
 }) {
   const { t } = useTranslation()
+  const syllables = result.assessment === 'syllable-accuracy'
   return (
     <section className="bg-card space-y-4 rounded-xl border p-5" data-testid="mandarin-result">
       <div className="flex items-center gap-4">
         <ScoreRing score={result.score} />
-        <h2 className="font-semibold">{t('learning.characterAccuracy')}</h2>
+        <h2 className="font-semibold">
+          {t(syllables ? 'mandarinGuide.syllableAccuracy' : 'learning.characterAccuracy')}
+        </h2>
       </div>
-      <p className="text-muted-foreground text-sm">{t('learning.assessmentNote')}</p>
+      <p className="text-muted-foreground text-sm">
+        {t(syllables ? 'mandarinGuide.scoreNote' : 'learning.assessmentNote')}
+      </p>
       <div>
         <h3 className="text-sm font-medium">{t('learning.reference')}</h3>
-        <p lang="zh-CN" className="text-2xl leading-loose">
+        <p lang={syllables ? 'zh-Latn-pinyin' : 'zh-CN'} className="text-2xl leading-loose">
           {text}
         </p>
       </div>
@@ -39,15 +48,20 @@ export function MandarinResult({
       {result.differences.errors.length > 0 && (
         <ul className="space-y-1 text-sm" aria-label={t('learning.mismatches')}>
           {result.differences.errors.map((error, index) => (
-            <li key={index} lang="zh-CN">
+            <li key={index} lang={syllables ? 'zh-Latn-pinyin' : 'zh-CN'}>
               {error.expected || '∅'} → {error.actual || '∅'}
             </li>
           ))}
         </ul>
       )}
-      <HearReference text={text} />
+      {reference ?? <HearReference text={text} />}
       <div className="flex gap-2">
         <Button onClick={onRetry}>{t('practice.retry')}</Button>
+        {onEdit && (
+          <Button variant="outline" onClick={onEdit}>
+            {t('screens.practice.editText')}
+          </Button>
+        )}
         <Button variant="outline" onClick={onReplay}>
           {t('screens.practice.playTake')}
         </Button>

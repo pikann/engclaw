@@ -1,6 +1,12 @@
+import { EnglishPronunciation } from '@/components/english-pronunciation'
+import { MandarinSoundGuide } from '@/components/mandarin-sound-guide'
+import { mandarinFinal } from '@/lib/mandarin-final'
+import { mandarinInitial } from '@/lib/mandarin-initial'
+import { MandarinPronunciation } from '@/components/mandarin-pronunciation'
+import { hasHanzi, mandarinGuide } from '@/lib/mandarin-pronunciation'
 import { MandarinResult } from '@/components/mandarin-result'
 import { useLearningLanguage } from '@/lib/learning-language'
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router'
 import {
@@ -67,6 +73,8 @@ import { firstFlagged } from '@/lib/result'
 import { notifyStarMoment } from '@/lib/star-prompt'
 import { cn } from '@/lib/utils'
 import { Label } from '@/components/ui/label'
+
+const mandarinSound = (text: string) => mandarinInitial(text) ?? mandarinFinal(text)
 
 const MODES: readonly PracticeMode[] = ['free', 'sentence']
 const HISTORY_SHOWN = 5
@@ -223,6 +231,15 @@ export function PracticeScreen() {
   const mode = state.active
   const s = state.tabs[mode]
   const free = mode === 'free'
+  const englishRead = language === 'en' && !free && hasText(s.text)
+  const mandarinRead = language === 'zh' && !free
+  const sound = mandarinRead ? mandarinSound(s.text) : null
+  const pinyinOnly = mandarinRead && !hasHanzi(s.text)
+  const syllables = useMemo(
+    () => (mandarinRead ? mandarinGuide(s.text) : []),
+    [mandarinRead, s.text],
+  )
+  const validReference = hasText(s.text) && (!pinyinOnly || !!sound || syllables.length > 0)
   const latest = useRef(state)
   latest.current = state
 
@@ -267,12 +284,14 @@ export function PracticeScreen() {
       const id = crypto.randomUUID()
       requestIds.current[m] = id
       const text = latest.current.tabs[m].text.trim()
+      const target =
+        language === 'zh' && m === 'sentence' ? (mandarinSound(text)?.reading ?? text) : text
       try {
         const res = await window.engclaw.inference.analyze({
           requestId: id,
           language,
           audio: audio.samples,
-          text,
+          text: target,
         })
         if (requestIds.current[m] !== id) return
         if (res.ok) {
@@ -367,7 +386,15 @@ export function PracticeScreen() {
     if (m === 'free' && !(tab.transcribed && hasText(tab.text) && !fromFile)) {
       send(m, { type: 'transcribe-requested' })
       void transcribe(m, audio)
-    } else if (!fromFile && hasText(tab.text)) {
+    } else if (
+      !fromFile &&
+      hasText(tab.text) &&
+      (language !== 'zh' ||
+        m === 'free' ||
+        hasHanzi(tab.text) ||
+        mandarinSound(tab.text) !== null ||
+        mandarinGuide(tab.text).length > 0)
+    ) {
       send(m, { type: 'analyze-requested' })
       void analyze(m, audio)
     }
@@ -548,9 +575,11 @@ export function PracticeScreen() {
         maxLength={1000}
         aria-invalid={s.hint}
         placeholder={
-          language === 'zh'
-            ? '你好，我正在学习中文。'
-            : t(free ? 'practice.freePlaceholder' : 'practice.placeholder')
+          mandarinRead
+            ? t('mandarinGuide.placeholder')
+            : language === 'zh'
+              ? '你好，我正在学习中文。'
+              : t(free ? 'practice.freePlaceholder' : 'practice.placeholder')
         }
         onChange={(e) => send(mode, { type: 'text', text: e.target.value })}
       />
@@ -560,6 +589,26 @@ export function PracticeScreen() {
         </p>
       )}
     </div>
+  )
+
+  const reference = sound ? (
+    <MandarinSoundGuide key={s.text} item={sound} disabled={isRecording || isPlaying} />
+  ) : syllables.length ? (
+    <MandarinPronunciation
+      key={s.text}
+      items={syllables}
+      text={s.text}
+      isPinyin={pinyinOnly}
+      disabled={isRecording || isPlaying}
+    />
+  ) : mandarinRead && hasText(s.text) && pinyinOnly ? (
+    <p role="status" className="text-muted-foreground text-sm">
+      {t('mandarinGuide.invalid')}
+    </p>
+  ) : englishRead ? (
+    <EnglishPronunciation key={s.text} text={s.text} disabled={isRecording || isPlaying} />
+  ) : (
+    <HearReference text={s.text} disabled={mandarinRead && (isRecording || isPlaying)} />
   )
 
   const alerts = (
@@ -668,7 +717,7 @@ export function PracticeScreen() {
               </p>
               <div className="flex flex-wrap gap-2">
                 {(language === 'zh'
-                  ? ['你好，我正在学习中文。', '请说慢一点。', '今天你想做什么？']
+                  ? ['你好，我正在学习中文。', '面条', 'miàntiáo', 'j', 'iang']
                   : EXAMPLES
                 ).map((ex) => (
                   <Button
@@ -685,7 +734,7 @@ export function PracticeScreen() {
               </div>
             </div>
           )}
-          <HearReference text={s.text} variant="outline" />
+          {reference}
         </div>
       )}
       <div className="flex justify-center">
@@ -755,9 +804,10 @@ export function PracticeScreen() {
             ? t('practice.transcriptNote')
             : t(free ? 'screens.practice.reviewHint' : 'screens.practice.reviewHintRead')}
         </p>
+        {(mandarinRead || englishRead) && reference}
       </div>
       <div className="flex flex-wrap items-center gap-2" data-testid="practice-review">
-        <HearReference text={s.text} variant="outline" />
+        {!mandarinRead && !englishRead && reference}
         <Button variant="outline" size="sm" data-testid="practice-play" onClick={togglePlay}>
           {isPlaying ? <Pause /> : <Play />}
           {t('screens.practice.playTake')}
@@ -781,7 +831,7 @@ export function PracticeScreen() {
         <Button
           size="lg"
           data-testid="practice-analyze"
-          disabled={!hasText(s.text)}
+          disabled={!validReference}
           onClick={() => runAnalyze(mode)}
         >
           {t('screens.practice.check')}
@@ -797,8 +847,15 @@ export function PracticeScreen() {
         onCancel={cancel}
         messageKey={s.phase === 'transcribing' ? 'practice.transcribing' : undefined}
       />
-    ) : stage === 'result' && result?.assessment === 'character-accuracy' ? (
-      <MandarinResult result={result} text={s.text} onReplay={togglePlay} onRetry={rerecord} />
+    ) : stage === 'result' && result?.assessment ? (
+      <MandarinResult
+        result={result}
+        text={sound?.reading ?? s.text}
+        onReplay={togglePlay}
+        onRetry={rerecord}
+        onEdit={mandarinRead ? () => send(mode, { type: 'edit' }) : undefined}
+        reference={mandarinRead ? reference : undefined}
+      />
     ) : stage === 'result' && result ? (
       <div className="grid items-start gap-5 xl:grid-cols-2">
         <div className="space-y-5">
@@ -813,6 +870,7 @@ export function PracticeScreen() {
             onSpeakFreely={free ? undefined : () => requestSwitch('free')}
             onStartOver={free ? () => send(mode, { type: 'reset' }) : undefined}
           />
+          {englishRead && <div className="bg-card rounded-xl border p-5">{reference}</div>}
           <DetailSection title={t('screens.practice.tabPhonemes')}>
             <PhonemesDetail result={result} view={view} />
           </DetailSection>

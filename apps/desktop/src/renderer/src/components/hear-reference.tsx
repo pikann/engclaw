@@ -4,51 +4,112 @@ import { useTranslation } from 'react-i18next'
 import { Volume2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DownloadModelsButton, useModelDownload } from '@/components/download-models'
-import { playPcm } from '@/lib/audio'
+import { playPcm, playSlowPcm } from '@/lib/audio'
 
 type State = 'idle' | 'loading' | 'playing'
+type SampleId = 'hear-reference' | 'hear-reference-alternate' | 'hear-reference-segmented'
+
+interface Sample {
+  text: string
+  label?: string
+  pinyin?: boolean
+}
 
 /** "Hear the reference": plays the Kokoro reference voice for `text` (cached after the first time). */
 export function HearReference({
   text,
   variant = 'outline',
-}: {
-  text: string
+  pinyin = false,
+  disabled = false,
+  label,
+  alternate,
+  segmented,
+  speedControls = false,
+  defaultRate = speedControls ? 0.75 : 1,
+  onPlaybackStart,
+}: Sample & {
   variant?: 'outline' | 'ghost'
+  disabled?: boolean
+  alternate?: Sample
+  segmented?: Sample
+  speedControls?: boolean
+  defaultRate?: 0.75 | 1
+  onPlaybackStart?: () => void
 }) {
   const language = useLearningLanguage()
   const { t } = useTranslation()
   const [state, setState] = useState<State>('idle')
+  const [rate, setRate] = useState<number>(defaultRate)
+  const [active, setActive] = useState<SampleId>('hear-reference')
+  const [pinyinFallback, setPinyinFallback] = useState(false)
   const [error, setError] = useState<'modelMissing' | 'failed' | null>(null)
   const playing = useRef<{ stop: () => void } | null>(null)
 
+  const lastSample = useRef<{ id: SampleId; text: string; pinyin: boolean } | null>(null)
   const token = useRef(0)
   const halt = useCallback(() => {
     token.current++
     playing.current?.stop()
+    playing.current = null
   }, [])
-  useEffect(() => {
+  const reset = useCallback(() => {
     halt()
+    lastSample.current = null
     setState('idle')
     setError(null)
-    return halt
-  }, [text, language, halt])
+    setPinyinFallback(false)
+  }, [halt])
 
-  const onClick = async (): Promise<void> => {
-    if (state === 'playing') return playing.current?.stop()
-    const mine = ++token.current
+  useEffect(() => {
+    reset()
+    return halt
+  }, [language, disabled, rate, halt, reset])
+
+  const alternateText = alternate?.text
+  const alternatePinyin = alternate?.pinyin
+  const segmentedText = segmented?.text
+  const segmentedPinyin = segmented?.pinyin
+  useEffect(() => {
+    const previous = lastSample.current
+    if (!previous) return
+    const inputs = {
+      'hear-reference': [text, pinyin],
+      'hear-reference-alternate': [alternateText, alternatePinyin],
+      'hear-reference-segmented': [segmentedText, segmentedPinyin],
+    } as const
+    const [currentText, currentPinyin] = inputs[previous.id]
+    if (previous.text !== currentText || previous.pinyin !== !!currentPinyin) reset()
+  }, [text, pinyin, alternateText, alternatePinyin, segmentedText, segmentedPinyin, reset])
+
+  const onClick = async (sample: Sample, id: SampleId): Promise<void> => {
+    if (state === 'playing' && id === active) return playing.current?.stop()
+    halt()
+    const mine = token.current
+    lastSample.current = { id, text: sample.text, pinyin: !!sample.pinyin }
+    setActive(id)
     setError(null)
+    setPinyinFallback(false)
     setState('loading')
     try {
-      const res = await window.engclaw.tts.speak({ text, language })
+      const res = await window.engclaw.tts.speak({
+        text: sample.text,
+        language,
+        ...(sample.pinyin ? { pinyin: true } : {}),
+        ...(id === 'hear-reference-segmented' ? { segmented: true } : {}),
+      })
       if (mine !== token.current) return
       if (!res.ok) {
         setError(res.code === 'MODEL_MISSING' ? 'modelMissing' : 'failed')
         return setState('idle')
       }
-      const handle = playPcm(res.samples, res.sampleRate)
+      setPinyinFallback(res.pinyinFallback === true)
+      const handle =
+        rate === 1
+          ? playPcm(res.samples, res.sampleRate)
+          : playSlowPcm(res.samples, res.sampleRate, rate)
       playing.current = handle
       setState('playing')
+      onPlaybackStart?.()
       await handle.done
     } catch {
       if (mine === token.current) setError('failed')
@@ -60,26 +121,60 @@ export function HearReference({
     }
   }
 
-  const download = useModelDownload(() => void onClick())
+  const main = { text, pinyin, label }
+  const download = useModelDownload(() => void onClick(main, 'hear-reference'))
+  const samples: { sample: Sample; id: SampleId }[] = [
+    { sample: main, id: 'hear-reference' },
+    ...(alternate ? [{ sample: alternate, id: 'hear-reference-alternate' as const }] : []),
+    ...(segmented ? [{ sample: segmented, id: 'hear-reference-segmented' as const }] : []),
+  ]
 
   return (
     <div className="space-y-1">
-      <Button
-        variant={variant}
-        size="sm"
-        data-testid="hear-reference"
-        disabled={state === 'loading' || !text.trim()}
-        onClick={() => void onClick()}
-      >
-        <Volume2 />
-        {state === 'loading'
-          ? t('reference.loading')
-          : state === 'playing'
-            ? t('reference.playing')
-            : t('reference.hear')}
-      </Button>
+      <div className="flex flex-wrap gap-2">
+        {samples.map(({ sample, id }) => {
+          const status = id === active ? state : 'idle'
+          return (
+            <Button
+              key={id}
+              variant={variant}
+              size="sm"
+              data-testid={id}
+              data-playback={status}
+              disabled={disabled || state === 'loading' || !sample.text.trim()}
+              onClick={() => void onClick(sample, id)}
+            >
+              <Volume2 />
+              {status === 'loading'
+                ? t('reference.loading')
+                : status === 'playing'
+                  ? t('reference.playing')
+                  : (sample.label ?? t('reference.hear'))}
+            </Button>
+          )
+        })}
+      </div>
+      {speedControls && (
+        <div role="group" aria-label={t('ds.player.speed')} className="flex flex-wrap gap-1">
+          {([0.75, 1] as const).map((option) => (
+            <Button
+              key={option}
+              type="button"
+              variant={rate === option ? 'secondary' : 'ghost'}
+              size="xs"
+              disabled={disabled}
+              aria-pressed={rate === option}
+              onClick={() => setRate(option)}
+            >
+              {t(option === 1 ? 'reference.normalPlayback' : 'reference.slowPlayback')}
+            </Button>
+          ))}
+        </div>
+      )}
       {language === 'zh' && (
-        <p className="text-muted-foreground text-xs">{t('learning.chineseVoice')}</p>
+        <p className="text-muted-foreground text-xs">
+          {t(pinyinFallback ? 'reference.pinyinFallback' : 'learning.chineseVoice')}
+        </p>
       )}
       {error && (
         <p role="alert" className="text-sm text-destructive" data-testid="hear-reference-error">

@@ -116,8 +116,14 @@ const youtubeResult = <T extends z.ZodTypeAny>(value: T) =>
 export const LearningLanguage = z.enum(['en', 'zh'])
 export type LearningLanguage = z.infer<typeof LearningLanguage>
 export const SpeakRequest = z
-  .object({ text: z.string().min(1).max(1000), language: LearningLanguage.optional() })
+  .object({
+    text: z.string().min(1).max(3000),
+    language: LearningLanguage.optional(),
+    pinyin: z.boolean().optional(),
+    segmented: z.boolean().optional(),
+  })
   .strict()
+  .refine(({ pinyin, text }) => pinyin || text.length <= 1000, { path: ['text'] })
 export const SpeakErrorCode = z.enum(['MODEL_MISSING', 'FAILED'])
 export const SpeakResponse = z.discriminatedUnion('ok', [
   z.object({
@@ -126,6 +132,7 @@ export const SpeakResponse = z.discriminatedUnion('ok', [
     samples: z.custom<Float32Array>((v) => v instanceof Float32Array),
     sampleRate: z.number(),
     cached: z.boolean(),
+    pinyinFallback: z.literal(true).optional(),
     /** Main-process wall time for this request: cache read or synthesis, excluding IPC to the renderer. */
     ms: z.number(),
   }),
@@ -241,7 +248,7 @@ const PhoneReport = z.object({ expected: z.string(), heard: z.string(), confiden
 /** OpenPronounce `/pronunciation` body (snake_case, as the Python reference emits it). */
 export const PronunciationResult = z.object({
   /** Mandarin currently reports ASR character accuracy, not phone or tone assessment. */
-  assessment: z.literal('character-accuracy').optional(),
+  assessment: z.enum(['character-accuracy', 'syllable-accuracy']).optional(),
   score: z.number(),
   distance: z.number(),
   acoustic_distance: z.number(),
@@ -995,9 +1002,13 @@ export const StarPromptState = z.object({
 })
 export type StarPromptState = z.infer<typeof StarPromptState>
 
+export const PronunciationGuideLanguage = z.enum(['auto', 'en', 'vi'])
+export type PronunciationGuideLanguage = z.infer<typeof PronunciationGuideLanguage>
+
 export const AppSettings = z.object({
   /** Target language for learning, separate from the interface locale. */
   learningLanguage: LearningLanguage.default('en'),
+  pronunciationGuideLanguage: PronunciationGuideLanguage.default('auto'),
   /** Stop recording after ~2 s of silence once speech was heard. */
   silenceAutoStop: z.boolean().default(true),
   /** Check GitHub releases for a newer version on launch. */
@@ -1016,7 +1027,19 @@ export const AppSettings = z.object({
   starPrompt: StarPromptState.default({ done: false, moments: 0, shown: 0, lastShownAt: 0 }),
 })
 export type AppSettings = z.infer<typeof AppSettings>
-export const AppSettingsPatch = AppSettings.partial().strict()
+// Defaults apply when loading a complete settings record. A patch must only
+// write the fields the caller supplied, so one preference cannot reset another.
+const appSettingsPatchShape = Object.fromEntries(
+  Object.entries(AppSettings.shape).map(([key, schema]) => [
+    key,
+    schema.removeDefault().optional(),
+  ]),
+) as {
+  [Key in keyof typeof AppSettings.shape]: z.ZodOptional<
+    ReturnType<(typeof AppSettings.shape)[Key]['removeDefault']>
+  >
+}
+export const AppSettingsPatch = z.strictObject(appSettingsPatchShape)
 
 export const IPC = {
   ping: 'app:ping',

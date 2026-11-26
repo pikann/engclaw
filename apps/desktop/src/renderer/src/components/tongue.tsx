@@ -44,7 +44,15 @@ function useTweenedPose(target: Pose, reduced: boolean): Pose {
 }
 
 /** Side view of the mouth for one pose; eases between poses (jumps with reduced motion). */
-export function Tongue({ pose, phone }: { pose: Pose; phone: string }) {
+export function Tongue({
+  pose,
+  phone,
+  showProfile = false,
+}: {
+  pose: Pose
+  phone: string
+  showProfile?: boolean
+}) {
   const { t } = useTranslation()
   const reduced = usePrefersReducedMotion()
   const p = useTweenedPose(pose, reduced)
@@ -52,6 +60,7 @@ export function Tongue({ pose, phone }: { pose: Pose; phone: string }) {
     <TongueDiagram
       pose={p}
       phone={phone}
+      showProfile={showProfile}
       label={t('result.tongueAlt', { phone: phone || 'rest' })}
     />
   )
@@ -62,10 +71,12 @@ export function TongueDiagram({
   pose: p,
   phone,
   label,
+  showProfile = false,
 }: {
   pose: Pose
   phone: string
   label: string
+  showProfile?: boolean
 }) {
   const ly = lowerTeethY(p)
   return (
@@ -77,6 +88,16 @@ export function TongueDiagram({
       data-phone={phone}
       className="bg-card h-28 w-36 shrink-0 rounded-md border"
     >
+      {showProfile && (
+        <path
+          d={`M32 10Q62 2 107 12Q161 24 173 64L175 137M32 10Q23 19 23 28L9 45Q7 50 17 50L18 54M14 ${ly + 9}Q10 ${ly + 29} 42 ${ly + 31}L113 ${ly + 33}L130 153`}
+          fill="none"
+          strokeWidth="2"
+          strokeLinecap="round"
+          className="stroke-foreground/40"
+          data-testid="articulation-profile"
+        />
+      )}
       <g fill="none" strokeLinecap="round" strokeLinejoin="round" className="stroke-foreground/60">
         {/* Nasal airflow, shown while the soft palate is lowered. */}
         <path
@@ -104,6 +125,17 @@ export function TongueDiagram({
         <ellipse cx={16 + p.prot} cy="58" rx="8" ry="7" />
         <ellipse cx={18 + p.prot} cy={ly + 4 - p.lift} rx="8" ry="6" />
       </g>
+      {showProfile && ['ɕ', 'ʂ', 's', 'x', 'h', 'f'].includes(phone) && (
+        <path
+          d="M23 73Q15 76 5 76m5-4-5 4 5 4"
+          fill="none"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="stroke-primary"
+          data-testid="articulation-airflow"
+        />
+      )}
       {/* Vocal folds: the zigzag shows while the sound is voiced. */}
       <path
         d="M164 112l5 5-5 5 5 5"

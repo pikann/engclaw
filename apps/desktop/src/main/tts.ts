@@ -4,6 +4,7 @@ import { IPC, type SpeakResponse } from '@engclaw/ipc-contract'
 import type { ModelManager } from '@engclaw/models'
 import { TTS_MODEL_ID } from '@engclaw/pronounce'
 import { handle } from './ipc'
+import type { ChineseDictionary } from './chinese-dictionary'
 import type { UtilityClient } from './utility-client'
 
 /** Catalog id of the Kokoro reference-voice model. */
@@ -21,6 +22,7 @@ export async function kokoroLocation(
 interface Spoke {
   samples: Float32Array
   sampleRate: number
+  pinyinFallback?: true
   cached: boolean
 }
 
@@ -29,23 +31,34 @@ export function registerTtsHandlers(
   client: UtilityClient,
   models: ModelManager,
   learningLanguage: () => string = () => 'en',
+  dictionary?: ChineseDictionary,
 ): void {
-  handle(IPC.ttsSpeak, async ({ text, language = learningLanguage() }): Promise<SpeakResponse> => {
-    const started = performance.now()
-    const kokoro = language === 'zh' ? null : await kokoroLocation(models)
-    if (!kokoro && language !== 'zh')
-      return {
-        ok: false,
-        code: 'MODEL_MISSING',
-        message: 'The reference voice model is not downloaded.',
+  handle(
+    IPC.ttsSpeak,
+    async ({ text, language = learningLanguage(), pinyin, segmented }): Promise<SpeakResponse> => {
+      const started = performance.now()
+      const kokoro = language === 'zh' ? null : await kokoroLocation(models)
+      if (!kokoro && language !== 'zh')
+        return {
+          ok: false,
+          code: 'MODEL_MISSING',
+          message: 'The reference voice model is not downloaded.',
+        }
+      try {
+        const nativeText =
+          language === 'zh' && process.platform === 'darwin'
+            ? pinyin
+              ? dictionary?.speechText(text, segmented)
+              : text
+            : undefined
+        const r = await client.call<Spoke>('speak', { text, kokoro, language, pinyin, nativeText })
+          .result
+        const ms = Math.round(performance.now() - started)
+        console.info(`[tts] speak cached=${r.cached} ${ms}ms (${text.length} chars)`)
+        return { ok: true, ...r, ms }
+      } catch (e) {
+        return { ok: false, code: 'FAILED', message: e instanceof Error ? e.message : String(e) }
       }
-    try {
-      const r = await client.call<Spoke>('speak', { text, kokoro, language }).result
-      const ms = Math.round(performance.now() - started)
-      console.info(`[tts] speak cached=${r.cached} ${ms}ms (${text.length} chars)`)
-      return { ok: true, samples: r.samples, sampleRate: r.sampleRate, cached: r.cached, ms }
-    } catch (e) {
-      return { ok: false, code: 'FAILED', message: e instanceof Error ? e.message : String(e) }
-    }
-  })
+    },
+  )
 }

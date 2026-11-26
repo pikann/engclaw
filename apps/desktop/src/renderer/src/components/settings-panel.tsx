@@ -14,6 +14,7 @@ import {
 import type { AppSettings } from '@engclaw/ipc-contract'
 import { setThemePreference, useThemePreference, type ThemePreference } from '@/lib/theme'
 import { cn } from '@/lib/utils'
+import { PronunciationGuideLanguageSelect } from '@/lib/learning-language'
 import { LanguageSwitcher } from '@/components/language-switcher'
 import { LlmProviderPanel } from '@/components/llm-provider-panel'
 import { LicensesPanel } from '@/components/licenses-panel'
@@ -113,6 +114,7 @@ export function SettingsPanel() {
     setSettings(await window.engclaw.app.updateSettings({ [key]: n }))
   }
 
+  const guideLanguageId = useId()
   const silenceId = useId()
   const updatesId = useId()
   const imagesId = useId()
@@ -155,6 +157,13 @@ export function SettingsPanel() {
             <div className={rows}>
               <SettingRow label={t('settings.language')} hint={t('settings.languageHint')}>
                 <LanguageSwitcher />
+              </SettingRow>
+              <SettingRow
+                label={t('pronunciation.settingsLabel')}
+                hint={t('pronunciation.settingsHint')}
+                labelId={guideLanguageId}
+              >
+                <PronunciationGuideLanguageSelect id={guideLanguageId} />
               </SettingRow>
               <SettingRow label={t('settings.theme')} hint={t('settings.themeHint')}>
                 <ToggleGroup
