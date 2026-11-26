@@ -124,6 +124,27 @@ test.describe('what the microphone hears', () => {
     await app.close()
   })
 
+  test('the bundled speech detector answers through the app', async () => {
+    const { app, page } = await start('silence')
+    const result = await page.evaluate(() =>
+      (window as unknown as Win).engclaw.inference.vad({ frames: new Float32Array(1024) }),
+    )
+    expect(result).toMatchObject({ ok: true })
+    if (result.ok) expect(result.value.probs).toHaveLength(2)
+    await app.close()
+  })
+
+  test('knocks after speech do not keep the turn open: the speaker has stopped', async () => {
+    const { app, page } = await start('speechThenClatter')
+    await page.getByTestId('converse-mic').click()
+    await expect(page.getByTestId('converse-stop')).toBeVisible()
+    await expect(page.getByTestId('converse-transcript')).toContainText(REPLY, { timeout: 30_000 })
+    const [call] = (await callLog(app)).transcribe
+    expect(call!.seconds).toBeGreaterThan(3)
+    expect(call!.seconds).toBeLessThan(8)
+    await app.close()
+  })
+
   test('with auto-stop switched off the recording keeps going through silence', async () => {
     const { app, page } = await start('speechThenSilence')
     await page.evaluate(() =>

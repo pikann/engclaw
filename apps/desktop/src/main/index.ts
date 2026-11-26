@@ -230,6 +230,11 @@ void app.whenReady().then(async () => {
     models,
     store.videos,
     () => store.settings.get().learningLanguage,
+    join(
+      app.isPackaged ? process.resourcesPath : join(app.getAppPath(), 'resources'),
+      'vad',
+      'silero_vad_16k_op15.onnx',
+    ),
   )
   if (!process.env['ENGCLAW_SMOKE']) startAutoUpdate(() => store.settings.get().checkForUpdates)
 })

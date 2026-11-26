@@ -16,6 +16,8 @@ jobs:
       - name: License check
         run: bun run license:check
       - run: bun run typecheck
+      - name: Fetch the speech detector model
+        run: bun run vad
       - run: bun run test
       - name: Build bundled espeak-ng
         run: ./scripts/espeak/build.sh

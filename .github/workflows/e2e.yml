@@ -20,6 +20,8 @@ jobs:
       - name: Ensure the Electron binary is installed
         working-directory: apps/desktop
         run: node -e "console.log(require('electron'))"
+      - name: Fetch the speech detector model
+        run: bun run vad
       - name: Build (with the dev-only design-system route for e2e)
         run: bun run build
         env:
