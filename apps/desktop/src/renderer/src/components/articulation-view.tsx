@@ -24,12 +24,14 @@ export function ArticulationView({
   durationMs,
   stopId = 0,
   showProfile = false,
+  holdPose = false,
 }: {
   phones: readonly string[]
   playId: number
   durationMs?: number
   stopId?: number
   showProfile?: boolean
+  holdPose?: boolean
 }) {
   const reduced = usePrefersReducedMotion()
   const key = phones.join(' ')
@@ -43,6 +45,8 @@ export function ArticulationView({
   useEffect(() => {
     clear()
     let frames = articulationFrames(phones)
+    const finalPose = frames.at(-2)
+    if (holdPose && finalPose) frames[frames.length - 1] = { ...finalPose, ms: 0 }
     if (durationMs) frames = scaleFrames(frames, durationMs)
     if (!phones.length) return setFrame(RESTING)
     if (reduced) return setFrame(frames[0] ?? RESTING)
@@ -53,7 +57,7 @@ export function ArticulationView({
     }
     return clear
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `key` stands in for `phones`
-  }, [key, playId, reduced])
+  }, [key, playId, reduced, durationMs, holdPose])
 
   useEffect(() => {
     if (!stopId) return

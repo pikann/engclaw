@@ -36,9 +36,9 @@ export function useSegmentAttempt(
   const [intonation, setIntonation] = useState<Record<number, IntonationState>>({})
   const [best, setBest] = useState<Record<number, number>>({})
   const recording = useRef<{ rec: Recorder; index: number } | null>(null)
-  const playing = useRef<{ stop: () => void } | null>(null)
+  const playing = useRef<{ stop: () => void; position?: number } | null>(null)
   const requestIds = useRef<Record<number, string>>({})
-  const [isPlaying, setIsPlaying] = useState(false)
+  const [playingPosition, setPlayingPosition] = useState<number | null>(null)
   const segmentsRef = useRef(segments)
   segmentsRef.current = segments
   const indexRef = useRef(index)
@@ -74,7 +74,7 @@ export function useSegmentAttempt(
   const stopPlayback = useCallback(() => {
     playing.current?.stop()
     playing.current = null
-    setIsPlaying(false)
+    setPlayingPosition(null)
   }, [])
 
   const runIntonation = useCallback(
@@ -216,21 +216,29 @@ export function useSegmentAttempt(
 
   const state = byIndex[index] ?? IDLE
 
-  const play = useCallback(() => {
-    if (playing.current) return stopPlayback()
-    const s = byIndex[indexRef.current]
-    const audio = s && (s.phase === 'result' || s.phase === 'error') ? s.audio : null
+  const playClip = (position?: number) => {
+    if (playing.current && playing.current.position === position) return stopPlayback()
+    const take = byIndex[indexRef.current]
+    const audio = take && (take.phase === 'result' || take.phase === 'error') ? take.audio : null
     if (!audio) return
-    const h = playPcm(audio, 16000)
-    playing.current = h
-    setIsPlaying(true)
-    void h.done.finally(() => {
-      if (playing.current === h) {
+    const span =
+      position !== undefined && take?.phase === 'result'
+        ? take.result.word_audio_spans?.[position]
+        : undefined
+    if (position !== undefined && (!span || span[0] >= span[1] || span[1] > audio.length)) return
+    const clip = span ? audio.subarray(span[0], span[1]) : audio
+    stopPlayback()
+    const handle = playPcm(clip, 16000)
+    const playback = { stop: handle.stop, position }
+    playing.current = playback
+    setPlayingPosition(position ?? -1)
+    void handle.done.finally(() => {
+      if (playing.current === playback) {
         playing.current = null
-        setIsPlaying(false)
+        setPlayingPosition(null)
       }
     })
-  }, [byIndex, stopPlayback])
+  }
 
   const retry = useCallback(() => {
     const s = byIndex[indexRef.current]
@@ -242,9 +250,12 @@ export function useSegmentAttempt(
     state,
     intonation: intonation[index] ?? null,
     best: best[segments[index]?.index ?? -1] ?? null,
-    isPlaying,
+    isPlaying: playingPosition !== null,
+    playingWord: playingPosition === -1 ? null : playingPosition,
     toggleRecord: () => (recording.current ? void stop() : void start()),
-    play,
+    play: () => playClip(),
+    playWord: (position: number) => playClip(position),
+    stopPlayback,
     retry,
   }
 }

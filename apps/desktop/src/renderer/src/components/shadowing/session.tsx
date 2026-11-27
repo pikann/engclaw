@@ -121,6 +121,7 @@ export function ShadowingSession({
     if (dictation) ensure(index)
   }, [dictation, index, ensure])
   const checkedRight = !!entry?.result && scoreSegment(entry.result) === 1
+  const [wordRecording, setWordRecording] = useState(false)
   const [railOpen, setRailOpen] = useState(true)
   const [sideTab, setSideTab] = useState<'transcript' | 'attempt'>('attempt')
   const [speedOpen, setSpeedOpen] = useState(false)
@@ -143,10 +144,11 @@ export function ShadowingSession({
   const modelDownload = useModelDownload(attempt.retry)
   const [stageRef, stage] = useContentSize()
   const toggleRecord = useCallback(() => {
+    if (wordRecording) return
     setRailOpen(true)
     setSideTab('attempt')
     attempt.toggleRecord()
-  }, [attempt])
+  }, [attempt, wordRecording])
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([])
 
   const shown = segments[index]
@@ -171,7 +173,7 @@ export function ShadowingSession({
   }
   const shownIpa = shown && showIpa ? ipaWords(shown.text) : null
   const failed = state.phase === 'error'
-  const blocked = state.phase !== 'ready'
+  const blocked = state.phase !== 'ready' || wordRecording
 
   const { check } = dict
   const runCheck = useCallback(() => {
@@ -720,8 +722,26 @@ export function ShadowingSession({
                 best={attempt.best}
                 disabled={blocked}
                 onToggleRecord={toggleRecord}
-                onPlay={attempt.play}
-                onRetry={attempt.retry}
+                onPlay={() => {
+                  if (!wordRecording) attempt.play()
+                }}
+                replaying={attempt.isPlaying && attempt.playingWord === null}
+                wordPlayback={{
+                  play: attempt.playWord,
+                  stop: attempt.stopPlayback,
+                  position: attempt.playingWord,
+                  practice:
+                    sideTab === 'attempt'
+                      ? {
+                          prepare: pauseForRecording,
+                          recording: wordRecording,
+                          onRecordingChange: setWordRecording,
+                        }
+                      : undefined,
+                }}
+                onRetry={() => {
+                  if (!wordRecording) attempt.retry()
+                }}
                 onDownloadModels={modelDownload.open}
               />
             </ResultSidebarBody>

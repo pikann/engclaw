@@ -28,7 +28,9 @@ async function openResult(script: SpeechScript = {}) {
   await expect(page.getByTestId('practice-stop')).toBeVisible()
   await page.waitForTimeout(2500)
   await page.getByTestId('practice-stop').click()
-  await expect(page.getByTestId('word-detail')).toBeVisible({ timeout: 20_000 })
+  const word = page.getByTestId('word-detail')
+  await expect(word).toBeVisible({ timeout: 20_000 })
+  await word.locator('summary').click()
   return { app, page }
 }
 

@@ -14,7 +14,7 @@ export interface SpeechResult {
 export interface Synthesizer {
   /** Part of the cache key: changes when the voice or model revision changes. */
   readonly id: string
-  synthesize(text: string): Promise<Float32Array>
+  synthesize(text: string, segmented?: boolean): Promise<Float32Array>
 }
 
 /**
@@ -29,10 +29,12 @@ export class SpeechService {
     private readonly cacheDir: string,
   ) {}
 
-  speak(text: string): Promise<SpeechResult> {
+  speak(text: string, segmented = false): Promise<SpeechResult> {
     const normalized = text.trim().replace(/\s+/g, ' ')
     if (!normalized) return Promise.reject(new Error('speak: empty text'))
-    const key = createHash('sha256').update(`${this.synth.id}\n${normalized}`).digest('hex')
+    const key = createHash('sha256')
+      .update(`${this.synth.id}\n${segmented ? 'segmented\n' : ''}${normalized}`)
+      .digest('hex')
     const path = join(this.cacheDir, `${key}.f32`)
 
     const hit = this.read(path)
@@ -41,7 +43,7 @@ export class SpeechService {
     let pending = this.inflight.get(key)
     if (!pending) {
       pending = this.synth
-        .synthesize(normalized)
+        .synthesize(normalized, segmented)
         .then((samples) => {
           this.write(path, samples)
           return { samples, sampleRate: TARGET_SAMPLE_RATE, cached: false }

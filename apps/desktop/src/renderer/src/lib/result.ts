@@ -1,4 +1,6 @@
 import type { PronunciationResult } from '@engclaw/ipc-contract'
+import { opcodes } from '@engclaw/pronounce/src/levenshtein'
+import { splitWords } from '@engclaw/pronounce/src/compare'
 import { scoreParts } from '@engclaw/pronounce/src/score'
 
 /** Pure view-model helpers for the result card (OpenPronounce result UI parity). */
@@ -21,7 +23,7 @@ export interface WordChip {
 /** One chip per reference word (same split as the phonemizer); flagged words carry their error. */
 export function wordChips(result: PronunciationResult, text: string): WordChip[] {
   const { errors, expected_phones } = result.differences
-  const words = (text.match(/\b[\w']+\b/g) ?? []).map((w) => w.toLowerCase())
+  const words = splitWords(text)
   const count = Math.max(expected_phones.length, words.length)
   return Array.from({ length: count }, (_, position) => {
     const error = errors.find((e) => e.position === position) ?? null
@@ -32,6 +34,25 @@ export function wordChips(result: PronunciationResult, text: string): WordChip[]
       error,
     }
   })
+}
+
+export interface WordRecognition {
+  matched: boolean
+  heard?: string
+}
+
+/** Align recognized words by position so repeated words are each checked once. */
+export function recognizeWords(expected: readonly string[], transcript: string): WordRecognition[] {
+  const heard = splitWords(transcript.replace(/’/gu, "'"))
+  const normalized = expected.map((word) => word.toLowerCase().replace(/’/gu, "'"))
+  const result: WordRecognition[] = normalized.map(() => ({ matched: false }))
+  for (const [tag, i1, i2, j1, j2] of opcodes(normalized, heard)) {
+    if (tag === 'equal' || (tag === 'replace' && i2 - i1 === j2 - j1)) {
+      for (let i = i1; i < i2; i++)
+        result[i] = { matched: tag === 'equal', heard: heard[j1 + i - i1] }
+    }
+  }
+  return result
 }
 
 /** Position of the first flagged word, or null when every word is fine. */

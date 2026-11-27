@@ -115,6 +115,11 @@ export function useWordArticulation(word: string, sounds: readonly string[]) {
     selected,
     pick,
     hear,
+    stopAudio: () => {
+      halt()
+      setLoading(false)
+      stop()
+    },
     loading,
     view: {
       phones: selected === null ? sounds : sounds.slice(selected, selected + 1),

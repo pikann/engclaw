@@ -72,6 +72,34 @@ describe('comparePhones', () => {
     expect(run(['ð', 'i'], 'the', [['ð', 'ə']]).errors).toEqual([])
   })
 
+  it('locates both correct and mispronounced words without assigning audio to deleted words', () => {
+    const rec: PhoneRecognition = {
+      phones: ['æ', 'm', 'ɪ', 'n'],
+      confidences: [1, 1, 1, 1],
+      spans: [
+        [2, 4],
+        [5, 8],
+        [11, 13],
+        [13, 15],
+      ],
+      logPosteriors: new Float32Array(),
+      frames: 16,
+      vocab: [],
+    }
+    const result = comparePhones(
+      rec,
+      ['at', 'in', 'go'],
+      [
+        ['æ', 't'],
+        ['ɪ', 'n'],
+        ['ɡ', 'oʊ'],
+      ],
+    )
+    expect(result.wordSpans).toEqual([[2, 8], [11, 15], null])
+    expect(result.wordsWithErrors).toContain('at')
+    expect(result.wordsWithErrors).not.toContain('in')
+  })
+
   it('scales confidence down by the posterior of the expected phone', () => {
     const vocab = ['<pad>', 'æ', 't', 'm']
     const frame = (id: number, p: number) => {

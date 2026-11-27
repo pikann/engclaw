@@ -5,6 +5,7 @@ import {
   firstFlagged,
   heardSounds,
   isWrongPhone,
+  recognizeWords,
   scoreTone,
   subScores,
   verdictOf,
@@ -37,6 +38,21 @@ const result = (errors: ReturnType<typeof err>[]) =>
   }) as unknown as PronunciationResult
 
 describe('result view model', () => {
+  it('marks words the recognizer understood independently of phoneme errors', () => {
+    expect(recognizeWords(['a', 'question', 'for', 'you'], 'A QUESTION, FOR YOU!')).toEqual(
+      ['a', 'question', 'for', 'you'].map((heard) => ({ matched: true, heard })),
+    )
+    expect(recognizeWords(['question', 'question', 'today'], 'QUESTION today')).toEqual([
+      { matched: true, heard: 'question' },
+      { matched: false },
+      { matched: true, heard: 'today' },
+    ])
+    expect(recognizeWords(['a', 'question'], 'a suggestion')[1]).toEqual({
+      matched: false,
+      heard: 'suggestion',
+    })
+  })
+
   it('builds one chip per word and attaches errors by position', () => {
     const chips = wordChips(result([err(1, 'quick')]), 'The quick, brown!')
     expect(chips.map((c) => c.word)).toEqual(['the', 'quick', 'brown'])

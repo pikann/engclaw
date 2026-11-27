@@ -24,6 +24,7 @@ describe('AttemptPanel errors', () => {
           disabled={false}
           onToggleRecord={() => undefined}
           onPlay={() => undefined}
+          replaying={false}
           onRetry={() => undefined}
           onDownloadModels={() => undefined}
         />

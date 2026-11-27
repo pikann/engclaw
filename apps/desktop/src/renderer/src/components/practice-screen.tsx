@@ -1,4 +1,9 @@
-import { EnglishPronunciation } from '@/components/english-pronunciation'
+import { englishSound } from '@/lib/english-sound'
+import {
+  EnglishIpaChart,
+  EnglishPronunciation,
+  EnglishSoundGuide,
+} from '@/components/english-pronunciation'
 import { MandarinSoundGuide } from '@/components/mandarin-sound-guide'
 import { mandarinFinal } from '@/lib/mandarin-final'
 import { mandarinInitial } from '@/lib/mandarin-initial'
@@ -232,6 +237,7 @@ export function PracticeScreen() {
   const s = state.tabs[mode]
   const free = mode === 'free'
   const englishRead = language === 'en' && !free && hasText(s.text)
+  const englishSoundItem = englishRead ? englishSound(s.text) : null
   const mandarinRead = language === 'zh' && !free
   const sound = mandarinRead ? mandarinSound(s.text) : null
   const pinyinOnly = mandarinRead && !hasHanzi(s.text)
@@ -255,7 +261,9 @@ export function PracticeScreen() {
   const [fileError, setFileError] = useState<string | null>(null)
   const [dragging, setDragging] = useState(false)
   const [downloadOpen, setDownloadOpen] = useState(false)
-  const [confirmTo, setConfirmTo] = useState<PracticeMode | null>(null)
+  const [showIpa, setShowIpa] = useState(false)
+  const ipaOpen = language === 'en' && showIpa
+  const [confirmTo, setConfirmTo] = useState<PracticeMode | 'ipa' | null>(null)
   const [history, setHistory] = useState<HistoryAttempt[]>([])
   const [saved, setSaved] = useState<PronunciationResult | null>(null)
   const [selected, setSelected] = useState<number | null>(null)
@@ -285,7 +293,10 @@ export function PracticeScreen() {
       requestIds.current[m] = id
       const text = latest.current.tabs[m].text.trim()
       const target =
-        language === 'zh' && m === 'sentence' ? (mandarinSound(text)?.reading ?? text) : text
+        m === 'sentence'
+          ? ((language === 'zh' ? mandarinSound(text)?.reading : englishSound(text)?.example) ??
+            text)
+          : text
       try {
         const res = await window.engclaw.inference.analyze({
           requestId: id,
@@ -296,7 +307,7 @@ export function PracticeScreen() {
         if (requestIds.current[m] !== id) return
         if (res.ok) {
           const result = res.value
-          void saveAttempt(m, text, audio, result).then((ok) => {
+          void saveAttempt(m, language === 'en' ? target : text, audio, result).then((ok) => {
             if (ok) setSaved(result)
             loadHistory()
           })
@@ -473,12 +484,14 @@ export function PracticeScreen() {
     })
   }
 
-  const requestSwitch = (m: PracticeMode): void => {
-    if (m === mode) return
+  const requestSwitch = (m: PracticeMode | 'ipa'): void => {
+    if (m === mode && !ipaOpen) return
     if (s.phase === 'recording') return setConfirmTo(m)
     setMic(null)
     setFileError(null)
-    dispatch({ type: 'switch', mode: m })
+    playing.current?.stop()
+    setShowIpa(m === 'ipa')
+    if (m !== 'ipa') dispatch({ type: 'switch', mode: m })
   }
 
   const discardAndSwitch = (): void => {
@@ -487,7 +500,8 @@ export function PracticeScreen() {
     if (cur) void cur.rec.stop()
     send(mode, { type: 'record-failed' })
     setMic(null)
-    if (confirmTo) dispatch({ type: 'switch', mode: confirmTo })
+    setShowIpa(confirmTo === 'ipa')
+    if (confirmTo && confirmTo !== 'ipa') dispatch({ type: 'switch', mode: confirmTo })
     setConfirmTo(null)
   }
 
@@ -514,19 +528,25 @@ export function PracticeScreen() {
   const result = s.result
   const view = useResultView(
     result ??
-      ({ differences: { errors: [], expected_phones: [] } } as unknown as PronunciationResult),
-    s.text,
+      ({
+        transcribe: '',
+        differences: { errors: [], expected_phones: [] },
+      } as unknown as PronunciationResult),
+    englishSoundItem?.example ?? s.text,
   )
   useEffect(() => {
-    setSelected(result ? firstFlagged(view.chips) : null)
+    const unclear = englishRead ? view.recognition.findIndex((word) => !word.matched) : -1
+    setSelected(result ? (unclear >= 0 ? unclear : firstFlagged(view.chips)) : null)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reset only when a new result arrives
   }, [result])
 
   const busy = s.phase === 'recording' || s.phase === 'transcribing' || s.phase === 'analyzing'
   const working = s.phase === 'transcribing' || s.phase === 'analyzing'
   const otherMode: PracticeMode = free ? 'sentence' : 'free'
-  const modeName = (m: PracticeMode): string =>
-    t(`screens.practice.mode.${m === 'free' ? 'free' : 'read'}`)
+  const modeName = (m: PracticeMode | 'ipa'): string =>
+    m === 'ipa'
+      ? t('englishGuide.ipaChart')
+      : t(`screens.practice.mode.${m === 'free' ? 'free' : 'read'}`)
   const missing = s.phase === 'error' && s.error?.code === 'MODEL_MISSING'
   const tooLong = s.phase === 'error' && s.error?.code === 'CLIP_TOO_LONG'
   const engineStopped = s.phase === 'error' && s.error?.code === 'PROCESS_CRASHED'
@@ -605,6 +625,8 @@ export function PracticeScreen() {
     <p role="status" className="text-muted-foreground text-sm">
       {t('mandarinGuide.invalid')}
     </p>
+  ) : englishSoundItem ? (
+    <EnglishSoundGuide sound={englishSoundItem} disabled={isRecording || isPlaying} />
   ) : englishRead ? (
     <EnglishPronunciation key={s.text} text={s.text} disabled={isRecording || isPlaying} />
   ) : (
@@ -869,19 +891,51 @@ export function PracticeScreen() {
             onReplay={togglePlay}
             onSpeakFreely={free ? undefined : () => requestSwitch('free')}
             onStartOver={free ? () => send(mode, { type: 'reset' }) : undefined}
+            clarity={englishRead}
+            technicalDetails={
+              englishRead ? (
+                <>
+                  <DetailSection title={t('screens.practice.tabPhonemes')}>
+                    <PhonemesDetail
+                      result={result}
+                      view={view}
+                      onReplay={togglePlay}
+                      replaying={isPlaying}
+                    />
+                  </DetailSection>
+                  <DetailSection title={t('screens.practice.tabPitch')}>
+                    <PitchDetail result={result} />
+                  </DetailSection>
+                </>
+              ) : undefined
+            }
           />
           {englishRead && <div className="bg-card rounded-xl border p-5">{reference}</div>}
-          <DetailSection title={t('screens.practice.tabPhonemes')}>
-            <PhonemesDetail result={result} view={view} />
-          </DetailSection>
+          {!englishRead && (
+            <DetailSection title={t('screens.practice.tabPhonemes')}>
+              <PhonemesDetail
+                result={result}
+                view={view}
+                onReplay={togglePlay}
+                replaying={isPlaying}
+              />
+            </DetailSection>
+          )}
         </div>
         <div className="space-y-5">
           <DetailSection title={t('screens.practice.tabWords')}>
-            <WordsDetail view={view} selected={selected} onSelect={setSelected} />
+            <WordsDetail
+              view={view}
+              selected={selected}
+              onSelect={setSelected}
+              clarity={englishRead}
+            />
           </DetailSection>
-          <DetailSection title={t('screens.practice.tabPitch')}>
-            <PitchDetail result={result} />
-          </DetailSection>
+          {!englishRead && (
+            <DetailSection title={t('screens.practice.tabPitch')}>
+              <PitchDetail result={result} />
+            </DetailSection>
+          )}
         </div>
       </div>
     ) : stage === 'review' ? (
@@ -905,15 +959,15 @@ export function PracticeScreen() {
         e.preventDefault()
         setDragging(false)
         const f = e.dataTransfer.files[0]
-        if (f && !busy && stage === 'record') void loadFile(f)
+        if (f && !ipaOpen && !busy && stage === 'record') void loadFile(f)
       }}
     >
       {language === 'zh' && (
         <p className="px-6 pt-3 text-sm text-muted-foreground">{t('learning.assessmentNote')}</p>
       )}
       <Tabs
-        value={mode}
-        onValueChange={(v) => requestSwitch(v as PracticeMode)}
+        value={ipaOpen ? 'ipa' : mode}
+        onValueChange={(v) => requestSwitch(v as PracticeMode | 'ipa')}
         className="min-h-0 flex-1 gap-0"
       >
         <div className="mx-auto flex w-full max-w-xl shrink-0 flex-col items-center gap-2 px-6 pt-5">
@@ -930,6 +984,11 @@ export function PracticeScreen() {
                   )}
                 </TabsTrigger>
               ))}
+              {language === 'en' && (
+                <TabsTrigger value="ipa" data-testid="practice-mode-ipa">
+                  {modeName('ipa')}
+                </TabsTrigger>
+              )}
             </TabsList>
           </div>
           {hasDraft(state.tabs[otherMode]) && (
@@ -938,6 +997,13 @@ export function PracticeScreen() {
             </span>
           )}
         </div>
+        {language === 'en' && (
+          <TabsContent value="ipa" className="min-h-0 flex-1 overflow-auto">
+            <div className="mx-auto w-full max-w-5xl p-6">
+              <EnglishIpaChart />
+            </div>
+          </TabsContent>
+        )}
         <TabsContent value={mode} className="min-h-0 flex-1 overflow-auto">
           <div
             className={cn(

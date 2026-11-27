@@ -130,9 +130,18 @@ export async function analyzeRecording(
     wordErrorRate: tc.wordErrorRate,
   })
 
+  const samplesPerFrame = rec.frames > 0 ? audio.length / rec.frames : 0
+  const wordSpans = pc.wordSpans?.map((span): [number, number] | null => {
+    if (!span || samplesPerFrame <= 0) return null
+    const start = Math.max(0, Math.round(span[0] * samplesPerFrame))
+    const end = Math.min(audio.length, Math.round(span[1] * samplesPerFrame))
+    return end > start ? [start, end] : null
+  })
+
   const f0 = interpolateF0(extractF0(audio, { sampleRate: SAMPLE_RATE }))
   return {
     score,
+    word_audio_spans: wordSpans,
     distance: Math.trunc(acoustic.distance * acoustic.path.length),
     acoustic_distance: round(acoustic.distance, 3),
     differences: {

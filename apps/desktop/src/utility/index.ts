@@ -3,7 +3,7 @@ import { speakMandarin } from './mandarin-speech'
 import { join } from 'node:path'
 import type { ContourData } from '@engclaw/ipc-contract'
 import { CachedPhonemizer, TTS_MODEL_ID } from '@engclaw/pronounce'
-import { EspeakProcess } from './espeak'
+import { EspeakProcess, speakEnglishIpa } from './espeak'
 import { resolveEspeak } from './espeak-binary'
 import { DEFAULT_KOKORO_FILES, loadKokoro } from './kokoro'
 import { InferenceError, toInferenceError } from './errors'
@@ -64,6 +64,9 @@ async function dispatch(req: RpcRequest, signal: AbortSignal): Promise<unknown> 
     audio?: Float32Array
     text?: string
     pinyin?: boolean
+    ipa?: boolean
+    ipaExample?: string
+    segmented?: boolean
     nativeText?: string
     language?: string
     reference?: { audio: Float32Array } | { contour: ContourData }
@@ -92,6 +95,16 @@ async function dispatch(req: RpcRequest, signal: AbortSignal): Promise<unknown> 
     case 'phonemize':
       return inference.phonemize(p.text!, p.language)
     case 'speak': {
+      if (p.language === 'en' && (p.ipa || p.ipaExample))
+        return {
+          samples: await speakEnglishIpa(
+            p.ipaExample ?? p.text!,
+            resolveEspeak(),
+            p.ipaExample ? p.text : undefined,
+          ),
+          sampleRate: 16000,
+          cached: false,
+        }
       if (p.language === 'zh')
         return {
           ...(await speakMandarin(p.text!, p.pinyin, p.nativeText)),
@@ -100,7 +113,7 @@ async function dispatch(req: RpcRequest, signal: AbortSignal): Promise<unknown> 
         }
       if (!p.kokoro)
         throw new InferenceError('MODEL_MISSING', 'reference voice not installed', TTS_MODEL_ID)
-      return (await speechFor(p.kokoro.modelDir, p.kokoro.cacheDir)).speak(p.text!)
+      return (await speechFor(p.kokoro.modelDir, p.kokoro.cacheDir)).speak(p.text!, p.segmented)
     }
   }
 }

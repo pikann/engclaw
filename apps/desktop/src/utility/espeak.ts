@@ -1,4 +1,6 @@
-import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process'
+import { promisify } from 'node:util'
+import { espeakPcm } from './speech-wav'
+import { execFile, spawn, type ChildProcessWithoutNullStreams } from 'node:child_process'
 import type { PhonemizeBackend } from '@engclaw/pronounce'
 
 export interface EspeakOptions {
@@ -85,4 +87,92 @@ export class EspeakProcess implements PhonemizeBackend {
     this.queue = []
     for (const p of pending) p.reject(err)
   }
+}
+
+// A trailing pause lets eSpeak release voiced stops and /dʒ/ without adding a vowel.
+const ENGLISH_IPA: ReadonlyMap<string, string> = new Map([
+  ['p', 'p'],
+  ['b', 'b_'],
+  ['t', 't'],
+  ['d', 'd_'],
+  ['k', 'k'],
+  ['ɡ', 'g_'],
+  ['m', 'm'],
+  ['n', 'n'],
+  ['ŋ', 'N'],
+  ['f', 'f'],
+  ['v', 'v'],
+  ['θ', 'T'],
+  ['ð', 'D'],
+  ['s', 's'],
+  ['z', 'z'],
+  ['ʃ', 'S'],
+  ['ʒ', 'Z'],
+  ['h', 'h'],
+  ['tʃ', 'tS'],
+  ['dʒ', 'dZ_'],
+  ['l', 'l'],
+  ['ɹ', 'r-'],
+  ['j', 'j'],
+  ['w', 'w'],
+  ['i', 'i:'],
+  ['ɪ', "'I"],
+  ['ɛ', 'E'],
+  ['æ', 'a'],
+  ['ɑ', 'A:'],
+  ['ɒ', '0'],
+  ['ɔ', 'O:'],
+  ['ʊ', 'U'],
+  ['u', 'u:'],
+  ['ʌ', 'V'],
+  ['ə', '@'],
+  ['ɜ', '3:'],
+  ['ɝ', '3'],
+  ['ɚ', '3'],
+  ['eɪ', 'eI'],
+  ['aɪ', 'aI'],
+  ['ɔɪ', 'OI'],
+  ['oʊ', 'oU'],
+  ['əʊ', 'oU'],
+  ['aʊ', 'aU'],
+  ['ɪə', "'I@"],
+  ['eə', 'e@'],
+  ['ʊə', 'U@'],
+])
+const ENGLISH_EXAMPLES: ReadonlyMap<string, string> = new Map([
+  ['ə:about', "@b'aUt"],
+  ['ɝ:bird', "b'3d"],
+  ['ɪə:near', "n'I@"],
+])
+const BRITISH_IPA = new Set(['ɒ', 'ɜ', 'əʊ', 'ɪə', 'eə', 'ʊə'])
+
+export function englishIpaArgs(
+  ipa: string,
+  dataPath: string | undefined,
+  example?: string,
+): string[] {
+  const phoneme = ENGLISH_IPA.get(ipa)
+  if (!phoneme) throw new Error(`Unsupported English IPA sound: ${ipa}`)
+  const voice = BRITISH_IPA.has(ipa) ? 'en-gb' : 'en-us'
+  const explicit = example ? ENGLISH_EXAMPLES.get(`${ipa}:${example}`) : phoneme
+  // Brackets tell eSpeak to read the encoded phonemes directly.
+  const args = ['-v', voice]
+  if (!example && ipa === 'ɝ') args.push('-s', '125')
+  if (!example && ipa === 'ɚ') args.push('-s', '215')
+  if (dataPath) args.push(`--path=${dataPath}`)
+  args.push('--', explicit ? `[[${explicit}]]` : (example ?? ''))
+  return args
+}
+
+export async function speakEnglishIpa(
+  ipa: string,
+  { binary, dataPath }: EspeakOptions,
+  example?: string,
+): Promise<Float32Array> {
+  const { stdout } = await promisify(execFile)(
+    binary,
+    ['--stdout', ...englishIpaArgs(ipa, dataPath, example)],
+    { encoding: 'buffer', timeout: 5000 },
+  )
+  return espeakPcm(stdout)
 }

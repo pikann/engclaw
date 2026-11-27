@@ -13,6 +13,8 @@ interface Sample {
   text: string
   label?: string
   pinyin?: boolean
+  ipa?: boolean
+  ipaExample?: string
 }
 
 /** "Hear the reference": plays the Kokoro reference voice for `text` (cached after the first time). */
@@ -20,6 +22,8 @@ export function HearReference({
   text,
   variant = 'outline',
   pinyin = false,
+  ipa = false,
+  ipaExample,
   disabled = false,
   label,
   alternate,
@@ -27,6 +31,7 @@ export function HearReference({
   speedControls = false,
   defaultRate = speedControls ? 0.75 : 1,
   onPlaybackStart,
+  testId,
 }: Sample & {
   variant?: 'outline' | 'ghost'
   disabled?: boolean
@@ -35,6 +40,7 @@ export function HearReference({
   speedControls?: boolean
   defaultRate?: 0.75 | 1
   onPlaybackStart?: () => void
+  testId?: string
 }) {
   const language = useLearningLanguage()
   const { t } = useTranslation()
@@ -63,7 +69,7 @@ export function HearReference({
   useEffect(() => {
     reset()
     return halt
-  }, [language, disabled, rate, halt, reset])
+  }, [language, disabled, rate, ipa, ipaExample, halt, reset])
 
   const alternateText = alternate?.text
   const alternatePinyin = alternate?.pinyin
@@ -95,6 +101,8 @@ export function HearReference({
         text: sample.text,
         language,
         ...(sample.pinyin ? { pinyin: true } : {}),
+        ...(sample.ipa ? { ipa: true } : {}),
+        ...(sample.ipaExample ? { ipaExample: sample.ipaExample } : {}),
         ...(id === 'hear-reference-segmented' ? { segmented: true } : {}),
       })
       if (mine !== token.current) return
@@ -121,7 +129,7 @@ export function HearReference({
     }
   }
 
-  const main = { text, pinyin, label }
+  const main = { text, pinyin, ipa, ipaExample, label }
   const download = useModelDownload(() => void onClick(main, 'hear-reference'))
   const samples: { sample: Sample; id: SampleId }[] = [
     { sample: main, id: 'hear-reference' },
@@ -139,7 +147,7 @@ export function HearReference({
               key={id}
               variant={variant}
               size="sm"
-              data-testid={id}
+              data-testid={id === 'hear-reference' ? (testId ?? id) : id}
               data-playback={status}
               disabled={disabled || state === 'loading' || !sample.text.trim()}
               onClick={() => void onClick(sample, id)}

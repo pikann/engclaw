@@ -1,3 +1,4 @@
+import type { PronunciationResult } from '@engclaw/ipc-contract'
 import type { ElectronApplication } from '@playwright/test'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
@@ -52,6 +53,8 @@ export interface AudioCall {
 }
 export interface SpeakCall {
   text: string
+  segmented?: boolean
+  ipaExample?: string
 }
 export interface CallLog {
   transcribe: AudioCall[]
@@ -78,7 +81,7 @@ export const fail = (
 
 /** A pronunciation result built from the golden "developer" analysis with a chosen score. */
 export function scored(score: number, opts: { flagged?: boolean; transcript?: string } = {}) {
-  const errors = opts.flagged
+  const errors: PronunciationResult['differences']['errors'] = opts.flagged
     ? [
         {
           position: 0,
@@ -96,6 +99,7 @@ export function scored(score: number, opts: { flagged?: boolean; transcript?: st
     ok: true as const,
     value: {
       ...GOLDEN,
+      ...(opts.transcript !== undefined ? { transcribe: opts.transcript } : {}),
       score,
       feedback: { code: score >= 80 ? 'EXCELLENT' : 'NEEDS_WORK', words: [] },
       differences: {
@@ -175,18 +179,25 @@ export async function stubSpeech(
     })
 
     ipcMain.removeHandler('tts:speak')
-    ipcMain.handle('tts:speak', async (_e, req: { text: string }) => {
-      const n = log['tts']!.length
-      log['tts']!.push({ text: req.text })
-      const step = next(scripts.tts, n)
-      await sleep(step.delayMs)
-      if (!step.reply.ok) return step.reply
-      const rate = 16000
-      const samples = new Float32Array(Math.round(rate * step.reply.seconds))
-      for (let i = 0; i < samples.length; i++)
-        samples[i] = 0.02 * Math.sin((2 * Math.PI * 220 * i) / rate)
-      return { ok: true, samples, sampleRate: rate, cached: false, ms: 1 }
-    })
+    ipcMain.handle(
+      'tts:speak',
+      async (_e, req: { text: string; segmented?: boolean; ipaExample?: string }) => {
+        const n = log['tts']!.length
+        log['tts']!.push({
+          text: req.text,
+          ...(req.segmented ? { segmented: true } : {}),
+          ...(req.ipaExample ? { ipaExample: req.ipaExample } : {}),
+        })
+        const step = next(scripts.tts, n)
+        await sleep(step.delayMs)
+        if (!step.reply.ok) return step.reply
+        const rate = 16000
+        const samples = new Float32Array(Math.round(rate * step.reply.seconds))
+        for (let i = 0; i < samples.length; i++)
+          samples[i] = 0.02 * Math.sin((2 * Math.PI * 220 * i) / rate)
+        return { ok: true, samples, sampleRate: rate, cached: false, ms: 1 }
+      },
+    )
   }, merged)
 }
 

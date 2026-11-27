@@ -269,6 +269,111 @@ test('Mandarin standalone iang gives guidance and plays its sample', async () =>
   }
 })
 
+test('English IPA chart opens sound details and records the selected exercise', async () => {
+  const { page, app } = await launchApp()
+  try {
+    await stubSpeech(app, {
+      analyze: [{ reply: scored(91, { transcript: 'pen pin pan pet pick' }) }],
+    })
+    await page.getByTestId('nav-practice').click()
+    await page.getByTestId('practice-mode-sentence').click()
+    await page.getByTestId('practice-text').fill('Keep this draft')
+    await page.getByTestId('practice-mode-ipa').click()
+    const chart = page.getByTestId('english-ipa-chart')
+    await expect(chart.getByRole('button')).toHaveCount(47)
+    const detail = chart.getByTestId('english-sound-guide')
+    for (const phone of ['dʒ', 'ʃ', 'tʃ', 'aɪ', 'θ', 'p']) {
+      await chart.getByRole('button', { name: `/${phone}/`, exact: true }).click()
+      await expect(detail).toContainText(`/${phone}/`)
+      await expect(detail.getByTestId('articulation')).toBeVisible()
+    }
+    await chart.getByRole('button', { name: '/aɪ/', exact: true }).click()
+    const tongue = detail.getByTestId('tongue')
+    await expect(tongue).toHaveAttribute('data-phone', 'ɪ')
+    await page.waitForTimeout(250)
+    await expect(tongue).toHaveAttribute('data-phone', 'ɪ')
+    await chart.getByRole('button', { name: '/ɜ/', exact: true }).click()
+    const comparison = detail.getByTestId('ipa-vowel-comparison')
+    await comparison.getByTestId('ipa-vowel-comparison-first').click()
+    await expect
+      .poll(async () => (await callLog(app)).tts.at(-1))
+      .toMatchObject({
+        text: 'bird',
+        ipaExample: 'ɜ',
+      })
+    await comparison.getByTestId('hear-reference-alternate').click()
+    await expect
+      .poll(async () => (await callLog(app)).tts.at(-1))
+      .toMatchObject({
+        text: 'bird',
+        ipaExample: 'ɝ',
+      })
+    await chart.getByRole('button', { name: '/əʊ/', exact: true }).click()
+    await detail.getByTestId('hear-reference-alternate').click()
+    await expect
+      .poll(async () => (await callLog(app)).tts.at(-1))
+      .toMatchObject({
+        text: 'go',
+        ipaExample: 'əʊ',
+      })
+    await chart.getByRole('button', { name: '/p/', exact: true }).click()
+    await detail.getByTestId('hear-reference').click()
+    await expect.poll(async () => (await callLog(app)).tts.at(-1)?.text).toBe('p')
+    await detail.getByTestId('hear-reference-segmented').click()
+    await expect
+      .poll(async () => (await callLog(app)).tts.at(-1))
+      .toMatchObject({
+        text: 'pen pin pan pet pick',
+        segmented: true,
+      })
+    const record = detail.getByTestId('shadowing-word-record')
+    await record.click()
+    await expect(record).toHaveText(/Stop and check|Dừng và chấm/)
+    await page.waitForTimeout(800)
+    await record.click()
+    await expect(detail.getByTestId('shadowing-word-recognition')).toBeVisible()
+    expect((await callLog(app)).analyze.at(-1)?.text).toBe('pen pin pan pet pick')
+    await page.getByTestId('practice-mode-sentence').click()
+    await expect(page.getByTestId('practice-text')).toHaveValue('Keep this draft')
+  } finally {
+    await app.close()
+  }
+})
+
+test('d3 opens the English sound guide and uses judge for playback and practice', async () => {
+  const { page, app } = await launchApp()
+  try {
+    await stubSpeech(app, {
+      analyze: [{ reply: scored(91, { transcript: 'judge' }) }],
+      tts: [{ reply: { ok: true, seconds: 1 } }],
+    })
+    await setInterfaceLanguage(page, 'vi')
+    await setGuideLanguage(page, 'Tiếng Việt')
+    await page.getByTestId('nav-practice').click()
+    await page.getByTestId('practice-mode-sentence').click()
+    const input = page.getByTestId('practice-text')
+    const guide = page.getByTestId('english-sound-guide')
+    await input.fill('/dʒ/')
+    await expect(guide).toBeVisible()
+    await input.fill('d3')
+    await expect(guide).toContainText('/dʒ/')
+    await expect(guide).toContainText('có rung giọng')
+    await expect(guide.getByTestId('articulation')).toBeVisible()
+    await guide.getByTestId('hear-reference').click()
+    await expect(guide.getByTestId('hear-reference')).toHaveAttribute('data-playback', 'playing')
+    expect((await callLog(app)).tts.at(-1)?.text).toBe('judge')
+
+    await page.getByTestId('practice-record').click()
+    await expect(page.getByTestId('practice-stop')).toBeVisible()
+    await page.waitForTimeout(1000)
+    await page.getByTestId('practice-stop').click()
+    await expect(page.getByTestId('result-chips')).toContainText('judge')
+    expect((await callLog(app)).analyze.at(-1)?.text).toBe('judge')
+  } finally {
+    await app.close()
+  }
+})
+
 test('English read-aloud shows IPA and linking guidance with Vietnamese interface', async () => {
   const { page, app } = await launchApp()
   try {

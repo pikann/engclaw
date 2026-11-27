@@ -29,6 +29,14 @@ function setup(overrides: Partial<{ ids: string[] }> = {}) {
 }
 
 describe('KokoroSynthesizer', () => {
+  it('synthesizes each practice word separately with time to repeat', async () => {
+    const { synth, lines, runs } = setup()
+    const audio = await synth.synthesize('pen pin pan', true)
+    expect(lines).toEqual([['pen', 'pin', 'pan']])
+    expect(runs).toHaveLength(3)
+    expect(audio.length).toBeGreaterThan(2 * 0.65 * 16000)
+  })
+
   it('runs one chunk per sentence with pad tokens and the style row for its length', async () => {
     const { synth, runs, lines } = setup()
     const out = await synth.synthesize('Hello there. Bye now!')

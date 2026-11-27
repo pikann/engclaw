@@ -1,5 +1,5 @@
 import { MandarinResult } from '@/components/mandarin-result'
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { PronunciationResult } from '@engclaw/ipc-contract'
 import {
@@ -8,6 +8,7 @@ import {
   ResultSummary,
   useResultView,
   WordsDetail,
+  type WordPlayback,
 } from '@/components/practice-result'
 import { firstFlagged } from '@/lib/result'
 import { cn } from '@/lib/utils'
@@ -61,6 +62,8 @@ export function PronunciationResultSections({
   text,
   onPlay,
   onRetry,
+  replaying,
+  wordPlayback,
   afterSummary,
   beforePitch,
   testId,
@@ -69,17 +72,29 @@ export function PronunciationResultSections({
   text: string
   onPlay: () => void
   onRetry: () => void
+  replaying?: boolean
+  wordPlayback?: WordPlayback
   afterSummary?: ReactNode
   beforePitch?: ReactNode
   testId?: string
 }) {
   const { t } = useTranslation()
   const view = useResultView(result, text)
-  const [selected, setSelected] = useState<number | null>(() => firstFlagged(view.chips))
+  const wordDetail = useRef<HTMLDivElement>(null)
+  const clarity = !!wordPlayback
+  const firstWord = () => {
+    const unclear = clarity ? view.recognition.findIndex((word) => !word.matched) : -1
+    return unclear >= 0 ? unclear : firstFlagged(view.chips)
+  }
+  const [selected, setSelected] = useState<number | null>(firstWord)
   useEffect(() => {
-    setSelected(firstFlagged(view.chips))
+    setSelected(firstWord())
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reset only when a new result arrives
   }, [result])
+  const selectWord = (position: number) => {
+    if (wordPlayback?.position != null && wordPlayback.position !== position) wordPlayback.stop()
+    setSelected(position)
+  }
   if (result.assessment)
     return (
       <div data-testid={testId}>
@@ -87,6 +102,23 @@ export function PronunciationResultSections({
         {beforePitch}
       </div>
     )
+  const soundAnalysis = (
+    <>
+      <ResultSection title={t('screens.practice.tabPhonemes')}>
+        <PhonemesDetail
+          result={result}
+          view={view}
+          onReplay={onPlay}
+          replaying={replaying}
+          recording={wordPlayback?.practice?.recording}
+        />
+      </ResultSection>
+      {beforePitch}
+      <ResultSection title={t('screens.practice.tabPitch')}>
+        <PitchDetail result={result} />
+      </ResultSection>
+    </>
+  )
   return (
     <div className="space-y-4" data-testid={testId}>
       <ResultSummary
@@ -94,21 +126,35 @@ export function PronunciationResultSections({
         view={view}
         selected={selected}
         saved={false}
-        onSelect={setSelected}
+        onSelect={(position) => {
+          selectWord(position)
+          if (wordPlayback) wordDetail.current?.scrollIntoView({ block: 'nearest' })
+        }}
         onTryAgain={onRetry}
         onReplay={onPlay}
+        clarity={clarity}
+        technicalDetails={
+          clarity ? (
+            <>
+              {afterSummary}
+              {soundAnalysis}
+            </>
+          ) : undefined
+        }
       />
-      {afterSummary}
-      <ResultSection title={t('screens.practice.tabWords')}>
-        <WordsDetail view={view} selected={selected} onSelect={setSelected} />
-      </ResultSection>
-      <ResultSection title={t('screens.practice.tabPhonemes')}>
-        <PhonemesDetail result={result} view={view} />
-      </ResultSection>
-      {beforePitch}
-      <ResultSection title={t('screens.practice.tabPitch')}>
-        <PitchDetail result={result} />
-      </ResultSection>
+      {!clarity && afterSummary}
+      <div ref={wordDetail}>
+        <ResultSection title={t('screens.practice.tabWords')}>
+          <WordsDetail
+            view={view}
+            selected={selected}
+            onSelect={selectWord}
+            wordPlayback={wordPlayback}
+            clarity={clarity}
+          />
+        </ResultSection>
+      </div>
+      {!clarity && soundAnalysis}
     </div>
   )
 }

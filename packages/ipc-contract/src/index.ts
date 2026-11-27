@@ -120,10 +120,23 @@ export const SpeakRequest = z
     text: z.string().min(1).max(3000),
     language: LearningLanguage.optional(),
     pinyin: z.boolean().optional(),
+    ipa: z.boolean().optional(),
+    ipaExample: z.string().min(1).max(2).optional(),
     segmented: z.boolean().optional(),
   })
   .strict()
   .refine(({ pinyin, text }) => pinyin || text.length <= 1000, { path: ['text'] })
+  .refine(
+    ({ ipa, language, pinyin, text }) =>
+      !ipa || (language === 'en' && !pinyin && /^[a-zæɑɒɔəɛɜɚɝɡɪɹʊʌʃʒŋθð]{1,2}$/u.test(text)),
+    { path: ['text'] },
+  )
+  .refine(
+    ({ ipaExample, language, ipa, pinyin, segmented, text }) =>
+      !ipaExample ||
+      (language === 'en' && !ipa && !pinyin && !segmented && /^[a-z]{1,40}$/iu.test(text)),
+    { path: ['ipaExample'] },
+  )
 export const SpeakErrorCode = z.enum(['MODEL_MISSING', 'FAILED'])
 export const SpeakResponse = z.discriminatedUnion('ok', [
   z.object({
@@ -269,6 +282,10 @@ export const PronunciationResult = z.object({
   score: z.number(),
   distance: z.number(),
   acoustic_distance: z.number(),
+  /** Bounds in the analyzed 16 kHz recording, indexed by reference word and end-exclusive. */
+  word_audio_spans: z
+    .array(z.tuple([z.int().nonnegative(), z.int().nonnegative()]).nullable())
+    .optional(),
   differences: z.object({
     word_distance: z.number(),
     phoneme_distance: z.number(),

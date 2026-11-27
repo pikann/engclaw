@@ -1,8 +1,10 @@
-import { useEffect, useMemo } from 'react'
+import { HearReference } from '@/components/hear-reference'
+import { useEffect, useMemo, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
-import { BookOpen, Check, Mic, Play, RotateCcw, Volume2, X } from 'lucide-react'
+import { BookOpen, Check, Mic, Play, RotateCcw, Square, Volume2, X } from 'lucide-react'
 import type { PronunciationResult } from '@engclaw/ipc-contract'
+import { WordPractice, type WordPracticeControls } from '@/components/shadowing/word-practice'
 import { Chart } from '@/components/detail-charts'
 import { ArticulationView } from '@/components/articulation-view'
 import { SoundButtons } from '@/components/sound-buttons'
@@ -20,6 +22,8 @@ import {
   heardSounds,
   heardText,
   isWrongPhone,
+  recognizeWords,
+  type WordRecognition,
   subScores,
   verdictOf,
   wordChips,
@@ -31,7 +35,16 @@ import { cn } from '@/lib/utils'
 export function useResultView(result: PronunciationResult, text: string) {
   return useMemo(() => {
     const chips = wordChips(result, text)
-    return { text, chips, verdict: verdictOf(chips), scores: subScores(result) }
+    return {
+      text,
+      chips,
+      verdict: verdictOf(chips),
+      scores: subScores(result),
+      recognition: recognizeWords(
+        chips.map((chip) => chip.word),
+        result.transcribe,
+      ),
+    }
   }, [result, text])
 }
 export type ResultView = ReturnType<typeof useResultView>
@@ -56,6 +69,8 @@ export function ResultSummary({
   onReplay,
   onSpeakFreely,
   onStartOver,
+  clarity = false,
+  technicalDetails,
 }: {
   result: PronunciationResult
   view: ResultView
@@ -68,69 +83,94 @@ export function ResultSummary({
   onSpeakFreely?: () => void
   /** Free tab: forget this take and text. */
   onStartOver?: () => void
+  clarity?: boolean
+  technicalDetails?: ReactNode
 }) {
   const { t } = useTranslation()
   useEffect(() => playChime(), [result])
   const { chips, verdict, scores } = view
+  const scoreBlock = (
+    <div className="flex flex-wrap items-center gap-4">
+      <ScoreRing score={result.score} />
+      <div className="grid min-w-0 grid-cols-3 gap-2">
+        <Tile label={t('screens.practice.accuracy')} value={scores.accuracy} />
+        <Tile label={t('screens.practice.fluency')} value={scores.fluency} />
+        <Tile label={t('screens.practice.prosody')} value={scores.prosody} />
+      </div>
+    </div>
+  )
   return (
     <div className="bg-card space-y-5 rounded-xl border border-input p-5" data-testid="result-card">
-      <div className="flex flex-wrap items-center gap-4">
-        <ScoreRing score={result.score} />
-        <div className="grid min-w-0 grid-cols-3 gap-2">
-          <Tile label={t('screens.practice.accuracy')} value={scores.accuracy} />
-          <Tile label={t('screens.practice.fluency')} value={scores.fluency} />
-          <Tile label={t('screens.practice.prosody')} value={scores.prosody} />
+      {clarity ? (
+        <div className="space-y-1">
+          <p className="font-semibold" data-testid="result-clarity">
+            {t('result.recognizedCount', {
+              recognized: view.recognition.filter((word) => word.matched).length,
+              total: chips.length,
+            })}
+          </p>
+          <p className="text-muted-foreground text-sm">
+            {t('result.heardSentence', { text: heardText(result) || '…' })}
+          </p>
         </div>
-      </div>
-      <p className="text-muted-foreground text-sm" data-testid="result-verdict">
-        {verdict.flagged === 0
-          ? t('result.verdictAll', { total: verdict.total })
-          : t('result.verdict', { flagged: verdict.flagged, total: verdict.total })}
-      </p>
+      ) : (
+        <>
+          {scoreBlock}
+          <p className="text-muted-foreground text-sm" data-testid="result-verdict">
+            {verdict.flagged === 0
+              ? t('result.verdictAll', { total: verdict.total })
+              : t('result.verdict', { flagged: verdict.flagged, total: verdict.total })}
+          </p>
+        </>
+      )}
       <p className="text-2xl leading-loose" data-testid="result-chips">
-        {chips.map((c) => (
-          <span key={c.position} className="mr-2 inline-block">
-            <ClickableWord
-              data-testid="word-chip"
-              data-flagged={!!c.error}
-              aria-expanded={c.position === selected}
-              title={
-                c.error
-                  ? t('result.chipTip', {
-                      confidence: Math.round(c.error.confidence * 100),
-                      expected: c.error.expected,
-                      actual: c.error.actual || '∅',
-                    })
-                  : t('result.chipOk')
-              }
-              onClick={() => onSelect(c.position)}
-              className={cn(
-                c.error
-                  ? 'bg-destructive-soft text-destructive-soft-foreground decoration-destructive'
-                  : 'text-success-soft-foreground',
+        {chips.map((c) => {
+          const heard = view.recognition[c.position]
+          const flagged = clarity ? !heard?.matched : !!c.error
+          const label = clarity
+            ? t(heard?.matched ? 'result.recognizedWord' : 'result.unrecognizedWord')
+            : c.error
+              ? t('result.chipTip', {
+                  confidence: Math.round(c.error.confidence * 100),
+                  expected: c.error.expected,
+                  actual: c.error.actual || '∅',
+                })
+              : t('result.chipOk')
+          return (
+            <span key={c.position} className="mr-2 inline-block">
+              <ClickableWord
+                data-testid="word-chip"
+                data-flagged={flagged}
+                aria-expanded={c.position === selected}
+                title={label}
+                onClick={() => onSelect(c.position)}
+                className={cn(
+                  flagged
+                    ? 'bg-destructive-soft text-destructive-soft-foreground decoration-destructive'
+                    : 'text-success-soft-foreground',
+                )}
+              >
+                {c.word}
+              </ClickableWord>
+              {flagged ? (
+                <X
+                  className="text-destructive ml-0.5 inline size-4"
+                  aria-label={clarity ? label : t('screens.practice.needsWork')}
+                />
+              ) : (
+                <Check className="text-success ml-0.5 inline size-4" aria-label={label} />
               )}
-            >
-              {c.word}
-            </ClickableWord>
-            {c.error ? (
-              <X
-                className="text-destructive ml-0.5 inline size-4"
-                aria-label={t('screens.practice.needsWork')}
-              />
-            ) : (
-              <Check
-                className="text-success ml-0.5 inline size-4"
-                aria-label={t('result.chipOk')}
-              />
-            )}
-          </span>
-        ))}
-      </p>
-      <p className="bg-info-soft text-info-soft-foreground rounded-md p-3 text-sm">
-        {t(`pronounce.feedback.${result.feedback.code}`, {
-          words: result.feedback.words.join(', '),
+            </span>
+          )
         })}
       </p>
+      {!clarity && (
+        <p className="bg-info-soft text-info-soft-foreground rounded-md p-3 text-sm">
+          {t(`pronounce.feedback.${result.feedback.code}`, {
+            words: result.feedback.words.join(', '),
+          })}
+        </p>
+      )}
       <div className="flex flex-wrap gap-2">
         <Button size="sm" data-testid="result-try-again" onClick={onTryAgain}>
           <RotateCcw />
@@ -157,6 +197,17 @@ export function ResultSummary({
           </Button>
         )}
       </div>
+      {clarity && (
+        <details className="rounded-md border p-3" data-testid="result-technical">
+          <summary className="cursor-pointer text-sm font-medium">
+            {t('result.technicalDetails')}
+          </summary>
+          <div className="mt-3 space-y-4">
+            {scoreBlock}
+            {technicalDetails}
+          </div>
+        </details>
+      )}
       {saved && (
         <p
           role="status"
@@ -173,7 +224,25 @@ export function ResultSummary({
   )
 }
 
-function WordDetail({ chip, text }: { chip: WordChip; text: string }) {
+export interface WordPlayback {
+  play: (position: number) => void
+  stop: () => void
+  position: number | null
+  spans: PronunciationResult['word_audio_spans']
+  practice?: WordPracticeControls
+}
+
+function WordDetail({
+  chip,
+  text,
+  wordPlayback,
+  recognition,
+}: {
+  chip: WordChip
+  text: string
+  wordPlayback?: WordPlayback
+  recognition?: WordRecognition
+}) {
   const { t } = useTranslation()
   const e = chip.error
   const lookup = useWordLookup()
@@ -186,33 +255,14 @@ function WordDetail({ chip, text }: { chip: WordChip; text: string }) {
           : ipaPhones(e?.expected ?? ''),
     [chip, e],
   )
+  const unclearPhone = e?.phones.find(
+    (phone) => phone.expected && phone.expected !== phone.heard && isWrongPhone(phone.confidence),
+  )
   const art = useWordArticulation(chip.word, sounds)
-  return (
-    <div className="space-y-2 rounded-md border p-3" data-testid="word-detail">
-      <div className="flex items-center gap-2">
-        <span className="text-lg font-semibold">{chip.word}</span>
-        <Button
-          variant="outline"
-          size="sm"
-          data-testid="word-hear"
-          disabled={art.loading}
-          onClick={() => void art.hear()}
-        >
-          <Volume2 />
-          {art.loading ? t('reference.loading') : t('result.hearIt')}
-        </Button>
-        {lookup && (
-          <Button
-            variant="outline"
-            size="sm"
-            data-testid="word-lookup"
-            onClick={() => lookup(normalizeWord(chip.word), text)}
-          >
-            <BookOpen />
-            {t('dict.lookup')}
-          </Button>
-        )}
-      </div>
+  const playingWord = wordPlayback?.position === chip.position
+  const recordedWord = wordPlayback?.spans?.[chip.position]
+  const soundDetails = (
+    <>
       <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
         <dt className="text-muted-foreground">{t('result.expected')}</dt>
         <dd className="font-mono" data-testid="word-expected" lang="en-fonipa">
@@ -249,6 +299,87 @@ function WordDetail({ chip, text }: { chip: WordChip; text: string }) {
         </p>
       )}
       {sounds.length > 0 && <ArticulationView {...art.view} />}
+    </>
+  )
+  return (
+    <div className="space-y-2 rounded-md border p-3" data-testid="word-detail">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-lg font-semibold">{chip.word}</span>
+        <Button
+          variant="outline"
+          size="sm"
+          data-testid="word-hear"
+          disabled={art.loading || wordPlayback?.practice?.recording}
+          onClick={() => {
+            wordPlayback?.stop()
+            void art.hear()
+          }}
+        >
+          <Volume2 />
+          {art.loading ? t('reference.loading') : t('result.hearIt')}
+        </Button>
+        {wordPlayback && recordedWord && (
+          <Button
+            variant="outline"
+            size="sm"
+            data-testid="word-replay-recording"
+            disabled={wordPlayback.practice?.recording}
+            onClick={() => {
+              art.stopAudio()
+              wordPlayback.play(chip.position)
+            }}
+          >
+            {playingWord ? <Square /> : <Play />}
+            {t(playingWord ? 'result.stopWordRecording' : 'result.playWordRecording')}
+          </Button>
+        )}
+        {lookup && (
+          <Button
+            variant="outline"
+            size="sm"
+            data-testid="word-lookup"
+            onClick={() => lookup(normalizeWord(chip.word), text)}
+          >
+            <BookOpen />
+            {t('dict.lookup')}
+          </Button>
+        )}
+      </div>
+      {wordPlayback && !recordedWord && (
+        <p className="text-muted-foreground text-xs">{t('result.wordRecordingUnavailable')}</p>
+      )}
+      {recognition ? (
+        <>
+          <p className="text-sm font-medium" data-testid="word-recognition">
+            {t(recognition.matched ? 'result.recognizedWord' : 'result.unrecognizedWord')}
+          </p>
+          {!recognition.matched && recognition.heard && (
+            <p className="text-sm">{t('result.understood', { word: recognition.heard })}</p>
+          )}
+          {unclearPhone && (
+            <p className="text-sm" data-testid="word-unclear-sound">
+              {t('result.unclearSound', { sound: unclearPhone.expected })}
+            </p>
+          )}
+          <details className="rounded-md border p-2">
+            <summary className="cursor-pointer text-sm">{t('result.soundDetails')}</summary>
+            <div className="mt-2 space-y-2">{soundDetails}</div>
+          </details>
+        </>
+      ) : (
+        soundDetails
+      )}
+      {wordPlayback?.practice && (
+        <WordPractice
+          key={chip.position}
+          word={chip.word}
+          controls={wordPlayback.practice}
+          onPrepare={() => {
+            art.stopAudio()
+            wordPlayback.stop()
+          }}
+        />
+      )}
     </div>
   )
 }
@@ -257,9 +388,15 @@ function WordDetail({ chip, text }: { chip: WordChip; text: string }) {
 export function PhonemesDetail({
   result,
   view,
+  onReplay,
+  replaying = false,
+  recording = false,
 }: {
   result: PronunciationResult
   view: ResultView
+  onReplay: () => void
+  replaying?: boolean
+  recording?: boolean
 }) {
   const { t } = useTranslation()
   const series = useMemo(() => detailSeries(result), [result])
@@ -267,7 +404,25 @@ export function PhonemesDetail({
   const heard = heardText(result)
   const { expected_phones } = result.differences
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-testid="result-phonemes">
+      <div className="flex flex-wrap gap-2">
+        <HearReference
+          text={view.text}
+          disabled={replaying || recording}
+          testId="phonemes-reference"
+        />
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={recording}
+          aria-pressed={replaying}
+          data-testid="phonemes-replay"
+          onClick={onReplay}
+        >
+          {replaying ? <Square /> : <Play />}
+          {t('screens.practice.playTake')}
+        </Button>
+      </div>
       <section>
         <h4 className="text-muted-foreground text-xs font-medium uppercase">
           {t('result.expected')}
@@ -371,48 +526,62 @@ export function WordsDetail({
   view,
   selected,
   onSelect,
+  wordPlayback,
+  clarity = false,
 }: {
   view: ResultView
   selected: number | null
   onSelect: (position: number) => void
+  wordPlayback?: WordPlayback
+  clarity?: boolean
 }) {
   const { t } = useTranslation()
   const current = view.chips.find((c) => c.position === selected)
   return (
     <div className="space-y-3">
       {current ? (
-        <WordDetail chip={current} text={view.text} />
+        <WordDetail
+          chip={current}
+          text={view.text}
+          wordPlayback={wordPlayback}
+          recognition={clarity ? view.recognition[current.position] : undefined}
+        />
       ) : (
         view.verdict.flagged > 0 && (
           <p className="text-muted-foreground text-sm">{t('screens.practice.pickWord')}</p>
         )
       )}
       <ul className="space-y-1 text-sm">
-        {view.chips.map((c) => (
-          <li key={c.position}>
-            <Button
-              variant="ghost"
-              type="button"
-              aria-pressed={c.position === selected}
-              onClick={() => onSelect(c.position)}
-              className={cn(
-                'h-auto justify-start whitespace-normal font-normal focus-visible:ring-ring/50 flex w-full items-center justify-between rounded-md border px-3 py-1.5 text-left focus-visible:ring-[3px] focus-visible:outline-none',
-                c.position === selected && 'bg-primary-soft',
-              )}
-            >
-              <span>{c.word}</span>
-              <span
+        {view.chips.map((c) => {
+          const flagged = clarity ? !view.recognition[c.position]?.matched : !!c.error
+          return (
+            <li key={c.position}>
+              <Button
+                variant="ghost"
+                type="button"
+                aria-pressed={c.position === selected}
+                onClick={() => onSelect(c.position)}
                 className={cn(
-                  'flex items-center gap-1',
-                  c.error ? 'text-destructive-soft-foreground' : 'text-success-soft-foreground',
+                  'h-auto justify-start whitespace-normal font-normal focus-visible:ring-ring/50 flex w-full items-center justify-between rounded-md border px-3 py-1.5 text-left focus-visible:ring-[3px] focus-visible:outline-none',
+                  c.position === selected && 'bg-primary-soft',
                 )}
               >
-                {c.error ? <X className="size-4" /> : <Check className="size-4" />}
-                {c.error ? t('screens.practice.needsWork') : t('result.chipOk')}
-              </span>
-            </Button>
-          </li>
-        ))}
+                <span>{c.word}</span>
+                <span
+                  className={cn(
+                    'flex items-center gap-1',
+                    flagged ? 'text-destructive-soft-foreground' : 'text-success-soft-foreground',
+                  )}
+                >
+                  {flagged ? <X className="size-4" /> : <Check className="size-4" />}
+                  {clarity
+                    ? t(flagged ? 'result.unrecognizedWord' : 'result.recognizedWord')
+                    : t(flagged ? 'screens.practice.needsWork' : 'result.chipOk')}
+                </span>
+              </Button>
+            </li>
+          )
+        })}
       </ul>
     </div>
   )

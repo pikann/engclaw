@@ -108,6 +108,7 @@ export interface PhoneReport {
 }
 
 export interface WordReport {
+  heardSpan?: [number, number]
   position: number
   word: string
   expected: string[]
@@ -129,6 +130,7 @@ export interface WordError {
 }
 
 export interface PhoneComparison {
+  wordSpans?: ([number, number] | null)[]
   expectedPhones: string[][]
   heardPhones: string[]
   heardPhonesConfidence: number[]
@@ -328,6 +330,7 @@ export function wordReports(
       distance,
       phones,
       weightedEdits: sum(phones.map((p) => p.confidence)),
+      ...(rec && matched.length ? { heardSpan: region } : {}),
     })
   })
   return reports
@@ -352,7 +355,16 @@ export function comparePhones(
 
   const errors: WordError[] = []
   const wordsWithErrors: string[] = []
-  for (const report of wordReports(heardPhones, words, groups, lang)) {
+  const reports = wordReports(heardPhones, words, groups, lang)
+  const spans: ([number, number] | null)[] = words.map(() => null)
+  for (const [index, report] of reports.entries()) {
+    const span = report.heardSpan
+    if (span) {
+      const previous = reports[index - 1]?.heardSpan
+      const next = reports[index + 1]?.heardSpan
+      if ((!previous || previous[1] <= span[0]) && (!next || next[0] >= span[1]))
+        spans[report.position] = span
+    }
     const edits = report.weightedEdits
     const length = report.expected.length
     if (
@@ -373,6 +385,7 @@ export function comparePhones(
     }
   }
   return {
+    ...(rec ? { wordSpans: spans } : {}),
     expectedPhones: groups.map((g) => [...g]),
     heardPhones: [...heard],
     heardPhonesConfidence: heardConfidences.map((c) => round(c, 3)),
