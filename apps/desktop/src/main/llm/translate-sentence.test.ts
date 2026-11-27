@@ -118,6 +118,34 @@ describe('subtitle translation', () => {
     expect(fetch).toHaveBeenCalledTimes(2)
   })
 
+  it.each([
+    ['en', 'How are you today?'],
+    ['vi', 'Hôm nay bạn khỏe không?'],
+  ] as const)('retries a Chinese echo when translating to %s', async (target, text) => {
+    const request = { text: '今天你好吗？', source: 'zh', target } as const
+    const fetch = vi
+      .fn<FetchLike>()
+      .mockResolvedValueOnce(completion(request.text))
+      .mockResolvedValueOnce(completion(text))
+    await expect(translateSentence(request, config, fetch)).resolves.toEqual({ ok: true, text })
+    expect(fetch).toHaveBeenCalledTimes(2)
+  })
+
+  it.each(['en', 'vi'] as const)(
+    'rejects an unchanged Chinese subtitle after retry for %s',
+    async (target) => {
+      const text = '今天你好吗？'
+      const fetch = vi.fn<FetchLike>().mockImplementation(async () => completion(text))
+      await expect(
+        translateSentence({ text, source: 'zh', target }, config, fetch),
+      ).resolves.toEqual({
+        ok: false,
+        code: 'FAILED',
+      })
+      expect(fetch).toHaveBeenCalledTimes(2)
+    },
+  )
+
   it('trims a valid response and rejects output beyond the IPC limit', async () => {
     await expect(
       translateSentence(subtitle, config, async () => completion('  Chào buổi sáng.  ')),
