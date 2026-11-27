@@ -24,6 +24,8 @@ export function useSentenceLoop(
 ) {
   const [loop, setLoop] = useState<LoopState>(idleLoop)
   const [settings, setSettingsState] = useState<SentenceSettings>(DEFAULT_SETTINGS)
+  const [repeatCurrent, setRepeatCurrentState] = useState(false)
+  const repeatCurrentRef = useRef(false)
   const loopRef = useRef(loop)
   const settingsRef = useRef(settings)
   const segmentsRef = useRef(segments)
@@ -47,7 +49,13 @@ export function useSentenceLoop(
       const effective = noAutoRef.current
         ? { ...settingsRef.current, autoContinuePct: 0 }
         : settingsRef.current
-      const step = stepLoop(loopRef.current, input, segmentsRef.current, effective)
+      const step = stepLoop(
+        loopRef.current,
+        input,
+        segmentsRef.current,
+        effective,
+        repeatCurrentRef.current && !noAutoRef.current,
+      )
       loopRef.current = step.state
       setLoop(step.state)
       for (const a of step.actions) {
@@ -105,6 +113,8 @@ export function useSentenceLoop(
     loopRef.current = idleLoop
     setLoop(idleLoop)
     loaded.current = false
+    repeatCurrentRef.current = false
+    setRepeatCurrentState(false)
     let cancelled = false
     void window.engclaw.youtube.getSettings({ videoId }).then((saved) => {
       if (cancelled) return
@@ -129,10 +139,23 @@ export function useSentenceLoop(
       const next = clampSettings({ ...settingsRef.current, ...patch })
       settingsRef.current = next
       setSettingsState(next)
+      if (next.autoContinuePct > 0 && repeatCurrentRef.current) {
+        repeatCurrentRef.current = false
+        setRepeatCurrentState(false)
+      }
+      if (next.autoContinuePct === 0 && loopRef.current.mode === 'waiting')
+        dispatch({ type: 'toggle' })
       if (loaded.current) void window.engclaw.youtube.saveSettings({ videoId, settings: next })
     },
-    [videoId],
+    [videoId, dispatch],
   )
+
+  const setRepeatCurrent = (enabled: boolean) => {
+    repeatCurrentRef.current = enabled
+    setRepeatCurrentState(enabled)
+    if (enabled) dispatch({ type: 'replay' })
+    else dispatch({ type: 'finishAfterPass' })
+  }
 
   const runShortcut = useCallback(
     (cmd: ShortcutCommand) => {
@@ -142,5 +165,15 @@ export function useSentenceLoop(
     [dispatch, setSettings],
   )
 
-  return { state, retry, loop, settings, setSettings, dispatch, runShortcut }
+  return {
+    state,
+    retry,
+    loop,
+    settings,
+    setSettings,
+    repeatCurrent,
+    setRepeatCurrent,
+    dispatch,
+    runShortcut,
+  }
 }
