@@ -194,9 +194,25 @@ test('the transcript downloads as a timestamped text file', async () => {
   await app.close()
 })
 
-test('loop sentence is available only with auto-continue off', async () => {
+test('loop sentence starts on click and finishes its current pass when turned off', async () => {
   const { app, page } = await openPracticeSession()
   try {
+    await app.evaluate(({ ipcMain }) => {
+      const calls: string[] = []
+      ;(globalThis as { loopPlayerCalls?: string[] }).loopPlayerCalls = calls
+      ipcMain.removeHandler('player:command')
+      ipcMain.handle('player:command', (_, command: { type: string }) => {
+        if (['seek', 'play', 'pause'].includes(command.type)) calls.push(command.type)
+        return null
+      })
+    })
+    const calls = () =>
+      app.evaluate(() => (globalThis as { loopPlayerCalls?: string[] }).loopPlayerCalls)
+    const tick = (seconds: number) =>
+      app.evaluate(({ BrowserWindow }, time) => {
+        for (const window of BrowserWindow.getAllWindows())
+          window.webContents.send('player:event', { type: 'time', seconds: time, duration: 60 })
+      }, seconds)
     const auto = page.getByTestId('shadowing-auto-toggle')
     const loop = page.getByTestId('shadowing-loop-current')
     const repeat = page.getByTestId('shadowing-repeat')
@@ -204,9 +220,20 @@ test('loop sentence is available only with auto-continue off', async () => {
     await expect(loop).toHaveCount(0)
     await auto.click()
     await expect(loop).toHaveAttribute('aria-pressed', 'false')
+    await repeat.fill('3')
     await loop.click()
     await expect(loop).toHaveAttribute('aria-pressed', 'true')
     await expect(repeat).toBeDisabled()
+    await expect.poll(calls).toEqual(['seek', 'play'])
+    await loop.click()
+    await expect(loop).toHaveAttribute('aria-pressed', 'false')
+    await expect(repeat).toBeEnabled()
+    await tick(11)
+    expect(await calls()).toEqual(['seek', 'play'])
+    await tick(20)
+    await expect.poll(calls).toEqual(['seek', 'play', 'pause'])
+    await loop.click()
+    await expect.poll(calls).toEqual(['seek', 'play', 'pause', 'seek', 'play'])
     await auto.click()
     await expect(loop).toHaveCount(0)
     await expect(repeat).toBeEnabled()

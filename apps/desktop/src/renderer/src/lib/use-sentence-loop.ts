@@ -153,7 +153,8 @@ export function useSentenceLoop(
   const setRepeatCurrent = (enabled: boolean) => {
     repeatCurrentRef.current = enabled
     setRepeatCurrentState(enabled)
-    if (enabled && loopRef.current.mode !== 'playing') dispatch({ type: 'replay' })
+    if (enabled) dispatch({ type: 'replay' })
+    else dispatch({ type: 'finishAfterPass' })
   }
 
   const runShortcut = useCallback(

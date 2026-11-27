@@ -275,7 +275,10 @@ export function ShadowingSession({
         <div role="status" className="flex shrink-0 items-center">
           {loop.mode === 'waiting' ? (
             <Badge data-testid="shadowing-your-turn">{t('screens.shadowing.yourTurn')}</Badge>
-          ) : loop.mode === 'playing' && settings.repeat > 1 && (dictation || !repeatCurrent) ? (
+          ) : loop.mode === 'playing' &&
+            settings.repeat > 1 &&
+            !loop.finishAfterPass &&
+            (dictation || !repeatCurrent) ? (
             <Badge variant="outline" className="tabular-nums" data-testid="shadowing-plays">
               {t('screens.shadowing.play', { n: loop.plays, total: settings.repeat })}
             </Badge>
