@@ -298,6 +298,18 @@
     "empty": "Chưa thu được âm thanh. Hãy thử lại.",
     "failed": "Không chấm được từ này. Bạn có thể nghe lại bản thu và thử lại."
   },
+  "translation": {
+    "unauthorized": "Nhà cung cấp từ chối khóa API hoặc header. Hãy kiểm tra cài đặt nhà cung cấp AI.",
+    "rateLimit": "Nhà cung cấp AI đã đạt giới hạn yêu cầu. Hãy thử lại sau.",
+    "timeout": "Nhà cung cấp AI phản hồi quá lâu. Hãy thử lại.",
+    "loading": "Đang dịch…",
+    "noProvider": "Cần thiết lập nhà cung cấp AI để dịch câu này.",
+    "configure": "Mở cài đặt nhà cung cấp AI",
+    "failed": "Dịch chưa thành công. Hãy thử lại.",
+    "providerHint": "Khi bật, gửi phụ đề đang hiển thị đến nhà cung cấp AI đã cấu hình.",
+    "toggle": "Dịch",
+    "sameLanguage": "Phụ đề này đã cùng ngôn ngữ với giao diện."
+  },
   "reference": {
     "pinyinFallback": "Mẫu này dùng giọng pinyin tổng hợp. Kiểm tra số thanh hoặc nhập chữ Hán để nghe theo từ.",
     "reading": "Mẫu đang đọc",
@@ -423,7 +435,7 @@
     "reviewsPerDayHint": "Giới hạn số lượt ôn các từ bạn đã học.",
     "llm": {
       "title": "Nhà cung cấp AI",
-      "intro": "Trợ lý luyện nói chạy trên nhà cung cấp do bạn chọn. Chỉ văn bản đã nhận dạng và một bản tóm tắt phát âm ngắn được gửi đi; âm thanh không bao giờ rời khỏi thiết bị.",
+      "intro": "Nhà cung cấp bạn chọn nhận văn bản hội thoại và bản tóm tắt phát âm ngắn. Khi bạn bật Dịch trong Nhại giọng, nhà cung cấp cũng nhận văn bản phụ đề. Âm thanh được giữ trên thiết bị này.",
       "advancedTitle": "API tương thích OpenAI",
       "advancedHint": "Dùng được với OpenAI, Gemini, OpenRouter hoặc máy chủ cục bộ như Ollama, LM Studio.",
       "presets": "Điền nhanh",
@@ -477,7 +489,7 @@
       "wikimedia": "Wikimedia Commons",
       "wikimediaBody": "Lấy hình minh họa cho từ trong từ điển. Tắt tại Chung > Hình minh họa từ điển.",
       "llm": "Nhà cung cấp AI do bạn cấu hình",
-      "llmBody": "Nếu bạn thiết lập nhà cung cấp AI cho trợ lý hội thoại, tin nhắn của bạn chỉ được gửi tới nhà cung cấp đó.",
+      "llmBody": "Tin nhắn hội thoại được gửi tới nhà cung cấp AI bạn đã cấu hình. Nếu bật dịch trong Nhại giọng, văn bản phụ đề đang hiển thị cũng được gửi tới nhà cung cấp đó để dịch.",
       "deleteTitle": "Quyền kiểm soát của bạn",
       "deleteBody": "Bạn có thể xóa mọi thứ Engclaw lưu trong mục Dữ liệu của bạn bất kỳ lúc nào."
     },

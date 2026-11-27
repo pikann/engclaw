@@ -4,6 +4,7 @@ import { IPC } from '@engclaw/ipc-contract'
 import { handle } from '../ipc'
 import { LlmConfigStore } from './config-store'
 import { LlmService } from './service'
+import { translateSentence } from './translate-sentence'
 
 /** `basic_text` on Linux means the "encryption" key sits in the clear, so it does not count. */
 const secureAvailable = (): boolean =>
@@ -17,7 +18,11 @@ export function registerLlmHandlers(): LlmConfigStore {
     encrypt: (plain) => safeStorage.encryptString(plain),
     decrypt: (blob) => safeStorage.decryptString(blob),
   })
-  const service = new LlmService(store, (url, init) => net.fetch(url, init))
+  const fetchProvider = (url: string, init: RequestInit) => net.fetch(url, init)
+  const service = new LlmService(store, fetchProvider)
+  handle(IPC.llmTranslateSentence, (request) =>
+    translateSentence(request, store.load(), fetchProvider),
+  )
   handle(IPC.llmStatus, () => service.status())
   handle(IPC.llmSave, (req) => service.save(req))
   handle(IPC.llmTest, (req) => service.test(req))
