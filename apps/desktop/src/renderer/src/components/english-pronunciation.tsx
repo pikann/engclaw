@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { PhonemizeResult } from '@engclaw/ipc-contract'
+import { ArticulationView } from '@/components/articulation-view'
+import { englishSoundGroups, type EnglishSound } from '@/lib/english-sound'
 import { HearReference } from '@/components/hear-reference'
 import { usePronunciationGuide } from '@/lib/learning-language'
+import { WordPractice } from '@/components/shadowing/word-practice'
 import { Button } from '@/components/ui/button'
 import { ipaPhones } from '@/lib/articulation'
 
@@ -57,6 +60,171 @@ const vietnamese: Record<string, string> = {
 }
 
 const VOWEL = /^[aeiouæɑɒɔəɛɜɚɝɪʊʌ]/u
+
+const CENTRAL_VOWELS = {
+  ʌ: { first: 'ʌ', second: 'ə', firstWord: 'cup', secondWord: 'about', tip: 'stress' },
+  ə: { first: 'ʌ', second: 'ə', firstWord: 'cup', secondWord: 'about', tip: 'stress' },
+  ɜ: { first: 'ɜ', second: 'ɝ', firstWord: 'bird', secondWord: 'bird', tip: 'accent' },
+  ɝ: { first: 'ɝ', second: 'ɚ', firstWord: 'bird', secondWord: 'teacher', tip: 'rhoticStress' },
+  ɚ: { first: 'ɝ', second: 'ɚ', firstWord: 'bird', secondWord: 'teacher', tip: 'rhoticStress' },
+}
+
+function CentralVowelComparison({ ipa, disabled }: { ipa: string; disabled: boolean }) {
+  const { t } = useTranslation()
+  const { language, t: guideT } = usePronunciationGuide()
+  const pair = CENTRAL_VOWELS[ipa as keyof typeof CENTRAL_VOWELS]
+  if (!pair) return null
+
+  return (
+    <div className="bg-muted/40 space-y-2 rounded-lg p-3" data-testid="ipa-vowel-comparison">
+      <h4 className="text-sm font-semibold">{t('englishGuide.vowelComparison')}</h4>
+      <p className="text-sm" lang={language}>
+        {guideT(`englishGuide.vowelContrast.${pair.tip}`)}
+      </p>
+      <HearReference
+        text={pair.firstWord}
+        ipaExample={pair.first}
+        label={t('englishGuide.hearWordSound', { word: pair.firstWord, sound: pair.first })}
+        disabled={disabled}
+        testId="ipa-vowel-comparison-first"
+        alternate={{
+          text: pair.secondWord,
+          ipaExample: pair.second,
+          label: t('englishGuide.hearWordSound', { word: pair.secondWord, sound: pair.second }),
+        }}
+      />
+    </div>
+  )
+}
+
+export function EnglishSoundGuide({
+  sound,
+  disabled,
+  exercise = false,
+}: {
+  sound: EnglishSound
+  disabled: boolean
+  exercise?: boolean
+}) {
+  const { t } = useTranslation()
+  const { language, t: guideT } = usePronunciationGuide()
+  const [playId, setPlayId] = useState(0)
+  const [recording, setRecording] = useState(false)
+  const drill =
+    exercise && sound.ipa === 'p'
+      ? [sound.example, 'pin', 'pan', 'pet', 'pick'].join(' ')
+      : sound.example
+
+  return (
+    <section
+      className="space-y-3"
+      aria-label={t('englishGuide.title')}
+      data-testid="english-sound-guide"
+    >
+      <h3 className="text-base font-semibold">{t('englishGuide.title')}</h3>
+      <p className="text-xl font-semibold" lang="en-fonipa">
+        /{sound.ipa}/
+      </p>
+      <div className="space-y-2 text-sm" lang={language}>
+        <p>
+          {guideT(
+            sound.ipa === 'dʒ' ? 'englishGuide.dzhTip' : `pronunciation.englishSounds.${sound.ipa}`,
+          )}
+        </p>
+        <p>
+          {guideT(
+            drill !== sound.example
+              ? 'englishGuide.sequenceExercise'
+              : sound.ipa === 'dʒ'
+                ? 'englishGuide.dzhExample'
+                : 'englishGuide.soundExercise',
+            {
+              word: drill,
+            },
+          )}
+        </p>
+      </div>
+      <ArticulationView phones={ipaPhones(sound.ipa)} playId={playId} holdPose={exercise} />
+      <div className="flex flex-wrap gap-2">
+        <HearReference
+          text={exercise ? sound.ipa : sound.example}
+          ipa={exercise}
+          disabled={disabled || recording}
+          label={
+            exercise
+              ? t('englishGuide.hearSound', { sound: sound.ipa })
+              : t('englishGuide.hearWord', { word: sound.example })
+          }
+          alternate={
+            exercise && drill === sound.example
+              ? {
+                  text: drill,
+                  ipaExample: sound.ipa,
+                  label: t('englishGuide.hearWord', { word: drill }),
+                }
+              : undefined
+          }
+          segmented={
+            drill !== sound.example
+              ? { text: drill, label: t('englishGuide.hearSequence') }
+              : undefined
+          }
+          onPlaybackStart={() => setPlayId((id) => id + 1)}
+        />
+        <Button size="sm" variant="outline" onClick={() => setPlayId((id) => id + 1)}>
+          {t('mandarinGuide.replayMotion')}
+        </Button>
+      </div>
+      {exercise && <CentralVowelComparison ipa={sound.ipa} disabled={disabled || recording} />}
+      {exercise && (
+        <WordPractice
+          word={drill}
+          controls={{ prepare: () => undefined, recording, onRecordingChange: setRecording }}
+          onPrepare={() => undefined}
+        />
+      )}
+    </section>
+  )
+}
+
+export function EnglishIpaChart() {
+  const { t } = useTranslation()
+  const [selected, setSelected] = useState<EnglishSound | null>(null)
+
+  return (
+    <div className="grid items-start gap-5 lg:grid-cols-2" data-testid="english-ipa-chart">
+      <section className="space-y-4 rounded-xl border p-4">
+        <h2 className="text-lg font-semibold">{t('englishGuide.ipaChart')}</h2>
+        {englishSoundGroups.map(({ key, sounds }) => (
+          <section key={key} className="space-y-2">
+            <h3 className="text-sm font-medium">{t(`englishGuide.${key}`)}</h3>
+            <div className="flex flex-wrap gap-2">
+              {sounds.map((sound) => (
+                <Button
+                  key={sound.ipa}
+                  variant={sound.ipa === selected?.ipa ? 'secondary' : 'outline'}
+                  aria-pressed={sound.ipa === selected?.ipa}
+                  onClick={() => setSelected(sound)}
+                  lang="en-fonipa"
+                >
+                  /{sound.ipa}/
+                </Button>
+              ))}
+            </div>
+          </section>
+        ))}
+        <p className="text-muted-foreground text-xs">{t('englishGuide.accentNote')}</p>
+      </section>
+      <div className="rounded-xl border p-4">
+        {selected ? (
+          <EnglishSoundGuide key={selected.ipa} sound={selected} disabled={false} exercise />
+        ) : (
+          <p className="text-muted-foreground text-sm">{t('englishGuide.selectSound')}</p>
+        )}
+      </div>
+    </div>
+  )
+}
 
 export function EnglishPronunciation({ text, disabled }: { text: string; disabled: boolean }) {
   const { t } = useTranslation()

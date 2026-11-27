@@ -113,9 +113,9 @@ describe('practice result', () => {
   })
 
   it('renders phonemes, pitch and the selected word detail', () => {
-    expect(html((view) => <PhonemesDetail result={result} view={view} />)).toContain(
-      'chart-phoneme',
-    )
+    expect(
+      html((view) => <PhonemesDetail result={result} view={view} onReplay={() => undefined} />),
+    ).toContain('chart-phoneme')
     expect(html(() => <PitchDetail result={result} />)).toContain('chart-f0')
     const words = html((view) => (
       <WordsDetail view={view} selected={1} onSelect={() => undefined} />

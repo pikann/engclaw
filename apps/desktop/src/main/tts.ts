@@ -35,10 +35,18 @@ export function registerTtsHandlers(
 ): void {
   handle(
     IPC.ttsSpeak,
-    async ({ text, language = learningLanguage(), pinyin, segmented }): Promise<SpeakResponse> => {
+    async ({
+      text,
+      language = learningLanguage(),
+      pinyin,
+      segmented,
+      ipa,
+      ipaExample,
+    }): Promise<SpeakResponse> => {
       const started = performance.now()
-      const kokoro = language === 'zh' ? null : await kokoroLocation(models)
-      if (!kokoro && language !== 'zh')
+      const needsKokoro = language === 'en' && !ipa && !ipaExample
+      const kokoro = needsKokoro ? await kokoroLocation(models) : null
+      if (needsKokoro && !kokoro)
         return {
           ok: false,
           code: 'MODEL_MISSING',
@@ -51,8 +59,16 @@ export function registerTtsHandlers(
               ? dictionary?.speechText(text, segmented)
               : text
             : undefined
-        const r = await client.call<Spoke>('speak', { text, kokoro, language, pinyin, nativeText })
-          .result
+        const r = await client.call<Spoke>('speak', {
+          text,
+          kokoro,
+          language,
+          pinyin,
+          nativeText,
+          ipa,
+          ipaExample,
+          segmented,
+        }).result
         const ms = Math.round(performance.now() - started)
         console.info(`[tts] speak cached=${r.cached} ${ms}ms (${text.length} chars)`)
         return { ok: true, ...r, ms }

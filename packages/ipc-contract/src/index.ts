@@ -120,10 +120,23 @@ export const SpeakRequest = z
     text: z.string().min(1).max(3000),
     language: LearningLanguage.optional(),
     pinyin: z.boolean().optional(),
+    ipa: z.boolean().optional(),
+    ipaExample: z.string().min(1).max(2).optional(),
     segmented: z.boolean().optional(),
   })
   .strict()
   .refine(({ pinyin, text }) => pinyin || text.length <= 1000, { path: ['text'] })
+  .refine(
+    ({ ipa, language, pinyin, text }) =>
+      !ipa || (language === 'en' && !pinyin && /^[a-zæɑɒɔəɛɜɚɝɡɪɹʊʌʃʒŋθð]{1,2}$/u.test(text)),
+    { path: ['text'] },
+  )
+  .refine(
+    ({ ipaExample, language, ipa, pinyin, segmented, text }) =>
+      !ipaExample ||
+      (language === 'en' && !ipa && !pinyin && !segmented && /^[a-z]{1,40}$/iu.test(text)),
+    { path: ['ipaExample'] },
+  )
 export const SpeakErrorCode = z.enum(['MODEL_MISSING', 'FAILED'])
 export const SpeakResponse = z.discriminatedUnion('ok', [
   z.object({
@@ -252,6 +265,10 @@ export const PronunciationResult = z.object({
   score: z.number(),
   distance: z.number(),
   acoustic_distance: z.number(),
+  /** Bounds in the analyzed 16 kHz recording, indexed by reference word and end-exclusive. */
+  word_audio_spans: z
+    .array(z.tuple([z.int().nonnegative(), z.int().nonnegative()]).nullable())
+    .optional(),
   differences: z.object({
     word_distance: z.number(),
     phoneme_distance: z.number(),
@@ -1041,6 +1058,22 @@ const appSettingsPatchShape = Object.fromEntries(
 }
 export const AppSettingsPatch = z.strictObject(appSettingsPatchShape)
 
+export const TranslationLanguage = z.enum(['en', 'vi'])
+export type TranslationLanguage = z.infer<typeof TranslationLanguage>
+export const SentenceTranslationRequest = z
+  .object({
+    text: z.string().trim().min(1).max(2000),
+    source: LearningLanguage,
+    target: TranslationLanguage,
+  })
+  .strict()
+export type SentenceTranslationRequest = z.infer<typeof SentenceTranslationRequest>
+export const SentenceTranslationResult = z.discriminatedUnion('ok', [
+  z.object({ ok: z.literal(true), text: z.string().min(1).max(5000) }),
+  z.object({ ok: z.literal(false), code: z.enum(['NO_PROVIDER', 'FAILED']) }),
+])
+export type SentenceTranslationResult = z.infer<typeof SentenceTranslationResult>
+
 export const IPC = {
   ping: 'app:ping',
   settingsGetLanguage: 'settings:getLanguage',
@@ -1091,6 +1124,7 @@ export const IPC = {
   gameMap: 'game:map',
   gameWorld: 'game:world',
   gameRecord: 'game:record',
+  llmTranslateSentence: 'llm:translateSentence',
   llmStatus: 'llm:status',
   llmSave: 'llm:save',
   llmTest: 'llm:test',
@@ -1216,6 +1250,10 @@ export const invokeChannels = {
   [IPC.gameWorld]: { request: GameWorldRequest, response: GameWorld },
   /** Stores a passed run; stars and scores only improve. */
   [IPC.gameRecord]: { request: GameRecordRequest, response: GameRecordResult },
+  [IPC.llmTranslateSentence]: {
+    request: SentenceTranslationRequest,
+    response: SentenceTranslationResult,
+  },
   [IPC.llmStatus]: { request: noArgs, response: LlmProviderStatus },
   [IPC.llmSave]: { request: LlmProviderSaveRequest, response: LlmSaveResult },
   /** Lists `/models` on the draft settings; secrets stay in main. */
@@ -1368,6 +1406,7 @@ export interface EngclawApi {
     image(req: z.infer<typeof DictionaryIdRequest>): Promise<WordImage | null>
   }
   llm: {
+    translateSentence(req: SentenceTranslationRequest): Promise<SentenceTranslationResult>
     status(): Promise<LlmProviderStatus>
     save(req: LlmProviderSaveRequest): Promise<LlmSaveResult>
     test(req: LlmProviderTestRequest): Promise<LlmTestResult>

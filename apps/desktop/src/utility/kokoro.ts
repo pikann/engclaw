@@ -42,14 +42,18 @@ export class KokoroSynthesizer implements Synthesizer {
     this.id = o.id
   }
 
-  async synthesize(text: string): Promise<Float32Array> {
-    const sentences = splitSentences(text)
+  async synthesize(text: string, segmented = false): Promise<Float32Array> {
+    const words = segmented ? (text.match(/[\w']+/g) ?? []) : null
+    const sentences = words ?? splitSentences(text)
     if (sentences.length === 0) throw new Error('speak: nothing to say')
     // espeak is line-for-line and the shared backend strips punctuation, so feed plain word lines.
     const lines = await this.o.ipa(sentences.map((s) => (s.match(/[\w']+/g) ?? []).join(' ')))
+    if (words && lines.length !== words.length) throw new Error('speak: missing practice words')
     const parts: Float32Array[] = []
-    for (const line of lines) {
+    for (const [index, line] of lines.entries()) {
+      if (words && index > 0) parts.push(new Float32Array(Math.round(KOKORO_SAMPLE_RATE * 0.65)))
       const ids = ipaToTokenIds(line, this.o.vocab)
+      if (words && !ids.length) throw new Error('speak: missing pronunciation for a practice word')
       for (const chunk of chunkTokenIds(ids, KOKORO_MAX_TOKENS)) {
         const audio = await this.o.run(
           withPad(chunk),

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { chineseCharacters, mandarinReadings, mandarinResult } from './mandarin'
-import { espeakPcm, espeakPinyinInput } from './mandarin-speech'
+import { espeakPcm } from './speech-wav'
+import { espeakPinyinInput } from './mandarin-speech'
 import { encodeWav } from '../main/store/wav'
 
 describe('Mandarin assessment', () => {

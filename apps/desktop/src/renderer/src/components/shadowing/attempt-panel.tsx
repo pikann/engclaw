@@ -1,6 +1,7 @@
 import { Loader2, Mic, Square } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { PronunciationResult } from '@engclaw/ipc-contract'
+import type { WordPlayback } from '@/components/practice-result'
 import { PronunciationResultSections, ResultSection } from '@/components/result-sidebar'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -15,12 +16,16 @@ function FullResult({
   text,
   intonation,
   onPlay,
+  replaying,
+  wordPlayback,
   onRetry,
 }: {
   result: PronunciationResult
   text: string
   intonation: IntonationState | null
   onPlay: () => void
+  replaying: boolean
+  wordPlayback?: Omit<WordPlayback, 'spans'>
   onRetry: () => void
 }) {
   const { t } = useTranslation()
@@ -29,6 +34,8 @@ function FullResult({
       result={result}
       text={text}
       onPlay={onPlay}
+      replaying={replaying}
+      wordPlayback={wordPlayback && { ...wordPlayback, spans: result.word_audio_spans }}
       onRetry={onRetry}
       testId="shadowing-attempt-result"
       afterSummary={
@@ -63,6 +70,8 @@ export function AttemptPanel({
   disabled,
   onToggleRecord,
   onPlay,
+  replaying,
+  wordPlayback,
   onRetry,
   onDownloadModels,
 }: {
@@ -73,6 +82,8 @@ export function AttemptPanel({
   disabled: boolean
   onToggleRecord: () => void
   onPlay: () => void
+  replaying: boolean
+  wordPlayback?: Omit<WordPlayback, 'spans'>
   onRetry: () => void
   onDownloadModels: () => void
 }) {
@@ -163,6 +174,8 @@ export function AttemptPanel({
           text={text}
           intonation={intonation}
           onPlay={onPlay}
+          replaying={replaying}
+          wordPlayback={wordPlayback}
           onRetry={onRetry}
         />
       )}

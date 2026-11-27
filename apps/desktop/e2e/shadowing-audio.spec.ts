@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 import { breakMic, fixMic } from './support/launch'
 import { openCachedSession } from './support/shadowing'
-import { analyzed, callLog, fail, SPEECH_RMS } from './support/speech-stubs'
+import { analyzed, callLog, fail, scored, SPEECH_RMS } from './support/speech-stubs'
 
 /**
  * Shadowing attempts on a cached video: the learner records a sentence through the fake microphone
@@ -25,8 +25,22 @@ test('a recorded attempt is checked against the shown sentence and scored', asyn
   await expect(phase(page)).toHaveAttribute('data-phase', 'idle')
   await attempt(page)
   await expect(phase(page)).toHaveAttribute('data-phase', 'result', { timeout: 20_000 })
+  await expect(page.getByTestId('result-clarity')).toContainText(/5 of 5|5\/5/)
+  await expect(page.getByTestId('result-score')).toBeHidden()
+  await page.getByTestId('result-technical').locator('summary').click()
   await expect(page.getByTestId('shadowing-accuracy-score')).toBeVisible()
   await expect(page.getByTestId('shadowing-detected')).toHaveText('hello i am a developer')
+  const phonemes = page.getByTestId('result-phonemes')
+  await phonemes.getByTestId('phonemes-reference').click()
+  await expect
+    .poll(async () => (await callLog(app)).tts.at(-1)?.text)
+    .toBe('Hello, I am a developer.')
+  const replay = phonemes.getByTestId('phonemes-replay')
+  await replay.click()
+  await expect(replay).toHaveAttribute('aria-pressed', 'true')
+  await expect(phonemes.getByTestId('phonemes-reference')).toBeDisabled()
+  await replay.click()
+  await expect(replay).toHaveAttribute('aria-pressed', 'false')
   await expect(page.getByTestId('shadowing-attempt-error')).toHaveCount(0)
 
   const [call] = (await callLog(app)).analyze
@@ -34,6 +48,94 @@ test('a recorded attempt is checked against the shown sentence and scored', asyn
   expect(call!.rms).toBeGreaterThan(SPEECH_RMS)
   expect(call!.seconds).toBeGreaterThan(2)
   await app.close()
+})
+
+test('clicking a scored word replays only that part of the learner recording', async () => {
+  const result = scored(86, { flagged: true, transcript: 'Hello I am a designer' })
+  result.value.differences.errors[0]!.phones = [{ expected: 'h', heard: '', confidence: 0.9 }]
+  const { app, page } = await openCachedSession({
+    script: {
+      analyze: [
+        {
+          reply: {
+            ...result,
+            value: {
+              ...result.value,
+              word_audio_spans: [[1600, 9600], [10000, 14800], null, null, null],
+            },
+          },
+        },
+      ],
+    },
+  })
+  try {
+    await attempt(page)
+    await expect(phase(page)).toHaveAttribute('data-phase', 'result')
+    await page.evaluate(() => {
+      const createBuffer = AudioContext.prototype.createBuffer
+      AudioContext.prototype.createBuffer = function (channels, length, rate) {
+        document.body.dataset.wordClipSamples = String(length)
+        return createBuffer.call(this, channels, length, rate)
+      }
+    })
+    const chips = page.getByTestId('result-chips').getByTestId('word-chip')
+    const replay = page.getByTestId('word-replay-recording')
+    await expect(chips.nth(0)).toHaveAttribute('data-flagged', 'false')
+    await expect(chips.nth(4)).toHaveAttribute('data-flagged', 'true')
+    await chips.nth(0).click()
+    await expect(page.getByTestId('word-recognition')).toHaveText('Heard this word clearly')
+    await expect(page.getByTestId('word-unclear-sound')).toBeVisible()
+    await replay.click()
+    await expect(page.locator('body')).toHaveAttribute('data-word-clip-samples', '8000')
+
+    await expect(chips.nth(1)).toHaveAttribute('data-flagged', 'false')
+    await chips.nth(1).click()
+    await replay.click()
+    await expect(page.locator('body')).toHaveAttribute('data-word-clip-samples', '4800')
+
+    await chips.nth(2).click()
+    await expect(replay).toHaveCount(0)
+    await expect(page.getByTestId('word-detail')).toContainText('could not be isolated')
+  } finally {
+    await app.close()
+  }
+})
+
+test('a selected word can be recorded and scored independently of the sentence', async () => {
+  const { app, page } = await openCachedSession({
+    script: {
+      analyze: [analyzed(86, { flagged: true }), analyzed(92, { transcript: 'hello' })],
+    },
+  })
+  try {
+    await attempt(page)
+    await expect(phase(page)).toHaveAttribute('data-phase', 'result')
+    const sentenceScore = page.getByTestId('result-score')
+    await expect(sentenceScore).toHaveText('86')
+    await page.getByTestId('result-chips').getByTestId('word-chip').first().click()
+    const wordRecord = page.getByTestId('shadowing-word-record')
+    await wordRecord.click()
+    await expect(wordRecord).toHaveText(/Stop and check|Dừng và chấm/)
+    await page.waitForTimeout(800)
+    await wordRecord.click()
+    await expect(page.getByTestId('shadowing-word-recognition')).toHaveText(
+      'Heard this word clearly',
+    )
+    await expect(page.getByTestId('shadowing-word-score')).toBeHidden()
+    await page.getByTestId('shadowing-word-practice').locator('summary').click()
+    await expect(page.getByTestId('shadowing-word-score')).toContainText('92 / 100')
+    await expect(sentenceScore).toHaveText('86')
+    await page.getByTestId('shadowing-word-replay').click()
+    await expect(page.getByTestId('shadowing-word-replay')).toHaveText(
+      /Stop word playback|Dừng phát đoạn thu/,
+    )
+    expect((await callLog(app)).analyze.map((call) => call.text)).toEqual([
+      'Hello, I am a developer.',
+      'hello',
+    ])
+  } finally {
+    await app.close()
+  }
 })
 
 test('each sentence keeps its own result when you move between sentences', async () => {
