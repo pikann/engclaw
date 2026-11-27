@@ -200,6 +200,7 @@ test('the transcript downloads as a timestamped text file', async () => {
 test('translation follows the interface language and handles a rejected provider key', async () => {
   const calls: Record<string, unknown>[] = []
   let authorized = false
+  const longTranslation = 'Hôm nay bạn làm gì? '.repeat(100).trim()
   const provider = createServer(async (request, response) => {
     const chunks: Buffer[] = []
     for await (const chunk of request) chunks.push(Buffer.from(chunk))
@@ -222,7 +223,7 @@ test('translation follows the interface language and handles a rejected provider
             message: {
               role: 'assistant',
               content:
-                calls.length === 2 ? 'Xin chào, tôi là một lập trình viên.' : 'Hôm nay bạn làm gì?',
+                calls.length === 2 ? 'Xin chào, tôi là một lập trình viên.' : longTranslation,
             },
             finish_reason: 'stop',
           },
@@ -275,7 +276,13 @@ test('translation follows the interface language and handles a rejected provider
       await expect(translated).toHaveText('Xin chào, tôi là một lập trình viên.')
       await expect(translated).toHaveAttribute('lang', 'vi')
       await page.getByTestId('shadowing-next').click()
-      await expect(translated).toHaveText('Hôm nay bạn làm gì?')
+      await expect(translated).toHaveText(longTranslation)
+      const translationPanel = translated.locator('..')
+      await expect(translationPanel).toHaveCSS('max-height', '80px')
+      expect(
+        await translationPanel.evaluate((panel) => panel.scrollHeight > panel.clientHeight),
+      ).toBe(true)
+      await expect(toggle).toBeInViewport()
       expect(calls).toHaveLength(3)
       expect(calls[1]).toMatchObject({
         model: 'test-model',

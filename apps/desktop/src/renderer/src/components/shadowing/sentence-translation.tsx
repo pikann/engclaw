@@ -5,6 +5,8 @@ import type { LearningLanguage, SentenceTranslationResult } from '@engclaw/ipc-c
 import { resolveLocale } from '@engclaw/i18n'
 import { Button } from '@/components/ui/button'
 
+export const TRANSLATION_MAX_HEIGHT = 80
+
 const KEY = 'shadowing.translateSubtitles'
 const errorMessages = {
   NO_PROVIDER: 'translation.noProvider',
@@ -75,7 +77,8 @@ export function SentenceTranslation({
   if (!eligible) return null
   return (
     <div
-      className="max-h-20 w-full shrink-0 overflow-auto px-4 text-center text-sm"
+      className="w-full shrink-0 overflow-auto px-4 text-center text-sm"
+      style={{ maxHeight: TRANSLATION_MAX_HEIGHT }}
       aria-live="polite"
     >
       {source === target ? (

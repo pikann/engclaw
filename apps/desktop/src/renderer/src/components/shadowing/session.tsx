@@ -20,6 +20,7 @@ import { AttemptPanel } from '@/components/shadowing/attempt-panel'
 import { PlayerSurface } from '@/components/shadowing/player-surface'
 import {
   SentenceTranslation,
+  TRANSLATION_MAX_HEIGHT,
   useShowTranslation,
 } from '@/components/shadowing/sentence-translation'
 import { SentenceWords } from '@/components/shadowing/sentence-words'
@@ -69,8 +70,10 @@ const DICTATION_SHORTCUTS: Record<
   l: 'cycleRepeat',
 }
 
+const STAGE_GAP = 12
+
 /** Fixed chrome under the video and sentence: the control bar plus the gaps between blocks. */
-const CHROME_HEIGHT = 64 + 12
+const CHROME_HEIGHT = 64 + STAGE_GAP
 
 /** The dictation action row under the sentence, plus its gap. */
 const ACTIONS_HEIGHT = 44
@@ -168,7 +171,8 @@ export function ShadowingSession({
     : fitStage({
         stageWidth: stage.width,
         stageHeight: stage.height,
-        chromeHeight: CHROME_HEIGHT + (showTranslation && shown ? 48 : 0),
+        chromeHeight:
+          CHROME_HEIGHT + (showTranslation && shown ? TRANSLATION_MAX_HEIGHT + STAGE_GAP : 0),
         sentenceChars: (shown?.text.length ?? 0) * (1 + (showIpa ? 1 : 0)),
       })
   const ipaWords = (text: string) => {
@@ -320,7 +324,11 @@ export function ShadowingSession({
         )}
       >
         <div className="flex min-h-0 min-w-0 flex-col p-4">
-          <div ref={stageRef} className="flex min-h-0 flex-1 flex-col items-center gap-3">
+          <div
+            ref={stageRef}
+            className="flex min-h-0 flex-1 flex-col items-center"
+            style={{ gap: STAGE_GAP }}
+          >
             <div
               className="relative shrink-0"
               style={{ width: fit.videoWidth, height: fit.videoHeight }}

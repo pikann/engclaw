@@ -42,6 +42,7 @@ Shadowing means repeating a speaker as closely as you can, in time.
 2. The transcript is split into sentences. Play a sentence, loop it, then record yourself and read your score and the words to fix.
 3. Switch the **Mode** to **Dictation** to test listening instead: sentences are played with some words blanked out, you type what you hear, then press **Check**. A summary lists the words to review and lets you practise them.
 4. Turn on **IPA** to show phonetic spelling under the words.
+5. Turn on **Translation** to show the current subtitle in your interface language. The toggle is off by default. When enabled, it sends the displayed subtitle text to the AI provider you configured in **Settings → AI provider**.
 
 Recent videos are listed so you can come back to them. Shadowing needs an internet connection and relies on YouTube; see the YouTube note in the [README](../README.md#youtube).
 
@@ -55,13 +56,13 @@ Search a word to see its definitions, IPA and audio, examples, synonyms and anto
 
 ## Converse (optional)
 
-Converse is a speaking-practice chat with an AI agent. It needs a provider you set up in **Settings → AI provider**: an OpenAI-compatible API (OpenAI, Gemini, OpenRouter) or a local server such as Ollama or LM Studio. Only your transcribed words and a short pronunciation summary are sent to that provider, never your audio. API keys are stored encrypted on your device. Without a provider the rest of the app works normally.
+Converse is a speaking-practice chat with an AI agent. It needs a provider you set up in **Settings → AI provider**: an OpenAI-compatible API (OpenAI, Gemini, OpenRouter) or a local server such as Ollama or LM Studio. Converse sends your conversation text and short pronunciation summaries to that provider. If you turn on **Translation** in Shadowing, the provider also receives the displayed subtitle text. Your audio stays on your device. API keys are stored encrypted on your device. Without a provider the rest of the app works normally.
 
 ## Settings
 
 - **General**: language (English or Vietnamese), theme, silence auto-stop, update check on launch, dictionary illustrations, flashcard limits.
 - **AI models**: model status, sizes, folder.
-- **AI provider**: Converse setup.
+- **AI provider**: provider setup for Converse and Shadowing translation.
 - **Privacy**: what stays on your device and the only connections the app makes.
 - **Licenses**: third-party notices.
 - **Delete all data** removes history, recordings and preferences. Downloaded models are kept.
