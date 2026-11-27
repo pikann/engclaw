@@ -298,15 +298,6 @@
     "empty": "No audio was recorded. Try again.",
     "failed": "Could not check this word. You can replay your recording and try again."
   },
-  "translation": {
-    "loading": "Translating…",
-    "noProvider": "Configure an AI provider to translate this sentence.",
-    "configure": "Open AI provider settings",
-    "failed": "Translation failed. Try again.",
-    "providerHint": "When enabled, sends each displayed subtitle to your configured AI provider and translates it into the interface language.",
-    "toggle": "Translation",
-    "sameLanguage": "This subtitle is already in the interface language."
-  },
   "reference": {
     "pinyinFallback": "This sample uses synthesized pinyin. Check the tone numbers or enter Chinese characters to hear the word.",
     "reading": "Sample text",

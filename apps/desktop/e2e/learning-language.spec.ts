@@ -287,6 +287,11 @@ test('English IPA chart opens sound details and records the selected exercise', 
       await expect(detail).toContainText(`/${phone}/`)
       await expect(detail.getByTestId('articulation')).toBeVisible()
     }
+    await chart.getByRole('button', { name: '/aɪ/', exact: true }).click()
+    const tongue = detail.getByTestId('tongue')
+    await expect(tongue).toHaveAttribute('data-phone', 'ɪ')
+    await page.waitForTimeout(250)
+    await expect(tongue).toHaveAttribute('data-phone', 'ɪ')
     await chart.getByRole('button', { name: '/ɜ/', exact: true }).click()
     const comparison = detail.getByTestId('ipa-vowel-comparison')
     await comparison.getByTestId('ipa-vowel-comparison-first').click()

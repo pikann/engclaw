@@ -18,10 +18,6 @@ import { ResultSidebar, ResultSidebarBody } from '@/components/result-sidebar'
 import { useModelDownload } from '@/components/download-models'
 import { AttemptPanel } from '@/components/shadowing/attempt-panel'
 import { PlayerSurface } from '@/components/shadowing/player-surface'
-import {
-  SentenceTranslation,
-  useShowTranslation,
-} from '@/components/shadowing/sentence-translation'
 import { SentenceWords } from '@/components/shadowing/sentence-words'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -133,7 +129,6 @@ export function ShadowingSession({
   const lastAutoPct = useRef(autoOn ? settings.autoContinuePct : DEFAULT_SETTINGS.autoContinuePct)
   if (autoOn) lastAutoPct.current = settings.autoContinuePct
   const [showIpa, setShowIpa] = useShowIpa()
-  const [showTranslation, setShowTranslation] = useShowTranslation()
   const { state: ipa, retry: retryIpa } = useTranscriptIpa(videoId, segments, showIpa)
   const [showProsody, setShowProsody] = useShowProsody()
   usePrefetchProsody(videoId, segments, index)
@@ -168,7 +163,7 @@ export function ShadowingSession({
     : fitStage({
         stageWidth: stage.width,
         stageHeight: stage.height,
-        chromeHeight: CHROME_HEIGHT + (showTranslation && shown ? 48 : 0),
+        chromeHeight: CHROME_HEIGHT,
         sentenceChars: (shown?.text.length ?? 0) * (1 + (showIpa ? 1 : 0)),
       })
   const ipaWords = (text: string) => {
@@ -394,13 +389,6 @@ export function ShadowingSession({
                 )}
               </div>
             )}
-            {!dictation && (
-              <SentenceTranslation
-                enabled={showTranslation}
-                text={shown?.text ?? ''}
-                source={language}
-              />
-            )}
             <div className="order-2 flex shrink-0 flex-wrap items-center justify-center gap-x-4 gap-y-2">
               <div
                 role="toolbar"
@@ -591,21 +579,6 @@ export function ShadowingSession({
                       </Button>
                     </span>
                   )}
-                </div>
-              )}
-              {!dictation && (
-                <div
-                  className="flex items-center gap-2 text-sm"
-                  title={t('translation.providerHint')}
-                >
-                  <Switch
-                    id="shadowing-translation"
-                    size="sm"
-                    data-testid="shadowing-translation-toggle"
-                    checked={showTranslation}
-                    onCheckedChange={setShowTranslation}
-                  />
-                  <Label htmlFor="shadowing-translation">{t('translation.toggle')}</Label>
                 </div>
               )}
               {!dictation && (

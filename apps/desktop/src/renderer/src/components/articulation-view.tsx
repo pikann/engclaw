@@ -45,7 +45,8 @@ export function ArticulationView({
   useEffect(() => {
     clear()
     let frames = articulationFrames(phones)
-    if (holdPose && phones.length) frames[frames.length - 1] = { ...frames[0]!, ms: 0 }
+    const finalPose = frames.at(-2)
+    if (holdPose && finalPose) frames[frames.length - 1] = { ...finalPose, ms: 0 }
     if (durationMs) frames = scaleFrames(frames, durationMs)
     if (!phones.length) return setFrame(RESTING)
     if (reduced) return setFrame(frames[0] ?? RESTING)

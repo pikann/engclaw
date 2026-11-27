@@ -1,7 +1,5 @@
-import type { EngclawApi } from '@engclaw/ipc-contract'
 import { expect, test } from '@playwright/test'
 import { electron } from './electron'
-import { openCachedSession as openPracticeSession } from './support/shadowing'
 import { mkdtempSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -193,66 +191,4 @@ test('the transcript downloads as a timestamped text file', async () => {
   await expect(page.getByTestId('shadowing-transcript-notice')).toBeVisible()
   expect(readFileSync(target, 'utf8')).toBe(`[0:10] ${SENTENCE}\n`)
   await app.close()
-})
-
-test('translation toggle follows the interface language and the current subtitle', async () => {
-  const { app, page } = await openPracticeSession()
-  try {
-    await page.evaluate(() =>
-      (window as unknown as { engclaw: EngclawApi }).engclaw.settings.setLanguage({
-        language: 'vi',
-      }),
-    )
-    await expect(page.locator('html')).toHaveAttribute('lang', 'vi')
-    const toggle = page.getByTestId('shadowing-translation-toggle')
-    const translated = page.getByTestId('shadowing-translation')
-    const configure = page.getByRole('link', { name: 'Mở cài đặt nhà cung cấp AI' })
-    await expect(toggle).not.toBeChecked()
-    await expect(configure).toHaveCount(0)
-    await toggle.click()
-    await expect(configure).toBeVisible()
-    await toggle.click()
-    await expect(configure).toHaveCount(0)
-
-    await app.evaluate(({ ipcMain }) => {
-      const calls: unknown[] = []
-      ;(globalThis as { translationCalls?: unknown[] }).translationCalls = calls
-      ipcMain.removeHandler('llm:translateSentence')
-      ipcMain.handle('llm:translateSentence', (_, request) => {
-        calls.push(request)
-        return {
-          ok: true,
-          text: calls.length === 1 ? 'Xin chào, tôi là một lập trình viên.' : 'Hôm nay bạn làm gì?',
-        }
-      })
-    })
-    const calls = () =>
-      app.evaluate(() => (globalThis as { translationCalls?: unknown[] }).translationCalls)
-    expect(await calls()).toHaveLength(0)
-    await toggle.click()
-    await expect(translated).toHaveText('Xin chào, tôi là một lập trình viên.')
-    await expect(translated).toHaveAttribute('lang', 'vi')
-    await page.getByTestId('shadowing-next').click()
-    await expect(translated).toHaveText('Hôm nay bạn làm gì?')
-    expect(await calls()).toEqual([
-      { text: 'Hello, I am a developer.', source: 'en', target: 'vi' },
-      { text: 'What did you build today?', source: 'en', target: 'vi' },
-    ])
-    await page.evaluate(() =>
-      (window as unknown as { engclaw: EngclawApi }).engclaw.settings.setLanguage({
-        language: 'en',
-      }),
-    )
-    await expect(
-      page.getByText('This subtitle is already in the interface language.'),
-    ).toBeVisible()
-    await expect(translated).toHaveCount(0)
-    expect(await calls()).toHaveLength(2)
-    await toggle.click()
-    await expect(page.getByText('This subtitle is already in the interface language.')).toHaveCount(
-      0,
-    )
-  } finally {
-    await app.close()
-  }
 })
