@@ -811,6 +811,8 @@
       "fullSaveError": "Couldn't save the transcript: {{message}}",
       "sampleLine": "Sample sentence number {{n}} of the video.",
       "replay": "Replay sentence",
+      "loopCurrent": "Loop sentence",
+      "loopCurrentHint": "Keep playing this sentence until you pause or turn looping off.",
       "repeat": "Plays",
       "autoContinue": "Auto-continue",
       "autoContinueHint": "After the last play, wait this percentage of the sentence length for your turn, then move to the next sentence. Turn the switch off to disable it.",

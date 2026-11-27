@@ -7,6 +7,7 @@ import {
   Pause,
   Play,
   RotateCcw,
+  Repeat,
   SkipBack,
   SkipForward,
   WifiOff,
@@ -113,11 +114,17 @@ export function ShadowingSession({
   const lookup = useWordLookup()
   const [mode, setMode] = useState<'shadowing' | 'dictation'>('shadowing')
   const dictation = mode === 'dictation'
-  const { state, retry, loop, settings, setSettings, dispatch, runShortcut } = useSentenceLoop(
-    videoId,
-    segments,
-    dictation,
-  )
+  const {
+    state,
+    retry,
+    loop,
+    settings,
+    setSettings,
+    repeatCurrent,
+    setRepeatCurrent,
+    dispatch,
+    runShortcut,
+  } = useSentenceLoop(videoId, segments, dictation)
   const index = loop.index
   const [percent, setPercent] = useState(DEFAULT_BLANK_PERCENT)
   const [autoAdvance, setAutoAdvance] = useState(false)
@@ -277,7 +284,10 @@ export function ShadowingSession({
         <div role="status" className="flex shrink-0 items-center">
           {loop.mode === 'waiting' ? (
             <Badge data-testid="shadowing-your-turn">{t('screens.shadowing.yourTurn')}</Badge>
-          ) : loop.mode === 'playing' && settings.repeat > 1 ? (
+          ) : loop.mode === 'playing' &&
+            settings.repeat > 1 &&
+            !loop.finishAfterPass &&
+            (dictation || !repeatCurrent) ? (
             <Badge variant="outline" className="tabular-nums" data-testid="shadowing-plays">
               {t('screens.shadowing.play', { n: loop.plays, total: settings.repeat })}
             </Badge>
@@ -437,6 +447,20 @@ export function ShadowingSession({
                 >
                   <RotateCcw />
                 </Button>
+                {!dictation && !autoOn && (
+                  <Button
+                    variant={repeatCurrent ? 'secondary' : 'ghost'}
+                    size="sm"
+                    data-testid="shadowing-loop-current"
+                    aria-pressed={repeatCurrent}
+                    title={t('screens.shadowing.loopCurrentHint')}
+                    disabled={blocked}
+                    onClick={() => setRepeatCurrent(!repeatCurrent)}
+                  >
+                    <Repeat />
+                    {t('screens.shadowing.loopCurrent')}
+                  </Button>
+                )}
                 <Button
                   size="icon"
                   data-testid="shadowing-toggle"
@@ -497,6 +521,7 @@ export function ShadowingSession({
                   data-testid="shadowing-repeat"
                   aria-keyshortcuts="- ="
                   value={settings.repeat}
+                  disabled={!dictation && repeatCurrent}
                   onChange={(e) => {
                     const n = e.currentTarget.valueAsNumber
                     if (Number.isFinite(n)) setSettings({ repeat: n })

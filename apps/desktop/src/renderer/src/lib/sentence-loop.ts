@@ -30,6 +30,7 @@ export interface LoopState {
   plays: number
   /** False until a tick from the new position arrives, so stale pre-seek ticks cannot end it. */
   armed: boolean
+  finishAfterPass?: boolean
 }
 
 export const idleLoop: LoopState = { mode: 'idle', index: 0, plays: 1, armed: false }
@@ -39,6 +40,7 @@ export type LoopInput =
   | { type: 'back' }
   | { type: 'next' }
   | { type: 'replay' }
+  | { type: 'finishAfterPass' }
   | { type: 'toggle' }
   | { type: 'time'; seconds: number }
   | { type: 'waitElapsed' }
@@ -74,6 +76,7 @@ export function stepLoop(
   input: LoopInput,
   segments: readonly Segment[],
   settings: SentenceSettings,
+  repeatCurrent = false,
 ): LoopStep {
   if (!segments.length) return { state, actions: [] }
   const last = segments.length - 1
@@ -100,6 +103,8 @@ export function stepLoop(
       return start(state.mode === 'idle' ? 1 : state.index + 1)
     case 'replay':
       return start(state.index)
+    case 'finishAfterPass':
+      return { state: { ...state, finishAfterPass: true }, actions: [] }
     case 'toggle':
       switch (state.mode) {
         case 'playing':
@@ -138,7 +143,13 @@ export function stepLoop(
         return atEnd ? { state, actions: [] } : { state: { ...state, armed: true }, actions: [] }
       }
       if (!atEnd) return { state, actions: [] }
-      if (state.plays < settings.repeat) {
+      if (repeatCurrent && settings.autoContinuePct === 0) {
+        return {
+          state: { ...state, armed: false },
+          actions: [{ type: 'seek', seconds: seg.start }],
+        }
+      }
+      if (!state.finishAfterPass && state.plays < settings.repeat) {
         return {
           state: { ...state, plays: state.plays + 1, armed: false },
           actions: [{ type: 'seek', seconds: seg.start }],
