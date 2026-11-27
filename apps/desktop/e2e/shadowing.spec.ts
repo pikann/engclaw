@@ -1,5 +1,9 @@
+import { createServer } from 'node:http'
+import { once } from 'node:events'
+import type { EngclawApi } from '@engclaw/ipc-contract'
 import { expect, test } from '@playwright/test'
 import { electron } from './electron'
+import { openCachedSession as openPracticeSession } from './support/shadowing'
 import { mkdtempSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -191,4 +195,115 @@ test('the transcript downloads as a timestamped text file', async () => {
   await expect(page.getByTestId('shadowing-transcript-notice')).toBeVisible()
   expect(readFileSync(target, 'utf8')).toBe(`[0:10] ${SENTENCE}\n`)
   await app.close()
+})
+
+test('translation follows the interface language and handles a rejected provider key', async () => {
+  const calls: Record<string, unknown>[] = []
+  let authorized = false
+  const provider = createServer(async (request, response) => {
+    const chunks: Buffer[] = []
+    for await (const chunk of request) chunks.push(Buffer.from(chunk))
+    calls.push(JSON.parse(Buffer.concat(chunks).toString()))
+    response.setHeader('Content-Type', 'application/json')
+    if (!authorized) {
+      response.statusCode = 401
+      response.end(JSON.stringify({ error: { message: 'Test authentication failure' } }))
+      return
+    }
+    response.end(
+      JSON.stringify({
+        id: 'test-reply',
+        object: 'chat.completion',
+        created: 0,
+        model: 'test-model',
+        choices: [
+          {
+            index: 0,
+            message: {
+              role: 'assistant',
+              content:
+                calls.length === 2 ? 'Xin chào, tôi là một lập trình viên.' : 'Hôm nay bạn làm gì?',
+            },
+            finish_reason: 'stop',
+          },
+        ],
+      }),
+    )
+  })
+  provider.listen(0, '127.0.0.1')
+  await once(provider, 'listening')
+  const address = provider.address()
+  if (!address || typeof address === 'string') throw new Error('Test provider did not bind.')
+
+  try {
+    const { app, page } = await openPracticeSession()
+    try {
+      await page.evaluate(() =>
+        (window as unknown as { engclaw: EngclawApi }).engclaw.settings.setLanguage({
+          language: 'vi',
+        }),
+      )
+      await expect(page.locator('html')).toHaveAttribute('lang', 'vi')
+      const toggle = page.getByTestId('shadowing-translation-toggle')
+      const translated = page.getByTestId('shadowing-translation')
+      const configure = page.getByRole('link', { name: 'Mở cài đặt nhà cung cấp AI' })
+      await expect(toggle).toHaveAccessibleDescription(/gửi phụ đề.*nhà cung cấp AI/)
+      await expect(toggle).not.toBeChecked()
+      expect(calls).toHaveLength(0)
+      await toggle.click()
+      await expect(configure).toBeVisible()
+      await toggle.click()
+      await expect(configure).toHaveCount(0)
+
+      expect(
+        await page.evaluate(
+          (port) =>
+            (window as unknown as { engclaw: EngclawApi }).engclaw.llm.save({
+              baseUrl: `http://127.0.0.1:${port}/v1`,
+              model: 'test-model',
+            }),
+          address.port,
+        ),
+      ).toMatchObject({ ok: true })
+      expect(calls).toHaveLength(0)
+
+      await toggle.click()
+      await expect(page.getByText(/Nhà cung cấp từ chối khóa API/)).toBeVisible()
+      await expect(configure).toBeVisible()
+      authorized = true
+      await page.getByRole('button', { name: 'Thử lại', exact: true }).click()
+      await expect(translated).toHaveText('Xin chào, tôi là một lập trình viên.')
+      await expect(translated).toHaveAttribute('lang', 'vi')
+      await page.getByTestId('shadowing-next').click()
+      await expect(translated).toHaveText('Hôm nay bạn làm gì?')
+      expect(calls).toHaveLength(3)
+      expect(calls[1]).toMatchObject({
+        model: 'test-model',
+        messages: expect.arrayContaining([
+          expect.objectContaining({ role: 'user', content: 'Hello, I am a developer.' }),
+        ]),
+      })
+      expect(calls[1]?.stream).not.toBe(true)
+
+      await page.evaluate(() =>
+        (window as unknown as { engclaw: EngclawApi }).engclaw.settings.setLanguage({
+          language: 'en',
+        }),
+      )
+      await expect(
+        page.getByText('This subtitle is already in the interface language.'),
+      ).toBeVisible()
+      await expect(translated).toHaveCount(0)
+      expect(calls).toHaveLength(3)
+      await toggle.click()
+      await expect(
+        page.getByText('This subtitle is already in the interface language.'),
+      ).toHaveCount(0)
+    } finally {
+      await app.close()
+    }
+  } finally {
+    provider.close()
+    provider.closeAllConnections()
+  }
 })

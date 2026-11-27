@@ -88,6 +88,7 @@ const api: EngclawApi = {
     has: (req) => invoke(IPC.contoursHas, req),
   },
   llm: {
+    translateSentence: (req) => invoke(IPC.llmTranslateSentence, req),
     status: () => invoke(IPC.llmStatus),
     save: (req) => invoke(IPC.llmSave, req),
     test: (req) => invoke(IPC.llmTest, req),

@@ -298,6 +298,18 @@
     "empty": "No audio was recorded. Try again.",
     "failed": "Could not check this word. You can replay your recording and try again."
   },
+  "translation": {
+    "unauthorized": "API key or headers rejected. Check your AI provider settings.",
+    "rateLimit": "Your AI provider reached its request limit. Try again later.",
+    "timeout": "The AI provider took too long to respond. Try again.",
+    "loading": "Translating…",
+    "noProvider": "Configure an AI provider to translate this sentence.",
+    "configure": "Open AI provider settings",
+    "failed": "Translation failed. Try again.",
+    "providerHint": "Sends the displayed subtitle to your configured AI provider while on.",
+    "toggle": "Translation",
+    "sameLanguage": "This subtitle is already in the interface language."
+  },
   "reference": {
     "pinyinFallback": "This sample uses synthesized pinyin. Check the tone numbers or enter Chinese characters to hear the word.",
     "reading": "Sample text",
@@ -423,7 +435,7 @@
     "reviewsPerDayHint": "Upper limit on reviews of words you already know.",
     "llm": {
       "title": "AI provider",
-      "intro": "The speaking-practice agent runs on a provider you choose. Only your transcribed words and a short pronunciation summary are sent; your audio never leaves this device.",
+      "intro": "Your chosen provider receives conversation text and short pronunciation summaries. When you turn on Shadowing translation, it also receives subtitle text. Audio stays on this device.",
       "advancedTitle": "OpenAI-compatible API",
       "advancedHint": "Works with OpenAI, Gemini, OpenRouter, or a local server such as Ollama or LM Studio.",
       "presets": "Quick fill",
@@ -477,7 +489,7 @@
       "wikimedia": "Wikimedia Commons",
       "wikimediaBody": "Fetches word illustrations in the dictionary. Turn this off under General > Dictionary illustrations.",
       "llm": "AI provider you configure",
-      "llmBody": "If you set up an AI provider for the conversation agent, your messages are sent to that provider and nowhere else.",
+      "llmBody": "Conversation messages go to the AI provider you configure. If you enable Shadowing translation, the displayed subtitle text is sent to that same provider for translation.",
       "deleteTitle": "Your control",
       "deleteBody": "You can erase everything Engclaw stores under Your data at any time."
     },
