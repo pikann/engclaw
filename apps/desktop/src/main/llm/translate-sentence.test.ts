@@ -118,6 +118,25 @@ describe('subtitle translation', () => {
     expect(fetch).toHaveBeenCalledTimes(2)
   })
 
+  it('keeps a Chinese quote from an English subtitle without retrying', async () => {
+    const text = 'Từ tiếng Trung để chào là 你好.'
+    const fetch = vi.fn<FetchLike>().mockResolvedValue(completion(text))
+    const request = { ...subtitle, text: 'The Chinese word for hello is 你好.' }
+    await expect(translateSentence(request, config, fetch)).resolves.toEqual({ ok: true, text })
+    expect(fetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('retries if the translation adds Chinese characters absent from the original quote', async () => {
+    const text = 'Từ tiếng Trung để chào là 你好.'
+    const fetch = vi
+      .fn<FetchLike>()
+      .mockResolvedValueOnce(completion('Từ tiếng Trung để chào là 你好. 藏'))
+      .mockResolvedValueOnce(completion(text))
+    const request = { ...subtitle, text: 'The Chinese word for hello is 你好.' }
+    await expect(translateSentence(request, config, fetch)).resolves.toEqual({ ok: true, text })
+    expect(fetch).toHaveBeenCalledTimes(2)
+  })
+
   it.each([
     ['en', 'How are you today?'],
     ['vi', 'Hôm nay bạn khỏe không?'],
