@@ -799,6 +799,8 @@
       "fullSaveError": "Không thể lưu bản ghi lời thoại: {{message}}",
       "sampleLine": "Câu mẫu số {{n}} của video.",
       "replay": "Phát lại câu",
+      "loopCurrent": "Lặp câu",
+      "loopCurrentHint": "Lặp lại câu hiện tại cho đến khi bạn tạm dừng hoặc tắt lặp.",
       "repeat": "Số lần phát",
       "autoContinue": "Tự chuyển câu",
       "autoContinueHint": "Sau lần phát cuối, chờ theo tỉ lệ phần trăm độ dài câu để bạn nói, rồi chuyển sang câu tiếp theo. Tắt công tắc để vô hiệu hóa.",

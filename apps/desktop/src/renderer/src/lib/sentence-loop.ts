@@ -74,6 +74,7 @@ export function stepLoop(
   input: LoopInput,
   segments: readonly Segment[],
   settings: SentenceSettings,
+  repeatCurrent = false,
 ): LoopStep {
   if (!segments.length) return { state, actions: [] }
   const last = segments.length - 1
@@ -138,6 +139,12 @@ export function stepLoop(
         return atEnd ? { state, actions: [] } : { state: { ...state, armed: true }, actions: [] }
       }
       if (!atEnd) return { state, actions: [] }
+      if (repeatCurrent && settings.autoContinuePct === 0) {
+        return {
+          state: { ...state, armed: false },
+          actions: [{ type: 'seek', seconds: seg.start }],
+        }
+      }
       if (state.plays < settings.repeat) {
         return {
           state: { ...state, plays: state.plays + 1, armed: false },

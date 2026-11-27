@@ -65,6 +65,21 @@ describe('reaching the end of a sentence', () => {
     expect(r.state.mode).toBe('done')
     expect(r.actions).toEqual([{ type: 'pause' }])
   })
+  it('loops the current sentence across passes while auto-continue is off', () => {
+    const settings = cfg({ autoContinuePct: 0 })
+    const end = { type: 'time', seconds: 6 } as const
+    let state = playing({ index: 1 })
+    for (let pass = 0; pass < 12; pass++) {
+      const next = stepLoop(state, end, segs, settings, true)
+      expect(next.state).toMatchObject({ mode: 'playing', index: 1, armed: false })
+      expect(next.actions).toEqual([{ type: 'seek', seconds: 4 }])
+      expect(stepLoop(next.state, end, segs, settings, true).actions).toEqual([])
+      state = stepLoop(next.state, { type: 'time', seconds: 4.5 }, segs, settings, true).state
+    }
+    expect(stepLoop(state, end, segs, settings).state.mode).toBe('done')
+    expect(stepLoop(state, end, segs, cfg(), true).state.mode).toBe('waiting')
+  })
+
   it('after the last play waits X% of the sentence duration, then advances', () => {
     const settings = cfg({ repeat: 1, autoContinuePct: 150 })
     const r = run(playing(), { type: 'time', seconds: 3.97 }, settings)

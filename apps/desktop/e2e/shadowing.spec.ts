@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { electron } from './electron'
+import { openCachedSession as openPracticeSession } from './support/shadowing'
 import { mkdtempSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -191,4 +192,27 @@ test('the transcript downloads as a timestamped text file', async () => {
   await expect(page.getByTestId('shadowing-transcript-notice')).toBeVisible()
   expect(readFileSync(target, 'utf8')).toBe(`[0:10] ${SENTENCE}\n`)
   await app.close()
+})
+
+test('loop sentence is available only with auto-continue off', async () => {
+  const { app, page } = await openPracticeSession()
+  try {
+    const auto = page.getByTestId('shadowing-auto-toggle')
+    const loop = page.getByTestId('shadowing-loop-current')
+    const repeat = page.getByTestId('shadowing-repeat')
+    await expect(auto).toBeChecked()
+    await expect(loop).toHaveCount(0)
+    await auto.click()
+    await expect(loop).toHaveAttribute('aria-pressed', 'false')
+    await loop.click()
+    await expect(loop).toHaveAttribute('aria-pressed', 'true')
+    await expect(repeat).toBeDisabled()
+    await auto.click()
+    await expect(loop).toHaveCount(0)
+    await expect(repeat).toBeEnabled()
+    await auto.click()
+    await expect(loop).toHaveAttribute('aria-pressed', 'false')
+  } finally {
+    await app.close()
+  }
 })
