@@ -80,6 +80,24 @@ describe('reaching the end of a sentence', () => {
     expect(stepLoop(state, end, segs, cfg(), true).state.mode).toBe('waiting')
   })
 
+  it('finishes the active pass without restarting when looping is turned off', () => {
+    const settings = cfg({ repeat: 3, autoContinuePct: 0 })
+    const finishing = run(playing({ index: 1, plays: 1 }), { type: 'finishAfterPass' }, settings)
+    expect(finishing.actions).toEqual([])
+    expect(finishing.state.mode).toBe('playing')
+
+    const duringPass = run(finishing.state, { type: 'time', seconds: 5 }, settings)
+    expect(duringPass.actions).toEqual([])
+    expect(duringPass.state.mode).toBe('playing')
+
+    const end = run(duringPass.state, { type: 'time', seconds: 6 }, settings)
+    expect(end.state).toMatchObject({ mode: 'done', index: 1 })
+    expect(end.actions).toEqual([{ type: 'pause' }])
+
+    const replay = run(end.state, { type: 'replay' }, settings)
+    expect(replay.state.finishAfterPass).toBeUndefined()
+  })
+
   it('after the last play waits X% of the sentence duration, then advances', () => {
     const settings = cfg({ repeat: 1, autoContinuePct: 150 })
     const r = run(playing(), { type: 'time', seconds: 3.97 }, settings)
